@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package ckdog1.kernel.v1;
+
+message EvidenceRef {
+  string evidence_id = 1;
+  string kind = 2;
+  string plaintext_sha256 = 3;
+  string uri = 4;
+  bytes metadata_json = 5;
+}
+
+message ClaimRecord {
+  string claim_id = 1;
+  string scope_id = 2;
+  string statement = 3;
+  string modality = 4;
+  string status = 5;
+  uint32 confidence_bps = 6;
+  bytes metadata_json = 7;
+}
+
+message SnapshotRequest {
+  repeated string node_ids = 1;
+}
+
+message SnapshotResponse {
+  string snapshot_id = 1;
+  string root_hash = 2;
+  uint64 node_count = 3;
+  uint64 created_at_ns = 4;
+}
+
+message AuthorizedJobRequest {
+  string action = 1;
+  string endpoint = 2;
+  bytes payload_json = 3;
+  string idempotency_key = 4;
+}
+
+message AuthorizedJobResponse {
+  string job_id = 1;
+  string status = 2;
+}
+
+message EndpointPacket {
+  string packet_id = 1;
+  string policy_id = 2;
+  string action = 3;
+  string endpoint = 4;
+  bytes payload_json = 5;
+  string payload_hash = 6;
+  string idempotency_key = 7;
+  string secret_env = 8;
+  string actor = 9;
+}
+
+message EndpointPacketResponse {
+  EndpointPacket packet = 1;
+}
+
+message GenesisInitRequest {
+  string policy_control_mode = 1;
+  string seed_b64 = 2;
+}
+
+message GenesisRecord {
+  string implementation_id = 1;
+  string policy_control_mode = 2;
+  string seed_hash = 3;
+  string genesis_hash = 4;
+  string version = 5;
+  uint64 created_at_ns = 6;
+}
+
+message GlobalAnchor {
+  uint32 ordinal = 1;
+  string symbol = 2;
+  string anchor_id = 3;
+  string anchor_hash = 4;
+  string block_name = 5;
+}
+
+message SoulCreateRequest {
+  uint32 soul_uuid = 1;
+  string term = 2;
+}
+
+message VillagerVersion {
+  uint32 soul_uuid = 1;
+  uint32 version = 2;
+  string term = 3;
+  string trait_root = 4;
+  string domain_root = 5;
+  string trinary_hash = 6;
+  string policy_effective_hash = 7;
+  string version_hash = 8;
+}
+
+message TraitSetRequest {
+  uint32 soul_uuid = 1;
+  uint32 trait_index = 2;
+  string value = 3;
+}
+
+message DomainSlotSetRequest {
+  uint32 soul_uuid = 1;
+  uint32 slot_index = 2;
+  string target_kind = 3;
+  string target_hash = 4;
+  string target_text = 5;
+  string global_symbol = 6;
+  uint32 weight_bps = 7;
+  repeated string flags = 8;
+}
+
+message StateShiftRequest {
+  uint32 soul_uuid = 1;
+  int32 axis = 2;
+  uint32 intensity_bps = 3;
+  bytes knobs_json = 4;
+}
+
+message RouteRequest {
+  uint32 soul_uuid = 1;
+  string global_symbol = 2;
+  optional uint32 domain_slot = 3;
+}
+
+message RouteResponse {
+  string trace_hash = 1;
+  bytes route_json = 2;
+}
+
+message DeltaApplyRequest {
+  uint32 soul_uuid = 1;
+  uint64 cycle = 2;
+  uint32 slot_count = 3;
+  bytes conversation = 4;
+}
+
+message DeltaApplyResponse {
+  string delta_hash = 1;
+  string projection_hash = 2;
+  uint32 packed_bytes = 3;
+  bytes delta_json = 4;
+}
+
+service KernelService {
+  rpc CreateSnapshot(SnapshotRequest) returns (SnapshotResponse);
+  rpc SubmitAuthorizedJob(AuthorizedJobRequest) returns (AuthorizedJobResponse);
+  rpc GenesisInit(GenesisInitRequest) returns (GenesisRecord);
+  rpc SoulCreate(SoulCreateRequest) returns (VillagerVersion);
+  rpc TraitSet(TraitSetRequest) returns (VillagerVersion);
+  rpc DomainSlotSet(DomainSlotSetRequest) returns (VillagerVersion);
+  rpc StateShift(StateShiftRequest) returns (VillagerVersion);
+  rpc Route(RouteRequest) returns (RouteResponse);
+  rpc DeltaApply(DeltaApplyRequest) returns (DeltaApplyResponse);
+}
