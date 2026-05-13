@@ -2,6 +2,7 @@
 
 ## Repositories
 
+- LUCIDOTA private umbrella repo: https://gitlab.com/mfspx/LUCIDOTA
 - doggystyle / CKDOG1 kernel: https://gitlab.com/mfspx/doggystyle
 - claudecode / Clawd interface: https://github.com/soongenwong/claudecode
 
@@ -20,6 +21,7 @@
 - Core Linux dev tools installed: `ripgrep`, `fd`, `jq`, `yq`, `fzf`, `bat`, `eza`, `tree`, `tmux`, `direnv`, `shellcheck`, `shfmt`, `hyperfine`, `entr`, `btop`, `nvtop`, `gh`, `git-lfs`, `protobuf-compiler`, `postgresql-client`, `sqlite3`, `cmake`, `ninja`.
 - Rust/Cargo installed from Pop/Ubuntu repos; `rustdoc` required `/usr/lib/rustlib/x86_64-unknown-linux-gnu/lib` in `ld.so` config.
 - LUCIDOTA/DIOGENES local verifier: `/home/mfspx/LUCIDOTA/check_diogenes.sh`.
+- Current Google app surface: Drive and Contacts connectors only. Gmail/Calendar need separate connector or local CLI integration.
 
 ## Model Notes
 

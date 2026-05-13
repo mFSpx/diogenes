@@ -5,6 +5,7 @@
 - Umbrella workspace renamed to `/home/mfspx/LUCIDOTA`; `/home/mfspx/DIOGENES` remains a compatibility symlink.
 - `LUCIDOTA` is the private umbrella project/repo. `doggystyle` remains the kernel-only repo.
 - `claudecode` is now treated as the LUCIDOTA-owned interface fork, not an external dependency.
+- Active long-term goal recorded: get the working sovereign local system done, with verified code over vibes.
 - Repo-level ignore policy covers secrets, credentials, runtime state, vault data, databases, model weights, logs, and build outputs.
 - Karpathy/GBRAIN/LLMWiki setup now lives in the repo as project-brain source, not build code.
 - Project brain initialized.
@@ -27,9 +28,10 @@
 - Combined LUCIDOTA/DIOGENES harness passes after the Rust tonic bridge and workspace rename.
 - Rustdoc dynamic linker path repaired system-wide for the distro Rust package.
 - Clawd plugin hook runner now tolerates hook scripts that exit without reading stdin.
-- GitLab CLI API auth is not active yet (`glab auth status` reports no token), so private remote creation/push is pending user auth.
+- Private GitLab remote created and pushed: `https://gitlab.com/mfspx/LUCIDOTA`.
+- Google account is connected for Drive/Contacts as `maroonedpilot@gmail.com`; Gmail and Calendar tools are not exposed in this session yet.
 
 ## Next Verification
 
-- Create private GitLab repo `LUCIDOTA` after GitLab API auth is available.
 - Begin DBOS/Postgres storage design after the kernel/interface bridge stays green.
+- Add operational Gmail/Calendar tooling; current Google access is not enough for email/calendar assistant work.
