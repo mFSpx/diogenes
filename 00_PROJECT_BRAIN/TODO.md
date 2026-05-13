@@ -28,6 +28,7 @@
 - [x] Create private GitLab repo `LUCIDOTA` and push umbrella project after GitLab auth.
 - [x] Record current Google auth surface: Drive/Contacts available, Gmail/Calendar not exposed yet.
 - [x] Record hard Google Drive boundary: explicit targeted retrieval only, never ambient browsing.
+- [x] Record quiet email/calendar side-process rule: no build-session interruption noise.
 
 ## Next
 
@@ -35,6 +36,7 @@
 - [ ] Create local auth inventory skeleton.
 - [ ] Add real Gmail connector or local Gmail CLI integration.
 - [ ] Add real Calendar connector or local calendar CLI integration.
+- [ ] Add side-process review queue for email/calendar notes so they do not interrupt build flow.
 - [ ] Create encrypted-storage research note.
 - [ ] Create model-runtime research note.
 - [ ] Create DBOS/Postgres topology note.

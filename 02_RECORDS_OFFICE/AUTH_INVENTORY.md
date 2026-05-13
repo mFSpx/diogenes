@@ -25,3 +25,5 @@ Google Drive is not ambient project context. Do not browse, root around, invento
 ## Operational Rule
 
 Email/calendar assistant behavior is authorized as a goal, but not operational until a real Gmail/Calendar connector or local CLI integration exists. Drafting, reading, scheduling, and reminders require explicit tool support, typed contracts, and no hidden token storage in the repo.
+
+Once operational, email/calendar runs as a quiet side process during build sessions. Do not interrupt active development with generic email, debt, lateness, urgency, or life-admin noise. Capture notes and populate calendar items that appear relevant and pressing, but surface them only through an agreed review window or explicit user request.

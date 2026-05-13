@@ -57,3 +57,4 @@ If a Markdown note changes behavior without explicit code, that is a bug.
 - A source claim needs a source path, command, citation, or explicit assumption label.
 - If it matters later, put it somewhere searchable now.
 - If it touches user data, secrets, external writes, or irreversible state, it needs a gate.
+- Do not stop development because a background download, auth step, or long-running job is pending. Continue with non-overlapping work, parallelize where safe, and keep token use tight.
