@@ -27,7 +27,7 @@
 ## UI References
 
 - Morrowind menu model: stats, inventory, magic, and map windows are the relevant interaction reference.
-- Private-dev-only asset boundary: Morrowind/Bethesda assets may be used only from local user-owned files and must not be pushed or shipped.
+- Private-dev boundary: Morrowind-style functionality/code/layouts may live in this repo; literal Bethesda art/font/audio/game assets must stay local/ignored and must not be pushed or shipped.
 
 ## Model Notes
 

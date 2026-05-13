@@ -4,7 +4,7 @@
 
 Build a private, personal LUCIDOTA/Clawd interface skin inspired by and, for northern.strike's own local environment, potentially using locally owned Morrowind UI assets.
 
-This is not a public-release asset plan.
+This is a private-dev implementation plan. Most of the code and functionality built here can ship later after a separate public-release sanitization pass. The boundary is about literal copyrighted art/font/audio/game assets, not about suppressing the interface architecture.
 
 ## Observed UI Pattern
 
@@ -34,16 +34,17 @@ The bars must be real state views, not decorative lies.
 
 ## Private Asset Boundary
 
-For northern.strike's personal environment:
+For this private dev repo:
 
-- Local Morrowind-derived assets may be used only from a lawful local install or user-provided local files.
-- Do not fetch, vendor, publish, or push Bethesda/Zenimax copyrighted game assets into the LUCIDOTA repo.
-- Do not make public release depend on ripped game assets.
+- Interface functionality, layout logic, theme switches, panel/window behavior, status bars, command surfaces, and original code belong in this repo.
+- Local Morrowind-derived assets may be used only from a lawful local install or user-provided local files, and must stay in ignored private asset paths.
+- Do not fetch, vendor, publish, or push Bethesda/Zenimax copyrighted game art, fonts, audio, or packed assets into the LUCIDOTA repo.
 
 For public release:
 
-- Recreate the functionality and broad interaction style with original art assets, generated assets, or properly licensed FOSS assets.
-- Keep any private total-conversion skin outside tracked public release artifacts.
+- Keep the functionality and interaction model where useful.
+- Replace private literal game assets with original art, generated assets, or properly licensed FOSS assets.
+- Treat public release as a future sanitization/distribution pass, not the constraint that blocks current private development.
 
 ## Tooling Installed
 
