@@ -29,11 +29,13 @@
 - Morrowind menu model: stats, inventory, magic, and map windows are the relevant interaction reference.
 - Private-dev boundary: Morrowind-style functionality/code/layouts may live in this repo; literal Bethesda art/font/audio/game assets must stay local/ignored and must not be pushed or shipped.
 - OpenMW: FOSS GPL engine reference for Morrowind-style implementation boundaries and MWUI templates.
+- Local OpenMW mechanics map: `02_RECORDS_OFFICE/OPENMW_UI_SOURCE_MAP.md`.
 
 ## Model Notes
 
 - Needle 26M: Cactus Compute Needle tool/function-calling model.
 - Mamba 1.3B: target state-space sequence model family.
+- Model source intelligence map: `02_RECORDS_OFFICE/MODEL_SOURCE_INTEL_MAP.md`.
 
 ## Current Verified Interfaces
 

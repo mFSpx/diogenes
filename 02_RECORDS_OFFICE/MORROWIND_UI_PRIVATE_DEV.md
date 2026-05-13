@@ -29,6 +29,10 @@ OpenMW is the clean FOSS reference for Morrowind-style implementation work:
 
 Use OpenMW as the implementation/legal boundary model: code and UI concepts are buildable; literal copyrighted game assets stay local and ignored.
 
+Detailed local source map:
+
+- `02_RECORDS_OFFICE/OPENMW_UI_SOURCE_MAP.md`
+
 ## Build Status Bars
 
 Build status bars are part of the private UI track and likely map well to the Morrowind health/magicka/fatigue visual language.
