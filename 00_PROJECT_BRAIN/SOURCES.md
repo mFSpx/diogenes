@@ -52,3 +52,4 @@
 - `scripts/apply_lucidota_control_schema.sh`: applies the control-plane schema to `lucidota_state`.
 - `scripts/lucidota_runtime_smoke.py`: verifies runtime imports, CUDA visibility, and control schema.
 - `scripts/lucidota_record_runtime_inventory.py`: writes CUDA/Python runtime inventory snapshots to Postgres.
+- `scripts/lucidota_model_registry.py`: prints active model loadout registry from Postgres.
