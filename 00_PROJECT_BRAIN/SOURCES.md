@@ -22,6 +22,12 @@
 - Rust/Cargo installed from Pop/Ubuntu repos; `rustdoc` required `/usr/lib/rustlib/x86_64-unknown-linux-gnu/lib` in `ld.so` config.
 - LUCIDOTA/DIOGENES local verifier: `/home/mfspx/LUCIDOTA/check_diogenes.sh`.
 - Current Google app surface: Drive and Contacts connectors only. Gmail/Calendar need separate connector or local CLI integration.
+- UI asset/theme tooling installed: `chafa`, ImageMagick, `optipng`, `pngquant`, `caca-utils`.
+
+## UI References
+
+- Morrowind menu model: stats, inventory, magic, and map windows are the relevant interaction reference.
+- Private-dev-only asset boundary: Morrowind/Bethesda assets may be used only from local user-owned files and must not be pushed or shipped.
 
 ## Model Notes
 

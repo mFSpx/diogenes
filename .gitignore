@@ -39,6 +39,11 @@ auth/
 /05_OUTPUTS/*
 !/05_OUTPUTS/README.md
 
+# Private local UI/theme assets, including personal game-asset experiments.
+/private_assets/
+/01_REPOS/claudecode/private_assets/
+/01_REPOS/claudecode/rust/private_assets/
+
 # Python/Rust/local build noise.
 __pycache__/
 *.py[cod]

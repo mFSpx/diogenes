@@ -35,6 +35,8 @@
 - `lucidota_graph` has verified `vector` 0.8.2 and `age` 1.7.0 extension behavior.
 - Local Postgres role `mfspx` is a dev superuser so AGE can be loaded from normal dev commands; this is local dev posture, not release policy.
 - DBOS 2.21.0 smoke workflow runs against `lucidota_state` and initializes DBOS system schema.
+- Private Morrowind-inspired Clawd UI track recorded; private game-derived assets stay local/ignored and are not public release material.
+- UI/image tooling installed for private theme work: `chafa`, ImageMagick, `optipng`, `pngquant`, `caca-utils`.
 
 ## Next Verification
 

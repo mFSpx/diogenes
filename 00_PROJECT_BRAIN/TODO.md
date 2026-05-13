@@ -37,6 +37,8 @@
 - [ ] Add real Gmail connector or local Gmail CLI integration.
 - [ ] Add real Calendar connector or local calendar CLI integration.
 - [ ] Add side-process review queue for email/calendar notes so they do not interrupt build flow.
+- [ ] Add Clawd private Morrowind UI theme track.
+- [ ] Add real build/status bars for build phases, service health, token pressure, and quiet side-process queues.
 - [ ] Create encrypted-storage research note.
 - [ ] Create model-runtime research note.
 - [x] Create DBOS/Postgres topology note.
