@@ -9,9 +9,9 @@
 ## Key Tools / Systems
 
 - DBOS: workflow control layer.
-- PostgreSQL: database substrate.
-- pgvector: vector storage/search.
-- Apache AGE: graph extension for Postgres.
+- PostgreSQL 18: database substrate, installed from official PGDG apt repository.
+- pgvector: vector storage/search; PGDG package target is `postgresql-18-pgvector`.
+- Apache AGE: graph extension for Postgres; PGDG package target is `postgresql-18-age`.
 - Bytewax: live dataflow layer.
 - River: online machine learning.
 - Treelite: tree model deployment/inference.

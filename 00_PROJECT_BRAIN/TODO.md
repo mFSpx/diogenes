@@ -39,7 +39,10 @@
 - [ ] Add side-process review queue for email/calendar notes so they do not interrupt build flow.
 - [ ] Create encrypted-storage research note.
 - [ ] Create model-runtime research note.
-- [ ] Create DBOS/Postgres topology note.
+- [x] Create DBOS/Postgres topology note.
+- [x] Install and verify PostgreSQL 18 + pgvector + AGE.
+- [x] Create local `lucidota_state` and `lucidota_graph` databases.
+- [x] Add DBOS Python smoke workflow against `lucidota_state`.
 - [ ] Create Subtle Knife Protocol placeholder spec.
 - [ ] Implement project brain adapters into product after the interface/kernel spine is stable.
 - [x] Create adversarial audit checklist and run it against Phase 000/001.

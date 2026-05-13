@@ -30,6 +30,11 @@
 - Clawd plugin hook runner now tolerates hook scripts that exit without reading stdin.
 - Private GitLab remote created and pushed: `https://gitlab.com/mfspx/LUCIDOTA`.
 - Google account is connected for Drive/Contacts as `maroonedpilot@gmail.com`; Gmail and Calendar tools are not exposed in this session yet.
+- DBOS/Postgres topology note created.
+- PostgreSQL 18.3 installed from PGDG; `lucidota_state` and `lucidota_graph` databases created.
+- `lucidota_graph` has verified `vector` 0.8.2 and `age` 1.7.0 extension behavior.
+- Local Postgres role `mfspx` is a dev superuser so AGE can be loaded from normal dev commands; this is local dev posture, not release policy.
+- DBOS 2.21.0 smoke workflow runs against `lucidota_state` and initializes DBOS system schema.
 
 ## Next Verification
 
