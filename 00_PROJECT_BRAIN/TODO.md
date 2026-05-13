@@ -43,6 +43,7 @@
 - [ ] Create encrypted-storage research note.
 - [ ] Create model-runtime research note.
 - [x] Record investigation lifecycle: ingest, hash/time/provenance, normalize, graph, infer, claim, pivot, repeat.
+- [x] Record canonical ternary modal labels: SANTA, BEEP BOOP, KRAMPUS.
 - [x] Create DBOS/Postgres topology note.
 - [x] Install and verify PostgreSQL 18 + pgvector + AGE.
 - [x] Create local `lucidota_state` and `lucidota_graph` databases.

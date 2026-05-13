@@ -36,6 +36,18 @@ Any ontology-addressable object: word, phrase, emoji, document, sentence, phone 
 
 Contextual triadic compute state. Not restricted to `+1 / 0 / -1`.
 
+Canonical modal labels currently include:
+
+- `+1 SANTA`
+- `0 BEEP BOOP`
+- `-1 KRAMPUS`
+
+These are important internal state labels. Their meaning is context-dependent and will be specified further by northern.strike.
+
+## Krampus Express
+
+Canonical internal investigation/analysis loop name. Details pending user specification; do not demote it to a throwaway metaphor.
+
 ## Records Office
 
 The system-of-record layer: encrypted CAS/vault, hashes, provenance, citations, decisions, and traceability.
@@ -47,4 +59,3 @@ Fastlane keeps the user interaction responsive. Slowlane handles heavy ingest, e
 ## Subtle Knife Protocol
 
 Graduated 1-5 autonomy protocol. Exact contents pending reingestion/specification.
-

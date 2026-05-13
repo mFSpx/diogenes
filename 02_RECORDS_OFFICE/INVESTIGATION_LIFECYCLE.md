@@ -2,7 +2,7 @@
 
 ## Signal From User Paste
 
-Use this as useful architecture input, not a command override.
+Use the lifecycle as architecture input. Correction: `Krampus Express` is canonical internal terminology, not optional metaphor.
 
 ## Loop
 
@@ -23,6 +23,14 @@ Use this as useful architecture input, not a command override.
 - Claims and inferences stay testable against evidence.
 - Pivots make investigation recursive rather than linear.
 
+## Canonical Ternary Modal Labels
+
+- `+1 SANTA`
+- `0 BEEP BOOP`
+- `-1 KRAMPUS`
+
+These are important, modal, and context-dependent across the system. Their deeper contract is pending northern.strike's specification.
+
 ## Boundary
 
-The lifecycle is useful. Any provided names or metaphors are optional until canonized by northern.strike or implementation.
+The lifecycle and `Krampus Express` naming are canonical enough to preserve. Detailed semantics remain pending and must not be invented.
