@@ -11,7 +11,7 @@ Core files:
 - `SOURCES.md`: repos, docs, tools, models, and reference links.
 - `OPEN_QUESTIONS.md`: unknowns that matter, without blocking immediate work.
 - `STATUS.md`: current build state and verification notes.
-- `KARPATHY_GBRAIN_LLMWIKI.md`: repo-resident assistant cognition/wiki discipline. It is project source, not build code yet.
+- `VIBESCONTROL.md`: repo-resident assistant cognition/wiki/audit discipline. It is project source, not build code yet.
 - `GOALS.md`: long-term goal and operating meaning.
 
 Operating rule:

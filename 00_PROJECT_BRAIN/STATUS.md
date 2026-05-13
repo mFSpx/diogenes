@@ -7,7 +7,7 @@
 - `claudecode` is now treated as the LUCIDOTA-owned interface fork, not an external dependency.
 - Active long-term goal recorded: get the working sovereign local system done, with verified code over vibes.
 - Repo-level ignore policy covers secrets, credentials, runtime state, vault data, databases, model weights, logs, and build outputs.
-- Karpathy/GBRAIN/LLMWiki setup now lives in the repo as project-brain source, not build code.
+- VIBESCONTROL now lives in the repo as project-brain/audit/self-improvement source, not build code.
 - Project brain initialized.
 - `doggystyle` cloned into `01_REPOS`.
 - `claudecode` cloned into `01_REPOS`.

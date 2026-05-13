@@ -23,7 +23,7 @@
 - [x] Re-run full harness after rename and Rust tonic bridge.
 - [x] Absorb claudecode fork into LUCIDOTA umbrella git without submodule behavior.
 - [x] Add repo-level secret/build/runtime ignore policy.
-- [x] Add Karpathy/GBRAIN/LLMWiki subsystem record that lives in repo but does not touch build.
+- [x] Add VIBESCONTROL subsystem record that lives in repo but does not touch build.
 - [x] Clarify that Markdown/wiki/PA material is support process only, not operational software.
 - [x] Create private GitLab repo `LUCIDOTA` and push umbrella project after GitLab auth.
 - [x] Record current Google auth surface: Drive/Contacts available, Gmail/Calendar not exposed yet.
@@ -47,6 +47,7 @@
 - [x] Add DBOS Python smoke workflow against `lucidota_state`.
 - [ ] Create Subtle Knife Protocol placeholder spec.
 - [ ] Implement project brain adapters into product after the interface/kernel spine is stable.
+- [ ] Convert VIBESCONTROL repeated work into scripts/checks where stable.
 - [x] Create adversarial audit checklist and run it against Phase 000/001.
 
 ## Later

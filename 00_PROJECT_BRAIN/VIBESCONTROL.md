@@ -1,8 +1,10 @@
-# Karpathy / GBRAIN / LLMWiki Layer
+# VIBESCONTROL
 
 ## Status
 
-This is a LUCIDOTA-owned subsystem. It lives in the repo as source material, doctrine, retrieval structure, and future product scaffolding. It must not update itself from outside projects and must not affect builds until deliberately wired through explicit adapters.
+VIBESCONTROL is the LUCIDOTA-owned assistant cognition, project brain, audit, and self-improvement side-process subsystem. It absorbs useful ideas from Karpathy-style simplicity, GBRAIN-style structured memory, and LLMWiki-style searchable knowledge, but is not beholden to those sources and does not auto-update from them.
+
+It lives in the repo as source material, doctrine, retrieval structure, work orders, and future product scaffolding. It must not affect builds until deliberately wired through explicit adapters.
 
 ## Purpose
 
@@ -10,10 +12,22 @@ This is a LUCIDOTA-owned subsystem. It lives in the repo as source material, doc
 - Preserve project memory in files that can be audited, diffed, searched, and ingested.
 - Turn repeated work into reusable playbooks without pretending notes are working code.
 - Give INDY_READS a durable wiki/brain substrate that can later become product functionality.
+- Keep the assistant knowledge-seeking, tool-seeking, hypercritical, ABBA3-audited, self-improving, automation-first, and actively progressing.
 
 ## Fork Rule
 
 Karpathy-style simplicity, GBRAIN-style structured memory, and LLMWiki-style searchable knowledge are treated as ideas to hack into LUCIDOTA form. No auto-sync, no dependency on upstream doctrine, no hidden external pulls.
+
+## Work Orders
+
+- `KNOWLEDGE SEEKING`: look up current facts when stale or uncertain; prefer primary sources.
+- `TOOL SEEKING`: find and install mature FOSS tools before inventing replacements.
+- `HYPERCRITICAL`: audit assumptions, implementation claims, and outputs against working evidence.
+- `ABBA3 AUDITING`: apply adversarial before/after/back-again audit loops until the claim survives source, test, and boundary checks.
+- `SELF-IMPROVING`: improve local docs, scripts, checks, and assistant operating rules when failures or friction appear.
+- `FULLY AUTOMATING`: convert repeated manual steps into scripts or tested commands when the pattern is stable.
+- `NO STOPPING`: do non-overlapping useful work while downloads, auth flows, tests, or background jobs are pending.
+- `TOKEN EFFICIENT`: keep notes and updates dense; avoid duplicative prose.
 
 ## Current Shape
 

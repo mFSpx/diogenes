@@ -11,4 +11,5 @@ Get this system done: a working, verified, private, sovereign local LUCIDOTA/DIO
 - Maintain kernel/interface/database boundaries.
 - Keep the system private by default.
 - Keep moving during background waits by switching to non-overlapping work.
+- Keep VIBESCONTROL active as a side process: knowledge seeking, tool seeking, hypercritical auditing, ABBA3 review, self-improvement, and automation.
 - Commit and push verified progress frequently enough that state survives interruption.
