@@ -18,6 +18,17 @@ Target the Clawd Rust terminal UI first:
 - `claw-cli/src/app.rs` and `main.rs`: REPL shell, prompt/status surfaces, session panels, command reports.
 - Later: a richer TUI layer if the current stream renderer is too limited.
 
+## OpenMW Reference Track
+
+OpenMW is the clean FOSS reference for Morrowind-style implementation work:
+
+- OpenMW is a from-scratch GPL engine reimplementation, not a mod of `Morrowind.exe`.
+- It does not distribute Bethesda game content; users provide legally owned content themselves.
+- Its technology stack documents the useful split: engine code versus content assets.
+- OpenMW's Lua UI docs expose `MWUI`, including Morrowind-style templates for borders, thick borders, boxes, solid/transparent panels, and horizontal lines.
+
+Use OpenMW as the implementation/legal boundary model: code and UI concepts are buildable; literal copyrighted game assets stay local and ignored.
+
 ## Build Status Bars
 
 Build status bars are part of the private UI track and likely map well to the Morrowind health/magicka/fatigue visual language.
@@ -52,6 +63,7 @@ For public release:
 - ImageMagick: image inspection/conversion/slicing.
 - `optipng`, `pngquant`: PNG optimization.
 - `caca-utils`: terminal graphics helpers.
+- `openmw`, `openmw-cs`: local reference engine/editor packages. Installed OpenMW binary reports 0.48.0.
 
 ## First Implementation Slice
 

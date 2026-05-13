@@ -38,9 +38,11 @@
 - [ ] Add real Calendar connector or local calendar CLI integration.
 - [ ] Add side-process review queue for email/calendar notes so they do not interrupt build flow.
 - [ ] Add Clawd private Morrowind UI theme track.
+- [ ] Use OpenMW/MWUI as clean implementation reference for panel, border, and status-bar behavior.
 - [ ] Add real build/status bars for build phases, service health, token pressure, and quiet side-process queues.
 - [ ] Create encrypted-storage research note.
 - [ ] Create model-runtime research note.
+- [x] Record investigation lifecycle: ingest, hash/time/provenance, normalize, graph, infer, claim, pivot, repeat.
 - [x] Create DBOS/Postgres topology note.
 - [x] Install and verify PostgreSQL 18 + pgvector + AGE.
 - [x] Create local `lucidota_state` and `lucidota_graph` databases.

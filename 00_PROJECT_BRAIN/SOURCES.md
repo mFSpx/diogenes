@@ -28,6 +28,7 @@
 
 - Morrowind menu model: stats, inventory, magic, and map windows are the relevant interaction reference.
 - Private-dev boundary: Morrowind-style functionality/code/layouts may live in this repo; literal Bethesda art/font/audio/game assets must stay local/ignored and must not be pushed or shipped.
+- OpenMW: FOSS GPL engine reference for Morrowind-style implementation boundaries and MWUI templates.
 
 ## Model Notes
 
@@ -39,3 +40,4 @@
 - `ckdog1-grpc`: Python gRPC server entrypoint backed by doggystyle.
 - `scripts/diogenes_grpc_smoke.py`: in-process CKDOG1 gRPC smoke harness.
 - `claw diogenes-smoke`: Clawd-side command that starts CKDOG1 gRPC locally and calls it through generated Rust tonic/prost client bindings.
+- `claw lucidota-status`: Clawd-side build status bar command.

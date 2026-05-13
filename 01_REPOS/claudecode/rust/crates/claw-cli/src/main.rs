@@ -89,6 +89,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     match parse_args(&args)? {
         CliAction::DumpManifests => dump_manifests(),
         CliAction::BootstrapPlan => print_bootstrap_plan(),
+        CliAction::LucidotaStatus => print_lucidota_status(),
         CliAction::DiogenesSmoke { args } => run_diogenes_smoke(&args)?,
         CliAction::Agents { args } => LiveCli::print_agents(args.as_deref())?,
         CliAction::Skills { args } => LiveCli::print_skills(args.as_deref())?,
@@ -123,6 +124,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 enum CliAction {
     DumpManifests,
     BootstrapPlan,
+    LucidotaStatus,
     DiogenesSmoke {
         args: Vec<String>,
     },
@@ -295,6 +297,7 @@ fn parse_args(args: &[String]) -> Result<CliAction, String> {
     match rest[0].as_str() {
         "dump-manifests" => Ok(CliAction::DumpManifests),
         "bootstrap-plan" => Ok(CliAction::BootstrapPlan),
+        "lucidota-status" => Ok(CliAction::LucidotaStatus),
         "diogenes-smoke" => Ok(CliAction::DiogenesSmoke {
             args: rest[1..].to_vec(),
         }),
@@ -661,6 +664,47 @@ fn print_bootstrap_plan() {
     for phase in runtime::BootstrapPlan::claw_default().phases() {
         println!("- {phase:?}");
     }
+}
+
+fn print_lucidota_status() {
+    print!("{}", render_lucidota_status_report());
+}
+
+fn render_lucidota_status_report() -> String {
+    let rows = [
+        ("LUCIDOTA repo/private remote", 100, "pushed"),
+        ("Project brain / VIBESCONTROL", 90, "active side-process"),
+        ("Clawd interface fork", 100, "absorbed"),
+        ("CKDOG1 kernel bridge", 80, "gRPC smoke"),
+        ("Rust tonic client", 100, "verified"),
+        ("Postgres 18 substrate", 100, "online"),
+        ("pgvector + AGE", 100, "verified"),
+        ("DBOS workflow smoke", 100, "verified"),
+        ("Full harness", 100, "green"),
+        ("Gmail / Calendar tooling", 30, "installed, auth pending"),
+        ("Morrowind private UI", 20, "track recorded"),
+        ("Ingest / RAG / ontology", 10, "next build"),
+        ("Model runtime / CUDA", 10, "next build"),
+        ("Public release split", 20, "future sanitize"),
+    ];
+
+    let mut out = String::from("LUCIDOTA Build Status\n");
+    out.push_str("=====================\n");
+    out.push_str("Theme: private dev, status-bar prototype\n\n");
+    for (label, percent, note) in rows {
+        let _ = writeln!(
+            out,
+            "{label:<31} [{}] {percent:>3}%  {note}",
+            lucidota_bar(percent, 12)
+        );
+    }
+    out
+}
+
+fn lucidota_bar(percent: u8, width: usize) -> String {
+    let filled = (usize::from(percent) * width + 50) / 100;
+    let empty = width.saturating_sub(filled);
+    format!("{}{}", "█".repeat(filled), "░".repeat(empty))
 }
 
 fn default_oauth_config() -> OAuthConfig {
@@ -4197,6 +4241,10 @@ fn print_help_to(out: &mut impl Write) -> io::Result<()> {
     )?;
     writeln!(
         out,
+        "  claw lucidota-status                  Print LUCIDOTA build status bars"
+    )?;
+    writeln!(
+        out,
         "  claw diogenes-smoke                   Run the CKDOG1 gRPC baby-smoke bridge"
     )?;
     writeln!(
@@ -4293,10 +4341,11 @@ mod tests {
         format_status_report, format_tool_call_start, format_tool_result,
         normalize_permission_mode, parse_args, parse_git_status_metadata, permission_policy,
         print_help_to, push_output_block, render_config_report, render_memory_report,
-        render_repl_help, render_unknown_repl_command, resolve_model_alias, response_to_events,
-        resume_supported_slash_commands, slash_command_completion_candidates, status_context,
-        CliAction, CliOutputFormat, InternalPromptProgressEvent, InternalPromptProgressState,
-        SlashCommand, StatusUsage, DEFAULT_MODEL,
+        render_lucidota_status_report, render_repl_help, render_unknown_repl_command,
+        resolve_model_alias, response_to_events, resume_supported_slash_commands,
+        slash_command_completion_candidates, status_context, CliAction, CliOutputFormat,
+        InternalPromptProgressEvent, InternalPromptProgressState, SlashCommand, StatusUsage,
+        DEFAULT_MODEL,
     };
     use api::{MessageResponse, OutputContentBlock, Usage};
     use plugins::{PluginTool, PluginToolDefinition, PluginToolPermission};
@@ -4740,7 +4789,17 @@ mod tests {
         assert!(help.contains("claw init"));
         assert!(help.contains("claw agents"));
         assert!(help.contains("claw skills"));
+        assert!(help.contains("claw lucidota-status"));
         assert!(help.contains("claw /skills"));
+    }
+
+    #[test]
+    fn lucidota_status_report_uses_build_bars() {
+        let report = render_lucidota_status_report();
+        assert!(report.contains("LUCIDOTA Build Status"));
+        assert!(report.contains("Postgres 18 substrate"));
+        assert!(report.contains("[████████████] 100%"));
+        assert!(report.contains("Morrowind private UI"));
     }
 
     #[test]
