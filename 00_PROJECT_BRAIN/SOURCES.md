@@ -6,6 +6,7 @@
 - doggystyle / CKDOG1 kernel: https://gitlab.com/mfspx/doggystyle
 - claudecode / Clawd interface: https://github.com/soongenwong/claudecode
 - needle / Cactus Compute function-call router: https://github.com/cactus-compute/needle
+- llama.cpp / ggml local inference backend: https://github.com/ggml-org/llama.cpp
 
 ## Key Tools / Systems
 

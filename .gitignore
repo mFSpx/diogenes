@@ -50,6 +50,13 @@ auth/
 /01_REPOS/needle/tokenizer/
 /01_REPOS/needle/.venv/
 
+# Vendored llama.cpp source is tracked; builds/models stay local.
+/01_REPOS/llama.cpp/build/
+/01_REPOS/llama.cpp/build-*/
+/01_REPOS/llama.cpp/models/
+/01_REPOS/llama.cpp/*.gguf
+/01_REPOS/llama.cpp/*.safetensors
+
 # Python/Rust/local build noise.
 __pycache__/
 *.py[cod]

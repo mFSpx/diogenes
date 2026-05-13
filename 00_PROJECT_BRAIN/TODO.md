@@ -50,7 +50,7 @@
 - [x] Add governance gate schema.
 - [x] Add DBOS workflow/event status conventions for Big Board.
 - [x] Add model runtime registry schema for resident loadout and LoRA cartridges.
-- [ ] Install LUCIDOTA Python runtime stack into project environment.
+- [x] Install LUCIDOTA Python runtime stack into project environment.
 - [x] Apply control-plane schema to `lucidota_state`.
 - [x] Add runtime inventory recorder.
 - [x] Add local NVIDIA MPS lifecycle helpers.
