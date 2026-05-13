@@ -36,6 +36,8 @@ Do not optimize around 35 always-on routers until benchmarks prove a real need. 
 Needle source:
 
 - repo: `https://github.com/cactus-compute/needle`
+- local source shelf: `01_REPOS/needle`
+- cloned revision at intake: `b4a4d5b`
 - license: MIT per GitHub repo metadata.
 - README claim: 26M parameter function-call model, 6000 tok/s prefill and 1200 decode speed in Cactus production.
 - architecture claim: Simple Attention Network, no FFN, encoder-decoder, cross-attention, gated residuals.
@@ -134,7 +136,7 @@ Do not claim convergence by wall-clock time yet. Record events first, then evalu
 
 ## First Benchmarks To Build
 
-1. Needle clone/install smoke in isolated local path.
+1. Needle install smoke in isolated local path.
 2. `needle run` with one simple tool schema.
 3. measure CPU-only and CUDA path if available.
 4. benchmark MPS on/off with two tiny CUDA workloads.

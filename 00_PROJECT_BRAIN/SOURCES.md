@@ -5,6 +5,7 @@
 - LUCIDOTA private umbrella repo: https://gitlab.com/mfspx/LUCIDOTA
 - doggystyle / CKDOG1 kernel: https://gitlab.com/mfspx/doggystyle
 - claudecode / Clawd interface: https://github.com/soongenwong/claudecode
+- needle / Cactus Compute function-call router: https://github.com/cactus-compute/needle
 
 ## Key Tools / Systems
 

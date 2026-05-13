@@ -44,6 +44,12 @@ auth/
 /01_REPOS/claudecode/private_assets/
 /01_REPOS/claudecode/rust/private_assets/
 
+# Vendored Needle source is tracked; downloaded weights/caches stay local.
+/01_REPOS/needle/.data_cache/
+/01_REPOS/needle/checkpoints/
+/01_REPOS/needle/tokenizer/
+/01_REPOS/needle/.venv/
+
 # Python/Rust/local build noise.
 __pycache__/
 *.py[cod]
