@@ -42,7 +42,9 @@
 - [ ] Add real build/status bars for build phases, service health, token pressure, and quiet side-process queues.
 - [ ] Create encrypted-storage research note.
 - [x] Create first model-source intelligence note.
-- [ ] Create model-runtime research note.
+- [x] Create model-runtime research note.
+- [ ] Benchmark Needle locally before accepting remote tok/s numbers.
+- [ ] Benchmark MPS on/off with concurrent local CUDA workloads.
 - [x] Record investigation lifecycle: ingest, hash/time/provenance, normalize, graph, infer, claim, pivot, repeat.
 - [x] Record canonical ternary modal labels: SANTA, BEEP BOOP, KRAMPUS.
 - [x] Record ROOT-414 LoRA triad as working model, not canonical primitive data.

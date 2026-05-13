@@ -36,6 +36,7 @@
 - Needle 26M: Cactus Compute Needle tool/function-calling model.
 - Mamba 1.3B: target state-space sequence model family.
 - Model source intelligence map: `02_RECORDS_OFFICE/MODEL_SOURCE_INTEL_MAP.md`.
+- CUDA/model stack working note: `02_RECORDS_OFFICE/CUDA_MODEL_STACK_V0.md`.
 
 ## Current Verified Interfaces
 

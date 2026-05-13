@@ -1,3 +1,4 @@
+use std::env;
 use std::fmt::Write as FmtWrite;
 use std::io::{self, Write};
 
@@ -40,6 +41,69 @@ impl Default for ColorTheme {
             spinner_active: Color::Blue,
             spinner_done: Color::Green,
             spinner_failed: Color::Red,
+        }
+    }
+}
+
+impl ColorTheme {
+    #[must_use]
+    pub fn morrowind_private() -> Self {
+        Self {
+            heading: Color::Yellow,
+            emphasis: Color::DarkYellow,
+            strong: Color::Rgb {
+                r: 214,
+                g: 172,
+                b: 89,
+            },
+            inline_code: Color::Rgb {
+                r: 170,
+                g: 116,
+                b: 43,
+            },
+            link: Color::Rgb {
+                r: 118,
+                g: 151,
+                b: 103,
+            },
+            quote: Color::Rgb {
+                r: 138,
+                g: 111,
+                b: 70,
+            },
+            table_border: Color::Rgb {
+                r: 122,
+                g: 82,
+                b: 45,
+            },
+            code_block_border: Color::Rgb {
+                r: 93,
+                g: 68,
+                b: 43,
+            },
+            spinner_active: Color::Rgb {
+                r: 214,
+                g: 172,
+                b: 89,
+            },
+            spinner_done: Color::Rgb {
+                r: 118,
+                g: 151,
+                b: 103,
+            },
+            spinner_failed: Color::Rgb {
+                r: 174,
+                g: 74,
+                b: 49,
+            },
+        }
+    }
+
+    #[must_use]
+    pub fn from_theme_name(name: &str) -> Self {
+        match name {
+            "morrowind-private" | "morrowind" | "mw-private" => Self::morrowind_private(),
+            _ => Self::default(),
         }
     }
 }
@@ -228,10 +292,14 @@ impl Default for TerminalRenderer {
             .themes
             .remove("base16-ocean.dark")
             .unwrap_or_default();
+        let color_theme = env::var("CLAW_THEME")
+            .ok()
+            .map(|name| ColorTheme::from_theme_name(name.trim()))
+            .unwrap_or_default();
         Self {
             syntax_set,
             syntax_theme,
-            color_theme: ColorTheme::default(),
+            color_theme,
         }
     }
 }
@@ -240,6 +308,15 @@ impl TerminalRenderer {
     #[must_use]
     pub fn new() -> Self {
         Self::default()
+    }
+
+    #[cfg(test)]
+    #[must_use]
+    pub fn with_color_theme(color_theme: ColorTheme) -> Self {
+        Self {
+            color_theme,
+            ..Self::default()
+        }
     }
 
     #[must_use]
@@ -693,7 +770,7 @@ fn strip_ansi(input: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{strip_ansi, MarkdownStreamState, Spinner, TerminalRenderer};
+    use super::{strip_ansi, ColorTheme, MarkdownStreamState, Spinner, TerminalRenderer};
 
     #[test]
     fn renders_markdown_with_styling_and_lists() {
@@ -793,5 +870,22 @@ mod tests {
 
         let output = String::from_utf8_lossy(&out);
         assert!(output.contains("Working"));
+    }
+
+    #[test]
+    fn morrowind_private_theme_uses_amber_borders() {
+        let renderer = TerminalRenderer::with_color_theme(ColorTheme::morrowind_private());
+        assert_eq!(
+            renderer.color_theme().table_border,
+            crossterm::style::Color::Rgb {
+                r: 122,
+                g: 82,
+                b: 45
+            }
+        );
+
+        let rendered = renderer.render_markdown("| Thing | State |\n| --- | --- |\n| CKDOG1 | online |");
+        assert!(strip_ansi(&rendered).contains("CKDOG1"));
+        assert!(rendered.contains('\u{1b}'));
     }
 }

@@ -682,9 +682,9 @@ fn render_lucidota_status_report() -> String {
         ("DBOS workflow smoke", 100, "verified"),
         ("Full harness", 100, "green"),
         ("Gmail / Calendar tooling", 30, "installed, auth pending"),
-        ("Morrowind private UI", 20, "track recorded"),
+        ("Morrowind private UI", 35, "OpenMW map, theme hook"),
         ("Ingest / RAG / ontology", 10, "next build"),
-        ("Model runtime / CUDA", 10, "next build"),
+        ("Model runtime / CUDA", 20, "stack notes, benchmark next"),
         ("Public release split", 20, "future sanitize"),
     ];
 
