@@ -53,6 +53,7 @@
 - [ ] Install LUCIDOTA Python runtime stack into project environment.
 - [x] Apply control-plane schema to `lucidota_state`.
 - [x] Add runtime inventory recorder.
+- [x] Add local NVIDIA MPS lifecycle helpers.
 - [x] Record investigation lifecycle: ingest, hash/time/provenance, normalize, graph, infer, claim, pivot, repeat.
 - [x] Record canonical ternary modal labels: SANTA, BEEP BOOP, KRAMPUS.
 - [x] Record ROOT-414 LoRA triad as working model, not canonical primitive data.
