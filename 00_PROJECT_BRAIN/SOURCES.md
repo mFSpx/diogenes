@@ -47,3 +47,8 @@
 - `claw diogenes-smoke`: Clawd-side command that starts CKDOG1 gRPC locally and calls it through generated Rust tonic/prost client bindings.
 - `claw lucidota-status`: Clawd-side build status bar command.
 - `scripts/lucidota_cuda_inventory.sh`: local CUDA/model software inventory helper.
+- `06_SCHEMA/001_lucidota_control.sql`: control-plane workflow/governance/runtime inventory schema.
+- `06_SCHEMA/002_model_runtime.sql`: model candidate, resident loadout, and adapter cartridge registry.
+- `scripts/apply_lucidota_control_schema.sh`: applies the control-plane schema to `lucidota_state`.
+- `scripts/lucidota_runtime_smoke.py`: verifies runtime imports, CUDA visibility, and control schema.
+- `scripts/lucidota_record_runtime_inventory.py`: writes CUDA/Python runtime inventory snapshots to Postgres.

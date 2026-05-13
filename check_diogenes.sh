@@ -28,6 +28,8 @@ fi
 "$LUCIDOTA_VENV/bin/python" -m pip install dbos >/dev/null
 DBOS_SYSTEM_DATABASE_URL="${DBOS_SYSTEM_DATABASE_URL:-postgresql://mfspx@/lucidota_state}" \
   "$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_smoke.py
+scripts/apply_lucidota_control_schema.sh
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_runtime_smoke.py
 
 cd "$KERNEL"
 if [[ ! -x .venv/bin/python ]]; then
