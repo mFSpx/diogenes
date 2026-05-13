@@ -45,6 +45,10 @@
 - [x] Create model-runtime research note.
 - [ ] Benchmark Needle locally before accepting remote tok/s numbers.
 - [ ] Benchmark MPS on/off with concurrent local CUDA workloads.
+- [x] Record Big Board, governance/privacy, and orchestration missing-link tracks.
+- [x] Add local CUDA/model inventory helper.
+- [ ] Add governance gate schema.
+- [ ] Add DBOS workflow/event status conventions for Big Board.
 - [x] Record investigation lifecycle: ingest, hash/time/provenance, normalize, graph, infer, claim, pivot, repeat.
 - [x] Record canonical ternary modal labels: SANTA, BEEP BOOP, KRAMPUS.
 - [x] Record ROOT-414 LoRA triad as working model, not canonical primitive data.

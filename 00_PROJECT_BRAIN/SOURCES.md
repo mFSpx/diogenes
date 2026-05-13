@@ -38,6 +38,7 @@
 - Mamba 1.3B: target state-space sequence model family.
 - Model source intelligence map: `02_RECORDS_OFFICE/MODEL_SOURCE_INTEL_MAP.md`.
 - CUDA/model stack working note: `02_RECORDS_OFFICE/CUDA_MODEL_STACK_V0.md`.
+- Missing links architecture note: `02_RECORDS_OFFICE/MISSING_LINKS_COMMAND_CENTER_GOVERNANCE_ORCHESTRATION.md`.
 
 ## Current Verified Interfaces
 
@@ -45,3 +46,4 @@
 - `scripts/diogenes_grpc_smoke.py`: in-process CKDOG1 gRPC smoke harness.
 - `claw diogenes-smoke`: Clawd-side command that starts CKDOG1 gRPC locally and calls it through generated Rust tonic/prost client bindings.
 - `claw lucidota-status`: Clawd-side build status bar command.
+- `scripts/lucidota_cuda_inventory.sh`: local CUDA/model software inventory helper.
