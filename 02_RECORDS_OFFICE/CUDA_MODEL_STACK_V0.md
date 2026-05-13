@@ -10,6 +10,7 @@ Working architecture note for the 4GB GTX 1650 local model stack. This records i
 - VRAM: `4096 MiB`
 - Driver: `580.126.18`
 - Compute capability: `7.5`
+- CUDA toolkit: `12.0.140`
 - PCI device: `TU117M [GeForce GTX 1650 Mobile / Max-Q]`
 - Display/iGPU: Intel CometLake-H UHD Graphics present.
 - `nvidia-cuda-mps-control`: installed at `/usr/bin/nvidia-cuda-mps-control`.
@@ -128,6 +129,7 @@ Do not claim convergence by wall-clock time yet. Record events first, then evalu
 ## Anti-Slop Checks
 
 - Do not trust tok/s claims from remote hardware as local GTX 1650 numbers.
+- `llama.cpp` confirms the GTX 1650 lacks tensor cores and may need an MMQ/Pascal-style CUDA build path for better performance.
 - Do not assume LoRA training speed; benchmark with a tiny lawful dataset first.
 - Do not assume MPS gives hard percentage partitioning on this GPU.
 - Do not assume no-KV-cache is free; every backend has its own memory behavior.
@@ -136,10 +138,29 @@ Do not claim convergence by wall-clock time yet. Record events first, then evalu
 
 ## First Benchmarks To Build
 
-1. Needle install smoke in isolated local path.
+1. Needle install smoke in isolated local path. Done: package imports in LUCIDOTA venv.
 2. `needle run` with one simple tool schema.
 3. measure CPU-only and CUDA path if available.
 4. benchmark MPS on/off with two tiny CUDA workloads.
 5. test one GGUF 500M/1.5B resident model through `llama.cpp`.
-6. record VRAM before/after each process.
+6. record VRAM before/after each process. Started via `scripts/lucidota_record_runtime_inventory.py`.
 7. build a `lucidota model-status` report once numbers exist.
+
+## llama.cpp Local Build
+
+Source shelf:
+
+- `01_REPOS/llama.cpp`
+- intake commit: `7f3f843c3`
+- vendored LUCIDOTA commit: `fc9160d`
+
+Build helper:
+
+- `scripts/build_llama_cuda.sh`
+
+Current smoke:
+
+- `llama-cli --version`: works.
+- `llama-server --version`: works.
+- CUDA backend detects the GTX 1650 at compute capability 7.5.
+- Warning captured: no tensor cores; investigate `CMAKE_CUDA_ARCHITECTURES=61-virtual;80-virtual` and `GGML_CUDA_FORCE_MMQ` for this Turing/1650 target.

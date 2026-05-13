@@ -55,3 +55,4 @@
 - `scripts/lucidota_record_runtime_inventory.py`: writes CUDA/Python runtime inventory snapshots to Postgres.
 - `scripts/lucidota_model_registry.py`: prints active model loadout registry from Postgres.
 - `scripts/lucidota_mps_start.sh`, `scripts/lucidota_mps_stop.sh`: local NVIDIA MPS lifecycle helpers.
+- `scripts/build_llama_cuda.sh`: reproducible CUDA build for local `llama-cli` and `llama-server`.

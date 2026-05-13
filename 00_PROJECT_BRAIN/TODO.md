@@ -54,6 +54,9 @@
 - [x] Apply control-plane schema to `lucidota_state`.
 - [x] Add runtime inventory recorder.
 - [x] Add local NVIDIA MPS lifecycle helpers.
+- [x] Install system CUDA toolkit and OpenBLAS.
+- [x] Build `llama.cpp` CUDA `llama-cli` and `llama-server`.
+- [ ] Benchmark alternate `llama.cpp` MMQ build for GTX 1650 no-tensor-core path.
 - [x] Record investigation lifecycle: ingest, hash/time/provenance, normalize, graph, infer, claim, pivot, repeat.
 - [x] Record canonical ternary modal labels: SANTA, BEEP BOOP, KRAMPUS.
 - [x] Record ROOT-414 LoRA triad as working model, not canonical primitive data.
