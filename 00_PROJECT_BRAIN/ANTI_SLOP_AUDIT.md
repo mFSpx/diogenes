@@ -34,3 +34,4 @@ When a failure label applies, either fix it immediately or record the smallest c
 - `DANGEROUS` contained: current smoke uses local temp homes and performs no external writes.
 - `REINVENTION` avoided for bridge client: generated tonic/prost bindings are now used instead of a hand-rolled protocol.
 - `SLOP` boundary clarified: Markdown, skills, plans, and personal-assistant notes are support process only. They do not become operational runtime behavior without explicit code, typed contracts, tests, and audit trails.
+- `DANGEROUS` Drive boundary: Google Drive is not ambient context. Access only on explicit, targeted user request; fetch only the agreed material.

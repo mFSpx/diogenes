@@ -25,12 +25,16 @@
 - [x] Add repo-level secret/build/runtime ignore policy.
 - [x] Add Karpathy/GBRAIN/LLMWiki subsystem record that lives in repo but does not touch build.
 - [x] Clarify that Markdown/wiki/PA material is support process only, not operational software.
-- [ ] Create private GitLab repo `LUCIDOTA` and push umbrella project after GitLab auth.
+- [x] Create private GitLab repo `LUCIDOTA` and push umbrella project after GitLab auth.
+- [x] Record current Google auth surface: Drive/Contacts available, Gmail/Calendar not exposed yet.
+- [x] Record hard Google Drive boundary: explicit targeted retrieval only, never ambient browsing.
 
 ## Next
 
 - [ ] Convert current conversation architecture into durable glossary/decisions/source notes.
 - [ ] Create local auth inventory skeleton.
+- [ ] Add real Gmail connector or local Gmail CLI integration.
+- [ ] Add real Calendar connector or local calendar CLI integration.
 - [ ] Create encrypted-storage research note.
 - [ ] Create model-runtime research note.
 - [ ] Create DBOS/Postgres topology note.
