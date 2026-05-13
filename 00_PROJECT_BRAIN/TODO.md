@@ -24,6 +24,7 @@
 - [x] Absorb claudecode fork into LUCIDOTA umbrella git without submodule behavior.
 - [x] Add repo-level secret/build/runtime ignore policy.
 - [x] Add Karpathy/GBRAIN/LLMWiki subsystem record that lives in repo but does not touch build.
+- [x] Clarify that Markdown/wiki/PA material is support process only, not operational software.
 - [ ] Create private GitLab repo `LUCIDOTA` and push umbrella project after GitLab auth.
 
 ## Next

@@ -30,6 +30,18 @@ Karpathy-style simplicity, GBRAIN-style structured memory, and LLMWiki-style sea
 
 This layer is repo source but not build input. Rust, Python, database migrations, generated bindings, and runtime services must not implicitly read or mutate it. Future integration requires a named adapter, tests, and a clear read/write contract.
 
+Markdown is not operational software. The project-brain files are a means to organize work, not a substitute for executable behavior. Personal-assistant routines, wiki habits, notes, skills, and planning doctrine remain a functional side process until deliberately promoted into product code.
+
+Promotion requires:
+
+- A named adapter or service.
+- Typed inputs and outputs.
+- Tests that prove the runtime behavior.
+- An audit trail for reads and writes.
+- No hidden dependency on assistant notes for core system operation.
+
+If a Markdown note changes behavior without explicit code, that is a bug.
+
 ## Future Product Path
 
 1. File-backed memory stays canonical while the spine is unstable.
