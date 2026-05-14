@@ -118,14 +118,14 @@ INSERT INTO lucidota_runtime.model_candidate (
     (
         'needle-26m',
         'router',
-        'https://github.com/cactus-compute/needle',
-        '01_REPOS/needle',
+        'https://huggingface.co/Cactus-Compute/needle',
+        '03_VAULT/models/needle/needle.pkl',
         'MIT',
         26000000,
         'upstream JAX checkpoint, quantization TBD',
-        NULL,
-        'testing',
-        'Function-call router candidate. Local benchmark required before tok/s claims are accepted.'
+        256,
+        'accepted',
+        'Function-call router candidate. Local checkpoint downloaded and smoke-tested for tool-call generation.'
     ),
     (
         'mamba2-1.3b-listener',
@@ -142,14 +142,14 @@ INSERT INTO lucidota_runtime.model_candidate (
     (
         'deepseek-1.5b-indy_reads-reads',
         'heavy_hitter',
-        'TBD',
-        NULL,
-        'unknown',
+        'https://huggingface.co/bartowski/DeepSeek-R1-Distill-Qwen-1.5B-GGUF',
+        '03_VAULT/models/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf',
+        'MIT',
         1500000000,
-        '4-bit target',
-        NULL,
-        'watch',
-        'Resident Indy_Reads heavy-hitter/adaptor host target; exact artifact not selected.'
+        'Q4_K_M GGUF',
+        1800,
+        'accepted',
+        'Resident Indy_Reads heavy-hitter/adaptor host target; local GGUF downloaded for llama.cpp demo serving.'
     )
 ON CONFLICT (model_id) DO UPDATE SET
     role = EXCLUDED.role,

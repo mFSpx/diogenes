@@ -9,7 +9,7 @@ import psycopg
 ROOT=Path(__file__).resolve().parents[1]
 DB=os.environ.get('DBOS_SYSTEM_DATABASE_URL','postgresql://mfspx@/lucidota_state')
 MODEL_DIRS=[ROOT/'03_VAULT', ROOT/'04_RUNTIME', ROOT/'01_REPOS'/'llama.cpp'/'models', Path.home()/'.cache'/'huggingface']
-WEIGHT_PATTERNS=['*.gguf','*.safetensors','pytorch_model*.bin','model*.bin']
+WEIGHT_PATTERNS=['*.gguf','*.pkl','*.safetensors','pytorch_model*.bin','model*.bin']
 VOCAB_RE=re.compile(r'ggml-vocab', re.I)
 
 
@@ -56,6 +56,7 @@ def main():
       'ok': True,
       'routing_registry_ready': checks['needle_six_registry'] and checks['mamba_registry'] and checks['deepseek_registry'],
       'artifact_ready': checks['usable_weight_files_present'] and checks['deepseek_weight_present'] and checks['mamba_weight_present'] and checks['needle_weight_present'],
+      'demo_inference_artifact_ready': checks['deepseek_weight_present'] and checks['needle_weight_present'],
       'zero_refusal_guarantee': False,
       'zero_refusal_note': 'Cannot guarantee model behavior without actual local artifacts and eval suite; no such guarantee is truthful.',
       'checks': checks,

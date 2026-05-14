@@ -59,7 +59,7 @@
 - River ML: `█████████░ 92%` — River scores workflow events; live Bytewax stream pending.
 - Bytewax: `█████████░ 92%` — installed/imports; mini TestingSource graph emits persisted hints.
 - Treelite: `█████████░ 92%` — installed/imports; Treelite artifact + advisory route run persisted; DBOS policy call-in pending.
-- Model runtime / Local Brain: `███████░░░ 70%` — CUDA/runtime imports, model governor, and registry intent pass locally; 2026-05-14 artifact check found no usable local model weight files, only vocab GGUFs, so local DeepSeek/Mamba/Needle artifact readiness and zero-refusal behavior are not claimable.
+- Model runtime / Local Brain: `████████░░ 80%` — CUDA/runtime imports, model governor, registry intent, Needle checkpoint, and DeepSeek-R1-Distill-Qwen-1.5B Q4_K_M GGUF are local and wired through llama.cpp/LiteLLM-compatible config; Mamba and zero-refusal eval remain open.
 - Drive map/import: `███████░░░ 72%` — nuclei mapped; full private granular map/imports pending.
 - Indy_Reads persona: `███████░░░ 65%` — runtime contract, local brief, local persona corpus/distillation, task memory, reminders/calendar-intent queue, redacted auth inventory, and expanded regression loop now exist; Drive/private-vault corpus import and real Gmail/Calendar adapters pending.
 - Algorithm primitive library: `██████████ 98%` — 40 wrappers smoked, including Possum/OPOSSUM/Thanatosis/Capybara/Hoeffding and Chelydra/Serpentina/Schoolfield additions.
@@ -109,12 +109,19 @@ Full audited checklist: `00_PROJECT_BRAIN/BUILD_PLAN_AUDIT.md` (280+ line-items)
 - `scripts/lucidota_kernel_api_smoke.py` exercises every current CKDOG1 KernelService RPC: GenesisInit, SoulCreate, TraitSet, DomainSlotSet, StateShift, DeltaApply, Route, CreateSnapshot, and SubmitAuthorizedJob.
 - CKDOG1 gRPC server bug fixes landed in the kernel repo: DeltaApply now returns top-level `packed_bytes`, SubmitAuthorizedJob uses `effective_hash`, and localhost smoke tests avoid duplicate port binding.
 - Kernel/CKDOG1 bar is closed at 100% for the current local test/demo API surface; broader future product API expansion remains future scope, not a blocker to demo.
-- `scripts/lucidota_model_artifact_readiness.py` confirms the routing registry is present, but actual local model weight artifacts are **not** present. Needle/Mamba/DeepSeek are planned/registered, not downloaded/verified. Zero-refusal/ablit behavior is not guaranteed and cannot be claimed without artifacts plus eval.
+- `scripts/lucidota_model_artifact_readiness.py` now confirms local demo artifacts for Needle (`03_VAULT/models/needle/needle.pkl`) and DeepSeek (`03_VAULT/models/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf`). Mamba is still not present. Zero-refusal/ablit behavior is not guaranteed and cannot be claimed without eval.
 
 
 ## Demo Readiness Recalibration — 2026-05-14
 
 - Full local harness: `██████████ 100%` for the current scripted demo path — `./check_diogenes.sh` passed on 2026-05-14 after DBOS/control schemas, runtime smoke, kernel API smoke, model artifact readiness check, CAS/Body Capture/Hop/Survey, Big Board/Cockpit, Indy/regression/release checks, CKDOG1 tests, Rust workspace tests, Clawd release build, and Clawd/Survey DBOS smokes.
 - Kernel API demo readiness: `██████████ 100%` for current local API surface — `scripts/lucidota_kernel_api_smoke.py --json` returned `ok: true` and exercised all current RPCs.
-- Model artifact demo readiness: `██░░░░░░░░ 20%` — registry intent exists for Needle/Mamba/DeepSeek, but `scripts/lucidota_model_artifact_readiness.py --json` reported `artifact_ready: false`, no usable weight files, and no zero-refusal guarantee.
-- Launch/demo truth: demo can show the kernel/interface/control/data harness; it must not claim local model weights, DeepSeek/Mamba/Needle inference, or refusal-free behavior until artifacts and evals exist.
+- Model artifact demo readiness: `███████░░░ 70%` — Needle and DeepSeek local artifacts are downloaded/wired and DeepSeek served through llama.cpp on port 8080; Mamba and zero-refusal eval remain red.
+- Launch/demo truth: demo can now show kernel/interface/control/data harness plus one live local DeepSeek GGUF and Needle tool-call smoke; it must not claim Mamba or refusal-free behavior until artifacts and evals exist.
+
+## Local Model Fire-Up — 2026-05-14
+
+- Downloaded Needle checkpoint/tokenizer from `Cactus-Compute/needle` into `03_VAULT/models/needle/`; smoke generated a valid `get_weather` tool call.
+- Downloaded `DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf` from `bartowski/DeepSeek-R1-Distill-Qwen-1.5B-GGUF` into `03_VAULT/models/`.
+- `scripts/lucidota_start_deepseek_llama.sh` starts the local llama.cpp OpenAI-compatible server; `/v1/models` and `/completion` smoked on `127.0.0.1:8080`.
+- LiteLLM bridge now emits the local DeepSeek route as `openai/deepseek-1.5b-indy_reads-reads` with `api_base=http://127.0.0.1:8080/v1`.

@@ -191,11 +191,20 @@ def model_list(entries: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     for entry in entries:
         if entry.get("error") or not entry.get("model_name") or not entry.get("litellm_model"):
             continue
-        params: dict[str, Any] = {"model": entry["litellm_model"]}
+        local = entry.get("local_path") or {}
+        local_path = str(local.get("path") or "")
+        if entry.get("provider") == "local" and local_path.endswith(".gguf"):
+            # llama.cpp server exposes an OpenAI-compatible /v1 API; LiteLLM routes it via openai/*.
+            params: dict[str, Any] = {
+                "model": f"openai/{entry['model_name']}",
+                "api_base": os.environ.get("LUCIDOTA_LLAMA_API_BASE", "http://127.0.0.1:8080/v1"),
+                "api_key": os.environ.get("LUCIDOTA_LLAMA_API_KEY", "not-needed"),
+            }
+        else:
+            params = {"model": entry["litellm_model"]}
         key_env = entry.get("api_key_env")
         if key_env:
             params["api_key"] = f"os.environ/{key_env}"
-        local = entry.get("local_path") or {}
         if local.get("configured"):
             params["local_path"] = local.get("path")
         out.append(
