@@ -58,6 +58,7 @@ def counters() -> dict:
     return {
         "workflow_events": scalar(STATE_DB, "SELECT count(*) FROM lucidota_control.workflow_event"),
         "registered_workflows": scalar(STATE_DB, "SELECT count(*) FROM lucidota_control.workflow_registry"),
+        "scheduled_workflows": scalar(STATE_DB, "SELECT count(*) FROM lucidota_control.workflow_schedule WHERE enabled=true"),
         "signoff_pending": scalar(STATE_DB, "SELECT count(*) FROM lucidota_control.governance_gate WHERE approval_status='pending'"),
         "signoff_approved": scalar(STATE_DB, "SELECT count(*) FROM lucidota_control.governance_gate WHERE approval_status='approved'"),
         "wake_pending": scalar(STATE_DB, "SELECT count(*) FROM lucidota_control.event_outbox WHERE status='pending'"),

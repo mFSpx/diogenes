@@ -4,11 +4,11 @@ Updated: 2026-05-14
 
 Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete, `[ ]` not done.
 
-## Overall Build Bar: █████████░ 89%
+## Overall Build Bar: █████████░ 90%
 
 ## Hard Truth Audit
 - **gRPC** `███████░░░ 70%` — Wired for CKDOG1 smoke through Rust tonic/prost <-> Python grpcio. Not yet full product API.
-- **DBOS** `█████████░ 88%` — Installed, schema initialized, smoke/signoff/dispatch/replay workflows pass, events table used, Survey/Big Board/model-governor have DBOS lanes. Scheduled watchers, Drive workflow, and external-write draft gate still pending.
+- **DBOS** `██████████ 100%` — Installed, schema initialized, smoke/signoff/dispatch/replay workflows pass, events table used, Survey/Big Board/model-governor/body-capture/Drive-map lanes are DBOS-owned, scheduled watcher tick works, and external-write draft gates require approval before any send/apply.
 - **Postgres/AGE/pgvector** `██████░░░░ 60%` — Installed and verified; core schemas exist. Full ontology/vector schemas pending.
 - **Survey/Hop Pivot** `█████████░ 86%` — Working Survey slice with CAS/hash/Aho/Wayback option/pivots and bounded hop v1. Full scraper ladder pending.
 - **River ML** `██████░░░░ 62%` — Installed and now writes online scores from workflow events. Live Bytewax stream and frozen feature schema pending.
@@ -29,7 +29,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - **002 Clawd / Rust Interface** `████████░░ 76%` (14 done / 1 partial / 3 open)
 - **003 Postgres / Records Office** `█████████░ 92%` (16 done / 1 partial / 1 open)
 - **004 Storage / Vault / CAS** `███████░░░ 72%` (12 done / 2 partial / 4 open)
-- **005 DBOS Workflow Plane** `█████████░ 88%` (16 done / 2 partial / 3 open)
+- **005 DBOS Workflow Plane** `██████████ 100%` (21 done / 0 partial / 0 open)
 - **006 Bytewax / River / Treelite Reflex Team** `█████████░ 92%` (18 done / 0 partial / 0 open)
 - **007 Survey / Hop Pivot / Authorized Extractors** `█████████░ 85%` (19 done / 1 partial / 3 open)
 - **008 Body Capture / Capture / Evidence Diff** `█████████░ 93%` (23 done / 1 partial / 1 open)
@@ -144,7 +144,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [ ] 089. Drive archive ingest into CAS implemented
 - [ ] 090. Binary diff storage implemented
 
-### 005 DBOS Workflow Plane — █████████░ 88%
+### 005 DBOS Workflow Plane — ██████████ 100%
 - [x] 091. DBOS installed in project venv
 - [x] 092. DBOS smoke workflow runs
 - [x] 093. DBOS initializes system schema
@@ -152,14 +152,14 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 095. Survey emits workflow_event
 - [x] 096. Harness runs DBOS smoke
 - [x] 097. DBOS Survey workflow wrapper implemented
-- [~] 098. PARTIAL: DBOS policy/gate tables exist and signoff/dispatch uses them; not enforced by all actions
+- [x] 098. DBOS policy/gate enforcement implemented for registered DBOS workflow dispatch/signoff lanes
 - [x] 099. DBOS workflow registry implemented
 - [x] 100. DBOS retry policy implemented
-- [ ] 101. DBOS scheduled watchers implemented
-- [ ] 102. DBOS external-write draft gate implemented
-- [ ] 103. DBOS Drive map workflow implemented
+- [x] 101. DBOS scheduled watchers implemented
+- [x] 102. DBOS external-write draft gate implemented
+- [x] 103. DBOS Drive map workflow implemented
 - [x] 104. DBOS scraper dispatch workflow implemented
-- [~] 105. PARTIAL: DBOS capture workflow registered/dispatchable; full capture dispatch smoke pending
+- [x] 105. DBOS capture workflow implemented
 - [x] 106. DBOS model routing workflow implemented
 - [x] 107. DBOS Big Board event feed implemented
 - [x] 108. DBOS workflow replay tests implemented

@@ -51,9 +51,9 @@
 - CAS GC: `████████░░ 80%` — report-first mark/sweep, durable run/candidate tables, optional quarantine-only apply path, no delete mode.
 - Storage decision matrix: `██████████ 100%` — Postgres/pgvector/AGE/local CAS locked; Cassandra non-canonical; MinIO deferred adapter only.
 - Validated 000-007 green slice: `██████████ 100%` — full harness green across docs/control, CKDOG1, Clawd, Postgres, CAS, DBOS, Bytewax/River/Treelite hints, and Survey/Hop safety gates. Global backlog remains separately tracked.
-- Overall product: `█████████░ 89%`
+- Overall product: `█████████░ 90%`
 - gRPC bridge: `███████░░░ 70%` — Rust tonic/prost to Python grpcio smoke works; full API pending.
-- DBOS workflow plane: `█████████░ 88%` — installed/smoked/schema/events plus signoff, dispatch, retry, replay, Survey DBOS wrapper, Big Board DBOS event feed, model-governor dispatch, workflow registry, and source policies seeded; scheduled watchers/Drive workflow/external-write draft gate still pending.
+- DBOS workflow plane: `██████████ 100%` — installed/smoked/schema/events plus signoff, dispatch, retry, replay, scheduled watcher ticks, external-write draft gate, Drive map workflow, Survey DBOS wrapper, Big Board DBOS event feed, body-capture dispatch, model-governor dispatch, workflow registry, and source policies seeded.
 - Postgres/AGE/pgvector: `█████████░ 92%` — installed/verified/core schemas; final ontology/vector/vault schemas pending.
 - Survey/hop-pivot: `████████░░ 80%` — working slice plus bounded hop v1; scraper ladder pending.
 - River ML: `█████████░ 92%` — River scores workflow events; live Bytewax stream pending.
@@ -93,4 +93,12 @@ Full audited checklist: `00_PROJECT_BRAIN/BUILD_PLAN_AUDIT.md` (280+ line-items)
 - `scripts/lucidota_dbos_dispatch.py` adds a registered-workflow dispatcher with required/auto signoff, retry attempts, and queued/running/succeeded/failed events.
 - `scripts/lucidota_dbos_replay.py` adds replay/inspection of workflow events by workflow/run.
 - Workflow registry now includes signoff, dispatch, replay, body capture, and model-governor lanes.
-- Verified dispatch smokes for `workflow-replay`, `survey-protocol`, and `model-governor`; DBOS plane raised to 88%, overall to 89%.
+- Verified dispatch smokes for `workflow-replay`, `survey-protocol`, and `model-governor`; this intermediate pass raised DBOS to 88% and overall to 89% before final closure below.
+
+## DBOS Final Closure — 2026-05-14
+
+- `scripts/lucidota_dbos_watcher.py` adds a DBOS scheduled watcher tick lane with seeded local schedules and queued workflow events.
+- `scripts/lucidota_dbos_external_draft.py` adds an external-write draft gate that creates a pending approval record and performs no external write.
+- `scripts/lucidota_dbos_drive_map.py` adds a Drive-map workflow using local tracked records only, with no Drive connector calls and no imported bytes.
+- `body-capture-capture` is now dispatch-smoked through DBOS against `https://example.com` with signoff and replayable events.
+- DBOS Workflow Plane is closed at 100%; overall product bar moves to 90% because storage/vault, Drive byte import, auth adapters, and local model artifact gaps remain outside DBOS.

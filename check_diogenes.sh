@@ -79,7 +79,11 @@ SQL
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_signoff.py smoke --workflow dbos-smoke --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_dispatch.py workflow-replay --auto-approve --retries 1 -- --workflow dbos-smoke --limit 5 --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_dispatch.py --auto-approve --no-json-flag survey-protocol -- scripts/lucidota_survey.py --keyword optional >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_dispatch.py --auto-approve body-capture-capture -- https://example.com --disable-signal-gate >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_dispatch.py model-governor --auto-approve >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_watcher.py --seed --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_external_draft.py --target external://check --draft "check draft only" --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_drive_map.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_big_board.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_validator_noise_stress.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_model_governor_smoke.py --json >/dev/null

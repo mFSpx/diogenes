@@ -19,6 +19,7 @@ BAR_RE = re.compile(r"(?P<label>.*?)\s*(?P<bar>[█░]+)\s*(?P<pct>\d+%)\s*(?P<
 COUNTER_ORDER = [
     "workflow_events",
     "registered_workflows",
+    "scheduled_workflows",
     "signoff_pending",
     "signoff_approved",
     "wake_pending",
@@ -62,6 +63,7 @@ def compact_counters(counters: dict[str, Any]) -> str:
             short = {
                 "workflow_events": "wf",
                 "registered_workflows": "flows",
+                "scheduled_workflows": "sched",
                 "signoff_pending": "sign_pending",
                 "signoff_approved": "sign_ok",
                 "wake_pending": "wake_pending",

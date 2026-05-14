@@ -103,6 +103,20 @@ CREATE TABLE IF NOT EXISTS lucidota_control.event_outbox (
 CREATE INDEX IF NOT EXISTS event_outbox_status_idx
     ON lucidota_control.event_outbox (status, created_at);
 
+CREATE TABLE IF NOT EXISTS lucidota_control.workflow_schedule (
+    schedule_id text PRIMARY KEY,
+    workflow_name text NOT NULL,
+    cadence_seconds integer NOT NULL CHECK (cadence_seconds > 0),
+    enabled boolean NOT NULL DEFAULT true,
+    next_run_at timestamptz NOT NULL DEFAULT now(),
+    last_run_at timestamptz,
+    detail jsonb NOT NULL DEFAULT '{}'::jsonb,
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS workflow_schedule_due_idx
+    ON lucidota_control.workflow_schedule (enabled, next_run_at);
+
 DO $$
 BEGIN
   IF EXISTS (
