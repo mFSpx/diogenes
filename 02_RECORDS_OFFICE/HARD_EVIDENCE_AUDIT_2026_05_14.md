@@ -48,3 +48,11 @@ Date: 2026-05-14
 1. Advance Survey: queue-backed discovery rounds and graph provenance edges.
 2. Activate Reflex Spine: Bytewax live stream over actual system events.
 3. Persona Implementation: convert research corpus into runtime assistant contract.
+
+## Worker D Local Drive/Auth Skeleton Closure — 2026-05-14
+
+- Added `scripts/lucidota_drive_import_manifest.py`: local-only generator/check for a Drive import manifest skeleton from tracked records. It does not call Drive, fetch bytes, or treat mapped Drive content as current authority.
+- Added `02_RECORDS_OFFICE/DRIVE_IMPORT_MANIFEST_SKELETON_2026_05_14.md`: candidate import rows for PYPELINE, math-intrinsics, scraper/template categories, and credential/env quarantine, with explicit next gates before any import.
+- Added `scripts/lucidota_auth_report.py`: local-only redacted auth surface report generator/check from `AUTH_INVENTORY.md`.
+- Added `02_RECORDS_OFFICE/AUTH_REPORT_2026_05_14.md`: truthful auth surface summary; Gmail/Calendar remain non-operational; Drive import remains map/skeleton only.
+- Evidence boundary: no Google Drive connector, no external data, no credential values, no import bytes. This closes skeleton/report gaps only; it does not promote Drive/auth readiness to operational.

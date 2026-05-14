@@ -77,9 +77,15 @@ SQL
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_wiki_query.py VIBESCONTROL --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_wake_bus_audit.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_validator_noise_stress.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_model_governor_smoke.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_model_governor.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_indy_regression.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_cockpit.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_drive_manifest.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_auth_report.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_operator_demo.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_regression_dashboard.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_release_checklist.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_survey.py scripts/lucidota_survey.py --fetch --keyword optional >/dev/null
 
 cd "$KERNEL"

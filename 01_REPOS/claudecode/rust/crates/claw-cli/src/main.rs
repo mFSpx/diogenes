@@ -317,6 +317,21 @@ fn parse_args(args: &[String]) -> Result<CliAction, String> {
         "indy-brief" | "indies" => Ok(CliAction::IndyBrief {
             args: rest[1..].to_vec(),
         }),
+        "indy-queue" => {
+            let mut args = vec!["queue-list".to_string()];
+            args.extend_from_slice(&rest[1..]);
+            Ok(CliAction::IndyBrief { args })
+        }
+        "indy-reminder" => {
+            let mut args = vec!["reminder".to_string()];
+            args.extend_from_slice(&rest[1..]);
+            Ok(CliAction::IndyBrief { args })
+        }
+        "indy-calendar-intent" => {
+            let mut args = vec!["calendar-intent".to_string()];
+            args.extend_from_slice(&rest[1..]);
+            Ok(CliAction::IndyBrief { args })
+        }
         "model-governor" | "governor" => Ok(CliAction::ModelGovernor {
             args: rest[1..].to_vec(),
         }),
@@ -4310,6 +4325,14 @@ fn print_help_to(out: &mut impl Write) -> io::Result<()> {
     )?;
     writeln!(
         out,
+        "  claw indy-queue [--limit N]            List Indy_Reads quiet side queue"
+    )?;
+    writeln!(
+        out,
+        "  claw indy-reminder <title>             Queue a quiet Indy_Reads reminder"
+    )?;
+    writeln!(
+        out,
         "  claw model-governor                   Check resident model VRAM/loadout decision"
     )?;
     writeln!(
@@ -4655,10 +4678,68 @@ mod tests {
     }
 
     #[test]
+    fn parses_indy_queue_shortcuts() {
+        assert_eq!(
+            parse_args(&["indy-queue".to_string(), "--limit".to_string(), "3".to_string()])
+                .expect("indy-queue should parse"),
+            CliAction::IndyBrief {
+                args: vec![
+                    "queue-list".to_string(),
+                    "--limit".to_string(),
+                    "3".to_string()
+                ]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "indy-reminder".to_string(),
+                "Re-run smoke".to_string(),
+                "--urgency".to_string(),
+                "high".to_string()
+            ])
+            .expect("indy-reminder should parse"),
+            CliAction::IndyBrief {
+                args: vec![
+                    "reminder".to_string(),
+                    "Re-run smoke".to_string(),
+                    "--urgency".to_string(),
+                    "high".to_string()
+                ]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "indy-calendar-intent".to_string(),
+                "Block review".to_string()
+            ])
+            .expect("indy-calendar-intent should parse"),
+            CliAction::IndyBrief {
+                args: vec!["calendar-intent".to_string(), "Block review".to_string()]
+            }
+        );
+    }
+
+    #[test]
     fn parses_cockpit_and_model_governor_subcommands() {
         assert_eq!(
             parse_args(&["cockpit".to_string()]).expect("cockpit should parse"),
             CliAction::Cockpit { args: vec![] }
+        );
+        assert_eq!(
+            parse_args(&[
+                "lucidota-cockpit".to_string(),
+                "--limit".to_string(),
+                "4".to_string(),
+                "--no-governor".to_string()
+            ])
+            .expect("lucidota-cockpit should parse"),
+            CliAction::Cockpit {
+                args: vec![
+                    "--limit".to_string(),
+                    "4".to_string(),
+                    "--no-governor".to_string()
+                ]
+            }
         );
         assert_eq!(
             parse_args(&["model-governor".to_string(), "--json".to_string()])

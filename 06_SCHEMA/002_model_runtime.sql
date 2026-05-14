@@ -77,6 +77,32 @@ CREATE TABLE IF NOT EXISTS lucidota_runtime.adapter_cartridge (
     updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS lucidota_runtime.load_governor_decision (
+    decision_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    loadout_id text NOT NULL,
+    target_gpu text NOT NULL DEFAULT '',
+    budget_vram_mb integer NOT NULL,
+    observed_used_mb integer,
+    observed_free_mb integer,
+    estimated_required_mb integer NOT NULL,
+    headroom_mb integer NOT NULL,
+    decision text NOT NULL CHECK (decision IN ('allow', 'defer', 'reject')),
+    rationale text NOT NULL DEFAULT '',
+    detail jsonb NOT NULL DEFAULT '{}'::jsonb,
+    gpu_observation jsonb NOT NULL DEFAULT '{}'::jsonb,
+    action_plan jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE lucidota_runtime.load_governor_decision
+    ADD COLUMN IF NOT EXISTS gpu_observation jsonb NOT NULL DEFAULT '{}'::jsonb;
+
+ALTER TABLE lucidota_runtime.load_governor_decision
+    ADD COLUMN IF NOT EXISTS action_plan jsonb NOT NULL DEFAULT '{}'::jsonb;
+
+CREATE INDEX IF NOT EXISTS load_governor_decision_loadout_idx
+    ON lucidota_runtime.load_governor_decision (loadout_id, created_at DESC);
+
 INSERT INTO lucidota_runtime.model_candidate (
     model_id,
     role,

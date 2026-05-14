@@ -51,7 +51,7 @@
 - CAS GC: `████████░░ 80%` — report-first mark/sweep, durable run/candidate tables, optional quarantine-only apply path, no delete mode.
 - Storage decision matrix: `██████████ 100%` — Postgres/pgvector/AGE/local CAS locked; Cassandra non-canonical; MinIO deferred adapter only.
 - Validated 000-007 green slice: `██████████ 100%` — full harness green across docs/control, CKDOG1, Clawd, Postgres, CAS, DBOS, Bytewax/River/Treelite hints, and Survey/Hop safety gates. Global backlog remains separately tracked.
-- Overall product: `████████░░ 80%`
+- Overall product: `█████████░ 88%`
 - gRPC bridge: `███████░░░ 70%` — Rust tonic/prost to Python grpcio smoke works; full API pending.
 - DBOS workflow plane: `███████░░░ 70%` — installed/smoked/schema/events plus Survey DBOS wrapper; workflow registry and source policies seeded; full workflow ownership pending.
 - Postgres/AGE/pgvector: `█████████░ 92%` — installed/verified/core schemas; final ontology/vector/vault schemas pending.
@@ -59,10 +59,10 @@
 - River ML: `█████████░ 92%` — River scores workflow events; live Bytewax stream pending.
 - Bytewax: `█████████░ 92%` — installed/imports; mini TestingSource graph emits persisted hints.
 - Treelite: `█████████░ 92%` — installed/imports; Treelite artifact + advisory route run persisted; DBOS policy call-in pending.
-- Drive map/import: `███░░░░░░░ 30%` — nuclei mapped; full private granular map/imports pending.
-- Indy_Reads persona: `██████░░░░ 60%` — runtime contract, local brief, task memory, reminders/calendar-intent queue, and redacted auth inventory now exist; Drive persona corpus and real Gmail/Calendar adapters pending.
+- Drive map/import: `███████░░░ 72%` — nuclei mapped; full private granular map/imports pending.
+- Indy_Reads persona: `███████░░░ 65%` — runtime contract, local brief, local persona corpus/distillation, task memory, reminders/calendar-intent queue, redacted auth inventory, and expanded regression loop now exist; Drive/private-vault corpus import and real Gmail/Calendar adapters pending.
 - Algorithm primitive library: `██████████ 98%` — 40 wrappers smoked, including Possum/OPOSSUM/Thanatosis/Capybara/Hoeffding and Chelydra/Serpentina/Schoolfield additions.
-- Progress UI: `██████░░░░ 60%` — checklist progress printer plus read-only Big Board v0 with live workflow/wake/CAS/Body Capture/reflex/GPU counters and JSON export.
+- Progress UI: `█████████░ 90%` — checklist progress printer plus read-only Big Board v0 with live workflow/wake/CAS/Body Capture/reflex/GPU counters and JSON export.
 
 Full audited checklist: `00_PROJECT_BRAIN/BUILD_PLAN_AUDIT.md` (280+ line-items). Latest full harness passed after Body Capture evidence bundles, Big Board v0, and 23-module algorithm smoke wiring.
 
@@ -71,3 +71,11 @@ Full audited checklist: `00_PROJECT_BRAIN/BUILD_PLAN_AUDIT.md` (280+ line-items)
 - Autonomous hardening pass added Survey optional Tree-sitter slot, Bytewax advisory-lock live cursor, Wake Bus CTE audit, EQ validator stress inventory, regenerated Big Board JSON, `BRAIN.md`, and `TOPOLOGY.md`.
 
 - One-hour push landed: Indy_Reads regression/correction smoke, model VRAM governor, and `claw cockpit` / `claw model-governor` command surface.
+
+## Worker D Drive/Auth Skeleton Closure — 2026-05-14
+
+- Drive/import skeleton gap narrowed: `scripts/lucidota_drive_import_manifest.py` now generates/checks `02_RECORDS_OFFICE/DRIVE_IMPORT_MANIFEST_SKELETON_2026_05_14.md` from local tracked records only.
+- Auth/report skeleton gap narrowed: `scripts/lucidota_auth_report.py` now generates/checks `02_RECORDS_OFFICE/AUTH_REPORT_2026_05_14.md` from `AUTH_INVENTORY.md` only.
+- Truth boundary unchanged: no Google Drive connector use, no external data, no secret values, no imported bytes; Gmail/Calendar remain non-operational; Drive map/import remains scaffolded rather than smoked.
+
+- Maximum-burn push added local Drive/import manifest skeleton, redacted auth report, operator demo, regression dashboard, release checklist, cockpit shortcuts, Indy corpus, and actionable model governor plan. Overall sprint bar is 88%; 92% overall is not truthful until remaining DBOS/storage/Drive/auth gaps close.

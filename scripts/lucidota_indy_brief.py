@@ -15,6 +15,8 @@ from pathlib import Path
 
 import psycopg
 
+from lucidota_indy_corpus import build_corpus
+
 ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "00_PROJECT_BRAIN" / "STATUS.md"
 TODO = ROOT / "00_PROJECT_BRAIN" / "TODO.md"
@@ -143,6 +145,17 @@ def auth_records(limit: int = 8) -> list[dict]:
     except Exception:
         return []
 
+def corpus_summary() -> dict:
+    corpus = build_corpus()
+    return {
+        "artifact": corpus["artifact"],
+        "unit_count": corpus["unit_count"],
+        "artifact_sha256": corpus["artifact_sha256"],
+        "source_scope": corpus["source_scope"],
+        "labels": corpus["labels"],
+    }
+
+
 def make_brief() -> dict:
     status_next = bullets(section(STATUS, "Next Verification"), 10)
     todo_next = bullets(section(TODO, "Next"), 10)
@@ -157,6 +170,7 @@ def make_brief() -> dict:
         "memory": recent_memory(),
         "queue": recent_queue(),
         "auth": auth_records(),
+        "corpus": corpus_summary(),
         "counters": db_counts(),
         "citations": [
             "00_PROJECT_BRAIN/STATUS.md#next-verification",
@@ -185,6 +199,12 @@ def render(report: dict) -> str:
         lines += [f"  - [{q['urgency']}/{q['item_type']}] {q['title']}" for q in report["queue"]]
     else:
         lines += ["  - none queued"]
+    corpus = report.get("corpus", {})
+    lines += ["", "Persona corpus:"]
+    if corpus:
+        lines += [f"  - {corpus.get('artifact')}: {corpus.get('unit_count')} units ({corpus.get('artifact_sha256')})"]
+    else:
+        lines += ["  - unavailable"]
     lines += ["", "Auth inventory:"]
     if report.get("auth"):
         lines += [f"  - {a['service']}: {a['access_status']} ({a['account_hint'] or 'no account hint'})" for a in report["auth"]]
@@ -340,6 +360,8 @@ def main() -> int:
     al = sub.add_parser("auth-list")
     al.add_argument("--json", action="store_true")
     al.add_argument("--limit", type=int, default=20)
+    co = sub.add_parser("corpus")
+    co.add_argument("--json", action="store_true")
     args = ap.parse_args()
     if args.cmd == "remember":
         report = remember(args)
@@ -359,6 +381,8 @@ def main() -> int:
         report = auth_add(args)
     elif args.cmd == "auth-list":
         report = auth_list(args)
+    elif args.cmd == "corpus":
+        report = build_corpus()
     else:
         report = make_brief()
     if args.json:
@@ -372,6 +396,8 @@ def main() -> int:
         print(f"{action} {report['queue_id']}: {report['title']}")
     elif "auth_id" in report:
         print(f"auth {report['service']}: {report['status']} ({report['auth_id']})")
+    elif "artifact" in report and "unit_count" in report:
+        print(f"{report['artifact']}: {report['unit_count']} units {report.get('artifact_sha256', '')}")
     elif "queue" in report:
         print("\n".join(f"{q['status']} {q['urgency']} {q['item_type']} {q['title']} {q['due_at']}" for q in report["queue"]))
     elif "auth" in report:

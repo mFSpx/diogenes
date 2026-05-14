@@ -46,6 +46,14 @@ def scalar(db_url: str, sql: str):
         return f"error:{str(exc)[:80]}"
 
 
+def drive_manifest_count() -> int:
+    try:
+        from lucidota_drive_manifest import scan
+        return len(scan())
+    except Exception:
+        return -1
+
+
 def counters() -> dict:
     return {
         "workflow_events": scalar(STATE_DB, "SELECT count(*) FROM lucidota_control.workflow_event"),
@@ -57,6 +65,11 @@ def counters() -> dict:
         "river_scores": scalar(STATE_DB, "SELECT count(*) FROM lucidota_learning.river_score"),
         "bytewax_hints": scalar(STATE_DB, "SELECT count(*) FROM lucidota_learning.bytewax_hint"),
         "treelite_runs": scalar(STATE_DB, "SELECT count(*) FROM lucidota_learning.treelite_router_run"),
+        "indy_queue": scalar(STATE_DB, "SELECT count(*) FROM lucidota_indy.side_queue WHERE status='queued'"),
+        "auth_records": scalar(STATE_DB, "SELECT count(*) FROM lucidota_indy.auth_inventory"),
+        "operator_corrections": scalar(STATE_DB, "SELECT count(*) FROM lucidota_indy.task_memory WHERE kind='correction'"),
+        "drive_manifest_targets": drive_manifest_count(),
+        "model_governor_decisions": scalar(STATE_DB, "SELECT count(*) FROM lucidota_runtime.load_governor_decision"),
     }
 
 
