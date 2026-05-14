@@ -73,6 +73,7 @@ def db_counts() -> dict:
         "active_memory": "SELECT count(*) FROM lucidota_indy.task_memory WHERE status='active'",
         "quiet_queue": "SELECT count(*) FROM lucidota_indy.side_queue WHERE status='queued'",
         "workflow_events": "SELECT count(*) FROM lucidota_control.workflow_event",
+        "auth_records": "SELECT count(*) FROM lucidota_indy.auth_inventory",
     }
     try:
         with psycopg.connect(STATE_DB, connect_timeout=3) as conn:
@@ -103,6 +104,45 @@ def recent_memory(limit: int = 5) -> list[dict]:
         return []
 
 
+
+def recent_queue(limit: int = 5) -> list[dict]:
+    try:
+        with psycopg.connect(STATE_DB, connect_timeout=3) as conn:
+            apply_schema(conn)
+            rows = conn.execute(
+                """
+                SELECT item_type, title, urgency, status, COALESCE(due_at::text, '') AS due_at, created_at::text
+                FROM lucidota_indy.side_queue
+                WHERE status IN ('queued','reviewing')
+                ORDER BY CASE urgency WHEN 'high' THEN 0 WHEN 'normal' THEN 1 ELSE 2 END, created_at DESC
+                LIMIT %s
+                """,
+                (limit,),
+            ).fetchall()
+            conn.commit()
+        return [dict(zip(["item_type", "title", "urgency", "status", "due_at", "created_at"], r)) for r in rows]
+    except Exception:
+        return []
+
+
+def auth_records(limit: int = 8) -> list[dict]:
+    try:
+        with psycopg.connect(STATE_DB, connect_timeout=3) as conn:
+            apply_schema(conn)
+            rows = conn.execute(
+                """
+                SELECT service, account_hint, access_status, scope_note, updated_at::text
+                FROM lucidota_indy.auth_inventory
+                ORDER BY service, account_hint
+                LIMIT %s
+                """,
+                (limit,),
+            ).fetchall()
+            conn.commit()
+        return [dict(zip(["service", "account_hint", "access_status", "scope_note", "updated_at"], r)) for r in rows]
+    except Exception:
+        return []
+
 def make_brief() -> dict:
     status_next = bullets(section(STATUS, "Next Verification"), 10)
     todo_next = bullets(section(TODO, "Next"), 10)
@@ -115,6 +155,8 @@ def make_brief() -> dict:
         "next": todo_next[:6],
         "indy_phase": indy,
         "memory": recent_memory(),
+        "queue": recent_queue(),
+        "auth": auth_records(),
         "counters": db_counts(),
         "citations": [
             "00_PROJECT_BRAIN/STATUS.md#next-verification",
@@ -138,6 +180,16 @@ def render(report: dict) -> str:
         lines += [f"  - [{m['kind']}] {m['title']}" for m in report["memory"]]
     else:
         lines += ["  - none yet"]
+    lines += ["", "Quiet queue:"]
+    if report.get("queue"):
+        lines += [f"  - [{q['urgency']}/{q['item_type']}] {q['title']}" for q in report["queue"]]
+    else:
+        lines += ["  - none queued"]
+    lines += ["", "Auth inventory:"]
+    if report.get("auth"):
+        lines += [f"  - {a['service']}: {a['access_status']} ({a['account_hint'] or 'no account hint'})" for a in report["auth"]]
+    else:
+        lines += ["  - none recorded"]
     lines += ["", "Counters:"] + [f"  - {k}: {v}" for k, v in report["counters"].items()]
     lines += ["", "Citations:"] + [f"  - {c}" for c in report["citations"]]
     return "\n".join(lines)
@@ -173,26 +225,127 @@ def queue_item(args) -> dict:
     return {"ok": True, "queue_id": row[0], "title": args.title}
 
 
+
+
+def reminder(args) -> dict:
+    args.item_type = "reminder"
+    return queue_item(args)
+
+
+def calendar_intent(args) -> dict:
+    args.item_type = "calendar_intent"
+    return queue_item(args)
+
+def list_queue(args) -> dict:
+    items = recent_queue(args.limit)
+    return {"ok": True, "queue": items}
+
+
+def mark_queue(args) -> dict:
+    with psycopg.connect(STATE_DB) as conn:
+        apply_schema(conn)
+        row = conn.execute(
+            """
+            UPDATE lucidota_indy.side_queue
+            SET status=%s, updated_at=now()
+            WHERE queue_id=%s::uuid
+            RETURNING queue_id::text, title, status
+            """,
+            (args.status, args.queue_id),
+        ).fetchone()
+        conn.commit()
+    return {"ok": row is not None, "queue_id": row[0] if row else args.queue_id, "title": row[1] if row else "", "status": row[2] if row else "missing"}
+
+
+def auth_add(args) -> dict:
+    # Never store raw secrets here. secret_ref is a pointer/label only.
+    with psycopg.connect(STATE_DB) as conn:
+        apply_schema(conn)
+        row = conn.execute(
+            """
+            INSERT INTO lucidota_indy.auth_inventory
+              (service, account_hint, access_status, scope_note, secret_ref, evidence)
+            VALUES (%s,%s,%s,%s,%s,%s::jsonb)
+            ON CONFLICT (service, account_hint) DO UPDATE SET
+              access_status=EXCLUDED.access_status,
+              scope_note=EXCLUDED.scope_note,
+              secret_ref=EXCLUDED.secret_ref,
+              evidence=EXCLUDED.evidence,
+              updated_at=now()
+            RETURNING auth_id::text
+            """,
+            (args.service, args.account_hint or "", args.status, args.scope_note or "", args.secret_ref or "", json.dumps({"no_raw_secret": True, "source": "indy_auth_add"})),
+        ).fetchone()
+        conn.commit()
+    return {"ok": True, "auth_id": row[0], "service": args.service, "status": args.status}
+
+
+def auth_list(args) -> dict:
+    return {"ok": True, "auth": auth_records(args.limit)}
+
 def main() -> int:
     ap = argparse.ArgumentParser(prog="lucidota-indy-brief")
     sub = ap.add_subparsers(dest="cmd")
     ap.add_argument("--json", action="store_true")
     r = sub.add_parser("remember")
+    r.add_argument("--json", action="store_true")
     r.add_argument("title")
     r.add_argument("--kind", choices=["task", "decision", "correction", "note"], default="note")
     r.add_argument("--body", default="")
     r.add_argument("--source", default="operator")
     q = sub.add_parser("queue")
+    q.add_argument("--json", action="store_true")
     q.add_argument("title")
     q.add_argument("--item-type", choices=["calendar_intent", "reminder", "wiki_note", "auth_inventory", "review"], default="review")
     q.add_argument("--body", default="")
     q.add_argument("--urgency", choices=["low", "normal", "high"], default="normal")
     q.add_argument("--due-at", default=None)
+    rem = sub.add_parser("reminder")
+    rem.add_argument("--json", action="store_true")
+    rem.add_argument("title")
+    rem.add_argument("--body", default="")
+    rem.add_argument("--urgency", choices=["low", "normal", "high"], default="normal")
+    rem.add_argument("--due-at", default=None)
+    cal = sub.add_parser("calendar-intent")
+    cal.add_argument("--json", action="store_true")
+    cal.add_argument("title")
+    cal.add_argument("--body", default="")
+    cal.add_argument("--urgency", choices=["low", "normal", "high"], default="normal")
+    cal.add_argument("--due-at", default=None)
+    lq = sub.add_parser("queue-list")
+    lq.add_argument("--json", action="store_true")
+    lq.add_argument("--limit", type=int, default=10)
+    mq = sub.add_parser("queue-mark")
+    mq.add_argument("--json", action="store_true")
+    mq.add_argument("queue_id")
+    mq.add_argument("--status", choices=["queued", "reviewing", "done", "dismissed"], default="done")
+    aa = sub.add_parser("auth-add")
+    aa.add_argument("--json", action="store_true")
+    aa.add_argument("service")
+    aa.add_argument("--account-hint", default="")
+    aa.add_argument("--status", choices=["unknown", "missing", "available", "blocked", "not_exposed"], default="unknown")
+    aa.add_argument("--scope-note", default="")
+    aa.add_argument("--secret-ref", default="")
+    al = sub.add_parser("auth-list")
+    al.add_argument("--json", action="store_true")
+    al.add_argument("--limit", type=int, default=20)
     args = ap.parse_args()
     if args.cmd == "remember":
         report = remember(args)
     elif args.cmd == "queue":
         report = queue_item(args)
+    elif args.cmd == "reminder":
+        report = reminder(args)
+    elif args.cmd == "calendar-intent":
+        report = calendar_intent(args)
+    elif args.cmd == "queue-list":
+        report = list_queue(args)
+    elif args.cmd == "queue-mark":
+        report = mark_queue(args)
+    elif args.cmd == "auth-add":
+        report = auth_add(args)
+    elif args.cmd == "auth-list":
+        report = auth_list(args)
     else:
         report = make_brief()
     if args.json:
@@ -202,7 +355,14 @@ def main() -> int:
     elif "memory_id" in report:
         print(f"remembered {report['memory_id']}: {report['title']}")
     elif "queue_id" in report:
-        print(f"queued {report['queue_id']}: {report['title']}")
+        action = "queued" if "status" not in report else report["status"]
+        print(f"{action} {report['queue_id']}: {report['title']}")
+    elif "auth_id" in report:
+        print(f"auth {report['service']}: {report['status']} ({report['auth_id']})")
+    elif "queue" in report:
+        print("\n".join(f"{q['status']} {q['urgency']} {q['item_type']} {q['title']} {q['due_at']}" for q in report["queue"]))
+    elif "auth" in report:
+        print("\n".join(f"{a['service']} {a['access_status']} {a['account_hint']} {a['scope_note']}" for a in report["auth"]))
     else:
         print(report)
     return 0 if report.get("ok") else 1

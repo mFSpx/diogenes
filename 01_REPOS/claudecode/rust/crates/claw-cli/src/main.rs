@@ -728,7 +728,7 @@ fn render_lucidota_status_report() -> String {
         ("008 Body Capture Capture", 66, "visual contract + policy"),
         ("009 Drive Imports", 59, "nuclei mapped"),
         ("010 Model Runtime", 65, "ALGOS + nature primitives"),
-        ("011 INDY_READS", 44, "brief + memory live"),
+        ("011 INDY_READS", 52, "brief + queues + auth"),
         ("012 Big Board UI", 31, "progress printer exists"),
         ("013 Redaction/Auth", 60, "scanner + private vault"),
         ("014 Verification", 92, "full harness green"),

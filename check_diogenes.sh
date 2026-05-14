@@ -72,6 +72,8 @@ SQL
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_big_board.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_indy_contract.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_indy_brief.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_indy_brief.py auth-list --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_indy_brief.py queue-list --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_wiki_query.py VIBESCONTROL --json >/dev/null
 
 cd "$KERNEL"

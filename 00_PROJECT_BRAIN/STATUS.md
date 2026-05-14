@@ -39,7 +39,7 @@
 - Drive mapping is in progress; PYPELINE/math/secrets/scraper/template nuclei located. Earlier wrong target-dossier intake is not canonical and must not be used unless reauthorized.
 - Survey Protocol v0 product slice exists: `claw lucidota-survey <target>` performs URL/file triage, local CAS write, multi-pattern keyword scan, structural HTML summary, pivot extraction, Wayback lookup option, and Postgres persistence.
 - UI/image tooling installed for private theme work: `chafa`, ImageMagick, `optipng`, `pngquant`, `caca-utils`.
-- Indy_Reads runtime brief exists: `claw indy-brief` reads local project brain + Postgres only, reports cited next moves, active memory, and quiet side queue counts.
+- Indy_Reads runtime brief exists: `claw indy-brief` reads local project brain + Postgres only, reports cited next moves, active memory, quiet side queue counts, and redacted auth inventory.
 
 ## Next Verification
 
@@ -60,7 +60,7 @@
 - Bytewax: `█████████░ 92%` — installed/imports; mini TestingSource graph emits persisted hints.
 - Treelite: `█████████░ 92%` — installed/imports; Treelite artifact + advisory route run persisted; DBOS policy call-in pending.
 - Drive map/import: `███░░░░░░░ 30%` — nuclei mapped; full private granular map/imports pending.
-- Indy_Reads persona: `████░░░░░░ 44%` — runtime contract, local brief, task memory, and quiet side queue now exist; Drive persona corpus/calendar adapters pending.
+- Indy_Reads persona: `█████░░░░░ 52%` — runtime contract, local brief, task memory, reminders/calendar-intent queue, and redacted auth inventory now exist; Drive persona corpus and real Gmail/Calendar adapters pending.
 - Algorithm primitive library: `██████████ 98%` — 40 wrappers smoked, including Possum/OPOSSUM/Thanatosis/Capybara/Hoeffding and Chelydra/Serpentina/Schoolfield additions.
 - Progress UI: `██████░░░░ 60%` — checklist progress printer plus read-only Big Board v0 with live workflow/wake/CAS/Body Capture/reflex/GPU counters and JSON export.
 

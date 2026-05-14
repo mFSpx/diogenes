@@ -33,7 +33,7 @@
 ## Next
 
 - [ ] Convert current conversation architecture into durable glossary/decisions/source notes.
-- [ ] Create local auth inventory skeleton.
+- [x] Create local auth inventory skeleton.
 - [ ] Add real Gmail connector or local Gmail CLI integration.
 - [ ] Add real Calendar connector or local calendar CLI integration.
 - [x] Add side-process review queue for email/calendar notes so they do not interrupt build flow.

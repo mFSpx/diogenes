@@ -33,3 +33,19 @@ CREATE TABLE IF NOT EXISTS lucidota_indy.side_queue (
 
 CREATE INDEX IF NOT EXISTS indy_side_queue_status_idx
     ON lucidota_indy.side_queue (status, urgency, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS lucidota_indy.auth_inventory (
+    auth_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    service text NOT NULL,
+    account_hint text NOT NULL DEFAULT '',
+    access_status text NOT NULL DEFAULT 'unknown' CHECK (access_status IN ('unknown','missing','available','blocked','not_exposed')),
+    scope_note text NOT NULL DEFAULT '',
+    secret_ref text NOT NULL DEFAULT '',
+    evidence jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE (service, account_hint)
+);
+
+CREATE INDEX IF NOT EXISTS indy_auth_inventory_status_idx
+    ON lucidota_indy.auth_inventory (access_status, service);
