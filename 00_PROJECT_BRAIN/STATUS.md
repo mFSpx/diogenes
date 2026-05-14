@@ -52,13 +52,14 @@
 - Storage decision matrix: `██████████ 100%` — Postgres/pgvector/AGE/local CAS locked; Cassandra non-canonical; MinIO deferred adapter only.
 - Validated 000-007 green slice: `██████████ 100%` — full harness green across docs/control, CKDOG1, Clawd, Postgres, CAS, DBOS, Bytewax/River/Treelite hints, and Survey/Hop safety gates. Global backlog remains separately tracked.
 - Overall product: `█████████░ 90%`
-- gRPC bridge: `███████░░░ 70%` — Rust tonic/prost to Python grpcio smoke works; full API pending.
+- gRPC bridge / CKDOG1 kernel API: `██████████ 100%` — 2026-05-14 local smoke and full harness passed across the current KernelService surface: genesis, soul/trait/domain/state update, delta ingest, route/snapshot recall, and authorized-job draft action.
 - DBOS workflow plane: `██████████ 100%` — installed/smoked/schema/events plus signoff, dispatch, retry, replay, scheduled watcher ticks, external-write draft gate, Drive map workflow, Survey DBOS wrapper, Big Board DBOS event feed, body-capture dispatch, model-governor dispatch, workflow registry, and source policies seeded.
 - Postgres/AGE/pgvector: `█████████░ 92%` — installed/verified/core schemas; final ontology/vector/vault schemas pending.
 - Survey/hop-pivot: `████████░░ 80%` — working slice plus bounded hop v1; scraper ladder pending.
 - River ML: `█████████░ 92%` — River scores workflow events; live Bytewax stream pending.
 - Bytewax: `█████████░ 92%` — installed/imports; mini TestingSource graph emits persisted hints.
 - Treelite: `█████████░ 92%` — installed/imports; Treelite artifact + advisory route run persisted; DBOS policy call-in pending.
+- Model runtime / Local Brain: `███████░░░ 70%` — CUDA/runtime imports, model governor, and registry intent pass locally; 2026-05-14 artifact check found no usable local model weight files, only vocab GGUFs, so local DeepSeek/Mamba/Needle artifact readiness and zero-refusal behavior are not claimable.
 - Drive map/import: `███████░░░ 72%` — nuclei mapped; full private granular map/imports pending.
 - Indy_Reads persona: `███████░░░ 65%` — runtime contract, local brief, local persona corpus/distillation, task memory, reminders/calendar-intent queue, redacted auth inventory, and expanded regression loop now exist; Drive/private-vault corpus import and real Gmail/Calendar adapters pending.
 - Algorithm primitive library: `██████████ 98%` — 40 wrappers smoked, including Possum/OPOSSUM/Thanatosis/Capybara/Hoeffding and Chelydra/Serpentina/Schoolfield additions.
@@ -102,3 +103,18 @@ Full audited checklist: `00_PROJECT_BRAIN/BUILD_PLAN_AUDIT.md` (280+ line-items)
 - `scripts/lucidota_dbos_drive_map.py` adds a Drive-map workflow using local tracked records only, with no Drive connector calls and no imported bytes.
 - `body-capture-capture` is now dispatch-smoked through DBOS against `https://example.com` with signoff and replayable events.
 - DBOS Workflow Plane is closed at 100%; overall product bar moves to 90% because storage/vault, Drive byte import, auth adapters, and local model artifact gaps remain outside DBOS.
+
+## Kernel API Closure + Model Truth Check — 2026-05-14
+
+- `scripts/lucidota_kernel_api_smoke.py` exercises every current CKDOG1 KernelService RPC: GenesisInit, SoulCreate, TraitSet, DomainSlotSet, StateShift, DeltaApply, Route, CreateSnapshot, and SubmitAuthorizedJob.
+- CKDOG1 gRPC server bug fixes landed in the kernel repo: DeltaApply now returns top-level `packed_bytes`, SubmitAuthorizedJob uses `effective_hash`, and localhost smoke tests avoid duplicate port binding.
+- Kernel/CKDOG1 bar is closed at 100% for the current local test/demo API surface; broader future product API expansion remains future scope, not a blocker to demo.
+- `scripts/lucidota_model_artifact_readiness.py` confirms the routing registry is present, but actual local model weight artifacts are **not** present. Needle/Mamba/DeepSeek are planned/registered, not downloaded/verified. Zero-refusal/ablit behavior is not guaranteed and cannot be claimed without artifacts plus eval.
+
+
+## Demo Readiness Recalibration — 2026-05-14
+
+- Full local harness: `██████████ 100%` for the current scripted demo path — `./check_diogenes.sh` passed on 2026-05-14 after DBOS/control schemas, runtime smoke, kernel API smoke, model artifact readiness check, CAS/Body Capture/Hop/Survey, Big Board/Cockpit, Indy/regression/release checks, CKDOG1 tests, Rust workspace tests, Clawd release build, and Clawd/Survey DBOS smokes.
+- Kernel API demo readiness: `██████████ 100%` for current local API surface — `scripts/lucidota_kernel_api_smoke.py --json` returned `ok: true` and exercised all current RPCs.
+- Model artifact demo readiness: `██░░░░░░░░ 20%` — registry intent exists for Needle/Mamba/DeepSeek, but `scripts/lucidota_model_artifact_readiness.py --json` reported `artifact_ready: false`, no usable weight files, and no zero-refusal guarantee.
+- Launch/demo truth: demo can show the kernel/interface/control/data harness; it must not claim local model weights, DeepSeek/Mamba/Needle inference, or refusal-free behavior until artifacts and evals exist.

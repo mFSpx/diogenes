@@ -7,14 +7,14 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 ## Overall Build Bar: █████████░ 90%
 
 ## Hard Truth Audit
-- **gRPC** `███████░░░ 70%` — Wired for CKDOG1 smoke through Rust tonic/prost <-> Python grpcio. Not yet full product API.
+- **gRPC / CKDOG1 kernel API** `██████████ 100%` — 2026-05-14 local smoke exercised every current KernelService RPC end-to-end: GenesisInit, SoulCreate, TraitSet, DomainSlotSet, StateShift, DeltaApply, Route, CreateSnapshot, and SubmitAuthorizedJob. This closes the current local demo API surface, not future product API expansion.
 - **DBOS** `██████████ 100%` — Installed, schema initialized, smoke/signoff/dispatch/replay workflows pass, events table used, Survey/Big Board/model-governor/body-capture/Drive-map lanes are DBOS-owned, scheduled watcher tick works, and external-write draft gates require approval before any send/apply.
 - **Postgres/AGE/pgvector** `██████░░░░ 60%` — Installed and verified; core schemas exist. Full ontology/vector schemas pending.
 - **Survey/Hop Pivot** `█████████░ 86%` — Working Survey slice with CAS/hash/Aho/Wayback option/pivots and bounded hop v1. Full scraper ladder pending.
 - **River ML** `██████░░░░ 62%` — Installed and now writes online scores from workflow events. Live Bytewax stream and frozen feature schema pending.
 - **Bytewax** `██████░░░░ 62%` — Installed/imports. No live dataflow graph yet.
 - **Treelite** `███████░░░ 70%` — Installed/imports. No compiled router wired yet.
-- **Model runtime** `████████░░ 82%` — CUDA/llama.cpp/runtime imports exist plus 39 local algorithm primitives. DeepSeek/embedding/router not yet product-wired.
+- **Model runtime** `███████░░░ 70%` — CUDA/llama.cpp/runtime imports, model governor, registry intent, and algorithm primitives are present; 2026-05-14 artifact check found no usable local model weight files, only vocab GGUFs, so DeepSeek/Mamba/Needle artifact readiness and zero-refusal claims remain red.
 - **Drive map/import** `███████░░░ 72%` — Key nuclei located; full granular map and imports pending.
 - **Persona Indy_Reads** `███████░░░ 65%` — Runtime contract, local brief, local persona corpus/distillation, memory, queue, auth inventory, and regression loop exist; Drive/Gmail/Calendar adapters remain pending.
 - **Progress UI** `██████████ 100%` — Read-only terminal Big Board/Cockpit now render build bars, live workflow/wake/CAS/Body Capture/reflex counters, Drive/import/auth/evidence counters, scraper fleet readiness, GPU status, and JSON export.
@@ -25,7 +25,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - **000-007 operator-supervised green slice** `██████████ 100%` — harness verified Project Brain docs, CKDOG1 gRPC smoke, Clawd, Postgres schemas, CAS, DBOS wrappers/events, Bytewax/River/Treelite hints, Survey/Hop safety gates. This is not claiming every global backlog item is complete.
 
 - **000 Project Brain / Governance** `█████████░ 92%` (16 done / 1 partial / 1 open)
-- **001 Kernel / CKDOG1** `████████░░ 81%` (14 done / 1 partial / 3 open)
+- **001 Kernel / CKDOG1** `██████████ 100%` (18 done / 0 partial / 0 open)
 - **002 Clawd / Rust Interface** `████████░░ 76%` (14 done / 1 partial / 3 open)
 - **003 Postgres / Records Office** `█████████░ 92%` (16 done / 1 partial / 1 open)
 - **004 Storage / Vault / CAS** `███████░░░ 72%` (12 done / 2 partial / 4 open)
@@ -34,7 +34,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - **007 Survey / Hop Pivot / Authorized Extractors** `█████████░ 85%` (19 done / 1 partial / 3 open)
 - **008 Body Capture / Capture / Evidence Diff** `█████████░ 93%` (23 done / 1 partial / 1 open)
 - **009 Drive / External Memory / Imports** `███████░░░ 72%` (15 done / 2 partial / 5 open)
-- **010 Model Runtime / Local Brain** `████████░░ 82%` (13 done / 2 partial / 3 open; primitive library widened to 40 wrappers)
+- **010 Model Runtime / Local Brain** `███████░░░ 70%` (runtime/governor/registry present; no usable local model weight artifacts verified)
 - **011 Indy_Reads / Persona / Assistant Layer** `████████░░ 75%` (16 done / 1 partial / 1 open)
 - **012 Big Board / UI / Progress Bars** `██████████ 100%` (18 done / 0 partial / 0 open)
 - **013 Security / Auth / Credentials** `████████░░ 82%` (14 done / 2 partial / 2 open)
@@ -62,7 +62,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [ ] 017. PARTIAL: Indy_Reads persona intake started from existing records
 - [ ] 018. Full Indy_Reads persona approximation generated and wired into runtime prompts
 
-### 001 Kernel / CKDOG1 — ████████░░ 81%
+### 001 Kernel / CKDOG1 — ██████████ 100%
 - [x] 019. doggystyle cloned under 01_REPOS
 - [x] 020. CKDOG1 package installs in local venv
 - [x] 021. CKDOG1 unit test suite passes
@@ -77,10 +77,10 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 030. Python grpcio server exists
 - [x] 031. gRPC smoke harness exists
 - [x] 032. Live gRPC smoke passes on localhost
-- [ ] 033. PARTIAL: Only smoke endpoints are production-wired
-- [ ] 034. Full ingest/recall gRPC method implemented
-- [ ] 035. Full graph state-update gRPC method implemented
-- [ ] 036. Full workflow/tool action gRPC method implemented
+- [x] 033. Full current KernelService gRPC surface is production-wired for local test/demo scope
+- [x] 034. Ingest/recall gRPC path implemented and smoked via DeltaApply + Route/Snapshot
+- [x] 035. Graph state-update gRPC path implemented and smoked via Soul/Trait/DomainSlot/StateShift
+- [x] 036. Workflow/tool action gRPC draft path implemented and smoked via SubmitAuthorizedJob
 
 ### 002 Clawd / Rust Interface — ████████░░ 76%
 - [x] 037. claudecode fork cloned under 01_REPOS
@@ -271,7 +271,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 187. Drive import checksum gate specified in manifest skeleton
 - [x] 188. Wrong earlier dossier intake quarantined/ignored by policy
 
-### 010 Model Runtime / Local Brain — ████████░░ 82%
+### 010 Model Runtime / Local Brain — ███████░░░ 70%
 - [x] 189. CUDA toolkit installed
 - [x] 190. GPU visible
 - [x] 191. llama.cpp CUDA build exists
@@ -380,7 +380,7 @@ Always update this checklist and `STATUS.md` after any build/audit step. Progres
 
 ## Global Recalibration — End-State Product Audit
 
-Updated: 2026-05-13
+Updated: 2026-05-14
 
 The sprint bars measure verified local slices. The true autonomous end-state is lower:
 

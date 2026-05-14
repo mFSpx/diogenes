@@ -30,6 +30,9 @@ DBOS_SYSTEM_DATABASE_URL="${DBOS_SYSTEM_DATABASE_URL:-postgresql://mfspx@/lucido
   "$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_smoke.py
 scripts/apply_lucidota_control_schema.sh
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_runtime_smoke.py
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_kernel_api_smoke.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_model_artifact_readiness.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_litellm_bridge.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_security_scan.py >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_code_language_scan.py >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_algos_smoke.py >/dev/null
