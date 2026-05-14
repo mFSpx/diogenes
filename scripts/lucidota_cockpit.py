@@ -18,6 +18,9 @@ if not PY.exists():
 BAR_RE = re.compile(r"(?P<label>.*?)\s*(?P<bar>[█░]+)\s*(?P<pct>\d+%)\s*(?P<tail>.*)")
 COUNTER_ORDER = [
     "workflow_events",
+    "registered_workflows",
+    "signoff_pending",
+    "signoff_approved",
     "wake_pending",
     "wake_delivered",
     "cas_artifacts",
@@ -58,6 +61,9 @@ def compact_counters(counters: dict[str, Any]) -> str:
         if key in counters:
             short = {
                 "workflow_events": "wf",
+                "registered_workflows": "flows",
+                "signoff_pending": "sign_pending",
+                "signoff_approved": "sign_ok",
                 "wake_pending": "wake_pending",
                 "wake_delivered": "wake_done",
                 "cas_artifacts": "cas",

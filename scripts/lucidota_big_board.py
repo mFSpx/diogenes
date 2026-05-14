@@ -57,6 +57,9 @@ def drive_manifest_count() -> int:
 def counters() -> dict:
     return {
         "workflow_events": scalar(STATE_DB, "SELECT count(*) FROM lucidota_control.workflow_event"),
+        "registered_workflows": scalar(STATE_DB, "SELECT count(*) FROM lucidota_control.workflow_registry"),
+        "signoff_pending": scalar(STATE_DB, "SELECT count(*) FROM lucidota_control.governance_gate WHERE approval_status='pending'"),
+        "signoff_approved": scalar(STATE_DB, "SELECT count(*) FROM lucidota_control.governance_gate WHERE approval_status='approved'"),
         "wake_pending": scalar(STATE_DB, "SELECT count(*) FROM lucidota_control.event_outbox WHERE status='pending'"),
         "wake_delivered": scalar(STATE_DB, "SELECT count(*) FROM lucidota_control.event_outbox WHERE status='delivered'"),
         "cas_artifacts": scalar(GRAPH_DB, "SELECT count(*) FROM lucidota_vault.cas_manifest"),

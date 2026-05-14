@@ -76,6 +76,10 @@ SQL
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_indy_brief.py queue-list --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_wiki_query.py VIBESCONTROL --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_wake_bus_audit.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_signoff.py smoke --workflow dbos-smoke --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_dispatch.py workflow-replay --auto-approve --retries 1 -- --workflow dbos-smoke --limit 5 --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_dispatch.py --auto-approve --no-json-flag survey-protocol -- scripts/lucidota_survey.py --keyword optional >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_dispatch.py model-governor --auto-approve >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_big_board.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_validator_noise_stress.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_model_governor_smoke.py --json >/dev/null

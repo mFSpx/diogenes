@@ -51,9 +51,9 @@
 - CAS GC: `████████░░ 80%` — report-first mark/sweep, durable run/candidate tables, optional quarantine-only apply path, no delete mode.
 - Storage decision matrix: `██████████ 100%` — Postgres/pgvector/AGE/local CAS locked; Cassandra non-canonical; MinIO deferred adapter only.
 - Validated 000-007 green slice: `██████████ 100%` — full harness green across docs/control, CKDOG1, Clawd, Postgres, CAS, DBOS, Bytewax/River/Treelite hints, and Survey/Hop safety gates. Global backlog remains separately tracked.
-- Overall product: `█████████░ 88%`
+- Overall product: `█████████░ 89%`
 - gRPC bridge: `███████░░░ 70%` — Rust tonic/prost to Python grpcio smoke works; full API pending.
-- DBOS workflow plane: `████████░░ 80%` — installed/smoked/schema/events plus Survey DBOS wrapper, Big Board DBOS event feed, workflow registry, and source policies seeded; full workflow ownership pending.
+- DBOS workflow plane: `█████████░ 88%` — installed/smoked/schema/events plus signoff, dispatch, retry, replay, Survey DBOS wrapper, Big Board DBOS event feed, model-governor dispatch, workflow registry, and source policies seeded; scheduled watchers/Drive workflow/external-write draft gate still pending.
 - Postgres/AGE/pgvector: `█████████░ 92%` — installed/verified/core schemas; final ontology/vector/vault schemas pending.
 - Survey/hop-pivot: `████████░░ 80%` — working slice plus bounded hop v1; scraper ladder pending.
 - River ML: `█████████░ 92%` — River scores workflow events; live Bytewax stream pending.
@@ -85,4 +85,12 @@ Full audited checklist: `00_PROJECT_BRAIN/BUILD_PLAN_AUDIT.md` (280+ line-items)
 - `scripts/lucidota_big_board.py` now reports scraper fleet readiness from local scripts, authorized extractor registry rows, browser-required adapter count, and local Drive-manifest scraper target hints.
 - `scripts/lucidota_cockpit.py` now surfaces the same scraper fleet summary in the one-screen operator view.
 - `scripts/lucidota_dbos_big_board.py` adds a DBOS-owned Big Board event-feed workflow that snapshots the dashboard into `lucidota_control.workflow_event`.
-- Phase 012 Big Board/UI/Progress Bars is closed at 100%; overall remains 88% because DBOS/storage/Drive/auth/model-runtime gaps are still real.
+- Phase 012 Big Board/UI/Progress Bars is closed at 100%; overall later moved to 89% after the DBOS signoff/dispatch push, while storage/Drive/auth/model-runtime gaps remain real.
+
+## DBOS Signoff/Dispatch Push — 2026-05-14
+
+- `scripts/lucidota_dbos_signoff.py` adds request/approve/deny/list/status/smoke for workflow signoff through `governance_gate` and `workflow_event`.
+- `scripts/lucidota_dbos_dispatch.py` adds a registered-workflow dispatcher with required/auto signoff, retry attempts, and queued/running/succeeded/failed events.
+- `scripts/lucidota_dbos_replay.py` adds replay/inspection of workflow events by workflow/run.
+- Workflow registry now includes signoff, dispatch, replay, body capture, and model-governor lanes.
+- Verified dispatch smokes for `workflow-replay`, `survey-protocol`, and `model-governor`; DBOS plane raised to 88%, overall to 89%.
