@@ -744,23 +744,24 @@ fn run_lucidota_survey(args: &[String]) -> Result<(), Box<dyn std::error::Error>
 
 fn render_lucidota_status_report() -> String {
     let rows = [
-        ("OVERALL PRODUCT", 76, "full audited checklist"),
+        ("OVERALL PRODUCT", 90, "verified demo path; model artifacts still red"),
         ("000-007 Green Slice", 100, "verified harness slice"),
-        ("000 Project Brain", 92, "one closeout left"),
-        ("001 Kernel / CKDOG1", 81, "gRPC smoke green"),
-        ("002 Clawd Interface", 58, "status bars + survey wired"),
+        ("000 Project Brain", 92, "governance/docs green slice"),
+        ("001 Kernel / CKDOG1", 100, "current KernelService API smoke green"),
+        ("002 Clawd Interface", 76, "CLI/status/survey/cockpit wired"),
         ("003 Postgres Office", 92, "AGE + CAS edges green"),
         ("004 Vault / CAS", 72, "CAS index + GC + graph"),
-        ("005 DBOS Plane", 70, "outbox + source policy"),
+        ("005 DBOS Plane", 100, "signoff/dispatch/replay/watchers green"),
         ("006 Reflex Team", 92, "Wake Bus + reflex"),
-        ("007 Extractors", 86, "adapters first + hop"),
-        ("008 Body Capture Capture", 66, "visual contract + policy"),
-        ("009 Drive Imports", 59, "nuclei mapped"),
-        ("010 Model Runtime", 65, "ALGOS + nature primitives"),
-        ("011 INDY_READS", 52, "brief + queues + auth"),
-        ("012 Big Board UI", 31, "progress printer exists"),
-        ("013 Redaction/Auth", 60, "scanner + private vault"),
-        ("014 Verification", 92, "full harness green"),
+        ("007 Extractors", 85, "adapters first + hop"),
+        ("008 Body Capture Capture", 93, "capture/evidence path green"),
+        ("009 Drive Imports", 72, "nuclei mapped; bytes pending"),
+        ("010 Model Runtime", 70, "registry/governor only; no weights"),
+        ("010 Model Artifacts", 20, "no usable local LLM weights verified"),
+        ("011 INDY_READS", 65, "brief + queues + auth"),
+        ("012 Big Board UI", 100, "cockpit/big board green"),
+        ("013 Redaction/Auth", 82, "scanner + private vault"),
+        ("014 Verification", 100, "full harness green"),
     ];
 
     let mut out = String::from("LUCIDOTA Build Status\n");
