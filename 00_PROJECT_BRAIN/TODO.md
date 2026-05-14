@@ -36,7 +36,7 @@
 - [ ] Create local auth inventory skeleton.
 - [ ] Add real Gmail connector or local Gmail CLI integration.
 - [ ] Add real Calendar connector or local calendar CLI integration.
-- [ ] Add side-process review queue for email/calendar notes so they do not interrupt build flow.
+- [x] Add side-process review queue for email/calendar notes so they do not interrupt build flow.
 - [x] Add Clawd private Morrowind UI theme track.
 - [x] Use OpenMW/MWUI as clean implementation reference for panel, border, and status-bar behavior.
 - [ ] Add real build/status bars for build phases, service health, token pressure, and quiet side-process queues.
@@ -65,7 +65,7 @@
 - [x] Create local `lucidota_state` and `lucidota_graph` databases.
 - [x] Add DBOS Python smoke workflow against `lucidota_state`.
 - [ ] Create Subtle Knife Protocol placeholder spec.
-- [ ] Implement project brain adapters into product after the interface/kernel spine is stable.
+- [x] Implement first project brain adapter into product (`claw indy-brief`).
 - [ ] Convert VIBESCONTROL repeated work into scripts/checks where stable.
 - [x] Create adversarial audit checklist and run it against Phase 000/001.
 

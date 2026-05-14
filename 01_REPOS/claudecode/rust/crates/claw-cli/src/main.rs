@@ -90,6 +90,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         CliAction::DumpManifests => dump_manifests(),
         CliAction::BootstrapPlan => print_bootstrap_plan(),
         CliAction::LucidotaStatus => print_lucidota_status(),
+        CliAction::IndyBrief { args } => run_lucidota_script("lucidota_indy_brief.py", "indy-brief", &args)?,
         CliAction::LucidotaSurvey { args } => run_lucidota_survey(&args)?,
         CliAction::DiogenesSmoke { args } => run_diogenes_smoke(&args)?,
         CliAction::Agents { args } => LiveCli::print_agents(args.as_deref())?,
@@ -126,6 +127,9 @@ enum CliAction {
     DumpManifests,
     BootstrapPlan,
     LucidotaStatus,
+    IndyBrief {
+        args: Vec<String>,
+    },
     LucidotaSurvey {
         args: Vec<String>,
     },
@@ -302,6 +306,9 @@ fn parse_args(args: &[String]) -> Result<CliAction, String> {
         "dump-manifests" => Ok(CliAction::DumpManifests),
         "bootstrap-plan" => Ok(CliAction::BootstrapPlan),
         "lucidota-status" => Ok(CliAction::LucidotaStatus),
+        "indy-brief" | "indies" => Ok(CliAction::IndyBrief {
+            args: rest[1..].to_vec(),
+        }),
         "lucidota-survey" | "survey" => Ok(CliAction::LucidotaSurvey {
             args: rest[1..].to_vec(),
         }),
@@ -677,7 +684,7 @@ fn print_lucidota_status() {
     print!("{}", render_lucidota_status_report());
 }
 
-fn run_lucidota_survey(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+fn run_lucidota_script(script_name: &str, command_name: &str, args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     let home = env::var("LUCIDOTA_HOME")
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("/home/mfspx/LUCIDOTA"));
@@ -687,9 +694,9 @@ fn run_lucidota_survey(args: &[String]) -> Result<(), Box<dyn std::error::Error>
     } else {
         PathBuf::from("python3")
     };
-    let script = home.join("scripts").join("lucidota_survey.py");
+    let script = home.join("scripts").join(script_name);
     if !script.exists() {
-        return Err(format!("missing survey script: {}", script.display()).into());
+        return Err(format!("missing {command_name} script: {}", script.display()).into());
     }
     let status = Command::new(python)
         .arg(script)
@@ -697,9 +704,13 @@ fn run_lucidota_survey(args: &[String]) -> Result<(), Box<dyn std::error::Error>
         .current_dir(home)
         .status()?;
     if !status.success() {
-        return Err(format!("lucidota-survey failed with status {status}").into());
+        return Err(format!("{command_name} failed with status {status}").into());
     }
     Ok(())
+}
+
+fn run_lucidota_survey(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    run_lucidota_script("lucidota_survey.py", "lucidota-survey", args)
 }
 
 fn render_lucidota_status_report() -> String {
@@ -717,7 +728,7 @@ fn render_lucidota_status_report() -> String {
         ("008 Body Capture Capture", 66, "visual contract + policy"),
         ("009 Drive Imports", 59, "nuclei mapped"),
         ("010 Model Runtime", 65, "ALGOS + nature primitives"),
-        ("011 INDY_READS", 28, "persona extraction pending"),
+        ("011 INDY_READS", 44, "brief + memory live"),
         ("012 Big Board UI", 31, "progress printer exists"),
         ("013 Redaction/Auth", 60, "scanner + private vault"),
         ("014 Verification", 92, "full harness green"),
@@ -4281,6 +4292,10 @@ fn print_help_to(out: &mut impl Write) -> io::Result<()> {
     )?;
     writeln!(
         out,
+        "  claw indy-brief                       Print Indy_Reads local runtime brief"
+    )?;
+    writeln!(
+        out,
         "  claw lucidota-survey <target>          Survey URL/file into local CAS + Postgres"
     )?;
     writeln!(
@@ -4599,6 +4614,21 @@ mod tests {
             CliAction::Agents {
                 args: Some("--help".to_string())
             }
+        );
+    }
+
+    #[test]
+    fn parses_indy_brief_subcommand() {
+        let args = vec!["indy-brief".to_string(), "--json".to_string()];
+        assert_eq!(
+            parse_args(&args).expect("indy-brief should parse"),
+            CliAction::IndyBrief {
+                args: args[1..].to_vec()
+            }
+        );
+        assert_eq!(
+            parse_args(&["indies".to_string()]).expect("indies alias should parse"),
+            CliAction::IndyBrief { args: vec![] }
         );
     }
 

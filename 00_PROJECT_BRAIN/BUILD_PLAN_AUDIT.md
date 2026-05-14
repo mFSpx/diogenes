@@ -35,7 +35,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - **008 Body Capture / Capture / Evidence Diff** `█████████░ 93%` (23 done / 1 partial / 1 open)
 - **009 Drive / External Memory / Imports** `██████░░░░ 59%` (12 done / 2 partial / 8 open)
 - **010 Model Runtime / Local Brain** `███████░░░ 68%` (13 done / 2 partial / 3 open; primitive library widened to 40 wrappers)
-- **011 Indy_Reads / Persona / Assistant Layer** `███░░░░░░░ 28%` (4 done / 2 partial / 12 open)
+- **011 Indy_Reads / Persona / Assistant Layer** `████░░░░░░ 44%` (8 done / 2 partial / 8 open)
 - **012 Big Board / UI / Progress Bars** `███████░░░ 72%` (14 done / 0 partial / 4 open)
 - **013 Security / Auth / Credentials** `██████░░░░ 60%` (9 done / 2 partial / 7 open)
 - **014 Verification / Release / Product Slice** `█████████░ 92%` (20 done / 0 partial / 0 open)
@@ -293,23 +293,23 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 206A. Local algorithm primitives wrapped under ALGOS: HDC, NLMS, SSIM, MinHash, Possum filter, OPOSSUM RBF surrogate, Thanatosis, Capybara Optimization, Hoeffding stream split, Schoolfield poikilotherm, Serpentina self-righting, Chelydrid ambush-strike
 - [x] 206B. Algorithm primitive smoke wired into harness (40 modules)
 
-### 011 Indy_Reads / Persona / Assistant Layer — ███░░░░░░░ 28%
+### 011 Indy_Reads / Persona / Assistant Layer — ████░░░░░░ 44%
 - [x] 207. Indy_Reads marked active assistant/persona
 - [x] 208. Operator identity recorded
 - [x] 209. Project brain answers basic status from docs
 - [x] 210. Quiet side-process rule recorded
 - [ ] 211. PARTIAL: Persona source exists in Drive/archives but not fully extracted
-- [ ] 212. PARTIAL: Persona approximation not yet generated as prompt/runtime contract
+- [x] 212. Runtime prompt/brief approximation generated from project brain contract
 - [ ] 213. Indy_Reads persona Drive targets mapped
 - [ ] 214. Indy_Reads persona corpus imported to private vault
 - [ ] 215. Persona distillation note produced
-- [ ] 216. Runtime system prompt contract produced
-- [ ] 217. Task memory routines implemented
+- [x] 216. Runtime system prompt contract produced
+- [x] 217. Task memory routines implemented
 - [ ] 218. Calendar intent routine implemented
 - [ ] 219. Reminder routine implemented
-- [ ] 220. Wiki/notes routine implemented
+- [x] 220. Wiki/notes routine implemented
 - [ ] 221. Auth inventory routine implemented
-- [ ] 222. No-interruption side queue implemented
+- [x] 222. No-interruption side queue implemented
 - [ ] 223. Persona regression tests created
 - [ ] 224. Operator correction learning loop implemented
 
