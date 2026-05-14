@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Render LOCAL_READS runtime contract v0 from project brain."""
+"""Render Indy_Reads runtime contract v0 from project brain."""
 from pathlib import Path
 import json, argparse
 ROOT=Path(__file__).resolve().parents[1]
-CONTRACT=ROOT/'00_PROJECT_BRAIN'/'LOCAL_READS_RUNTIME_CONTRACT.md'
+CONTRACT=ROOT/'00_PROJECT_BRAIN'/'INDY_READS_RUNTIME_CONTRACT.md'
 STATUS=ROOT/'00_PROJECT_BRAIN'/'STATUS.md'
 
 def main():

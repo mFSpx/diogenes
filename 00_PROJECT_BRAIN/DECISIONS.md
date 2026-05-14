@@ -3,7 +3,7 @@
 ## Locked For Current Dev Build
 
 - `northern.strike` is the operator name.
-- Current assistant/persona identity is `LOCAL_READS`.
+- Current assistant/persona identity is `Indy_Reads`.
 - `claudecode` / Clawd is the intended user-facing interface shell.
 - `doggystyle` / CKDOG1 is the kernel target.
 - gRPC is the cross-language API boundary.

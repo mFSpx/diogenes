@@ -21,7 +21,7 @@ Brainstorm names are not decisions. Every new component must be marked `confirme
 Confirmed before v0.2 intake:
 
 - Operator: `northern.strike`.
-- Assistant/persona: `LOCAL_READS`.
+- Assistant/persona: `Indy_Reads`.
 - Umbrella workspace: `/home/mfspx/LUCIDOTA`; `/home/mfspx/DIOGENES` is a compatibility symlink.
 - Interface shell: Clawd / `claudecode`, owned inside LUCIDOTA.
 - Kernel: CKDOG1 / `doggystyle`, kernel-only repo.
@@ -135,7 +135,7 @@ No high-volume live event path without Bytewax-style flow control once that laye
 - `Bytewax`: confirmed live dataflow layer, integration pending.
 - `River ML`: confirmed online learning layer, integration pending.
 - `Treelite`: confirmed deployable tree inference layer, integration pending.
-- `DeepSeek-R1-Distill-Qwen-1.5B`: compatible with existing `deepseek-1.5b-local_reads-reads` runtime registry target, exact artifact still TBD.
+- `DeepSeek-R1-Distill-Qwen-1.5B`: compatible with existing `deepseek-1.5b-indy_reads-reads` runtime registry target, exact artifact still TBD.
 - `Bloom Filter`: compatible as fast seen/check structure; not yet implemented.
 - `SHA-256`: compatible with hash/proof/vault direction.
 - `Playwright`: compatible candidate for dynamic extraction/capture; not yet locked.
@@ -143,7 +143,7 @@ No high-volume live event path without Bytewax-style flow control once that laye
 ### Rename / Align With Existing Names
 
 - `nomad_surface.proto`: conflicts with current verified `kernel.proto` / CKDOG1 gRPC surface unless explicitly renamed later. Treat as brainstorm name, not canonical.
-- `The Enseminator`: unresolved operator/control-surface codename; must not replace Clawd/LOCAL_READS naming without decision.
+- `The Enseminator`: unresolved operator/control-surface codename; must not replace Clawd/Indy_Reads naming without decision.
 - `DBOS Python Brain`: align with DBOS workflow plane plus CKDOG1 kernel, not a replacement for CKDOG1 ontology meaning.
 - `Unified Vault`: align with Records Office + encrypted CAS vault + Postgres/AGE/pgvector, not MinIO-first.
 - `Village Sideload`: compatible with existing Village/Villagers concept, but storage shape remains open.
@@ -173,7 +173,7 @@ Current coherent target, using existing names:
 
 ```text
 northern.strike
-  -> LOCAL_READS inside Clawd / claudecode
+  -> Indy_Reads inside Clawd / claudecode
   -> Rust tonic/prost gRPC boundary
   -> CKDOG1 / doggystyle kernel
   -> DBOS workflows
@@ -181,7 +181,7 @@ northern.strike
   -> encrypted local CAS vault for artifacts
   -> Bytewax / River / Treelite live learning path
   -> model runtime as stateless compute heads
-  -> back to LOCAL_READS / Clawd
+  -> back to Indy_Reads / Clawd
 ```
 
 Workflow/event loop:

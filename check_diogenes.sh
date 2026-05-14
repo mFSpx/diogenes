@@ -70,7 +70,7 @@ SQL
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_browser_body_capture.py https://example.com --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_age_edges.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_big_board.py --json >/dev/null
-"$LUCIDOTA_VENV/bin/python" scripts/lucidota_local_reads_contract.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_indy_contract.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_wiki_query.py VIBESCONTROL --json >/dev/null
 
 cd "$KERNEL"

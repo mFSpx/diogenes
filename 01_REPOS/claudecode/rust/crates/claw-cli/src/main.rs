@@ -363,7 +363,7 @@ impl Default for DiogenesSmokeArgs {
             home: PathBuf::from(".ckdog1-diogenes-smoke"),
             soul_uuid: 7,
             term: "NORTHERN_STRIKE".to_string(),
-            trait_value: "LOCAL_READS".to_string(),
+            trait_value: "INDY_READS".to_string(),
             global_symbol: "CLAIM_UNVERIFIED".to_string(),
         }
     }
@@ -717,7 +717,7 @@ fn render_lucidota_status_report() -> String {
         ("008 Body Capture Capture", 66, "visual contract + policy"),
         ("009 Drive Imports", 59, "nuclei mapped"),
         ("010 Model Runtime", 65, "ALGOS + nature primitives"),
-        ("011 LOCAL_READS", 28, "persona extraction pending"),
+        ("011 INDY_READS", 28, "persona extraction pending"),
         ("012 Big Board UI", 31, "progress printer exists"),
         ("013 Redaction/Auth", 60, "scanner + private vault"),
         ("014 Verification", 92, "full harness green"),

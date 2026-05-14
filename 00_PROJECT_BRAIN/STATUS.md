@@ -59,7 +59,7 @@
 - Bytewax: `█████████░ 92%` — installed/imports; mini TestingSource graph emits persisted hints.
 - Treelite: `█████████░ 92%` — installed/imports; Treelite artifact + advisory route run persisted; DBOS policy call-in pending.
 - Drive map/import: `███░░░░░░░ 30%` — nuclei mapped; full private granular map/imports pending.
-- LOCAL_READS persona: `█░░░░░░░░░ 10%` — named/sourced; runtime approximation pending.
+- Indy_Reads persona: `█░░░░░░░░░ 10%` — named/sourced; runtime approximation pending.
 - Algorithm primitive library: `██████████ 98%` — 40 wrappers smoked, including Possum/OPOSSUM/Thanatosis/Capybara/Hoeffding and Chelydra/Serpentina/Schoolfield additions.
 - Progress UI: `█████░░░░░ 55%` — checklist progress printer plus read-only Big Board v0 with live workflow/wake/CAS/Body Capture/reflex/GPU counters and JSON export.
 

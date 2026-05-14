@@ -11,7 +11,7 @@ It lives in the repo as source material, doctrine, retrieval structure, work ord
 - Keep assistant behavior simple, grounded, and useful.
 - Preserve project memory in files that can be audited, diffed, searched, and ingested.
 - Turn repeated work into reusable playbooks without pretending notes are working code.
-- Give LOCAL_READS a durable wiki/brain substrate that can later become product functionality.
+- Give Indy_Reads a durable wiki/brain substrate that can later become product functionality.
 - Keep the assistant knowledge-seeking, tool-seeking, hypercritical, ABBA3-audited, self-improving, automation-first, and actively progressing.
 
 ## Fork Rule
@@ -60,7 +60,7 @@ If a Markdown note changes behavior without explicit code, that is a bug.
 
 1. File-backed memory stays canonical while the spine is unstable.
 2. Add an ingest adapter that turns project brain documents into ontology records.
-3. Add a query adapter that lets LOCAL_READS retrieve these records.
+3. Add a query adapter that lets Indy_Reads retrieve these records.
 4. Add a write adapter that proposes patches to project brain files.
 5. Gate automatic writes through anti-slop checks and user-visible audit trails.
 

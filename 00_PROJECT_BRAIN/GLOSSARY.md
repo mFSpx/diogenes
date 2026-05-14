@@ -4,7 +4,7 @@
 
 Sovereign, encrypted, ontology-first investigative cognition system.
 
-## LOCAL_READS
+## Indy_Reads
 
 The current user-facing assistant/persona for `northern.strike`.
 

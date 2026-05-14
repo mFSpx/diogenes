@@ -25,7 +25,7 @@ Current preferred shape:
 - 1x Mamba/Mamba2-class listener: long-running stream listener / anomaly compressor.
 - 6x Needle-class routers: function-call / JSON routing layer.
 - 2x roughly 500M models: mid-tier tacticians / formatters / local reasoning hops.
-- 1x roughly 1.5B model: LOCAL_READS resident heavy hitter.
+- 1x roughly 1.5B model: Indy_Reads resident heavy hitter.
 - Treelite / River / classical algorithms: decision math and streaming learning.
 - CKDOG1 kernel: proof, policy, state transition, gRPC control surface.
 - SQLite/Postgres graph/state substrate: memory/provenance, not raw context-window stuffing.
@@ -115,7 +115,7 @@ The play is predictive LoRA/source-cartridge prefetch:
 - Needle emits retrieval/adapter intent.
 - CKDOG1 records which cartridge was actually used.
 - online learner predicts likely next cartridge.
-- prefetch warms RAM or VRAM airlock before LOCAL_READS needs it.
+- prefetch warms RAM or VRAM airlock before Indy_Reads needs it.
 
 Do not claim convergence by wall-clock time yet. Record events first, then evaluate:
 

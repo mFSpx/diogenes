@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""File-backed VIBESCONTROL / LOCAL_READS wiki query v0."""
+"""File-backed VIBESCONTROL / Indy_Reads wiki query v0."""
 from __future__ import annotations
 import argparse, json, re
 from pathlib import Path
