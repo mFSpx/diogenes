@@ -91,6 +91,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         CliAction::BootstrapPlan => print_bootstrap_plan(),
         CliAction::LucidotaStatus => print_lucidota_status(),
         CliAction::IndyBrief { args } => run_lucidota_script("lucidota_indy_brief.py", "indy-brief", &args)?,
+        CliAction::ModelGovernor { args } => run_lucidota_script("lucidota_model_governor.py", "model-governor", &args)?,
+        CliAction::Cockpit { args } => run_lucidota_script("lucidota_cockpit.py", "cockpit", &args)?,
         CliAction::LucidotaSurvey { args } => run_lucidota_survey(&args)?,
         CliAction::DiogenesSmoke { args } => run_diogenes_smoke(&args)?,
         CliAction::Agents { args } => LiveCli::print_agents(args.as_deref())?,
@@ -128,6 +130,12 @@ enum CliAction {
     BootstrapPlan,
     LucidotaStatus,
     IndyBrief {
+        args: Vec<String>,
+    },
+    ModelGovernor {
+        args: Vec<String>,
+    },
+    Cockpit {
         args: Vec<String>,
     },
     LucidotaSurvey {
@@ -307,6 +315,12 @@ fn parse_args(args: &[String]) -> Result<CliAction, String> {
         "bootstrap-plan" => Ok(CliAction::BootstrapPlan),
         "lucidota-status" => Ok(CliAction::LucidotaStatus),
         "indy-brief" | "indies" => Ok(CliAction::IndyBrief {
+            args: rest[1..].to_vec(),
+        }),
+        "model-governor" | "governor" => Ok(CliAction::ModelGovernor {
+            args: rest[1..].to_vec(),
+        }),
+        "cockpit" | "lucidota-cockpit" => Ok(CliAction::Cockpit {
             args: rest[1..].to_vec(),
         }),
         "lucidota-survey" | "survey" => Ok(CliAction::LucidotaSurvey {
@@ -4296,6 +4310,14 @@ fn print_help_to(out: &mut impl Write) -> io::Result<()> {
     )?;
     writeln!(
         out,
+        "  claw model-governor                   Check resident model VRAM/loadout decision"
+    )?;
+    writeln!(
+        out,
+        "  claw cockpit                          Print one-screen LUCIDOTA cockpit"
+    )?;
+    writeln!(
+        out,
         "  claw lucidota-survey <target>          Survey URL/file into local CAS + Postgres"
     )?;
     writeln!(
@@ -4629,6 +4651,21 @@ mod tests {
         assert_eq!(
             parse_args(&["indies".to_string()]).expect("indies alias should parse"),
             CliAction::IndyBrief { args: vec![] }
+        );
+    }
+
+    #[test]
+    fn parses_cockpit_and_model_governor_subcommands() {
+        assert_eq!(
+            parse_args(&["cockpit".to_string()]).expect("cockpit should parse"),
+            CliAction::Cockpit { args: vec![] }
+        );
+        assert_eq!(
+            parse_args(&["model-governor".to_string(), "--json".to_string()])
+                .expect("model-governor should parse"),
+            CliAction::ModelGovernor {
+                args: vec!["--json".to_string()]
+            }
         );
     }
 

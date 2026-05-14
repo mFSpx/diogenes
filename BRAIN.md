@@ -15,6 +15,7 @@ Operator → Clawd → Indy_Reads brief/queues → CKDOG1 kernel / DBOS / Postgr
 
 ## Hardening Notes
 
+- One-hour push: `claw cockpit`, `claw model-governor`, Indy_Reads correction regression, and VRAM load-governor decision table are live.
 - Bars are not forced to 100%; current `big_board.json` min bar is 52 and max is 100.
 - Survey now exposes an optional Tree-sitter structural slot with explicit `unavailable` reporting when grammars are absent.
 - Bytewax live cursor now uses a transaction-scoped advisory lock to avoid duplicate live cursor workers.

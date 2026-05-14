@@ -60,7 +60,7 @@
 - Bytewax: `█████████░ 92%` — installed/imports; mini TestingSource graph emits persisted hints.
 - Treelite: `█████████░ 92%` — installed/imports; Treelite artifact + advisory route run persisted; DBOS policy call-in pending.
 - Drive map/import: `███░░░░░░░ 30%` — nuclei mapped; full private granular map/imports pending.
-- Indy_Reads persona: `█████░░░░░ 52%` — runtime contract, local brief, task memory, reminders/calendar-intent queue, and redacted auth inventory now exist; Drive persona corpus and real Gmail/Calendar adapters pending.
+- Indy_Reads persona: `██████░░░░ 60%` — runtime contract, local brief, task memory, reminders/calendar-intent queue, and redacted auth inventory now exist; Drive persona corpus and real Gmail/Calendar adapters pending.
 - Algorithm primitive library: `██████████ 98%` — 40 wrappers smoked, including Possum/OPOSSUM/Thanatosis/Capybara/Hoeffding and Chelydra/Serpentina/Schoolfield additions.
 - Progress UI: `██████░░░░ 60%` — checklist progress printer plus read-only Big Board v0 with live workflow/wake/CAS/Body Capture/reflex/GPU counters and JSON export.
 
@@ -69,3 +69,5 @@ Full audited checklist: `00_PROJECT_BRAIN/BUILD_PLAN_AUDIT.md` (280+ line-items)
 - math.zip top-level recovery: `██████████ 100%` — `/home/mfspx/Downloads/math.zip` copied, extracted, manifested, and converted into discrete ALGOS modules; full system hardwire audit written.
 - Ruthless audit fixes: Wake Bus CTE batch delivery, Body Capture graph-local workflow-event outbox, and Survey explicit IP gate landed.
 - Autonomous hardening pass added Survey optional Tree-sitter slot, Bytewax advisory-lock live cursor, Wake Bus CTE audit, EQ validator stress inventory, regenerated Big Board JSON, `BRAIN.md`, and `TOPOLOGY.md`.
+
+- One-hour push landed: Indy_Reads regression/correction smoke, model VRAM governor, and `claw cockpit` / `claw model-governor` command surface.

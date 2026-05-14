@@ -4,6 +4,7 @@
 Operator
   -> Clawd CLI
       -> indy-brief / Indy_Reads runtime tables
+      -> cockpit / model-governor
       -> lucidota-survey / local CAS + Postgres survey schema
       -> diogenes-smoke / CKDOG1 gRPC bridge
   -> DBOS workflow plane

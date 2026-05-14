@@ -22,3 +22,10 @@ python scripts/lucidota_bytewax_mini.py --live-cursor --json
 ## Bar Truth
 
 `05_OUTPUTS/big_board.json` was regenerated. Lifecycle bars are **not** all 100%; current generated range is 52–100. No fake green was written.
+
+## One-Hour Push Addendum
+
+- Added `scripts/lucidota_model_governor.py` and `lucidota_runtime.load_governor_decision` for advisory VRAM/loadout decisions.
+- Added `scripts/lucidota_indy_regression.py` for Indy_Reads brief shape and correction-loop regression.
+- Added `scripts/lucidota_cockpit.py` plus Clawd `cockpit` and `model-governor` commands.
+- Verified `cargo test -q -p claw-cli` and `./check_diogenes.sh` green.

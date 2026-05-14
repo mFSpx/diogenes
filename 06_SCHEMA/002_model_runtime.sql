@@ -198,3 +198,11 @@ ON CONFLICT (loadout_id, slot_name) DO UPDATE SET
     expected_vram_mb = EXCLUDED.expected_vram_mb,
     priority = EXCLUDED.priority,
     notes = EXCLUDED.notes;
+
+
+-- Cleanup obsolete transitional persona slot name from the temporary Local_Reads rename.
+DELETE FROM lucidota_runtime.resident_loadout_slot
+WHERE loadout_id = 'gtx1650-special-forces-v0'
+  AND slot_name = 'local_reads_heavy_hitter';
+DELETE FROM lucidota_runtime.model_candidate
+WHERE model_id = 'deepseek-1.5b-local_reads-reads';

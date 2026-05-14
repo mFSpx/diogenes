@@ -236,6 +236,12 @@ def calendar_intent(args) -> dict:
     args.item_type = "calendar_intent"
     return queue_item(args)
 
+def correction(args) -> dict:
+    args.kind = "correction"
+    args.source = args.source or "operator"
+    return remember(args)
+
+
 def list_queue(args) -> dict:
     items = recent_queue(args.limit)
     return {"ok": True, "queue": items}
@@ -293,6 +299,11 @@ def main() -> int:
     r.add_argument("--kind", choices=["task", "decision", "correction", "note"], default="note")
     r.add_argument("--body", default="")
     r.add_argument("--source", default="operator")
+    c = sub.add_parser("correct")
+    c.add_argument("--json", action="store_true")
+    c.add_argument("title")
+    c.add_argument("--body", default="")
+    c.add_argument("--source", default="operator")
     q = sub.add_parser("queue")
     q.add_argument("--json", action="store_true")
     q.add_argument("title")
@@ -332,6 +343,8 @@ def main() -> int:
     args = ap.parse_args()
     if args.cmd == "remember":
         report = remember(args)
+    elif args.cmd == "correct":
+        report = correction(args)
     elif args.cmd == "queue":
         report = queue_item(args)
     elif args.cmd == "reminder":

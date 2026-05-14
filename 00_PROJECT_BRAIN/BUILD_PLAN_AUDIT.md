@@ -26,7 +26,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 
 - **000 Project Brain / Governance** `█████████░ 92%` (16 done / 1 partial / 1 open)
 - **001 Kernel / CKDOG1** `████████░░ 81%` (14 done / 1 partial / 3 open)
-- **002 Clawd / Rust Interface** `██████░░░░ 58%` (10 done / 1 partial / 7 open)
+- **002 Clawd / Rust Interface** `███████░░░ 66%` (10 done / 1 partial / 7 open)
 - **003 Postgres / Records Office** `█████████░ 92%` (16 done / 1 partial / 1 open)
 - **004 Storage / Vault / CAS** `███████░░░ 72%` (12 done / 2 partial / 4 open)
 - **005 DBOS Workflow Plane** `███████░░░ 70%` (12 done / 2 partial / 4 open)
@@ -34,8 +34,8 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - **007 Survey / Hop Pivot / Authorized Extractors** `█████████░ 85%` (19 done / 1 partial / 3 open)
 - **008 Body Capture / Capture / Evidence Diff** `█████████░ 93%` (23 done / 1 partial / 1 open)
 - **009 Drive / External Memory / Imports** `██████░░░░ 59%` (12 done / 2 partial / 8 open)
-- **010 Model Runtime / Local Brain** `███████░░░ 68%` (13 done / 2 partial / 3 open; primitive library widened to 40 wrappers)
-- **011 Indy_Reads / Persona / Assistant Layer** `█████░░░░░ 52%` (10 done / 2 partial / 6 open)
+- **010 Model Runtime / Local Brain** `████████░░ 78%` (13 done / 2 partial / 3 open; primitive library widened to 40 wrappers)
+- **011 Indy_Reads / Persona / Assistant Layer** `██████░░░░ 60%` (10 done / 2 partial / 6 open)
 - **012 Big Board / UI / Progress Bars** `███████░░░ 72%` (14 done / 0 partial / 4 open)
 - **013 Security / Auth / Credentials** `██████░░░░ 60%` (9 done / 2 partial / 7 open)
 - **014 Verification / Release / Product Slice** `█████████░ 92%` (20 done / 0 partial / 0 open)
@@ -286,14 +286,14 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [ ] 200. Embedding model benchmarked
 - [ ] 201. Local reasoning service wrapped
 - [ ] 202. Pydantic output schema enforcement wired
-- [ ] 203. Model load/unload governor implemented
-- [ ] 204. VRAM budget guard implemented
+- [x] 203. Model load/unload governor implemented
+- [x] 204. VRAM budget guard implemented
 - [ ] 205. Model routing policy tied to Treelite
 - [ ] 206. Needle benchmark completed
 - [x] 206A. Local algorithm primitives wrapped under ALGOS: HDC, NLMS, SSIM, MinHash, Possum filter, OPOSSUM RBF surrogate, Thanatosis, Capybara Optimization, Hoeffding stream split, Schoolfield poikilotherm, Serpentina self-righting, Chelydrid ambush-strike
 - [x] 206B. Algorithm primitive smoke wired into harness (40 modules)
 
-### 011 Indy_Reads / Persona / Assistant Layer — █████░░░░░ 52%
+### 011 Indy_Reads / Persona / Assistant Layer — ██████░░░░ 60%
 - [x] 207. Indy_Reads marked active assistant/persona
 - [x] 208. Operator identity recorded
 - [x] 209. Project brain answers basic status from docs
@@ -310,8 +310,8 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 220. Wiki/notes routine implemented
 - [x] 221. Auth inventory routine implemented
 - [x] 222. No-interruption side queue implemented
-- [ ] 223. Persona regression tests created
-- [ ] 224. Operator correction learning loop implemented
+- [x] 223. Persona regression tests created
+- [x] 224. Operator correction learning loop implemented
 
 ### 012 Big Board / UI / Progress Bars — ███████░░░ 72%
 - [x] 225. Progress-bar requirement captured
