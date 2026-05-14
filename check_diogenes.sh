@@ -76,6 +76,7 @@ SQL
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_indy_brief.py queue-list --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_wiki_query.py VIBESCONTROL --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_wake_bus_audit.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_big_board.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_validator_noise_stress.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_model_governor_smoke.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_model_governor.py --json >/dev/null

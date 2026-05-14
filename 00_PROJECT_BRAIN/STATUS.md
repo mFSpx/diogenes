@@ -53,7 +53,7 @@
 - Validated 000-007 green slice: `██████████ 100%` — full harness green across docs/control, CKDOG1, Clawd, Postgres, CAS, DBOS, Bytewax/River/Treelite hints, and Survey/Hop safety gates. Global backlog remains separately tracked.
 - Overall product: `█████████░ 88%`
 - gRPC bridge: `███████░░░ 70%` — Rust tonic/prost to Python grpcio smoke works; full API pending.
-- DBOS workflow plane: `███████░░░ 70%` — installed/smoked/schema/events plus Survey DBOS wrapper; workflow registry and source policies seeded; full workflow ownership pending.
+- DBOS workflow plane: `████████░░ 80%` — installed/smoked/schema/events plus Survey DBOS wrapper, Big Board DBOS event feed, workflow registry, and source policies seeded; full workflow ownership pending.
 - Postgres/AGE/pgvector: `█████████░ 92%` — installed/verified/core schemas; final ontology/vector/vault schemas pending.
 - Survey/hop-pivot: `████████░░ 80%` — working slice plus bounded hop v1; scraper ladder pending.
 - River ML: `█████████░ 92%` — River scores workflow events; live Bytewax stream pending.
@@ -62,7 +62,7 @@
 - Drive map/import: `███████░░░ 72%` — nuclei mapped; full private granular map/imports pending.
 - Indy_Reads persona: `███████░░░ 65%` — runtime contract, local brief, local persona corpus/distillation, task memory, reminders/calendar-intent queue, redacted auth inventory, and expanded regression loop now exist; Drive/private-vault corpus import and real Gmail/Calendar adapters pending.
 - Algorithm primitive library: `██████████ 98%` — 40 wrappers smoked, including Possum/OPOSSUM/Thanatosis/Capybara/Hoeffding and Chelydra/Serpentina/Schoolfield additions.
-- Progress UI: `█████████░ 90%` — checklist progress printer plus read-only Big Board v0 with live workflow/wake/CAS/Body Capture/reflex/GPU counters and JSON export.
+- Progress UI: `██████████ 100%` — checklist progress printer plus read-only Big Board/Cockpit with live workflow/wake/CAS/Body Capture/reflex/GPU counters, Drive/import/auth/evidence counters, scraper fleet readiness, and JSON export.
 
 Full audited checklist: `00_PROJECT_BRAIN/BUILD_PLAN_AUDIT.md` (280+ line-items). Latest full harness passed after Body Capture evidence bundles, Big Board v0, and 23-module algorithm smoke wiring.
 
@@ -79,3 +79,10 @@ Full audited checklist: `00_PROJECT_BRAIN/BUILD_PLAN_AUDIT.md` (280+ line-items)
 - Truth boundary unchanged: no Google Drive connector use, no external data, no secret values, no imported bytes; Gmail/Calendar remain non-operational; Drive map/import remains scaffolded rather than smoked.
 
 - Maximum-burn push added local Drive/import manifest skeleton, redacted auth report, operator demo, regression dashboard, release checklist, cockpit shortcuts, Indy corpus, and actionable model governor plan. Overall sprint bar is 88%; 92% overall is not truthful until remaining DBOS/storage/Drive/auth gaps close.
+
+## Big Board Scraper Fleet Closure — 2026-05-14
+
+- `scripts/lucidota_big_board.py` now reports scraper fleet readiness from local scripts, authorized extractor registry rows, browser-required adapter count, and local Drive-manifest scraper target hints.
+- `scripts/lucidota_cockpit.py` now surfaces the same scraper fleet summary in the one-screen operator view.
+- `scripts/lucidota_dbos_big_board.py` adds a DBOS-owned Big Board event-feed workflow that snapshots the dashboard into `lucidota_control.workflow_event`.
+- Phase 012 Big Board/UI/Progress Bars is closed at 100%; overall remains 88% because DBOS/storage/Drive/auth/model-runtime gaps are still real.

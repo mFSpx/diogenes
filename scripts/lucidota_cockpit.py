@@ -72,6 +72,18 @@ def compact_counters(counters: dict[str, Any]) -> str:
     return "  ".join(parts + leftovers)
 
 
+def scraper_line(big: dict[str, Any]) -> str:
+    sf = big.get("scraper_fleet", {})
+    scripts = len(sf.get("local_scripts", []))
+    adapters = len(sf.get("authorized_adapters", []))
+    targets = len(sf.get("manifest_scraper_targets", []))
+    return (
+        f"{sf.get('status', 'unknown')}  "
+        f"scripts={scripts} adapters={adapters} "
+        f"browser_required={sf.get('browser_required_adapters', '?')} manifest_targets={targets}"
+    )
+
+
 def governor_line(mg: dict[str, Any]) -> str:
     if not mg.get("ok"):
         return f"unavailable ({mg.get('error', 'no report')})"
@@ -108,6 +120,7 @@ def build_report(limit: int, include_governor: bool) -> dict[str, Any]:
             "overall": big.get("bars", {}).get("overall", "unknown"),
             "lowest_phases": lowest,
             "counters": big.get("counters", {}),
+            "scraper_fleet": scraper_line(big),
             "indy_counters": indy.get("counters", {}),
             "indy_queue": indy_queue,
             "governor": governor_line(mg),
@@ -126,6 +139,7 @@ def render(report: dict[str, Any]) -> str:
         f"Overall      {s['overall']}",
         f"Governor     {s['governor']}",
         f"Counters     {compact_counters(s['counters'])}",
+        f"Scrapers     {s['scraper_fleet']}",
     ]
     ic = s.get("indy_counters", {})
     lines.append(

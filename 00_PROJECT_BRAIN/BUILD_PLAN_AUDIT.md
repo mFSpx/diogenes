@@ -1,6 +1,6 @@
 # LUCIDOTA / DIOGENES Full Build Plan Audit
 
-Updated: 2026-05-13
+Updated: 2026-05-14
 
 Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete, `[ ]` not done.
 
@@ -8,7 +8,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 
 ## Hard Truth Audit
 - **gRPC** `███████░░░ 70%` — Wired for CKDOG1 smoke through Rust tonic/prost <-> Python grpcio. Not yet full product API.
-- **DBOS** `██████░░░░ 62%` — Installed, schema initialized, smoke workflow passes, events table used, Survey has DBOS wrapper. Not yet owning all workflows.
+- **DBOS** `████████░░ 80%` — Installed, schema initialized, smoke workflow passes, events table used, Survey and Big Board have DBOS wrappers/feeds. Not yet owning all workflows.
 - **Postgres/AGE/pgvector** `██████░░░░ 60%` — Installed and verified; core schemas exist. Full ontology/vector schemas pending.
 - **Survey/Hop Pivot** `█████████░ 86%` — Working Survey slice with CAS/hash/Aho/Wayback option/pivots and bounded hop v1. Full scraper ladder pending.
 - **River ML** `██████░░░░ 62%` — Installed and now writes online scores from workflow events. Live Bytewax stream and frozen feature schema pending.
@@ -17,7 +17,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - **Model runtime** `████████░░ 82%` — CUDA/llama.cpp/runtime imports exist plus 39 local algorithm primitives. DeepSeek/embedding/router not yet product-wired.
 - **Drive map/import** `███████░░░ 72%` — Key nuclei located; full granular map and imports pending.
 - **Persona Indy_Reads** `███████░░░ 65%` — Runtime contract, local brief, local persona corpus/distillation, memory, queue, auth inventory, and regression loop exist; Drive/Gmail/Calendar adapters remain pending.
-- **Progress UI** `█████████░ 90%` — Read-only terminal Big Board v0 now renders build bars, live workflow/wake/CAS/Body Capture/reflex counters, GPU status, and JSON export.
+- **Progress UI** `██████████ 100%` — Read-only terminal Big Board/Cockpit now render build bars, live workflow/wake/CAS/Body Capture/reflex counters, Drive/import/auth/evidence counters, scraper fleet readiness, GPU status, and JSON export.
 
 ## Phase Bars
 
@@ -29,14 +29,14 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - **002 Clawd / Rust Interface** `████████░░ 76%` (14 done / 1 partial / 3 open)
 - **003 Postgres / Records Office** `█████████░ 92%` (16 done / 1 partial / 1 open)
 - **004 Storage / Vault / CAS** `███████░░░ 72%` (12 done / 2 partial / 4 open)
-- **005 DBOS Workflow Plane** `████████░░ 78%` (12 done / 2 partial / 4 open)
+- **005 DBOS Workflow Plane** `████████░░ 80%` (13 done / 2 partial / 3 open)
 - **006 Bytewax / River / Treelite Reflex Team** `█████████░ 92%` (18 done / 0 partial / 0 open)
 - **007 Survey / Hop Pivot / Authorized Extractors** `█████████░ 85%` (19 done / 1 partial / 3 open)
 - **008 Body Capture / Capture / Evidence Diff** `█████████░ 93%` (23 done / 1 partial / 1 open)
 - **009 Drive / External Memory / Imports** `███████░░░ 72%` (15 done / 2 partial / 5 open)
 - **010 Model Runtime / Local Brain** `████████░░ 82%` (13 done / 2 partial / 3 open; primitive library widened to 40 wrappers)
 - **011 Indy_Reads / Persona / Assistant Layer** `████████░░ 75%` (16 done / 1 partial / 1 open)
-- **012 Big Board / UI / Progress Bars** `█████████░ 90%` (17 done / 0 partial / 1 open)
+- **012 Big Board / UI / Progress Bars** `██████████ 100%` (18 done / 0 partial / 0 open)
 - **013 Security / Auth / Credentials** `████████░░ 82%` (14 done / 2 partial / 2 open)
 - **014 Verification / Release / Product Slice** `██████████ 100%` (25 done / 0 partial / 0 open)
 
@@ -144,7 +144,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [ ] 089. Drive archive ingest into CAS implemented
 - [ ] 090. Binary diff storage implemented
 
-### 005 DBOS Workflow Plane — ███████░░░ 70%
+### 005 DBOS Workflow Plane — ████████░░ 80%
 - [x] 091. DBOS installed in project venv
 - [x] 092. DBOS smoke workflow runs
 - [x] 093. DBOS initializes system schema
@@ -161,7 +161,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [ ] 104. DBOS scraper dispatch workflow implemented
 - [ ] 105. DBOS capture workflow implemented
 - [ ] 106. DBOS model routing workflow implemented
-- [ ] 107. DBOS Big Board event feed implemented
+- [x] 107. DBOS Big Board event feed implemented
 - [ ] 108. DBOS workflow replay tests implemented
 - [x] 108A. DBOS/source policy seed implemented for public web, Wayback, local files, and Drive
 - [x] 108B. Wake Bus outbox schema implemented
@@ -313,7 +313,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 223. Persona regression tests created
 - [x] 224. Operator correction learning loop implemented
 
-### 012 Big Board / UI / Progress Bars — █████████░ 90%
+### 012 Big Board / UI / Progress Bars — ██████████ 100%
 - [x] 225. Progress-bar requirement captured
 - [x] 226. Status docs exist
 - [x] 227. Workflow_event has phase/status
@@ -328,7 +328,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 236. Workflow queue panel implemented
 - [x] 237. Model/GPU panel implemented
 - [x] 238. River/Bytewax/Treelite panel implemented
-- [ ] 239. Scraper fleet panel implemented
+- [x] 239. Scraper fleet panel implemented
 - [x] 240. Evidence/vault panel implemented
 - [x] 241. Operator correction panel/counter implemented
 - [x] 242. Report export implemented

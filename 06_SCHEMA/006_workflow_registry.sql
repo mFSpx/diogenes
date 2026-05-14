@@ -19,6 +19,7 @@ INSERT INTO lucidota_control.workflow_registry
 VALUES
 ('dbos-smoke', 'dbos', '005', 'active', 'scripts/lucidota_dbos_smoke.py', '{"text":"string"}', '{"normalized":"string"}', 'Verifies DBOS system database and workflow execution.'),
 ('survey-protocol', 'dbos+survey', '007', 'active', 'scripts/lucidota_dbos_survey.py', '{"target":"url_or_path","keywords":"list"}', '{"decision":"string","sha256":"string","pivots":"integer"}', 'DBOS wrapper around Survey Protocol.'),
+('big-board-event-feed', 'dbos+big-board', '005', 'active', 'scripts/lucidota_dbos_big_board.py', '{"run_id":"string"}', '{"workflow_event":"uuid","overall":"string","scraper_status":"string"}', 'DBOS wrapper that snapshots Big Board state into workflow_event for replayable UI feeds.'),
 ('river-reflex', 'dbos+river', '006', 'prototype', 'scripts/lucidota_river_reflex.py', '{"workflow_event":"rows"}', '{"river_score":"rows"}', 'Online-ish River scoring from committed workflow events.'),
 ('cas-index', 'vault', '004', 'active', 'scripts/lucidota_cas_index.py', '{"vault":"path"}', '{"cas_manifest":"rows"}', 'Indexes and verifies local CAS bytes.')
 ON CONFLICT (workflow_name) DO UPDATE SET

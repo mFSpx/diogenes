@@ -73,6 +73,63 @@ def counters() -> dict:
     }
 
 
+def scraper_fleet() -> dict:
+    """Summarize local scraper/extractor readiness without touching Drive/web."""
+    script_names = [
+        "lucidota_survey.py",
+        "lucidota_hop_pivot.py",
+        "lucidota_body_capture.py",
+        "lucidota_browser_body_capture.py",
+        "lucidota_extractor_registry.py",
+    ]
+    local_scripts = [name for name in script_names if (ROOT / "scripts" / name).exists()]
+
+    manifest_targets = []
+    try:
+        from lucidota_drive_manifest import scan
+
+        manifest_targets = [
+            hit
+            for hit in scan()
+            if "scraper" in (ROOT / hit["path"]).read_text(errors="ignore").lower()
+        ][:8]
+    except Exception:
+        manifest_targets = []
+
+    adapters: list[dict] = []
+    try:
+        with psycopg.connect(GRAPH_DB, connect_timeout=3) as conn:
+            rows = conn.execute(
+                """
+                SELECT adapter_id, adapter_kind, stability, default_priority, browser_required
+                FROM lucidota_extract.adapter
+                ORDER BY default_priority ASC, adapter_id
+                """
+            ).fetchall()
+        adapters = [
+            dict(
+                zip(
+                    ["adapter_id", "adapter_kind", "stability", "default_priority", "browser_required"],
+                    row,
+                )
+            )
+            for row in rows
+        ]
+    except Exception:
+        adapters = []
+
+    return {
+        "status": "ok" if local_scripts and adapters else "partial",
+        "policy": "adapters_first_browser_last",
+        "local_scripts": local_scripts,
+        "authorized_adapters": adapters,
+        "browser_required_adapters": sum(1 for a in adapters if a.get("browser_required")),
+        "manifest_scraper_targets": [
+            {"path": hit["path"], "score": hit["score"]} for hit in manifest_targets
+        ],
+    }
+
+
 def gpu() -> dict:
     exe = shutil.which("nvidia-smi")
     if not exe:
@@ -90,6 +147,15 @@ def render(report: dict) -> str:
     lines += ["", "Live counters:"]
     lines.extend(f"  {k}: {v}" for k, v in report["counters"].items())
     lines += ["", "GPU:", f"  {report['gpu']}"]
+    sf = report.get("scraper_fleet", {})
+    lines += [
+        "",
+        "Scraper fleet:",
+        f"  status: {sf.get('status', 'unknown')}  policy: {sf.get('policy', 'unknown')}",
+        f"  scripts: {', '.join(sf.get('local_scripts', []))}",
+        f"  authorized_adapters: {len(sf.get('authorized_adapters', []))}  browser_required: {sf.get('browser_required_adapters', '?')}",
+        f"  manifest_targets: {len(sf.get('manifest_scraper_targets', []))}",
+    ]
     return "\n".join(lines)
 
 
@@ -97,7 +163,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(prog="lucidota-big-board")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
-    report = {"ok": True, "bars": bars(), "counters": counters(), "gpu": gpu()}
+    report = {"ok": True, "bars": bars(), "counters": counters(), "gpu": gpu(), "scraper_fleet": scraper_fleet()}
     print(json.dumps(report, sort_keys=True) if args.json else render(report))
     return 0
 
