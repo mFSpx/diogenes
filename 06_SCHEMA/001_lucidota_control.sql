@@ -87,3 +87,84 @@ CREATE TABLE IF NOT EXISTS lucidota_control.model_runtime_inventory (
     notes text NOT NULL DEFAULT ''
 );
 
+
+CREATE TABLE IF NOT EXISTS lucidota_control.event_outbox (
+    outbox_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_id uuid REFERENCES lucidota_control.workflow_event(event_id) ON DELETE CASCADE,
+    topic text NOT NULL,
+    ref_body jsonb NOT NULL DEFAULT '{}'::jsonb,
+    status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'delivered', 'failed')),
+    attempts integer NOT NULL DEFAULT 0,
+    last_error text NOT NULL DEFAULT '',
+    created_at timestamptz NOT NULL DEFAULT now(),
+    delivered_at timestamptz
+);
+
+CREATE INDEX IF NOT EXISTS event_outbox_status_idx
+    ON lucidota_control.event_outbox (status, created_at);
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='lucidota_control' AND table_name='event_outbox' AND column_name='payload'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='lucidota_control' AND table_name='event_outbox' AND column_name='ref_body'
+  ) THEN
+    ALTER TABLE lucidota_control.event_outbox RENAME COLUMN payload TO ref_body;
+  END IF;
+END $$;
+
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='lucidota_control' AND table_name='event_outbox' AND column_name='published_at'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='lucidota_control' AND table_name='event_outbox' AND column_name='delivered_at'
+  ) THEN
+    ALTER TABLE lucidota_control.event_outbox RENAME COLUMN published_at TO delivered_at;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.constraint_column_usage
+    WHERE table_schema='lucidota_control' AND table_name='event_outbox' AND constraint_name='event_outbox_status_check'
+  ) THEN
+    ALTER TABLE lucidota_control.event_outbox DROP CONSTRAINT event_outbox_status_check;
+  END IF;
+
+  UPDATE lucidota_control.event_outbox SET status='delivered' WHERE status='published';
+  ALTER TABLE lucidota_control.event_outbox
+    ADD CONSTRAINT event_outbox_status_check CHECK (status IN ('pending', 'delivered', 'failed'));
+END $$;
+
+CREATE OR REPLACE FUNCTION lucidota_control.enqueue_workflow_event_outbox()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  INSERT INTO lucidota_control.event_outbox (event_id, topic, ref_body)
+  VALUES (
+    NEW.event_id,
+    'workflow_event',
+    jsonb_build_object(
+      'event_id', NEW.event_id::text,
+      'workflow_id', NEW.workflow_id,
+      'run_id', NEW.run_id,
+      'phase', NEW.phase,
+      'status', NEW.status,
+      'source', NEW.source
+    )
+  )
+  ON CONFLICT DO NOTHING;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS workflow_event_outbox_trigger ON lucidota_control.workflow_event;
+CREATE TRIGGER workflow_event_outbox_trigger
+AFTER INSERT ON lucidota_control.workflow_event
+FOR EACH ROW EXECUTE FUNCTION lucidota_control.enqueue_workflow_event_outbox();

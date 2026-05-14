@@ -17,6 +17,7 @@ import sys
 IMPORTS = [
     "dbos",
     "river",
+    "bytewax",
     "treelite",
     "transformers",
     "accelerate",
@@ -59,7 +60,7 @@ def verify_control_schema() -> dict[str, object]:
     sql = """
     SELECT table_schema || '.' || table_name
     FROM information_schema.tables
-    WHERE table_schema IN ('lucidota_control', 'lucidota_runtime')
+    WHERE table_schema IN ('lucidota_control', 'lucidota_runtime', 'lucidota_learning', 'lucidota_vault', 'lucidota_pivot', 'lucidota_bus')
     ORDER BY table_schema, table_name;
     """
     result = subprocess.run(
@@ -74,10 +75,23 @@ def verify_control_schema() -> dict[str, object]:
         "lucidota_control.model_runtime_inventory",
         "lucidota_control.source_policy",
         "lucidota_control.workflow_event",
+        "lucidota_control.event_outbox",
         "lucidota_runtime.adapter_cartridge",
         "lucidota_runtime.model_candidate",
         "lucidota_runtime.resident_loadout",
         "lucidota_runtime.resident_loadout_slot",
+        "lucidota_learning.river_event_cursor",
+        "lucidota_learning.river_run",
+        "lucidota_learning.river_score",
+        "lucidota_learning.treelite_router_run",
+        "lucidota_bus.wake_run",
+        "lucidota_pivot.promotion",
+        "lucidota_pivot.hop_node",
+        "lucidota_pivot.hop_job",
+        "lucidota_vault.cas_integrity_check",
+        "lucidota_vault.cas_gc_run",
+        "lucidota_vault.cas_gc_candidate",
+        "lucidota_vault.cas_manifest",
     }
     return {
         "status": "ok" if expected.issubset(set(tables)) else "failed",

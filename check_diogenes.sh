@@ -30,6 +30,46 @@ DBOS_SYSTEM_DATABASE_URL="${DBOS_SYSTEM_DATABASE_URL:-postgresql://mfspx@/lucido
   "$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_smoke.py
 scripts/apply_lucidota_control_schema.sh
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_runtime_smoke.py
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_security_scan.py >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_code_language_scan.py >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_algos_smoke.py >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_source_policy_seed.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_river_reflex.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_cas_index.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_cas_gc.py --json >/dev/null
+
+# CAS dual-write phantom proof: bytes without authoritative DB metadata must be reported, not hidden by the byte index.
+DUAL_WRITE_VAULT="$(mktemp -d /tmp/lucidota-cas-dual.XXXXXX)"
+PYTHONPATH="$ROOT/scripts" "$LUCIDOTA_VENV/bin/python" -c "from pathlib import Path; from lucidota_scout import store_cas; store_cas(Path('$DUAL_WRITE_VAULT'), b'phantom dual write proof')"
+PYTHONPATH="$ROOT/scripts" "$LUCIDOTA_VENV/bin/python" scripts/lucidota_cas_gc.py --vault "$DUAL_WRITE_VAULT" --recover-journal --json | grep '"orphan_candidates": 1' >/dev/null
+rm -rf "$DUAL_WRITE_VAULT"
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_workflow_registry.py >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_extractor_registry.py --json >/dev/null
+psql "${DBOS_SYSTEM_DATABASE_URL:-postgresql://mfspx@/lucidota_state}" -v ON_ERROR_STOP=1 >/dev/null <<'SQL'
+DO $$
+DECLARE
+  ev uuid;
+  n integer;
+BEGIN
+  INSERT INTO lucidota_control.workflow_event (workflow_id, run_id, phase, status, source, detail)
+  VALUES ('wake-trigger-smoke', gen_random_uuid()::text, 'wake', 'succeeded', 'check_diogenes', '{}'::jsonb)
+  RETURNING event_id INTO ev;
+  SELECT count(*) INTO n FROM lucidota_control.event_outbox WHERE event_id = ev;
+  IF n <> 1 THEN
+    RAISE EXCEPTION 'wake bus outbox trigger failed for %', ev;
+  END IF;
+END $$;
+SQL
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_wake_bus.py --seed --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_bytewax_mini.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_treelite_router.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_hop_pivot.py https://example.com --fetch --keyword example --max-depth 1 --max-pivots 1 --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_hydra_capture.py https://example.com --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_hydra_policy.py https://example.com --profile content_truth --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_hydra_evidence.py https://example.com --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_hydra_browser_capture.py https://example.com --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_age_edges.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_big_board.py --json >/dev/null
 
 cd "$KERNEL"
 if [[ ! -x .venv/bin/python ]]; then
@@ -44,3 +84,7 @@ cd "$CLAW"
 cargo test --workspace
 cargo build --release -p claw-cli
 ./target/release/claw diogenes-smoke --home "$CLAW_SMOKE_HOME"
+printf 'LUCIDOTA scout smoke\n' > "$CLAW_SMOKE_HOME/scout.txt"
+./target/release/claw lucidota-scout "$CLAW_SMOKE_HOME/scout.txt" --keyword LUCIDOTA >/dev/null
+cd "$ROOT"
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_scout.py "$CLAW_SMOKE_HOME/scout.txt" --keyword LUCIDOTA >/dev/null

@@ -40,6 +40,8 @@
 - Model source intelligence map: `02_RECORDS_OFFICE/MODEL_SOURCE_INTEL_MAP.md`.
 - CUDA/model stack working note: `02_RECORDS_OFFICE/CUDA_MODEL_STACK_V0.md`.
 - Missing links architecture note: `02_RECORDS_OFFICE/MISSING_LINKS_COMMAND_CENTER_GOVERNANCE_ORCHESTRATION.md`.
+- Block-out v0.2 reconciliation: `02_RECORDS_OFFICE/DIOGENES_BLOCKOUT_V02_RECONCILIATION.md`.
+- Drive algorithms/target intake: `02_RECORDS_OFFICE/DRIVE_TARGETS_ALGORITHMS_INTAKE.md`.
 
 ## Current Verified Interfaces
 

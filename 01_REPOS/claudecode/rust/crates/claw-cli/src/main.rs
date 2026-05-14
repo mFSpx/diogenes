@@ -90,6 +90,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         CliAction::DumpManifests => dump_manifests(),
         CliAction::BootstrapPlan => print_bootstrap_plan(),
         CliAction::LucidotaStatus => print_lucidota_status(),
+        CliAction::LucidotaScout { args } => run_lucidota_scout(&args)?,
         CliAction::DiogenesSmoke { args } => run_diogenes_smoke(&args)?,
         CliAction::Agents { args } => LiveCli::print_agents(args.as_deref())?,
         CliAction::Skills { args } => LiveCli::print_skills(args.as_deref())?,
@@ -125,6 +126,9 @@ enum CliAction {
     DumpManifests,
     BootstrapPlan,
     LucidotaStatus,
+    LucidotaScout {
+        args: Vec<String>,
+    },
     DiogenesSmoke {
         args: Vec<String>,
     },
@@ -298,6 +302,9 @@ fn parse_args(args: &[String]) -> Result<CliAction, String> {
         "dump-manifests" => Ok(CliAction::DumpManifests),
         "bootstrap-plan" => Ok(CliAction::BootstrapPlan),
         "lucidota-status" => Ok(CliAction::LucidotaStatus),
+        "lucidota-scout" | "scout" => Ok(CliAction::LucidotaScout {
+            args: rest[1..].to_vec(),
+        }),
         "diogenes-smoke" => Ok(CliAction::DiogenesSmoke {
             args: rest[1..].to_vec(),
         }),
@@ -670,31 +677,60 @@ fn print_lucidota_status() {
     print!("{}", render_lucidota_status_report());
 }
 
+fn run_lucidota_scout(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    let home = env::var("LUCIDOTA_HOME")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| PathBuf::from("/home/mfspx/LUCIDOTA"));
+    let venv_python = home.join(".venv").join("bin").join("python");
+    let python = if venv_python.exists() {
+        venv_python
+    } else {
+        PathBuf::from("python3")
+    };
+    let script = home.join("scripts").join("lucidota_scout.py");
+    if !script.exists() {
+        return Err(format!("missing scout script: {}", script.display()).into());
+    }
+    let status = Command::new(python)
+        .arg(script)
+        .args(args)
+        .current_dir(home)
+        .status()?;
+    if !status.success() {
+        return Err(format!("lucidota-scout failed with status {status}").into());
+    }
+    Ok(())
+}
+
 fn render_lucidota_status_report() -> String {
     let rows = [
-        ("LUCIDOTA repo/private remote", 100, "pushed"),
-        ("Project brain / VIBESCONTROL", 90, "active side-process"),
-        ("Clawd interface fork", 100, "absorbed"),
-        ("CKDOG1 kernel bridge", 80, "gRPC smoke"),
-        ("Rust tonic client", 100, "verified"),
-        ("Postgres 18 substrate", 100, "online"),
-        ("pgvector + AGE", 100, "verified"),
-        ("DBOS workflow smoke", 100, "verified"),
-        ("Full harness", 100, "green"),
-        ("Gmail / Calendar tooling", 30, "installed, auth pending"),
-        ("Morrowind private UI", 35, "OpenMW map, theme hook"),
-        ("Ingest / RAG / ontology", 10, "next build"),
-        ("Model runtime / CUDA", 20, "stack notes, benchmark next"),
-        ("Public release split", 20, "future sanitize"),
+        ("OVERALL PRODUCT", 76, "full audited checklist"),
+        ("000-007 Green Slice", 100, "verified harness slice"),
+        ("000 Project Brain", 92, "one closeout left"),
+        ("001 Kernel / CKDOG1", 81, "gRPC smoke green"),
+        ("002 Clawd Interface", 58, "status bars + scout wired"),
+        ("003 Postgres Office", 92, "AGE + CAS edges green"),
+        ("004 Vault / CAS", 72, "CAS index + GC + graph"),
+        ("005 DBOS Plane", 70, "outbox + source policy"),
+        ("006 Reflex Team", 92, "Wake Bus + reflex"),
+        ("007 Extractors", 86, "adapters first + hop"),
+        ("008 Hydra Capture", 66, "visual contract + policy"),
+        ("009 Drive Imports", 59, "nuclei mapped"),
+        ("010 Model Runtime", 65, "ALGOS + nature primitives"),
+        ("011 INDY_READS", 28, "persona extraction pending"),
+        ("012 Big Board UI", 31, "progress printer exists"),
+        ("013 Redaction/Auth", 60, "scanner + private vault"),
+        ("014 Verification", 92, "full harness green"),
     ];
 
     let mut out = String::from("LUCIDOTA Build Status\n");
     out.push_str("=====================\n");
-    out.push_str("Theme: private dev, status-bar prototype\n\n");
+    out.push_str("Operator-supervised evidence provenance build\n");
+    out.push_str("Bars are audited truth; green slice is today's verified product path, not every backlog item.\n\n");
     for (label, percent, note) in rows {
         let _ = writeln!(
             out,
-            "{label:<31} [{}] {percent:>3}%  {note}",
+            "{label:<25} [{}] {percent:>3}%  {note}",
             lucidota_bar(percent, 12)
         );
     }
@@ -4245,6 +4281,10 @@ fn print_help_to(out: &mut impl Write) -> io::Result<()> {
     )?;
     writeln!(
         out,
+        "  claw lucidota-scout <target>          Scout URL/file into local CAS + Postgres"
+    )?;
+    writeln!(
+        out,
         "  claw diogenes-smoke                   Run the CKDOG1 gRPC baby-smoke bridge"
     )?;
     writeln!(
@@ -4563,6 +4603,30 @@ mod tests {
     }
 
     #[test]
+    fn parses_lucidota_scout_subcommand() {
+        let args = vec![
+            "lucidota-scout".to_string(),
+            "https://example.com".to_string(),
+            "--fetch".to_string(),
+            "--keyword".to_string(),
+            "example".to_string(),
+        ];
+        assert_eq!(
+            parse_args(&args).expect("lucidota-scout should parse"),
+            CliAction::LucidotaScout {
+                args: args[1..].to_vec()
+            }
+        );
+        assert_eq!(
+            parse_args(&["scout".to_string(), "file.txt".to_string()])
+                .expect("scout alias should parse"),
+            CliAction::LucidotaScout {
+                args: vec!["file.txt".to_string()]
+            }
+        );
+    }
+
+    #[test]
     fn parses_direct_agents_and_skills_slash_commands() {
         assert_eq!(
             parse_args(&["/agents".to_string()]).expect("/agents should parse"),
@@ -4790,6 +4854,7 @@ mod tests {
         assert!(help.contains("claw agents"));
         assert!(help.contains("claw skills"));
         assert!(help.contains("claw lucidota-status"));
+        assert!(help.contains("claw lucidota-scout"));
         assert!(help.contains("claw /skills"));
     }
 
@@ -4797,9 +4862,10 @@ mod tests {
     fn lucidota_status_report_uses_build_bars() {
         let report = render_lucidota_status_report();
         assert!(report.contains("LUCIDOTA Build Status"));
-        assert!(report.contains("Postgres 18 substrate"));
-        assert!(report.contains("[████████████] 100%"));
-        assert!(report.contains("Morrowind private UI"));
+        assert!(report.contains("003 Postgres Office"));
+        assert!(report.contains("[█████████░░░]  76%"));
+        assert!(report.contains("000-007 Green Slice"));
+        assert!(report.contains("007 Extractors"));
     }
 
     #[test]
