@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LUCIDOTA Scout Protocol: first-contact URL/file triage + local CAS + pivot hints."""
+"""LUCIDOTA Survey Protocol: first-contact URL/file triage + local CAS + pivot hints."""
 from __future__ import annotations
 
 import argparse
@@ -23,12 +23,68 @@ import requests
 from lucidota_cas_journal import append_record as append_cas_journal
 
 ROOT = Path(__file__).resolve().parents[1]
-SCHEMA_PATH = ROOT / "06_SCHEMA" / "003_scout_protocol.sql"
+SCHEMA_PATH = ROOT / "06_SCHEMA" / "003_survey_protocol.sql"
 DEFAULT_DB = "postgresql://mfspx@/lucidota_graph"
 DEFAULT_STATE_DB = "postgresql://mfspx@/lucidota_state"
 DEFAULT_VAULT = ROOT / "03_VAULT" / "cas"
 DEFAULT_MAX_BYTES = 1_500_000
 MAX_REDIRECTS = 5
+
+
+def gate_action(
+    state_db_url: str,
+    workflow_id: str,
+    run_id: str,
+    source_id: str,
+    action_name: str,
+    action_kind: str,
+    target: str,
+    requested_by: str = "lucidota_survey",
+    operator_approved: bool = False,
+    explicit_cli_target: bool = False,
+) -> str:
+    """Enforce source_policy through governance_gate before privileged Survey actions."""
+    with psycopg.connect(state_db_url) as conn:
+        policy = conn.execute("""
+          SELECT allowed_actions, requires_user_approval
+          FROM lucidota_control.source_policy
+          WHERE source_id=%s
+        """, (source_id,)).fetchone()
+        if not policy:
+            status = "denied"
+            rationale = f"missing source_policy for {source_id}"
+        else:
+            allowed_actions, requires_user_approval = policy
+            allowed = action_name in (allowed_actions or [])
+            if not allowed:
+                status = "denied"
+                rationale = f"action {action_name} not allowed by source_policy {source_id}"
+            elif requires_user_approval and not (operator_approved or explicit_cli_target):
+                status = "pending"
+                rationale = f"operator approval required by source_policy {source_id}"
+            else:
+                status = "approved" if operator_approved else "not_required"
+                rationale = f"allowed by source_policy {source_id}"
+        conn.execute("""
+          INSERT INTO lucidota_control.governance_gate
+            (workflow_id, run_id, action_kind, requested_by, target, risk_level, policy_mode, approval_status, rationale, evidence, decided_at)
+          VALUES (%s,%s,%s,%s,%s,%s,'user_controlled',%s,%s,%s::jsonb, CASE WHEN %s IN ('approved','denied','not_required') THEN now() ELSE NULL END)
+        """, (
+            workflow_id,
+            run_id,
+            action_kind,
+            requested_by,
+            target,
+            "medium" if status == "pending" else "low",
+            status,
+            rationale,
+            json.dumps({"source_id": source_id, "action": action_name, "explicit_cli_target": explicit_cli_target}),
+            status,
+        ))
+        conn.commit()
+    if status in ("denied", "pending"):
+        raise PermissionError(f"governance gate {status}: {rationale}")
+    return status
 
 
 class LinkAndStructureParser(html.parser.HTMLParser):
@@ -67,7 +123,7 @@ class LinkAndStructureParser(html.parser.HTMLParser):
         }
 
 
-class AhoCorasick:
+class MultiPatternIndex:
     def __init__(self, patterns: Iterable[str]):
         self.goto: list[dict[str, int]] = [dict()]
         self.fail: list[int] = [0]
@@ -119,7 +175,7 @@ class AhoCorasick:
 
 
 @dataclass
-class ScoutResult:
+class SurveyResult:
     target: str
     method: str
     status_code: int | None
@@ -172,7 +228,7 @@ def store_cas(vault: Path, data: bytes) -> tuple[str, str, Path]:
         "cas_uri": cas_uri,
         "relative_path": path.relative_to(vault).as_posix(),
         "size_bytes": len(data),
-        "source": "scout",
+        "source": "survey",
     })
     return digest, cas_uri, path
 
@@ -252,13 +308,13 @@ def source_request(method: str, url: str, timeout: float, allow_local_addresses:
     raise ValueError(f"too many redirects; max {MAX_REDIRECTS}")
 
 
-def fetch_target(target: str, max_bytes: int, timeout: float, do_fetch: bool, allow_local_addresses: bool = False) -> tuple[ScoutResult, bytes | None]:
+def fetch_target(target: str, max_bytes: int, timeout: float, do_fetch: bool, allow_local_addresses: bool = False) -> tuple[SurveyResult, bytes | None]:
     parsed = urlparse(target)
     if parsed.scheme in ("http", "https"):
         head = source_request("HEAD", target, timeout, allow_local_addresses)
         mime = head.headers.get("content-type", "").split(";", 1)[0]
         clen = int(head.headers.get("content-length") or 0) or None
-        base = ScoutResult(
+        base = SurveyResult(
             target=target, method="HEAD", status_code=head.status_code, final_url=head.url,
             content_length=clen, mime=mime, etag=head.headers.get("etag", ""),
             last_modified=head.headers.get("last-modified", ""), sha256=None, cas_uri=None,
@@ -295,7 +351,7 @@ def fetch_target(target: str, max_bytes: int, timeout: float, do_fetch: bool, al
     path = Path(target).expanduser().resolve()
     data = path.read_bytes()
     mime = mimetypes.guess_type(str(path))[0] or "application/octet-stream"
-    result = ScoutResult(
+    result = SurveyResult(
         target=str(path), method="FILE", status_code=None, final_url=str(path),
         content_length=len(data), mime=mime, etag="", last_modified=str(int(path.stat().st_mtime)),
         sha256=None, cas_uri=None, decision="stored_artifact", keyword_hits=[], structure={}, wayback={}, pivot_candidates=[], notes="",
@@ -307,11 +363,11 @@ def fetch_target(target: str, max_bytes: int, timeout: float, do_fetch: bool, al
     return result, data
 
 
-def analyze(result: ScoutResult, data: bytes | None, keywords: list[str], do_wayback: bool, timeout: float) -> None:
+def analyze(result: SurveyResult, data: bytes | None, keywords: list[str], do_wayback: bool, timeout: float) -> None:
     text = ""
     if data:
         text = data[:1_000_000].decode("utf-8", errors="ignore")
-        result.keyword_hits = AhoCorasick(keywords).find(text)
+        result.keyword_hits = MultiPatternIndex(keywords).find(text)
         if "html" in result.mime or "<html" in text[:2000].lower():
             parser = LinkAndStructureParser(result.final_url or result.target)
             parser.feed(text)
@@ -319,7 +375,7 @@ def analyze(result: ScoutResult, data: bytes | None, keywords: list[str], do_way
             for link in parser.links[:50]:
                 result.pivot_candidates.append({"candidate": link, "kind": "link", "score": 20, "reason": "html link"})
         for hit in result.keyword_hits:
-            result.pivot_candidates.append({"candidate": hit["keyword"], "kind": "keyword", "score": 50 + hit["count"], "reason": "aho-corasick hit"})
+            result.pivot_candidates.append({"candidate": hit["keyword"], "kind": "keyword", "score": 50 + hit["count"], "reason": "multi-pattern hit"})
     if do_wayback and urlparse(result.target).scheme in ("http", "https"):
         result.wayback = wayback_lookup(result.target, timeout)
         if result.wayback.get("status") == "ok":
@@ -330,16 +386,16 @@ def analyze(result: ScoutResult, data: bytes | None, keywords: list[str], do_way
                     result.pivot_candidates.append({"candidate": f"https://web.archive.org/web/{ts}/{original}", "kind": "archive", "score": 35, "reason": "wayback capture"})
 
 
-def persist(db_url: str, state_db_url: str, result: ScoutResult, size: int | None) -> None:
+def persist(db_url: str, state_db_url: str, result: SurveyResult, size: int | None) -> None:
     with psycopg.connect(db_url) as conn:
         with conn.cursor() as cur:
             artifact_id = None
             if result.sha256 and result.cas_uri:
                 cur.execute(
                     """
-                    INSERT INTO lucidota_scout.artifact (cas_uri, sha256, size_bytes, mime, source_url)
+                    INSERT INTO lucidota_survey.artifact (cas_uri, sha256, size_bytes, mime, source_url)
                     VALUES (%s,%s,%s,%s,%s)
-                    ON CONFLICT (sha256) DO UPDATE SET source_url = COALESCE(lucidota_scout.artifact.source_url, EXCLUDED.source_url)
+                    ON CONFLICT (sha256) DO UPDATE SET source_url = COALESCE(lucidota_survey.artifact.source_url, EXCLUDED.source_url)
                     RETURNING artifact_id
                     """,
                     (result.cas_uri, result.sha256, size or 0, result.mime, result.target),
@@ -347,9 +403,9 @@ def persist(db_url: str, state_db_url: str, result: ScoutResult, size: int | Non
                 artifact_id = cur.fetchone()[0]
             cur.execute(
                 """
-                INSERT INTO lucidota_scout.scout_observation
+                INSERT INTO lucidota_survey.survey_observation
                 (target, method, status_code, final_url, content_length, mime, etag, last_modified, sha256, artifact_id,
-                 scout_decision, keyword_hits, structure, wayback, notes)
+                 survey_decision, keyword_hits, structure, wayback, notes)
                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb,%s::jsonb,%s)
                 RETURNING observation_id
                 """,
@@ -361,7 +417,7 @@ def persist(db_url: str, state_db_url: str, result: ScoutResult, size: int | Non
             for cand in result.pivot_candidates[:100]:
                 cur.execute(
                     """
-                    INSERT INTO lucidota_scout.pivot_candidate
+                    INSERT INTO lucidota_survey.pivot_candidate
                     (observation_id, source_target, candidate, candidate_kind, score, reason)
                     VALUES (%s,%s,%s,%s,%s,%s)
                     """,
@@ -383,7 +439,7 @@ def persist(db_url: str, state_db_url: str, result: ScoutResult, size: int | Non
                 cur.execute(
                     """
                     INSERT INTO lucidota_control.workflow_event (workflow_id, run_id, phase, status, source, detail)
-                    VALUES ('scout-protocol', %s, 'scout', 'succeeded', 'lucidota_scout', %s::jsonb)
+                    VALUES ('survey-protocol', %s, 'survey', 'succeeded', 'lucidota_survey', %s::jsonb)
                     """,
                     (str(obs_id), json.dumps({"target": result.target, "decision": result.decision, "sha256": result.sha256})),
                 )
@@ -393,7 +449,30 @@ def persist(db_url: str, state_db_url: str, result: ScoutResult, size: int | Non
 
 
 
-def run_one(args, target: str) -> ScoutResult:
+def run_one(args, target: str) -> SurveyResult:
+    parsed = urlparse(target)
+    run_id = hashlib.sha256(f"{target}:{time.time_ns()}".encode()).hexdigest()[:24]
+    if not getattr(args, "no_db", False):
+        if parsed.scheme in ("http", "https"):
+            gate_action(
+                args.state_db_url, "survey-protocol", run_id, "public_web",
+                "get_small_body" if args.fetch else "get_metadata",
+                "external_read", target,
+                operator_approved=getattr(args, "operator_approved", False),
+            )
+        elif parsed.scheme == "":
+            gate_action(
+                args.state_db_url, "survey-protocol", run_id, "local_files",
+                "read_operator_selected_file", "drive_read", target,
+                operator_approved=getattr(args, "operator_approved", False),
+                explicit_cli_target=True,
+            )
+        if args.wayback:
+            gate_action(
+                args.state_db_url, "survey-protocol", run_id, "wayback",
+                "lookup_metadata", "external_read", target,
+                operator_approved=getattr(args, "operator_approved", False),
+            )
     result, data = fetch_target(target, args.max_bytes, args.timeout, args.fetch, getattr(args, "allow_local_addresses", False))
     if data is not None:
         digest, cas_uri, _path = store_cas(args.vault, data)
@@ -408,7 +487,7 @@ def run_one(args, target: str) -> ScoutResult:
 
 
 
-def promotion_candidates(root: ScoutResult, hops: list[dict], threshold: int) -> list[dict]:
+def promotion_candidates(root: SurveyResult, hops: list[dict], threshold: int) -> list[dict]:
     candidates = []
     for cand in root.pivot_candidates:
         if int(cand.get("score", 0)) >= threshold:
@@ -421,7 +500,7 @@ def promotion_candidates(root: ScoutResult, hops: list[dict], threshold: int) ->
     return candidates[:50]
 
 
-def bounded_hop(args, root: ScoutResult) -> list[dict]:
+def bounded_hop(args, root: SurveyResult) -> list[dict]:
     if args.hop_depth <= 0:
         return []
     seen = {root.target}
@@ -447,14 +526,15 @@ def bounded_hop(args, root: ScoutResult) -> list[dict]:
     return hop_results
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description="LUCIDOTA Scout Protocol: HEAD/GET/file triage into local CAS + Postgres.")
+    ap = argparse.ArgumentParser(description="LUCIDOTA Survey Protocol: HEAD/GET/file triage into local CAS + Postgres.")
     ap.add_argument("target", help="URL or local file path")
-    ap.add_argument("--keyword", action="append", default=[], help="Keyword/pattern for Aho-Corasick scan. Repeatable.")
+    ap.add_argument("--keyword", action="append", default=[], help="Keyword/pattern for multi-pattern scan. Repeatable.")
     ap.add_argument("--keywords", default="", help="Comma-separated keywords.")
     ap.add_argument("--fetch", action="store_true", help="Fetch/store small URL bodies after HEAD. Files are read by default.")
     ap.add_argument("--wayback", action="store_true", help="Query Wayback CDX for archival pivots.")
     ap.add_argument("--allow-local-addresses", action="store_true", help="Allow operator-confirmed local-address URL intake. Default is public-web only.")
-    ap.add_argument("--hop-depth", type=int, default=0, help="Bounded link-hop depth for pivot scouting.")
+    ap.add_argument("--operator-approved", action="store_true", help="Mark this explicit operator action as approved for governance-gated enrichment.")
+    ap.add_argument("--hop-depth", type=int, default=0, help="Bounded link-hop depth for pivot surveying.")
     ap.add_argument("--max-pivots", type=int, default=8, help="Maximum pivots to follow per hop.")
     ap.add_argument("--promote-threshold", type=int, default=35, help="Score threshold for promotion candidates.")
     ap.add_argument("--max-bytes", type=int, default=DEFAULT_MAX_BYTES)

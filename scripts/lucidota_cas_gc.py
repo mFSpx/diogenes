@@ -40,7 +40,7 @@ def load_references(conn)->set[str]:
     # not proof that a source/record metadata commit succeeded.
     refs=set()
     queries=[
-        "SELECT sha256 FROM lucidota_scout.artifact WHERE sha256 IS NOT NULL AND sha256 <> ''",
+        "SELECT sha256 FROM lucidota_survey.artifact WHERE sha256 IS NOT NULL AND sha256 <> ''",
     ]
     for sql in queries:
         try:

@@ -8,21 +8,21 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 
 ## Hard Truth Audit
 - **gRPC** `███████░░░ 70%` — Wired for CKDOG1 smoke through Rust tonic/prost <-> Python grpcio. Not yet full product API.
-- **DBOS** `██████░░░░ 62%` — Installed, schema initialized, smoke workflow passes, events table used, Scout has DBOS wrapper. Not yet owning all workflows.
+- **DBOS** `██████░░░░ 62%` — Installed, schema initialized, smoke workflow passes, events table used, Survey has DBOS wrapper. Not yet owning all workflows.
 - **Postgres/AGE/pgvector** `██████░░░░ 60%` — Installed and verified; core schemas exist. Full ontology/vector schemas pending.
-- **Scout/Hop Pivot** `█████████░ 86%` — Working Scout slice with CAS/hash/Aho/Wayback option/pivots and bounded hop v1. Full scraper ladder pending.
+- **Survey/Hop Pivot** `█████████░ 86%` — Working Survey slice with CAS/hash/Aho/Wayback option/pivots and bounded hop v1. Full scraper ladder pending.
 - **River ML** `██████░░░░ 62%` — Installed and now writes online scores from workflow events. Live Bytewax stream and frozen feature schema pending.
 - **Bytewax** `██████░░░░ 62%` — Installed/imports. No live dataflow graph yet.
 - **Treelite** `███████░░░ 70%` — Installed/imports. No compiled router wired yet.
 - **Model runtime** `███████░░░ 68%` — CUDA/llama.cpp/runtime imports exist plus 39 local algorithm primitives. DeepSeek/embedding/router not yet product-wired.
 - **Drive map/import** `███░░░░░░░ 30%` — Key nuclei located; full granular map and imports pending.
-- **Persona INDY_READS** `█░░░░░░░░░ 10%` — Named and sourced in records; runtime persona approximation not yet built.
-- **Progress UI** `█████░░░░░ 55%` — Read-only terminal Big Board v0 now renders build bars, live workflow/wake/CAS/Hydra/reflex counters, GPU status, and JSON export.
+- **Persona LOCAL_READS** `█░░░░░░░░░ 10%` — Named and sourced in records; runtime persona approximation not yet built.
+- **Progress UI** `█████░░░░░ 55%` — Read-only terminal Big Board v0 now renders build bars, live workflow/wake/CAS/Body Capture/reflex counters, GPU status, and JSON export.
 
 ## Phase Bars
 
 ### Validated Today-Slice Through 007
-- **000-007 operator-supervised green slice** `██████████ 100%` — harness verified Project Brain docs, CKDOG1 gRPC smoke, Clawd, Postgres schemas, CAS, DBOS wrappers/events, Bytewax/River/Treelite hints, Scout/Hop safety gates. This is not claiming every global backlog item is complete.
+- **000-007 operator-supervised green slice** `██████████ 100%` — harness verified Project Brain docs, CKDOG1 gRPC smoke, Clawd, Postgres schemas, CAS, DBOS wrappers/events, Bytewax/River/Treelite hints, Survey/Hop safety gates. This is not claiming every global backlog item is complete.
 
 - **000 Project Brain / Governance** `█████████░ 92%` (16 done / 1 partial / 1 open)
 - **001 Kernel / CKDOG1** `████████░░ 81%` (14 done / 1 partial / 3 open)
@@ -31,11 +31,11 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - **004 Storage / Vault / CAS** `███████░░░ 72%` (12 done / 2 partial / 4 open)
 - **005 DBOS Workflow Plane** `███████░░░ 70%` (12 done / 2 partial / 4 open)
 - **006 Bytewax / River / Treelite Reflex Team** `█████████░ 92%` (18 done / 0 partial / 0 open)
-- **007 Scout / Hop Pivot / Authorized Extractors** `█████████░ 85%` (19 done / 1 partial / 3 open)
-- **008 Hydra / Capture / Evidence Diff** `█████████░ 93%` (23 done / 1 partial / 1 open)
+- **007 Survey / Hop Pivot / Authorized Extractors** `█████████░ 85%` (19 done / 1 partial / 3 open)
+- **008 Body Capture / Capture / Evidence Diff** `█████████░ 93%` (23 done / 1 partial / 1 open)
 - **009 Drive / External Memory / Imports** `██████░░░░ 59%` (12 done / 2 partial / 8 open)
 - **010 Model Runtime / Local Brain** `███████░░░ 68%` (13 done / 2 partial / 3 open; primitive library widened to 40 wrappers)
-- **011 INDY_READS / Persona / Assistant Layer** `███░░░░░░░ 28%` (4 done / 2 partial / 12 open)
+- **011 LOCAL_READS / Persona / Assistant Layer** `███░░░░░░░ 28%` (4 done / 2 partial / 12 open)
 - **012 Big Board / UI / Progress Bars** `███████░░░ 72%` (14 done / 0 partial / 4 open)
 - **013 Security / Auth / Credentials** `██████░░░░ 60%` (9 done / 2 partial / 7 open)
 - **014 Verification / Release / Product Slice** `█████████░ 92%` (20 done / 0 partial / 0 open)
@@ -59,8 +59,8 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 014. DBOS + Bytewax team model recorded
 - [x] 015. Drive mapping rules recorded
 - [x] 016. No secret values in tracked docs rule recorded
-- [ ] 017. PARTIAL: INDY_READS persona intake started from existing records
-- [ ] 018. Full INDY_READS persona approximation generated and wired into runtime prompts
+- [ ] 017. PARTIAL: LOCAL_READS persona intake started from existing records
+- [ ] 018. Full LOCAL_READS persona approximation generated and wired into runtime prompts
 
 ### 001 Kernel / CKDOG1 — ████████░░ 81%
 - [x] 019. doggystyle cloned under 01_REPOS
@@ -90,7 +90,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 041. Generated tonic/prost client compiled
 - [x] 042. claw diogenes-smoke command exists
 - [x] 043. claw diogenes-smoke starts CKDOG1 and calls gRPC
-- [x] 044. claw lucidota-scout command exists
+- [x] 044. claw lucidota-survey command exists
 - [x] 045. Clawd plugin hook runner repaired
 - [x] 046. Private UI/theming track recorded
 - [ ] 047. PARTIAL: Morrowind-inspired status bar spec recorded, not fully coded
@@ -112,21 +112,21 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 061. DBOS/Postgres topology note created
 - [x] 062. control-plane schema applied
 - [x] 063. model runtime schema applied
-- [x] 064. scout schema applied
+- [x] 064. survey schema applied
 - [x] 065. learning/reflex schema applied
 - [x] 066. workflow_event table exists
 - [x] 067. governance_gate table exists
 - [x] 068. source_policy table exists
-- [x] 069. Artifact metadata schema exists for Scout/local CAS artifacts
+- [x] 069. Artifact metadata schema exists for Survey/local CAS artifacts
 - [ ] 070. encrypted local CAS finalized
 - [x] 071. AGE provenance graph writer implemented for pivots/promotions
 - [ ] 072. pgvector chunk schema finalized
 
 ### 004 Storage / Vault / CAS — ███████░░░ 72%
 - [x] 073. Vault directory exists with no-commit rule
-- [x] 074. Scout stores artifacts in local CAS
-- [x] 075. Scout computes SHA-256
-- [x] 076. Scout persists artifact metadata
+- [x] 074. Survey stores artifacts in local CAS
+- [x] 075. Survey computes SHA-256
+- [x] 076. Survey persists artifact metadata
 - [x] 077. Originals immutable rule recorded
 - [x] 078. MinIO not canonical rule recorded
 - [x] 078A. Storage decision matrix written; Cassandra marked non-canonical
@@ -137,7 +137,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 083. CAS GC report-first mark/sweep implemented
 - [x] 084. CAS manifest/index implemented
 - [ ] 085. CAS restore/export implemented
-- [x] 086. CAS->AGE provenance edge writer implemented for Scout artifacts
+- [x] 086. CAS->AGE provenance edge writer implemented for Survey artifacts
 - [x] 087. Vault integrity checker implemented
 - [x] 087A. CAS GC smoke wired into full harness
 - [x] 088. CAS orphan quarantine path implemented; no delete mode
@@ -149,9 +149,9 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 092. DBOS smoke workflow runs
 - [x] 093. DBOS initializes system schema
 - [x] 094. workflow_event conventions exist
-- [x] 095. Scout emits workflow_event
+- [x] 095. Survey emits workflow_event
 - [x] 096. Harness runs DBOS smoke
-- [x] 097. DBOS Scout workflow wrapper implemented
+- [x] 097. DBOS Survey workflow wrapper implemented
 - [ ] 098. PARTIAL: DBOS policy/gate tables exist but are not enforced by all actions
 - [x] 099. DBOS workflow registry implemented
 - [ ] 100. DBOS retry policy implemented
@@ -180,7 +180,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 118. Bytewax mini live dataflow graph implemented
 - [x] 119. Bytewax TestingSource ordering proof implemented
 - [x] 120. River feature schema frozen for v0 source/phase/decision/status features
-- [x] 121. Bytewax-to-hint persistence implemented for DBOS/scout events
+- [x] 121. Bytewax-to-hint persistence implemented for DBOS/survey events
 - [x] 122. Treelite router artifact generated in ignored local vault
 - [ ] 123. Treelite router called from DBOS policy
 - [x] 124. XGBoost kept offline-only by policy; current Treelite proof uses no XGBoost runtime
@@ -188,17 +188,17 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 126. Reflex audit trail persisted through river_run/bytewax_stream_run/treelite_router_run
 - [x] 126A. Wake Bus canon wired into Section V event stream plan
 
-### 007 Scout / Hop Pivot / Authorized Extractors — █████████░ 85%
-- [x] 127. Scout CLI exists
+### 007 Survey / Hop Pivot / Authorized Extractors — █████████░ 85%
+- [x] 127. Survey CLI exists
 - [x] 128. HEAD/GET/file triage implemented
 - [x] 129. Size gate implemented
-- [x] 130. Aho-Corasick keyword scan implemented
+- [x] 130. multi-pattern keyword scan implemented
 - [x] 131. HTML structure summary implemented
 - [x] 132. Pivot link extraction implemented
 - [x] 133. Wayback optional lookup implemented
 - [x] 134. Postgres persistence implemented
 - [x] 135. Clawd subcommand wired
-- [x] 136. Harness smoke covers Scout
+- [x] 136. Harness smoke covers Survey
 - [ ] 137. PARTIAL: Tree-sitter slot exists but real Tree-sitter parser not installed/wired
 - [x] 138. Bounded link discovery / hop pivot capability named and persisted
 - [x] 139. Bounded hop expansion implemented
@@ -216,12 +216,12 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 148C. Browser fallback explicitly non-default in extractor registry
 - [x] 148D. Extractor registry smoke wired into harness
 
-### 008 Hydra / Capture / Evidence Diff — █████████░ 93%
-- [x] 149. Hydra Head brainstorm reconciled as candidate subsystem
+### 008 Body Capture / Capture / Evidence Diff — █████████░ 93%
+- [x] 149. Body Capture Head brainstorm reconciled as candidate subsystem
 - [x] 150. Screenshot/capture requirement recorded
 - [x] 151. Wayback requirement recorded
 - [x] 152. SHA-256 evidence rule exists
-- [x] 153. Hydra HTTP-body capture writes current artifact hash
+- [x] 153. Body Capture HTTP-body capture writes current artifact hash
 - [~] 154. Browser capture contract implemented; real screenshot waits on clean browser binary
 - [~] 155. Visual hash slot and browser fallback tool exist; skipped without usable browser
 - [x] 156. Capture bytes stored in CAS for HTTP-body v0
@@ -233,19 +233,19 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 162. Evidence bundle export implemented
 - [x] 163. Capture provenance AGE edge implemented as CAPTURED_AS
 - [x] 164. Watcher profile policy evaluator implemented
-- [x] 165. Hydra policy harness smoke implemented; scheduling pending
+- [x] 165. Body Capture policy harness smoke implemented; scheduling pending
 - [ ] 166. Visual diff review UI implemented
-- [x] 166A. Hydra v0 harness smoke added
-- [x] 166B. Hydra graph/state DB split fixed after adversarial audit
-- [x] 166C. Hydra watcher law recorded
+- [x] 166A. Body Capture v0 harness smoke added
+- [x] 166B. Body Capture graph/state DB split fixed after adversarial audit
+- [x] 166C. Body Capture watcher law recorded
 - [x] 166D. Adversarial audit record created
 - [x] 166E. Browser fallback contract implemented with safe skip
-- [x] 166F. Hydra visual channel design recorded
-- [x] 166G. Tri-Algo conduit signal gate wired before Hydra CAS writes
+- [x] 166F. Body Capture visual channel design recorded
+- [x] 166G. Tri-Algo conduit signal gate wired before Body Capture CAS writes
 - [x] 166H. Signal ingress schema records standby/burst/recover decisions
-- [x] 166I. Hydra graph-local workflow_event_outbox prevents silent state split-brain
+- [x] 166I. Body Capture graph-local workflow_event_outbox prevents silent state split-brain
 - [x] 166J. Wake Bus batch delivery CTE removes O(N) update round trips
-- [x] 166K. Scout local-address gate uses explicit ipaddress properties, no obfuscation
+- [x] 166K. Survey local-address gate uses explicit ipaddress properties, no obfuscation
 
 ### 009 Drive / External Memory / Imports — ██████░░░░ 59%
 - [x] 167. Google Drive connector available
@@ -293,15 +293,15 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 206A. Local algorithm primitives wrapped under ALGOS: HDC, NLMS, SSIM, MinHash, Possum filter, OPOSSUM RBF surrogate, Thanatosis, Capybara Optimization, Hoeffding stream split, Schoolfield poikilotherm, Serpentina self-righting, Chelydrid ambush-strike
 - [x] 206B. Algorithm primitive smoke wired into harness (40 modules)
 
-### 011 INDY_READS / Persona / Assistant Layer — ███░░░░░░░ 28%
-- [x] 207. INDY_READS marked active assistant/persona
+### 011 LOCAL_READS / Persona / Assistant Layer — ███░░░░░░░ 28%
+- [x] 207. LOCAL_READS marked active assistant/persona
 - [x] 208. Operator identity recorded
 - [x] 209. Project brain answers basic status from docs
 - [x] 210. Quiet side-process rule recorded
 - [ ] 211. PARTIAL: Persona source exists in Drive/archives but not fully extracted
 - [ ] 212. PARTIAL: Persona approximation not yet generated as prompt/runtime contract
-- [ ] 213. Indy persona Drive targets mapped
-- [ ] 214. Indy persona corpus imported to private vault
+- [ ] 213. Local Reads persona Drive targets mapped
+- [ ] 214. Local Reads persona corpus imported to private vault
 - [ ] 215. Persona distillation note produced
 - [ ] 216. Runtime system prompt contract produced
 - [ ] 217. Task memory routines implemented
@@ -363,7 +363,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 267. Rust workspace tests in harness
 - [x] 268. Clawd release build in harness
 - [x] 269. Clawd gRPC smoke in harness
-- [x] 270. Scout smoke in harness
+- [x] 270. Survey smoke in harness
 - [x] 271. River reflex smoke added to harness
 - [x] 272. Full harness rerun after latest River/Bytewax edits
 - [ ] 273. Tree-sitter smoke in harness
@@ -396,32 +396,32 @@ Do **not** chase more smoke-test percentage. Bias the next real work toward clos
 
 1. **Autonomous Hop Pivot / perception first** — the reflex loop needs real event volume and varied outcomes.
 2. **Bytewax/River/Treelite reflex spine second, but not later** — every Hop Pivot action must emit events in the shape the reflex system will consume.
-3. **Hydra capture/diff third** — once Hop Pivot promotes candidates, capture and diff become evidence-grade.
-4. **INDY_READS/Village fourth** — do not let persona work block crawling/reflex, but keep the sideload boundary clean.
+3. **Body Capture capture/diff third** — once Hop Pivot promotes candidates, capture and diff become evidence-grade.
+4. **LOCAL_READS/Village fourth** — do not let persona work block crawling/reflex, but keep the sideload boundary clean.
 
 ### New North-Star Loop
 
 ```text
-Scout target
+Survey target
   -> bounded Hop Pivot expands candidates
   -> every candidate/action emits DBOS workflow_event
   -> Bytewax normalizes live stream
   -> River updates source/route/trust/failure scores
   -> Treelite serves compiled routing hints
   -> DBOS chooses next workflow under governance
-  -> Hydra captures promoted evidence
+  -> Body Capture captures promoted evidence
   -> AGE/pgvector/CAS persist provenance, semantics, bytes
 ```
 
 ### Immediate Priority Delta
 
 - Promote 007 from `64%` to `75%` by implementing real queue-backed hop rounds, source-policy gates, and AGE edges.
-- Promote 006 from `56%` to `70%` by wiring Bytewax to actual DBOS/scout events and producing bounded River features.
+- Promote 006 from `56%` to `70%` by wiring Bytewax to actual DBOS/survey events and producing bounded River features.
 - Promote 008 from `25%` to `45%` by adding current-page capture + hash + diff shell.
 - Keep 011 persona at low priority until the system has enough behavior to profile.
 
 - [x] 280A. Code language scanner wired into harness for executable/schema paths
-- [x] 280B. Hydra evidence bundle smoke wired into harness
+- [x] 280B. Body Capture evidence bundle smoke wired into harness
 - [x] 280C. Big Board JSON smoke wired into harness
 - [x] 280D. Tri-Algo conduit smoke wired into algorithm harness
 

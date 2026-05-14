@@ -41,7 +41,7 @@ def load_events(conn: psycopg.Connection, limit: int) -> list[Event]:
     rows = conn.execute(
         """
         SELECT event_id::text, created_at::text, source, phase, status,
-               COALESCE(detail->>'decision', detail->>'scout_decision', '') AS decision
+               COALESCE(detail->>'decision', detail->>'survey_decision', '') AS decision
         FROM lucidota_control.workflow_event
         WHERE status IN ('succeeded', 'failed')
         ORDER BY created_at ASC, event_id ASC
@@ -57,7 +57,7 @@ def features(e: Event) -> dict[str, object]:
         "source": e.source,
         "phase": e.phase,
         "decision": e.decision or "none",
-        "is_scout": int(e.source == "lucidota_scout"),
+        "is_survey": int(e.source == "lucidota_survey"),
     }
 
 

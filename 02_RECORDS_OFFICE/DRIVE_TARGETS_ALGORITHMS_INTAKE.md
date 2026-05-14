@@ -20,7 +20,7 @@ This tracked note is intentionally summary-only. Earlier noncanonical Drive item
 
 ```text
 operator-selected source
-  -> Scout metadata/hash/CAS
+  -> Survey metadata/hash/CAS
   -> durable observation
   -> optional bounded link discovery
   -> AGE/pgvector ingestion after governance

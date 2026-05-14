@@ -1,4 +1,4 @@
-# Hydra / Watcher Law
+# Body Capture / Watcher Law
 
 > All visual diffs are evidence. Not all visual diffs are alerts.
 

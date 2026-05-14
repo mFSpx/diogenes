@@ -3,7 +3,7 @@
 ## Locked For Current Dev Build
 
 - `northern.strike` is the operator name.
-- Current assistant/persona identity is `INDY_READS`.
+- Current assistant/persona identity is `LOCAL_READS`.
 - `claudecode` / Clawd is the intended user-facing interface shell.
 - `doggystyle` / CKDOG1 is the kernel target.
 - gRPC is the cross-language API boundary.
@@ -11,7 +11,7 @@
 - PostgreSQL + pgvector + Apache AGE are the intended graph/vector/state substrate.
 - Storage should start as an encrypted local file vault / invisible CAS, not S3-first.
 - Brainstorm components are not architecture until reconciled against locked decisions and marked confirmed/candidate/conflict/rename/defer.
-- Hop/pivot search, Scout Protocol, Aho-Corasick scanning, Tree-sitter structural parsing, and Wayback archival lookup are promoted required capabilities; final subsystem names may change.
+- Hop/pivot search, Survey Protocol, multi-pattern scanning, Tree-sitter structural parsing, and Wayback archival lookup are promoted required capabilities; final subsystem names may change.
 - XGBoost is never runtime. If used, it is offline training/export only; Treelite is the lightweight compiled inference path.
 - Architecture must stay light, local, fast, inspectable, and sharper than heavyweight mainstream stacks.
 - Original evidence files are immutable.
@@ -71,7 +71,7 @@ Credential handling frame: Inventory credential file locations and store only re
   - Local CAS vault: immutable artifact bytes addressed by SHA-256.
 - Cassandra is only a future candidate if a separate high-volume, append-only event/time-series workload appears and Postgres/Bytewax/River are insufficient.
 
-## Hydra / Watcher Law
+## Body Capture / Watcher Law
 
 All visual diffs are evidence. Not all visual diffs are alerts.
 

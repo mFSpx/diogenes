@@ -1,9 +1,9 @@
--- Scout / hop-pivot intake schema for LUCIDOTA.
+-- Survey / hop-pivot intake schema for LUCIDOTA.
 -- Light, local, boring tables: durable surface for Clawd, DBOS, Bytewax, and Big Board.
 
-CREATE SCHEMA IF NOT EXISTS lucidota_scout;
+CREATE SCHEMA IF NOT EXISTS lucidota_survey;
 
-CREATE TABLE IF NOT EXISTS lucidota_scout.artifact (
+CREATE TABLE IF NOT EXISTS lucidota_survey.artifact (
     artifact_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     cas_uri text UNIQUE NOT NULL,
     sha256 text UNIQUE NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS lucidota_scout.artifact (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS lucidota_scout.scout_observation (
+CREATE TABLE IF NOT EXISTS lucidota_survey.survey_observation (
     observation_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     target text NOT NULL,
     method text NOT NULL CHECK (method IN ('HEAD', 'GET', 'FILE')),
@@ -29,8 +29,8 @@ CREATE TABLE IF NOT EXISTS lucidota_scout.scout_observation (
     etag text NOT NULL DEFAULT '',
     last_modified text NOT NULL DEFAULT '',
     sha256 text,
-    artifact_id uuid REFERENCES lucidota_scout.artifact(artifact_id),
-    scout_decision text NOT NULL CHECK (scout_decision IN (
+    artifact_id uuid REFERENCES lucidota_survey.artifact(artifact_id),
+    survey_decision text NOT NULL CHECK (survey_decision IN (
         'metadata_only',
         'stored_artifact',
         'too_large',
@@ -44,12 +44,12 @@ CREATE TABLE IF NOT EXISTS lucidota_scout.scout_observation (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS scout_observation_target_idx
-    ON lucidota_scout.scout_observation (target, created_at DESC);
+CREATE INDEX IF NOT EXISTS survey_observation_target_idx
+    ON lucidota_survey.survey_observation (target, created_at DESC);
 
-CREATE TABLE IF NOT EXISTS lucidota_scout.pivot_candidate (
+CREATE TABLE IF NOT EXISTS lucidota_survey.pivot_candidate (
     candidate_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    observation_id uuid REFERENCES lucidota_scout.scout_observation(observation_id) ON DELETE CASCADE,
+    observation_id uuid REFERENCES lucidota_survey.survey_observation(observation_id) ON DELETE CASCADE,
     source_target text NOT NULL,
     candidate text NOT NULL,
     candidate_kind text NOT NULL CHECK (candidate_kind IN ('link', 'keyword', 'archive', 'structural')),
@@ -59,4 +59,4 @@ CREATE TABLE IF NOT EXISTS lucidota_scout.pivot_candidate (
 );
 
 CREATE INDEX IF NOT EXISTS pivot_candidate_score_idx
-    ON lucidota_scout.pivot_candidate (score DESC, created_at DESC);
+    ON lucidota_survey.pivot_candidate (score DESC, created_at DESC);

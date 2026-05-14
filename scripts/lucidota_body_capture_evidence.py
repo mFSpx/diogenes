@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Hydra evidence bundle + text/Wayback diff.
+"""Body Capture evidence bundle + text/Wayback diff.
 
-Reads latest Hydra captures from local CAS, computes a compact text diff and
+Reads latest Body Capture captures from local CAS, computes a compact text diff and
 exports a JSON evidence bundle. Optional Wayback comparison fetches one archived
 snapshot for current-vs-archive drift without making Wayback mandatory in the
 harness.
@@ -22,14 +22,14 @@ import psycopg
 import requests
 
 ROOT = Path(__file__).resolve().parents[1]
-SCHEMA = ROOT / "06_SCHEMA" / "011_hydra_capture.sql"
+SCHEMA = ROOT / "06_SCHEMA" / "011_body_capture.sql"
 DB = os.environ.get("LUCIDOTA_GRAPH_DATABASE_URL", "postgresql://mfspx@/lucidota_graph")
 DEFAULT_VAULT = ROOT / "03_VAULT" / "cas"
-DEFAULT_OUT = ROOT / "05_OUTPUTS" / "hydra_bundles"
+DEFAULT_OUT = ROOT / "05_OUTPUTS" / "body_capture_bundles"
 
 import sys
 sys.path.insert(0, str(ROOT / "scripts"))
-from lucidota_hydra_capture import canonical_hashes  # noqa: E402
+from lucidota_body_capture import canonical_hashes  # noqa: E402
 
 
 def cas_path(vault: Path, cas_uri: str) -> Path:
@@ -107,7 +107,7 @@ def latest_captures(conn, source: str) -> list[dict]:
         """
         SELECT capture_id::text, source, capture_kind, sha256, cas_uri, size_bytes,
                mime, title, content_hash, structure_hash, visual_hash, created_at::text
-        FROM lucidota_hydra.capture
+        FROM lucidota_body_capture.capture
         WHERE source=%s AND status='succeeded' AND cas_uri IS NOT NULL AND cas_uri <> ''
         ORDER BY created_at DESC LIMIT 2
         """,
@@ -160,7 +160,7 @@ def safe_name(source: str) -> str:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(prog="lucidota-hydra-evidence")
+    ap = argparse.ArgumentParser(prog="lucidota-body_capture-evidence")
     ap.add_argument("source")
     ap.add_argument("--db-url", default=DB)
     ap.add_argument("--vault", type=Path, default=DEFAULT_VAULT)
@@ -175,7 +175,7 @@ def main() -> int:
         conn.execute(SCHEMA.read_text())
         caps = latest_captures(conn, args.source)
         if not caps:
-            report = {"ok": False, "error": "no successful hydra captures for source", "source": args.source}
+            report = {"ok": False, "error": "no successful body_capture captures for source", "source": args.source}
             print(json.dumps(report, sort_keys=True) if args.json else report)
             return 1
         new = caps[0]
@@ -186,7 +186,7 @@ def main() -> int:
         wb = wayback_compare(args.source, new_text, args.wayback_timeout, args.diff_limit) if args.wayback else {"status": "skipped"}
         summary = summarize(args.source, old, new, text_delta, wb)
         bundle = {
-            "schema": "lucidota.hydra.evidence_bundle.v0",
+            "schema": "lucidota.body_capture.evidence_bundle.v0",
             "source": args.source,
             "generated_at_epoch": int(time.time()),
             "summary": summary,
@@ -202,7 +202,7 @@ def main() -> int:
         out_path.write_text(payload + "\n", encoding="utf-8")
         row = conn.execute(
             """
-            INSERT INTO lucidota_hydra.evidence_bundle
+            INSERT INTO lucidota_body_capture.evidence_bundle
               (source, old_capture_id, new_capture_id, bundle_sha256, bundle_path, summary, detail)
             VALUES (%s,%s,%s,%s,%s,%s,%s::jsonb)
             RETURNING bundle_id::text
@@ -212,7 +212,7 @@ def main() -> int:
         # Put a compact summary back on the delta row when possible.
         conn.execute(
             """
-            UPDATE lucidota_hydra.delta
+            UPDATE lucidota_body_capture.delta
             SET detail = detail || %s::jsonb
             WHERE source=%s AND new_capture_id=%s::uuid
             """,

@@ -64,14 +64,14 @@ Schoolfield normalized_activity(queue_pressure)
 
 Use: avoid blind `deliver_pending(limit)` ordering. Rank pending outbox rows by heat, recovery odds, fairness debt, and circuit status.
 
-### 2. Hydra capture / evidence diff
+### 2. Body Capture capture / evidence diff
 
 Files:
-- `scripts/lucidota_hydra_capture.py`
-- `scripts/lucidota_hydra_evidence.py`
-- `scripts/lucidota_hydra_policy.py`
-- `scripts/lucidota_hydra_browser_capture.py`
-- `06_SCHEMA/011_hydra_capture.sql`
+- `scripts/lucidota_body_capture.py`
+- `scripts/lucidota_body_capture_evidence.py`
+- `scripts/lucidota_body_capture_policy.py`
+- `scripts/lucidota_browser_body_capture.py`
+- `06_SCHEMA/011_body_capture.sql`
 
 Hardwire pattern:
 - Perceptual dedupe + SSIM: replace screenshot byte-hash placeholder with stable pHash/dHash + SSIM review buckets.
@@ -88,15 +88,15 @@ Possum cluster suppression on similar sources
   -> capture priority and reviewer queue
 ```
 
-Use: Hydra stops treating every URL equally; it captures novel/high-signal evidence first.
+Use: Body Capture stops treating every URL equally; it captures novel/high-signal evidence first.
 
-### 3. Scout / Hop Pivot / authorized extractors
+### 3. Survey / Hop Pivot / authorized extractors
 
 Files:
-- `scripts/lucidota_scout.py`
+- `scripts/lucidota_survey.py`
 - `scripts/lucidota_hop_pivot.py`
 - `scripts/lucidota_extractor_registry.py`
-- `06_SCHEMA/003_scout_protocol.sql`
+- `06_SCHEMA/003_survey_protocol.sql`
 - `06_SCHEMA/008_hop_pivot.sql`
 - `06_SCHEMA/012_authorized_extractors.sql`
 
@@ -268,7 +268,7 @@ Use: block commits/exports that leak auth material or fake sanitized status.
 
 1. `lucidota_wake_bus.py`: add algorithmic ranking/admission without changing truth schema.
 2. `lucidota_hop_pivot.py`: Possum + Bandit + RBF + Hoeffding for pivot selection/promotion.
-3. `lucidota_hydra_evidence.py`: pHash/SSIM/MinHash/Bayes evidence priority.
+3. `lucidota_body_capture_evidence.py`: pHash/SSIM/MinHash/Bayes evidence priority.
 4. `lucidota_big_board.py`: cockpit honesty / anti-slop / audit debt banner.
 5. `lucidota_runtime_smoke.py` + model registry: Schoolfield + regret model route governor.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write Scout/Hop/CAS provenance edges into Apache AGE."""
+"""Write Survey/Hop/CAS provenance edges into Apache AGE."""
 from __future__ import annotations
 import argparse, json, os
 import psycopg
@@ -21,7 +21,7 @@ def main():
         if not exists: cur.execute(f"SELECT create_graph('{GRAPH}')")
         rows=cur.execute("""
           SELECT source_target,candidate,candidate_kind,score,reason
-          FROM lucidota_scout.pivot_candidate
+          FROM lucidota_survey.pivot_candidate
           ORDER BY created_at DESC LIMIT %s
         """, (args.limit,)).fetchall()
         edges=0
@@ -52,7 +52,7 @@ def main():
             edges+=1
         arows=cur.execute("""
           SELECT source_url, cas_uri, sha256, size_bytes, mime
-          FROM lucidota_scout.artifact
+          FROM lucidota_survey.artifact
           WHERE source_url IS NOT NULL AND source_url <> ''
           ORDER BY created_at DESC LIMIT %s
         """, (args.limit,)).fetchall()
@@ -70,7 +70,7 @@ def main():
         try:
             crows=cur.execute("""
               SELECT source, cas_uri, sha256, size_bytes, mime, capture_kind
-              FROM lucidota_hydra.capture
+              FROM lucidota_body_capture.capture
               WHERE cas_uri IS NOT NULL AND cas_uri <> ''
               ORDER BY created_at DESC LIMIT %s
             """, (args.limit,)).fetchall()

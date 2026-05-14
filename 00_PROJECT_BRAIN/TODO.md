@@ -75,4 +75,4 @@
 - [ ] DBOS local setup.
 - [ ] Postgres + pgvector + AGE local setup.
 - [ ] Bytewax/River/Treelite integration.
-- [ ] INDY_READS calendar/reminder/wiki routines.
+- [ ] LOCAL_READS calendar/reminder/wiki routines.

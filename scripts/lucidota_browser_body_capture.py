@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hydra browser capture contract.
+"""Body Capture browser capture contract.
 
 Browser rendering is policy-gated fallback, not default extraction. If no browser
 binary is available, this reports skipped instead of fake success.
@@ -11,12 +11,12 @@ import psycopg
 
 ROOT=Path(__file__).resolve().parents[1]
 GRAPH_DB=os.environ.get('LUCIDOTA_GRAPH_DATABASE_URL','postgresql://mfspx@/lucidota_graph')
-SCHEMA=ROOT/'06_SCHEMA'/'011_hydra_capture.sql'
+SCHEMA=ROOT/'06_SCHEMA'/'011_body_capture.sql'
 DEFAULT_VAULT=ROOT/'03_VAULT'/'cas'
 
 import sys
 sys.path.insert(0, str(ROOT/'scripts'))
-import lucidota_scout as scout  # noqa: E402
+import lucidota_survey as survey  # noqa: E402
 
 
 def browser_bin()->str|None:
@@ -32,7 +32,7 @@ def visual_hash(data: bytes)->str:
 
 
 def main()->int:
-    ap=argparse.ArgumentParser(prog='lucidota-hydra-browser-capture')
+    ap=argparse.ArgumentParser(prog='lucidota-body_capture-browser-capture')
     ap.add_argument('source')
     ap.add_argument('--db-url', default=GRAPH_DB)
     ap.add_argument('--vault', type=Path, default=DEFAULT_VAULT)
@@ -46,7 +46,7 @@ def main()->int:
         report={'ok':True,'skipped':True,'reason':'no_browser_binary','browser_default':False}
         print(json.dumps(report, sort_keys=True) if args.json else report)
         return 0
-    with tempfile.TemporaryDirectory(prefix='lucidota-hydra-browser.') as td:
+    with tempfile.TemporaryDirectory(prefix='lucidota-body_capture-browser.') as td:
         out=Path(td)/'shot.png'
         profile=Path(td)/'profile'
         cmd=[b,'--headless=new','--disable-gpu','--no-first-run','--disable-dev-shm-usage','--hide-scrollbars',f'--window-size={args.width},{args.height}',f'--user-data-dir={profile}',f'--screenshot={out}',args.source]
@@ -61,12 +61,12 @@ def main()->int:
             print(json.dumps(report, sort_keys=True) if args.json else report)
             return 1
         data=out.read_bytes()
-    digest, cas_uri, _=scout.store_cas(args.vault,data)
+    digest, cas_uri, _=survey.store_cas(args.vault,data)
     vhash=visual_hash(data)
     with psycopg.connect(args.db_url) as conn:
         conn.execute(SCHEMA.read_text())
         row=conn.execute("""
-          INSERT INTO lucidota_hydra.capture
+          INSERT INTO lucidota_body_capture.capture
             (source,capture_kind,status,sha256,cas_uri,size_bytes,mime,title,visual_hash,detail)
           VALUES (%s,'screenshot_placeholder','succeeded',%s,%s,%s,'image/png','',%s,%s::jsonb)
           RETURNING capture_id

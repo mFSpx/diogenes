@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hydra watcher policy evaluator.
+"""Body Capture watcher policy evaluator.
 
 Evaluates latest capture pairs against watcher profiles. Capture is evidence;
 alerts are policy-dependent.
@@ -10,7 +10,7 @@ from pathlib import Path
 import psycopg
 
 ROOT=Path(__file__).resolve().parents[1]
-SCHEMA=ROOT/'06_SCHEMA'/'011_hydra_capture.sql'
+SCHEMA=ROOT/'06_SCHEMA'/'011_body_capture.sql'
 DB=os.environ.get('LUCIDOTA_GRAPH_DATABASE_URL','postgresql://mfspx@/lucidota_graph')
 ORDER={'ignore':0,'record_only':1,'alert':2,'escalate':3}
 
@@ -21,7 +21,7 @@ def max_outcome(*vals):
 
 def ensure_assignment(conn, source:str, profile:str):
     conn.execute("""
-      INSERT INTO lucidota_hydra.watcher_assignment (source, profile_id, enabled, notes)
+      INSERT INTO lucidota_body_capture.watcher_assignment (source, profile_id, enabled, notes)
       VALUES (%s,%s,true,'auto v0 assignment')
       ON CONFLICT (source) DO UPDATE SET profile_id=EXCLUDED.profile_id, enabled=true, updated_at=now()
     """, (source, profile))
@@ -30,8 +30,8 @@ def ensure_assignment(conn, source:str, profile:str):
 def evaluate(conn, source:str):
     row=conn.execute("""
       SELECT wa.profile_id, wp.alert_on_content, wp.alert_on_structure, wp.alert_on_visual, wp.visual_mode, wp.min_severity
-      FROM lucidota_hydra.watcher_assignment wa
-      JOIN lucidota_hydra.watcher_profile wp USING(profile_id)
+      FROM lucidota_body_capture.watcher_assignment wa
+      JOIN lucidota_body_capture.watcher_profile wp USING(profile_id)
       WHERE wa.source=%s AND wa.enabled
     """, (source,)).fetchone()
     if not row:
@@ -39,7 +39,7 @@ def evaluate(conn, source:str):
     profile_id, alert_content, alert_structure, alert_visual, visual_mode, min_severity = row
     caps=conn.execute("""
       SELECT capture_id, content_hash, structure_hash, visual_hash, sha256
-      FROM lucidota_hydra.capture
+      FROM lucidota_body_capture.capture
       WHERE source=%s AND status='succeeded'
       ORDER BY created_at DESC LIMIT 2
     """, (source,)).fetchall()
@@ -65,7 +65,7 @@ def evaluate(conn, source:str):
     if ORDER[outcome] < ORDER[min_severity] and outcome != 'ignore' and reasons != ['first_capture']:
         outcome=min_severity
     dec=conn.execute("""
-      INSERT INTO lucidota_hydra.watcher_decision
+      INSERT INTO lucidota_body_capture.watcher_decision
         (source,profile_id,old_capture_id,new_capture_id,content_changed,structure_changed,visual_changed,outcome,rationale,detail)
       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb)
       RETURNING decision_id
@@ -74,7 +74,7 @@ def evaluate(conn, source:str):
 
 
 def main()->int:
-    ap=argparse.ArgumentParser(prog='lucidota-hydra-policy')
+    ap=argparse.ArgumentParser(prog='lucidota-body_capture-policy')
     ap.add_argument('source')
     ap.add_argument('--profile', default='content_truth')
     ap.add_argument('--db-url', default=DB)

@@ -11,12 +11,12 @@ Status: active
 - Fix: Postgres trigger `workflow_event_outbox_trigger` now writes `event_outbox` in the same DB transaction.
 - Proof: harness inserts `workflow_event` and fails unless matching outbox row exists.
 
-### CRITICAL: Hydra v0 JSON output lied when graph write rolled back
+### CRITICAL: Body Capture v0 JSON output lied when graph write rolled back
 
-- Finding: Hydra wrote capture metadata in graph DB, then attempted workflow event in graph DB where control schema does not exist. The caught exception left transaction state unsafe and capture rows were not persisted despite JSON success.
+- Finding: Body Capture wrote capture metadata in graph DB, then attempted workflow event in graph DB where control schema does not exist. The caught exception left transaction state unsafe and capture rows were not persisted despite JSON success.
 - Risk: fake-green evidence capture.
 - Fix: graph DB transaction commits capture metadata first; state DB workflow event emit is separate best-effort.
-- Proof: psql row count confirms capture row; Hydra policy evaluator reads it.
+- Proof: psql row count confirms capture row; Body Capture policy evaluator reads it.
 
 ### HIGH: CAS manifest is not authoritative semantic ownership
 
@@ -32,16 +32,16 @@ Status: active
 - Fix: granular metadata moved to ignored vault; tracked docs summary-only.
 - Proof: redaction scanner green.
 
-### MEDIUM: Hydra visual policy did not exist yet
+### MEDIUM: Body Capture visual policy did not exist yet
 
 - Finding: capture existed without profile-specific alert policy.
 - Risk: all changes become noise, or visual changes get ignored globally.
 - Fix: watcher profiles + decision table + policy evaluator added.
-- Proof: `lucidota_hydra_policy.py` returns decision row.
+- Proof: `lucidota_body_capture_policy.py` returns decision row.
 
 ## Active Remaining Risks
 
-- Browser screenshot/DOM capture not yet implemented; Hydra v0 is HTTP-body only.
+- Browser screenshot/DOM capture not yet implemented; Body Capture v0 is HTTP-body only.
 - Visual hash/SSIM/bounding-box channels are planned, not implemented.
 - DBOS does not yet own every side effect.
 - Least-privilege DB roles not implemented.

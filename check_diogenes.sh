@@ -40,7 +40,7 @@ scripts/apply_lucidota_control_schema.sh
 
 # CAS dual-write phantom proof: bytes without authoritative DB metadata must be reported, not hidden by the byte index.
 DUAL_WRITE_VAULT="$(mktemp -d /tmp/lucidota-cas-dual.XXXXXX)"
-PYTHONPATH="$ROOT/scripts" "$LUCIDOTA_VENV/bin/python" -c "from pathlib import Path; from lucidota_scout import store_cas; store_cas(Path('$DUAL_WRITE_VAULT'), b'phantom dual write proof')"
+PYTHONPATH="$ROOT/scripts" "$LUCIDOTA_VENV/bin/python" -c "from pathlib import Path; from lucidota_survey import store_cas; store_cas(Path('$DUAL_WRITE_VAULT'), b'phantom dual write proof')"
 PYTHONPATH="$ROOT/scripts" "$LUCIDOTA_VENV/bin/python" scripts/lucidota_cas_gc.py --vault "$DUAL_WRITE_VAULT" --recover-journal --json | grep '"orphan_candidates": 1' >/dev/null
 rm -rf "$DUAL_WRITE_VAULT"
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_workflow_registry.py >/dev/null
@@ -61,15 +61,17 @@ BEGIN
 END $$;
 SQL
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_wake_bus.py --seed --json >/dev/null
-"$LUCIDOTA_VENV/bin/python" scripts/lucidota_bytewax_mini.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_bytewax_mini.py --live-cursor --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_treelite_router.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_hop_pivot.py https://example.com --fetch --keyword example --max-depth 1 --max-pivots 1 --json >/dev/null
-"$LUCIDOTA_VENV/bin/python" scripts/lucidota_hydra_capture.py https://example.com --json >/dev/null
-"$LUCIDOTA_VENV/bin/python" scripts/lucidota_hydra_policy.py https://example.com --profile content_truth --json >/dev/null
-"$LUCIDOTA_VENV/bin/python" scripts/lucidota_hydra_evidence.py https://example.com --json >/dev/null
-"$LUCIDOTA_VENV/bin/python" scripts/lucidota_hydra_browser_capture.py https://example.com --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_body_capture.py https://example.com --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_body_capture_policy.py https://example.com --profile content_truth --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_body_capture_evidence.py https://example.com --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_browser_body_capture.py https://example.com --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_age_edges.py --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_big_board.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_local_reads_contract.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_wiki_query.py VIBESCONTROL --json >/dev/null
 
 cd "$KERNEL"
 if [[ ! -x .venv/bin/python ]]; then
@@ -84,7 +86,7 @@ cd "$CLAW"
 cargo test --workspace
 cargo build --release -p claw-cli
 ./target/release/claw diogenes-smoke --home "$CLAW_SMOKE_HOME"
-printf 'LUCIDOTA scout smoke\n' > "$CLAW_SMOKE_HOME/scout.txt"
-./target/release/claw lucidota-scout "$CLAW_SMOKE_HOME/scout.txt" --keyword LUCIDOTA >/dev/null
+printf 'LUCIDOTA survey smoke\n' > "$CLAW_SMOKE_HOME/survey.txt"
+./target/release/claw lucidota-survey "$CLAW_SMOKE_HOME/survey.txt" --keyword LUCIDOTA >/dev/null
 cd "$ROOT"
-"$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_scout.py "$CLAW_SMOKE_HOME/scout.txt" --keyword LUCIDOTA >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_dbos_survey.py "$CLAW_SMOKE_HOME/survey.txt" --keyword LUCIDOTA >/dev/null

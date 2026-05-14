@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hydra capture v0: operator-supervised HTTP/body snapshot into local CAS.
+"""Body Capture capture v0: operator-supervised HTTP/body snapshot into local CAS.
 
 This is the first non-browser capture slice. Browser screenshots/DOM via
 Playwright come next; this establishes the same evidence path: fetch, hash,
@@ -15,13 +15,13 @@ import psycopg
 ROOT=Path(__file__).resolve().parents[1]
 DEFAULT_DB='postgresql://mfspx@/lucidota_graph'
 DEFAULT_STATE_DB='postgresql://mfspx@/lucidota_state'
-SCHEMA=ROOT/'06_SCHEMA'/'011_hydra_capture.sql'
+SCHEMA=ROOT/'06_SCHEMA'/'011_body_capture.sql'
 SIGNAL_SCHEMA=ROOT/'06_SCHEMA'/'013_signal_ingress.sql'
 
 import sys
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT/'scripts'))
-import lucidota_scout as scout  # noqa: E402
+import lucidota_survey as survey  # noqa: E402
 from ALGOS import tri_algo_conduit  # noqa: E402
 
 
@@ -78,19 +78,19 @@ def title_from_html(data: bytes)->str:
 
 def previous_capture(conn, source:str):
     return conn.execute("""
-      SELECT capture_id, sha256 FROM lucidota_hydra.capture
+      SELECT capture_id, sha256 FROM lucidota_body_capture.capture
       WHERE source=%s AND status='succeeded' AND sha256 IS NOT NULL
       ORDER BY created_at DESC LIMIT 1
     """, (source,)).fetchone()
 
 
 def main()->int:
-    ap=argparse.ArgumentParser(prog='lucidota-hydra-capture')
+    ap=argparse.ArgumentParser(prog='lucidota-body_capture-capture')
     ap.add_argument('source')
     ap.add_argument('--db-url', default=os.environ.get('LUCIDOTA_GRAPH_DATABASE_URL', DEFAULT_DB))
     ap.add_argument('--state-db-url', default=os.environ.get('DBOS_SYSTEM_DATABASE_URL', DEFAULT_STATE_DB))
-    ap.add_argument('--vault', type=Path, default=scout.DEFAULT_VAULT)
-    ap.add_argument('--max-bytes', type=int, default=scout.DEFAULT_MAX_BYTES)
+    ap.add_argument('--vault', type=Path, default=survey.DEFAULT_VAULT)
+    ap.add_argument('--max-bytes', type=int, default=survey.DEFAULT_MAX_BYTES)
     ap.add_argument('--timeout', type=float, default=10.0)
     ap.add_argument('--allow-local-addresses', action='store_true')
     ap.add_argument('--disable-signal-gate', action='store_true',
@@ -100,8 +100,8 @@ def main()->int:
 
     parsed=urlparse(args.source)
     if parsed.scheme not in ('http','https'):
-        raise SystemExit('Hydra v0 captures http/https sources only')
-    result, data=scout.fetch_target(args.source,args.max_bytes,args.timeout,True,args.allow_local_addresses)
+        raise SystemExit('Body Capture v0 captures http/https sources only')
+    result, data=survey.fetch_target(args.source,args.max_bytes,args.timeout,True,args.allow_local_addresses)
     if data is None:
         raise SystemExit(json.dumps({'ok':False,'error':'no capture bytes','decision':result.decision}))
 
@@ -124,7 +124,7 @@ def main()->int:
           INSERT INTO lucidota_signal.ingress_decision
             (source,subsystem,action,confidence_gap,epsilon,signal_score,noise_score,
              dormancy_probability,recovery_priority,reason,detail)
-          VALUES (%s,'hydra',%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb)
+          VALUES (%s,'body_capture',%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb)
         """, (
             args.source,
             signal_decision.action,
@@ -148,12 +148,12 @@ def main()->int:
             print(json.dumps(report, sort_keys=True) if args.json else report)
             return 1
 
-        digest, cas_uri, _path=scout.store_cas(args.vault,data)
+        digest, cas_uri, _path=survey.store_cas(args.vault,data)
         title=title_from_html(data)
         content_hash, structure_hash = canonical_hashes(data, result.mime)
         prev=previous_capture(conn,args.source)
         row=conn.execute("""
-          INSERT INTO lucidota_hydra.capture
+          INSERT INTO lucidota_body_capture.capture
             (source,capture_kind,status,sha256,cas_uri,size_bytes,mime,title,content_hash,structure_hash,detail)
           VALUES (%s,'http_body','succeeded',%s,%s,%s,%s,%s,%s,%s,%s::jsonb)
           RETURNING capture_id
@@ -162,12 +162,12 @@ def main()->int:
         old_id=prev[0] if prev else None; old_sha=prev[1] if prev else ''
         changed=(old_sha != '' and old_sha != digest)
         conn.execute("""
-          INSERT INTO lucidota_hydra.delta
+          INSERT INTO lucidota_body_capture.delta
             (source,old_capture_id,new_capture_id,old_sha256,new_sha256,changed,detail)
           VALUES (%s,%s,%s,%s,%s,%s,%s::jsonb)
         """, (args.source,old_id,capture_id,old_sha,digest,changed,json.dumps({'first_capture':prev is None})))
         conn.execute("""
-          INSERT INTO lucidota_hydra.workflow_event_outbox
+          INSERT INTO lucidota_body_capture.workflow_event_outbox
             (capture_id, run_id, detail)
           VALUES (%s, %s, %s::jsonb)
         """, (capture_id, str(capture_id), json.dumps({'source':args.source,'sha256':digest,'decision':'captured','signal_gate':signal_decision.__dict__})))
@@ -176,12 +176,12 @@ def main()->int:
         with psycopg.connect(args.state_db_url) as sconn:
             sconn.execute("""
               INSERT INTO lucidota_control.workflow_event (workflow_id, run_id, phase, status, source, detail)
-              VALUES ('hydra-capture', %s, 'capture', 'succeeded', 'lucidota_hydra_capture', %s::jsonb)
+              VALUES ('body_capture-capture', %s, 'capture', 'succeeded', 'lucidota_body_capture', %s::jsonb)
             """, (str(capture_id), json.dumps({'source':args.source,'sha256':digest,'decision':'captured'})))
             sconn.commit()
         with psycopg.connect(args.db_url) as gconn:
             gconn.execute("""
-              UPDATE lucidota_hydra.workflow_event_outbox
+              UPDATE lucidota_body_capture.workflow_event_outbox
               SET delivery_status='delivered', attempts=attempts+1, delivered_at=now(), last_error=''
               WHERE capture_id=%s AND delivery_status='pending'
             """, (capture_id,))
@@ -190,7 +190,7 @@ def main()->int:
         try:
             with psycopg.connect(args.db_url) as gconn:
                 gconn.execute("""
-                  UPDATE lucidota_hydra.workflow_event_outbox
+                  UPDATE lucidota_body_capture.workflow_event_outbox
                   SET delivery_status='failed', attempts=attempts+1, last_error=%s
                   WHERE capture_id=%s AND delivery_status='pending'
                 """, ('state workflow_event delivery failed; graph-local outbox retained', capture_id))

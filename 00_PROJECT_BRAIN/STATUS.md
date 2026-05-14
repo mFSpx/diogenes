@@ -37,33 +37,33 @@
 - DBOS 2.21.0 smoke workflow runs against `lucidota_state` and initializes DBOS system schema.
 - Private Morrowind-inspired Clawd UI track recorded; functionality/code/layouts can live in the private dev repo, while literal copyrighted game assets stay local/ignored and are not public release material.
 - Drive mapping is in progress; PYPELINE/math/secrets/scraper/template nuclei located. Earlier wrong target-dossier intake is not canonical and must not be used unless reauthorized.
-- Scout Protocol v0 product slice exists: `claw lucidota-scout <target>` performs URL/file triage, local CAS write, Aho-Corasick keyword scan, structural HTML summary, pivot extraction, Wayback lookup option, and Postgres persistence.
+- Survey Protocol v0 product slice exists: `claw lucidota-survey <target>` performs URL/file triage, local CAS write, multi-pattern keyword scan, structural HTML summary, pivot extraction, Wayback lookup option, and Postgres persistence.
 - UI/image tooling installed for private theme work: `chafa`, ImageMagick, `optipng`, `pngquant`, `caca-utils`.
 
 ## Next Verification
 
 - Begin DBOS/Postgres storage design after the kernel/interface bridge stays green.
 - Add operational Gmail/Calendar tooling; current Google access is not enough for email/calendar assistant work.
-- Hydra v0: `█████████░ 93%` — HTTP-body capture to CAS now gated by Tri-Algo conduit, SHA delta, content/structure hashes, watcher decisions, Wayback/text diff, evidence bundle export, AGE CAPTURED_AS edge, harness smoke.
+- Body Capture v0: `█████████░ 93%` — HTTP-body capture to CAS now gated by Tri-Algo conduit, SHA delta, content/structure hashes, watcher decisions, Wayback/text diff, evidence bundle export, AGE CAPTURED_AS edge, harness smoke.
 
 - Wake Bus: `████████░░ 80%` — Postgres outbox refs + local signal worker; truth remains DBOS/Postgres.
 - CAS GC: `████████░░ 80%` — report-first mark/sweep, durable run/candidate tables, optional quarantine-only apply path, no delete mode.
 - Storage decision matrix: `██████████ 100%` — Postgres/pgvector/AGE/local CAS locked; Cassandra non-canonical; MinIO deferred adapter only.
-- Validated 000-007 green slice: `██████████ 100%` — full harness green across docs/control, CKDOG1, Clawd, Postgres, CAS, DBOS, Bytewax/River/Treelite hints, and Scout/Hop safety gates. Global backlog remains separately tracked.
+- Validated 000-007 green slice: `██████████ 100%` — full harness green across docs/control, CKDOG1, Clawd, Postgres, CAS, DBOS, Bytewax/River/Treelite hints, and Survey/Hop safety gates. Global backlog remains separately tracked.
 - Overall product: `████████░░ 80%`
 - gRPC bridge: `███████░░░ 70%` — Rust tonic/prost to Python grpcio smoke works; full API pending.
-- DBOS workflow plane: `███████░░░ 70%` — installed/smoked/schema/events plus Scout DBOS wrapper; workflow registry and source policies seeded; full workflow ownership pending.
+- DBOS workflow plane: `███████░░░ 70%` — installed/smoked/schema/events plus Survey DBOS wrapper; workflow registry and source policies seeded; full workflow ownership pending.
 - Postgres/AGE/pgvector: `█████████░ 92%` — installed/verified/core schemas; final ontology/vector/vault schemas pending.
-- Scout/hop-pivot: `████████░░ 80%` — working slice plus bounded hop v1; scraper ladder pending.
+- Survey/hop-pivot: `████████░░ 80%` — working slice plus bounded hop v1; scraper ladder pending.
 - River ML: `█████████░ 92%` — River scores workflow events; live Bytewax stream pending.
 - Bytewax: `█████████░ 92%` — installed/imports; mini TestingSource graph emits persisted hints.
 - Treelite: `█████████░ 92%` — installed/imports; Treelite artifact + advisory route run persisted; DBOS policy call-in pending.
 - Drive map/import: `███░░░░░░░ 30%` — nuclei mapped; full private granular map/imports pending.
-- INDY_READS persona: `█░░░░░░░░░ 10%` — named/sourced; runtime approximation pending.
+- LOCAL_READS persona: `█░░░░░░░░░ 10%` — named/sourced; runtime approximation pending.
 - Algorithm primitive library: `██████████ 98%` — 40 wrappers smoked, including Possum/OPOSSUM/Thanatosis/Capybara/Hoeffding and Chelydra/Serpentina/Schoolfield additions.
-- Progress UI: `█████░░░░░ 55%` — checklist progress printer plus read-only Big Board v0 with live workflow/wake/CAS/Hydra/reflex/GPU counters and JSON export.
+- Progress UI: `█████░░░░░ 55%` — checklist progress printer plus read-only Big Board v0 with live workflow/wake/CAS/Body Capture/reflex/GPU counters and JSON export.
 
-Full audited checklist: `00_PROJECT_BRAIN/BUILD_PLAN_AUDIT.md` (280+ line-items). Latest full harness passed after Hydra evidence bundles, Big Board v0, and 23-module algorithm smoke wiring.
+Full audited checklist: `00_PROJECT_BRAIN/BUILD_PLAN_AUDIT.md` (280+ line-items). Latest full harness passed after Body Capture evidence bundles, Big Board v0, and 23-module algorithm smoke wiring.
 
 - math.zip top-level recovery: `██████████ 100%` — `/home/mfspx/Downloads/math.zip` copied, extracted, manifested, and converted into discrete ALGOS modules; full system hardwire audit written.
-- Ruthless audit fixes: Wake Bus CTE batch delivery, Hydra graph-local workflow-event outbox, and Scout explicit IP gate landed.
+- Ruthless audit fixes: Wake Bus CTE batch delivery, Body Capture graph-local workflow-event outbox, and Survey explicit IP gate landed.

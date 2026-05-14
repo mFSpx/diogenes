@@ -4,7 +4,7 @@ CREATE SCHEMA IF NOT EXISTS lucidota_signal;
 CREATE TABLE IF NOT EXISTS lucidota_signal.ingress_decision (
     decision_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     source text NOT NULL,
-    subsystem text NOT NULL DEFAULT 'hydra',
+    subsystem text NOT NULL DEFAULT 'body_capture',
     action text NOT NULL CHECK (action IN ('standby', 'burst', 'recover')),
     confidence_gap double precision NOT NULL DEFAULT 0,
     epsilon double precision NOT NULL DEFAULT 0,

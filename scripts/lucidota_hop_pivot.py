@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Queue-backed bounded Hop Pivot v1.
 
-Uses Scout as the sensor; persists job/node/promotion state; emits workflow events.
+Uses Survey as the sensor; persists job/node/promotion state; emits workflow events.
 """
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ import psycopg
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / 'scripts'))
-import lucidota_scout as scout  # noqa: E402
+import lucidota_survey as survey  # noqa: E402
 from ALGOS import pheromone  # noqa: E402
 
 GRAPH_DB=os.environ.get('LUCIDOTA_GRAPH_DATABASE_URL','postgresql://mfspx@/lucidota_graph')
@@ -79,7 +79,7 @@ def select_links(conn, job_id, source, candidates, max_pivots, curiosity, gamma)
     return [item for item,_ in selected]
 
 
-def run_scout(target, args):
+def run_survey(target, args):
     class A: pass
     a=A()
     a.max_bytes=args.max_bytes; a.timeout=args.timeout; a.fetch=args.fetch; a.vault=args.vault
@@ -87,7 +87,7 @@ def run_scout(target, args):
     a.db_url=args.db_url; a.state_db_url=args.state_db_url
     a.allow_local_addresses=args.allow_local_addresses
     a.hop_depth=0; a.max_pivots=args.max_pivots; a.promote_threshold=args.promote_threshold
-    return scout.run_one(a, target)
+    return survey.run_one(a, target)
 
 
 def allowed_target(t):
@@ -106,9 +106,9 @@ def main():
     ap.add_argument('--fetch', action='store_true')
     ap.add_argument('--wayback', action='store_true')
     ap.add_argument('--allow-local-addresses', action='store_true')
-    ap.add_argument('--max-bytes', type=int, default=scout.DEFAULT_MAX_BYTES)
+    ap.add_argument('--max-bytes', type=int, default=survey.DEFAULT_MAX_BYTES)
     ap.add_argument('--timeout', type=float, default=10.0)
-    ap.add_argument('--vault', type=Path, default=scout.DEFAULT_VAULT)
+    ap.add_argument('--vault', type=Path, default=survey.DEFAULT_VAULT)
     ap.add_argument('--db-url', default=GRAPH_DB)
     ap.add_argument('--state-db-url', default=STATE_DB)
     ap.add_argument('--no-db', action='store_true')
@@ -118,7 +118,7 @@ def main():
     args=ap.parse_args()
 
     with psycopg.connect(args.db_url) as conn:
-        scout.apply_schema(args.db_url)
+        survey.apply_schema(args.db_url)
         job_id=insert_job(conn,args.target,args.max_depth,args.max_pivots,args.promote_threshold)
         emit_event(job_id,'hop_start','running',{'target':args.target,'max_depth':args.max_depth})
         frontier=[(args.target,0,None)]
@@ -131,7 +131,7 @@ def main():
                 upsert_node(conn,job_id,target,depth,'skipped',parent=parent,detail={'reason':'unsupported_scheme'}); continue
             try:
                 upsert_node(conn,job_id,target,depth,'running',parent=parent); conn.commit()
-                res=run_scout(target,args)
+                res=run_survey(target,args)
                 max_score=max([int(c.get('score',0)) for c in res.pivot_candidates] or [0])
                 utility=max_score/100.0
                 ph=pheromone.evaporate(0.0, reinforcement=utility, phi=0.05)

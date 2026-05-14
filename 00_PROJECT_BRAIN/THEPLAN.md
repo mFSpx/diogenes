@@ -1,24 +1,24 @@
-# DIOGENES / INDY_READS Build Plan
+# DIOGENES / LOCAL_READS Build Plan
 
 ## Summary
-DIOGENES is a sovereign, encrypted, ontology-first investigative operating system. `clawd/claudecode` is the Rust-facing CLI shell, `INDY_READS` is the active assistant/persona, `doggystyle/CKDOG1` is the symbolic kernel, DBOS controls workflows, Postgres/AGE/pgvector stores graph/vector/state, Bytewax/River/Treelite run live learning, and local models are hot-swappable compute heads.
+DIOGENES is a sovereign, encrypted, ontology-first investigative operating system. `clawd/claudecode` is the Rust-facing CLI shell, `LOCAL_READS` is the active assistant/persona, `doggystyle/CKDOG1` is the symbolic kernel, DBOS controls workflows, Postgres/AGE/pgvector stores graph/vector/state, Bytewax/River/Treelite run live learning, and local models are hot-swappable compute heads.
 
 Operator name: `northern.strike`.
-Current assistant identity in this system: `INDY_READS`.
+Current assistant identity in this system: `LOCAL_READS`.
 Standing rule: all plans are subject to change when northern.strike changes reality.
 
 ```text
 northern.strike
-  -> INDY_READS inside Clawd
+  -> LOCAL_READS inside Clawd
   -> gRPC boundary
   -> CKDOG1 Kernel
   -> DBOS workflows
   -> encrypted Postgres / AGE / pgvector / CAS vault
   -> Bytewax / River / Treelite / model runtime
-  -> back to INDY_READS
+  -> back to LOCAL_READS
 ```
 
-## Phase 000: Finish The Plan / Make INDY Smarter
+## Phase 000: Finish The Plan / Make LOCAL_READS Smarter
 Goal: create the working memory/planning substrate before heavy implementation.
 
 - Build the living project brain structure: architecture plan, wiki, TODO ledger, decisions log, glossary, open questions, source inventory, and phase tracker.
@@ -26,7 +26,7 @@ Goal: create the working memory/planning substrate before heavy implementation.
 - Reingest all currently available project material: doggystyle repo, claudecode repo, Codex config, current conversation plan, kernel docs, and any local notes the user provides.
 - Establish "records office" discipline: every decision gets a source, status, timestamp, and confidence level.
 - Define the first local assistant routines: maintain TODOs, calendar/reminder intent, wiki pages, auth inventory, and active project state.
-- Output of Phase 000: INDY_READS can answer "what are we doing, why, what's next, what's blocked, what changed?" from the project brain without relying on chat memory.
+- Output of Phase 000: LOCAL_READS can answer "what are we doing, why, what's next, what's blocked, what changed?" from the project brain without relying on chat memory.
 
 ## Phase 001: Baby Smoke Loop
 Goal: prove the whole system shape end to end on this laptop.
@@ -36,7 +36,7 @@ Goal: prove the whole system shape end to end on this laptop.
 - Add the first gRPC bridge around existing kernel behavior, with doggystyle as canonical proto owner unless later changed.
 - Connect Clawd to the kernel through gRPC for three proof actions: ingest/recall, graph routing/state update, and tool/workflow action.
 - Keep originals immutable; all ingest writes derived encrypted records only.
-- Output of Phase 001: user can type messy input into Clawd, INDY routes it to CKDOG1, CKDOG1 updates ontology state, and INDY prints a useful cited response.
+- Output of Phase 001: user can type messy input into Clawd, LOCAL_READS routes it to CKDOG1, CKDOG1 updates ontology state, and LOCAL_READS prints a useful cited response.
 
 ## Phase 002: Encrypted Records Office
 Goal: make storage real, encrypted, and graph-native.
@@ -67,7 +67,7 @@ Goal: make workflows durable, repeatable, and ontology-addressed.
 - Define `/TOOLS`, `/ALGOS`, `/MODELS`, `/LORAS`, and `/VAULT` as ontology-addressed tool chests.
 - Make "solve it how we solved it perfectly before" a first-class retrieval path: prior workflow -> fit check -> execute/adapt -> cite result.
 - Keep external writes draft/preview-only until Subtle Knife governance is fully reingested.
-- Output of Phase 004: INDY can select or construct a workflow, run safe local steps, draft external actions, and explain why.
+- Output of Phase 004: LOCAL_READS can select or construct a workflow, run safe local steps, draft external actions, and explain why.
 
 ## Phase 005: Learning / Model Runtime
 Goal: wire live learning and local model compute without sacrificing the 4GB GPU.
@@ -79,7 +79,7 @@ Goal: wire live learning and local model compute without sacrificing the 4GB GPU
 - Treat LLMs as stateless compute heads; graph/database/vault are ROM/RAM.
 - Output of Phase 005: models can be selected, loaded, routed, and unloaded according to task, speed, refusal behavior, and VRAM budget.
 
-## Phase 006: INDY_READS Assistant Layer
+## Phase 006: LOCAL_READS Assistant Layer
 Goal: make the interface feel like a living command center, not a database UI.
 
 - Implement context-reactive modes: case command center, graph cockpit, library, coding workspace, life admin, hangout, and emergency focus.
@@ -87,7 +87,7 @@ Goal: make the interface feel like a living command center, not a database UI.
 - Respect the Subtle Knife Protocol: levels 1-5 autonomy, graduation/downgrade based on performance and consequences.
 - Current dev policy: full internal authority, no unconfirmed external writes, email/messages/uploads/purchases/commits stop at draft/preview unless confirmed.
 - Release policy: natural-language intake determines privacy, safety, services, persona, and autonomy defaults for each end user.
-- Output of Phase 006: INDY actively assists, predicts, remembers, drafts, schedules, and organizes without blocking the user.
+- Output of Phase 006: LOCAL_READS actively assists, predicts, remembers, drafts, schedules, and organizes without blocking the user.
 
 ## Phase 007: Casefile Trial By Fire
 Goal: pass the unfair real benchmark.
@@ -103,7 +103,7 @@ Goal: pass the unfair real benchmark.
 - Reuse first: search for mature FOSS implementations before writing custom code.
 - Write code mainly to wire, adapt, secure, orchestrate, and encode DIOGENES-specific ontology/kernel behavior.
 - Research loop: inspect repo reality, check official docs, broaden to product docs/community reports when the first path is partial, then record source and decision.
-- Self-soothing loop for INDY/Codex: slow down, restate the goal, identify the smallest real next step, prefer evidence over panic, and update the project brain.
+- Self-soothing loop for LOCAL_READS/Codex: slow down, restate the goal, identify the smallest real next step, prefer evidence over panic, and update the project brain.
 - Every phase ends with: working demo, test/check output, known failures, next correction, and plan update.
 
 ## Assumptions

@@ -20,9 +20,9 @@ This is resource-efficiency logic, not security theatre and not biological metap
 - Unified primitive: `ALGOS/tri_algo_conduit.py`.
 - Durable decision trail: `06_SCHEMA/013_signal_ingress.sql`, table `lucidota_signal.ingress_decision`.
 
-## Hydra wire
+## Body Capture wire
 
-`scripts/lucidota_hydra_capture.py` now runs the conduit after fetch and before CAS write:
+`scripts/lucidota_body_capture.py` now runs the conduit after fetch and before CAS write:
 
 - `burst`: write CAS + capture metadata as normal.
 - `standby`: record ingress decision and skip heavy capture.
@@ -45,5 +45,5 @@ This is resource-efficiency logic, not security theatre and not biological metap
 ## Ruthless audit fixes applied
 
 - Wake Bus batching slop fixed: `lucidota_wake_bus.py` now claims/delivers a batch with `FOR UPDATE SKIP LOCKED` and one SQL CTE round-trip; `pg_notify` happens inside the CTE.
-- Hydra split-brain reduced: `lucidota_hydra_capture.py` writes `lucidota_hydra.workflow_event_outbox` in the same graph transaction as capture/delta. Cross-DB state delivery is best-effort, but graph-local pending/failed delivery is durable.
-- Scout obfuscation removed: `validate_source_url()` now uses explicit `ipaddress` properties instead of string-fragment getattr tricks.
+- Body Capture split-brain reduced: `lucidota_body_capture.py` writes `lucidota_body_capture.workflow_event_outbox` in the same graph transaction as capture/delta. Cross-DB state delivery is best-effort, but graph-local pending/failed delivery is durable.
+- Survey obfuscation removed: `validate_source_url()` now uses explicit `ipaddress` properties instead of string-fragment getattr tricks.

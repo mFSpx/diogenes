@@ -16,6 +16,6 @@ Core files:
 
 Operating rule:
 
-Keep these files short enough to use, but complete enough that INDY_READS can recover project context from disk.
+Keep these files short enough to use, but complete enough that LOCAL_READS can recover project context from disk.
 
 The project brain lives in the repo deliberately, but it must not interfere with builds. Future product integration should consume it through explicit adapters, not hidden side effects.

@@ -45,7 +45,7 @@ def main() -> int:
     args.artifact.write_bytes(model.serialize_bytes())
     features=np.array([[0.80, 1.0, 1.0]], dtype=np.float32)
     score=float(gtil.predict(model, features).reshape(-1)[0])
-    route='scout-hop-promote' if score >= 0.5 else 'metadata-only'
+    route='survey-hop-promote' if score >= 0.5 else 'metadata-only'
     detail={'runtime':'treelite-gtil','xgboost_runtime':False,'features':['source_confidence','has_keyword','has_link']}
     with psycopg.connect(args.db_url) as conn:
         conn.execute(SCHEMA.read_text())

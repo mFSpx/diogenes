@@ -114,7 +114,7 @@ INSERT INTO lucidota_runtime.model_candidate (
         'Always-on stream listener target; exact model artifact not selected.'
     ),
     (
-        'deepseek-1.5b-indy-reads',
+        'deepseek-1.5b-local_reads-reads',
         'heavy_hitter',
         'TBD',
         NULL,
@@ -123,7 +123,7 @@ INSERT INTO lucidota_runtime.model_candidate (
         '4-bit target',
         NULL,
         'watch',
-        'Resident INDY_READS heavy-hitter/adaptor host target; exact artifact not selected.'
+        'Resident LOCAL_READS heavy-hitter/adaptor host target; exact artifact not selected.'
     )
 ON CONFLICT (model_id) DO UPDATE SET
     role = EXCLUDED.role,
@@ -185,8 +185,8 @@ INSERT INTO lucidota_runtime.resident_loadout_slot (
     ),
     (
         'gtx1650-special-forces-v0',
-        'indy_reads_heavy_hitter',
-        'deepseek-1.5b-indy-reads',
+        'local_reads_heavy_hitter',
+        'deepseek-1.5b-local_reads-reads',
         1,
         NULL,
         40,

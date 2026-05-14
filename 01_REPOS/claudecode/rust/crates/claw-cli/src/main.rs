@@ -90,7 +90,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         CliAction::DumpManifests => dump_manifests(),
         CliAction::BootstrapPlan => print_bootstrap_plan(),
         CliAction::LucidotaStatus => print_lucidota_status(),
-        CliAction::LucidotaScout { args } => run_lucidota_scout(&args)?,
+        CliAction::LucidotaSurvey { args } => run_lucidota_survey(&args)?,
         CliAction::DiogenesSmoke { args } => run_diogenes_smoke(&args)?,
         CliAction::Agents { args } => LiveCli::print_agents(args.as_deref())?,
         CliAction::Skills { args } => LiveCli::print_skills(args.as_deref())?,
@@ -126,7 +126,7 @@ enum CliAction {
     DumpManifests,
     BootstrapPlan,
     LucidotaStatus,
-    LucidotaScout {
+    LucidotaSurvey {
         args: Vec<String>,
     },
     DiogenesSmoke {
@@ -302,7 +302,7 @@ fn parse_args(args: &[String]) -> Result<CliAction, String> {
         "dump-manifests" => Ok(CliAction::DumpManifests),
         "bootstrap-plan" => Ok(CliAction::BootstrapPlan),
         "lucidota-status" => Ok(CliAction::LucidotaStatus),
-        "lucidota-scout" | "scout" => Ok(CliAction::LucidotaScout {
+        "lucidota-survey" | "survey" => Ok(CliAction::LucidotaSurvey {
             args: rest[1..].to_vec(),
         }),
         "diogenes-smoke" => Ok(CliAction::DiogenesSmoke {
@@ -363,7 +363,7 @@ impl Default for DiogenesSmokeArgs {
             home: PathBuf::from(".ckdog1-diogenes-smoke"),
             soul_uuid: 7,
             term: "NORTHERN_STRIKE".to_string(),
-            trait_value: "INDY_READS".to_string(),
+            trait_value: "LOCAL_READS".to_string(),
             global_symbol: "CLAIM_UNVERIFIED".to_string(),
         }
     }
@@ -677,7 +677,7 @@ fn print_lucidota_status() {
     print!("{}", render_lucidota_status_report());
 }
 
-fn run_lucidota_scout(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+fn run_lucidota_survey(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     let home = env::var("LUCIDOTA_HOME")
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("/home/mfspx/LUCIDOTA"));
@@ -687,9 +687,9 @@ fn run_lucidota_scout(args: &[String]) -> Result<(), Box<dyn std::error::Error>>
     } else {
         PathBuf::from("python3")
     };
-    let script = home.join("scripts").join("lucidota_scout.py");
+    let script = home.join("scripts").join("lucidota_survey.py");
     if !script.exists() {
-        return Err(format!("missing scout script: {}", script.display()).into());
+        return Err(format!("missing survey script: {}", script.display()).into());
     }
     let status = Command::new(python)
         .arg(script)
@@ -697,7 +697,7 @@ fn run_lucidota_scout(args: &[String]) -> Result<(), Box<dyn std::error::Error>>
         .current_dir(home)
         .status()?;
     if !status.success() {
-        return Err(format!("lucidota-scout failed with status {status}").into());
+        return Err(format!("lucidota-survey failed with status {status}").into());
     }
     Ok(())
 }
@@ -708,16 +708,16 @@ fn render_lucidota_status_report() -> String {
         ("000-007 Green Slice", 100, "verified harness slice"),
         ("000 Project Brain", 92, "one closeout left"),
         ("001 Kernel / CKDOG1", 81, "gRPC smoke green"),
-        ("002 Clawd Interface", 58, "status bars + scout wired"),
+        ("002 Clawd Interface", 58, "status bars + survey wired"),
         ("003 Postgres Office", 92, "AGE + CAS edges green"),
         ("004 Vault / CAS", 72, "CAS index + GC + graph"),
         ("005 DBOS Plane", 70, "outbox + source policy"),
         ("006 Reflex Team", 92, "Wake Bus + reflex"),
         ("007 Extractors", 86, "adapters first + hop"),
-        ("008 Hydra Capture", 66, "visual contract + policy"),
+        ("008 Body Capture Capture", 66, "visual contract + policy"),
         ("009 Drive Imports", 59, "nuclei mapped"),
         ("010 Model Runtime", 65, "ALGOS + nature primitives"),
-        ("011 INDY_READS", 28, "persona extraction pending"),
+        ("011 LOCAL_READS", 28, "persona extraction pending"),
         ("012 Big Board UI", 31, "progress printer exists"),
         ("013 Redaction/Auth", 60, "scanner + private vault"),
         ("014 Verification", 92, "full harness green"),
@@ -4281,7 +4281,7 @@ fn print_help_to(out: &mut impl Write) -> io::Result<()> {
     )?;
     writeln!(
         out,
-        "  claw lucidota-scout <target>          Scout URL/file into local CAS + Postgres"
+        "  claw lucidota-survey <target>          Survey URL/file into local CAS + Postgres"
     )?;
     writeln!(
         out,
@@ -4603,24 +4603,24 @@ mod tests {
     }
 
     #[test]
-    fn parses_lucidota_scout_subcommand() {
+    fn parses_lucidota_survey_subcommand() {
         let args = vec![
-            "lucidota-scout".to_string(),
+            "lucidota-survey".to_string(),
             "https://example.com".to_string(),
             "--fetch".to_string(),
             "--keyword".to_string(),
             "example".to_string(),
         ];
         assert_eq!(
-            parse_args(&args).expect("lucidota-scout should parse"),
-            CliAction::LucidotaScout {
+            parse_args(&args).expect("lucidota-survey should parse"),
+            CliAction::LucidotaSurvey {
                 args: args[1..].to_vec()
             }
         );
         assert_eq!(
-            parse_args(&["scout".to_string(), "file.txt".to_string()])
-                .expect("scout alias should parse"),
-            CliAction::LucidotaScout {
+            parse_args(&["survey".to_string(), "file.txt".to_string()])
+                .expect("survey alias should parse"),
+            CliAction::LucidotaSurvey {
                 args: vec!["file.txt".to_string()]
             }
         );
@@ -4854,7 +4854,7 @@ mod tests {
         assert!(help.contains("claw agents"));
         assert!(help.contains("claw skills"));
         assert!(help.contains("claw lucidota-status"));
-        assert!(help.contains("claw lucidota-scout"));
+        assert!(help.contains("claw lucidota-survey"));
         assert!(help.contains("claw /skills"));
     }
 

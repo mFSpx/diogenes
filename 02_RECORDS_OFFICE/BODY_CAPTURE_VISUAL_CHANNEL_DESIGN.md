@@ -1,4 +1,4 @@
-# Hydra Visual Channel Design
+# Body Capture Visual Channel Design
 
 Updated: 2026-05-13
 

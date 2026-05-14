@@ -21,7 +21,7 @@ Brainstorm names are not decisions. Every new component must be marked `confirme
 Confirmed before v0.2 intake:
 
 - Operator: `northern.strike`.
-- Assistant/persona: `INDY_READS`.
+- Assistant/persona: `LOCAL_READS`.
 - Umbrella workspace: `/home/mfspx/LUCIDOTA`; `/home/mfspx/DIOGENES` is a compatibility symlink.
 - Interface shell: Clawd / `claudecode`, owned inside LUCIDOTA.
 - Kernel: CKDOG1 / `doggystyle`, kernel-only repo.
@@ -135,7 +135,7 @@ No high-volume live event path without Bytewax-style flow control once that laye
 - `Bytewax`: confirmed live dataflow layer, integration pending.
 - `River ML`: confirmed online learning layer, integration pending.
 - `Treelite`: confirmed deployable tree inference layer, integration pending.
-- `DeepSeek-R1-Distill-Qwen-1.5B`: compatible with existing `deepseek-1.5b-indy-reads` runtime registry target, exact artifact still TBD.
+- `DeepSeek-R1-Distill-Qwen-1.5B`: compatible with existing `deepseek-1.5b-local_reads-reads` runtime registry target, exact artifact still TBD.
 - `Bloom Filter`: compatible as fast seen/check structure; not yet implemented.
 - `SHA-256`: compatible with hash/proof/vault direction.
 - `Playwright`: compatible candidate for dynamic extraction/capture; not yet locked.
@@ -143,19 +143,19 @@ No high-volume live event path without Bytewax-style flow control once that laye
 ### Rename / Align With Existing Names
 
 - `nomad_surface.proto`: conflicts with current verified `kernel.proto` / CKDOG1 gRPC surface unless explicitly renamed later. Treat as brainstorm name, not canonical.
-- `The Enseminator`: unresolved operator/control-surface codename; must not replace Clawd/INDY_READS naming without decision.
+- `The Enseminator`: unresolved operator/control-surface codename; must not replace Clawd/LOCAL_READS naming without decision.
 - `DBOS Python Brain`: align with DBOS workflow plane plus CKDOG1 kernel, not a replacement for CKDOG1 ontology meaning.
 - `Unified Vault`: align with Records Office + encrypted CAS vault + Postgres/AGE/pgvector, not MinIO-first.
 - `Village Sideload`: compatible with existing Village/Villagers concept, but storage shape remains open.
 
 ### Candidate / Needs Design
 
-- `SerScrapist`: candidate name/subsystem for extraction ladder. Compatible with Scout/ingest/scraper policy needs; not yet canonical code.
-- `Hydra Head`: candidate name/subsystem for capture/evidence/diff pipeline. Compatible if backed by CAS vault and governance.
+- `SerScrapist`: candidate name/subsystem for extraction ladder. Compatible with Survey/ingest/scraper policy needs; not yet canonical code.
+- `Body Capture Head`: candidate name/subsystem for capture/evidence/diff pipeline. Compatible if backed by CAS vault and governance.
 - Hop/pivot search functionality formerly nicknamed `Superglow Spider`: PROMOTED as required capability, but the name is rejected. Final subsystem name pending. It covers bounded hop expansion, pivot discovery, promotion scoring, and source-policy-aware search.
-- `Scout Protocol`: PROMOTED as required capability for first-contact URL/file/endpoint triage.
+- `Survey Protocol`: PROMOTED as required capability for first-contact URL/file/endpoint triage.
 - `Krampus / Audit Workflow`: compatible with glossary `Krampus Express`; exact workflow pending user specification.
-- `Aho-Corasick`: PROMOTED as required lightweight exact-keyword scanning algorithm for hop/pivot search and ultra-light scans.
+- `multi-pattern`: PROMOTED as required lightweight exact-keyword scanning algorithm for hop/pivot search and ultra-light scans.
 - `Tree-sitter`: PROMOTED as required structural parsing/anomaly tool where language/HTML structure matters.
 - `Wayback Machine`: PROMOTED as required archival evidence source, behind source policy/rate limits/governance.
 - `XGBoost`: TRAINING/EXPORT ONLY if used. NEVER runtime. Runtime inference must stay light; Treelite is the compiled deployment path.
@@ -173,7 +173,7 @@ Current coherent target, using existing names:
 
 ```text
 northern.strike
-  -> INDY_READS inside Clawd / claudecode
+  -> LOCAL_READS inside Clawd / claudecode
   -> Rust tonic/prost gRPC boundary
   -> CKDOG1 / doggystyle kernel
   -> DBOS workflows
@@ -181,7 +181,7 @@ northern.strike
   -> encrypted local CAS vault for artifacts
   -> Bytewax / River / Treelite live learning path
   -> model runtime as stateless compute heads
-  -> back to INDY_READS / Clawd
+  -> back to LOCAL_READS / Clawd
 ```
 
 Workflow/event loop:
@@ -212,8 +212,8 @@ Object bytes
 Promoted from v0.2 brainstorm into required architecture capabilities:
 
 - Bounded hop/pivot search functionality: required, but not under the `Superglow Spider` name. Rename pending.
-- Scout Protocol: required first-contact triage layer.
-- Aho-Corasick: required lightweight exact-match scan path.
+- Survey Protocol: required first-contact triage layer.
+- multi-pattern: required lightweight exact-match scan path.
 - Tree-sitter: required structural parse/anomaly path.
 - Wayback Machine: required archival evidence source with source policy/rate limits.
 
@@ -240,7 +240,7 @@ Do not settle for heavyweight/mid architecture when a sharper compiled/determini
 - Exact Bytewax/DBOS command-event-hint schema.
 - Exact River feature schema.
 - Exact Treelite refresh cadence and whether XGBoost is the offline trainer. XGBoost is explicitly never runtime.
-- Exact crawler/extractor ladder names: SerScrapist/Hydra/Superglow/Scout or simpler names.
+- Exact crawler/extractor ladder names: SerScrapist/Body Capture/Superglow/Survey or simpler names.
 - Exact dynamic capture backend: Playwright/CDP path.
 - Exact embedding model and vector dimensions.
 - Exact teleoperation recording format.
@@ -266,7 +266,7 @@ DBOS workflow commit
   -> lucidota_control.workflow_event
   -> lucidota_control.event_outbox
   -> local wake signal with IDs/refs only
-  -> Bytewax / River / Watchers / Big Board rehydrate from Postgres/Vault
+  -> Bytewax / River / Watchers / Big Board rebody_capturete from Postgres/Vault
 ```
 
 Rules:

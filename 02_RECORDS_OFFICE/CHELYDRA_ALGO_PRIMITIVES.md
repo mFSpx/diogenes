@@ -29,7 +29,7 @@ The Schoolfield poikilotherm curve maps cleanly onto cold-start / overload behav
 - Predictive CI/CD pre-heating: monitor local file changes, IDE activity, or branch staging signals as system temperature. When activity crosses the activation threshold, start build/container incubation before commit so the environment is warm when CI lands.
 - Adaptive API rate limiting: let low-traffic endpoints hibernate, warm as request temperature rises, then enter a denaturing/throttle phase at thermal peak to avoid meltdown.
 - Edge-node hibernation: scraper/IoT nodes play dead until a data signature supplies enough activation energy to justify full processing.
-- LUCIDOTA candidate wire: use `poikilotherm_schoolfield.normalized_activity()` as a Wake Bus admission multiplier for watchers, scrapers, model loads, or expensive Hydra captures.
+- LUCIDOTA candidate wire: use `poikilotherm_schoolfield.normalized_activity()` as a Wake Bus admission multiplier for watchers, scrapers, model loads, or expensive Body Capture captures.
 - Not daft: this is basically a biologically-shaped hysteresis curve. The useful part is not literal temperature; it is a bounded activity function with cold dormancy and high-load inhibition.
 
 ### 2. Distributed-system self-righting
@@ -49,7 +49,7 @@ The Chelydrid strike model maps to burst capture: stay metabolically cheap, dete
 - Honey-snapping: a security probe stays quiet until exploit-like prey enters the buffer, then allocates CPU for forensic capture/isolation. Defensive-only framing: capture and quarantine inbound suspicious packets/events; no offensive action.
 - JIT market scraping: low-energy ticker monitoring, then full order-book capture on volatility spike.
 - Event-driven metadata extraction: ignore raw streams until a high-value node appears, then snap into CAS/metadata/AGE edge extraction and return dormant.
-- LUCIDOTA candidate wire: use `chelydrid_ambush.burst_admission_score()` to decide whether a Hydra/Scout/CAS extraction should execute as a short burst now or stay queued.
+- LUCIDOTA candidate wire: use `chelydrid_ambush.burst_admission_score()` to decide whether a Body Capture/Survey/CAS extraction should execute as a short burst now or stay queued.
 - Not daft: the useful part is the force-vs-drag tradeoff. Short decisive actions beat long high-drag jobs when urgency is high.
 
 ### Combined control pattern
