@@ -68,3 +68,4 @@ Full audited checklist: `00_PROJECT_BRAIN/BUILD_PLAN_AUDIT.md` (280+ line-items)
 
 - math.zip top-level recovery: `██████████ 100%` — `/home/mfspx/Downloads/math.zip` copied, extracted, manifested, and converted into discrete ALGOS modules; full system hardwire audit written.
 - Ruthless audit fixes: Wake Bus CTE batch delivery, Body Capture graph-local workflow-event outbox, and Survey explicit IP gate landed.
+- Autonomous hardening pass added Survey optional Tree-sitter slot, Bytewax advisory-lock live cursor, Wake Bus CTE audit, EQ validator stress inventory, regenerated Big Board JSON, `BRAIN.md`, and `TOPOLOGY.md`.

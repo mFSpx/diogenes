@@ -31,6 +31,40 @@ DEFAULT_MAX_BYTES = 1_500_000
 MAX_REDIRECTS = 5
 
 
+def optional_tree_sitter_summary(text: str, language_hint: str = "") -> dict:
+    """Best-effort structural parse slot.
+
+    Uses tree_sitter when a runtime grammar is present; otherwise returns an
+    explicit unavailable marker so callers can distinguish fallback parsing from
+    a fake tree-sitter result. No network, no parser downloads.
+    """
+    try:
+        from tree_sitter import Parser  # type: ignore
+        try:
+            from tree_sitter_languages import get_language  # type: ignore
+        except Exception as exc:
+            return {"engine": "tree_sitter", "status": "grammar_unavailable", "error": str(exc)[:120]}
+        lang_name = "python" if language_hint.endswith(".py") or "python" in language_hint else "html"
+        parser = Parser()
+        language = get_language(lang_name)
+        if hasattr(parser, "set_language"):
+            parser.set_language(language)
+        else:
+            parser.language = language
+        tree = parser.parse(text[:1_000_000].encode("utf-8", errors="ignore"))
+        root = tree.root_node
+        return {
+            "engine": "tree_sitter",
+            "status": "ok",
+            "language": lang_name,
+            "root_type": root.type,
+            "named_child_count": root.named_child_count,
+            "has_error": root.has_error,
+        }
+    except Exception as exc:
+        return {"engine": "tree_sitter", "status": "unavailable", "error": str(exc)[:120]}
+
+
 def gate_action(
     state_db_url: str,
     workflow_id: str,
@@ -114,7 +148,7 @@ class LinkAndStructureParser(html.parser.HTMLParser):
 
     def summary(self) -> dict:
         return {
-            "parser": "html.parser-pre-tree-sitter-slot",
+            "parser": "html.parser+optional-tree-sitter-slot",
             "link_count": len(self.links),
             "hidden_link_count": self.hidden_links,
             "tag_count": sum(self.tags.values()),
@@ -372,8 +406,11 @@ def analyze(result: SurveyResult, data: bytes | None, keywords: list[str], do_wa
             parser = LinkAndStructureParser(result.final_url or result.target)
             parser.feed(text)
             result.structure = parser.summary()
+            result.structure["tree_sitter"] = optional_tree_sitter_summary(text, result.mime)
             for link in parser.links[:50]:
                 result.pivot_candidates.append({"candidate": link, "kind": "link", "score": 20, "reason": "html link"})
+        elif result.method == "FILE" and result.target.endswith((".py", ".rs", ".js", ".ts", ".c", ".h")):
+            result.structure = {"parser": "optional-tree-sitter-slot", "tree_sitter": optional_tree_sitter_summary(text, result.target)}
         for hit in result.keyword_hits:
             result.pivot_candidates.append({"candidate": hit["keyword"], "kind": "keyword", "score": 50 + hit["count"], "reason": "multi-pattern hit"})
     if do_wayback and urlparse(result.target).scheme in ("http", "https"):

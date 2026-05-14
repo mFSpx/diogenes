@@ -22,10 +22,16 @@ def event_to_hint(e: dict) -> dict:
         'score': 80 if ok else 20, 'detail': {'workflow_id': e.get('workflow_id'), 'decision': decision}
     }
 
-def load_events(limit:int, since_last: bool = False)->list[dict]:
+def load_events(limit:int, since_last: bool = False)->tuple[list[dict], dict]:
+    meta={'cursor_lock': True, 'cursor_name': 'bytewax_live'}
     with psycopg.connect(DB) as conn:
         conn.execute(SCHEMA.read_text())
         if since_last:
+            locked=conn.execute("SELECT pg_try_advisory_xact_lock(hashtext('lucidota_bytewax_live_cursor'))").fetchone()[0]
+            meta['cursor_lock']=bool(locked)
+            if not locked:
+                conn.commit()
+                return [], meta
             conn.execute("""
               INSERT INTO lucidota_learning.river_event_cursor (cursor_name)
               VALUES ('bytewax_live')
@@ -49,7 +55,9 @@ def load_events(limit:int, since_last: bool = False)->list[dict]:
             ORDER BY created_at DESC LIMIT %s
             """, (limit,)).fetchall()
         conn.commit()
-    return [dict(zip(['event_id','workflow_id','phase','status','source','detail','created_at'], r)) for r in rows]
+    events=[dict(zip(['event_id','workflow_id','phase','status','source','detail','created_at'], r)) for r in rows]
+    meta['events_loaded']=len(events)
+    return events, meta
 
 def run_flow(events:list[dict])->list[dict]:
     flow=Dataflow('lucidota-bytewax-mini')
@@ -60,7 +68,7 @@ def run_flow(events:list[dict])->list[dict]:
     run_main(flow)
     return out
 
-def persist(events:list[dict], hints:list[dict], mode: str):
+def persist(events:list[dict], hints:list[dict], mode: str, meta: dict):
     with psycopg.connect(DB) as conn:
         conn.execute(SCHEMA.read_text())
         for h in hints:
@@ -71,7 +79,7 @@ def persist(events:list[dict], hints:list[dict], mode: str):
         conn.execute("""
             INSERT INTO lucidota_learning.bytewax_stream_run (status, events_in, hints_out, detail)
             VALUES ('succeeded', %s, %s, %s::jsonb)
-        """, (len(events), len(hints), json.dumps({'mode':mode})))
+        """, (len(events), len(hints), json.dumps({'mode':mode, **meta})))
         if events and mode == 'live_cursor':
             last=events[-1]
             conn.execute("""
@@ -90,11 +98,11 @@ def main()->int:
     ap.add_argument('--live-cursor', action='store_true', help='Process new workflow_event rows since the bytewax cursor.')
     ap.add_argument('--json', action='store_true')
     args=ap.parse_args()
-    events=load_events(args.limit, args.live_cursor)
+    events, meta=load_events(args.limit, args.live_cursor)
     hints=run_flow(events)
     mode='live_cursor' if args.live_cursor else 'latest_window'
-    persist(events,hints,mode)
-    report={'ok': True, 'events_in': len(events), 'hints_out': len(hints), 'mode': mode}
+    persist(events,hints,mode,meta)
+    report={'ok': True, 'events_in': len(events), 'hints_out': len(hints), 'mode': mode, **meta}
     print(json.dumps(report, sort_keys=True) if args.json else report)
     return 0
 if __name__=='__main__':

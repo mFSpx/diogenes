@@ -75,6 +75,9 @@ SQL
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_indy_brief.py auth-list --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_indy_brief.py queue-list --json >/dev/null
 "$LUCIDOTA_VENV/bin/python" scripts/lucidota_wiki_query.py VIBESCONTROL --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_wake_bus_audit.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_validator_noise_stress.py --json >/dev/null
+"$LUCIDOTA_VENV/bin/python" scripts/lucidota_survey.py scripts/lucidota_survey.py --fetch --keyword optional >/dev/null
 
 cd "$KERNEL"
 if [[ ! -x .venv/bin/python ]]; then

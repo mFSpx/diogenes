@@ -199,7 +199,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 134. Postgres persistence implemented
 - [x] 135. Clawd subcommand wired
 - [x] 136. Harness smoke covers Survey
-- [ ] 137. PARTIAL: Tree-sitter slot exists but real Tree-sitter parser not installed/wired
+- [ ] 137. PARTIAL: optional Tree-sitter infrastructure wired; runtime grammar package not installed
 - [x] 138. Bounded link discovery / hop pivot capability named and persisted
 - [x] 139. Bounded hop expansion implemented
 - [x] 140. Promotion scoring implemented
@@ -366,7 +366,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 270. Survey smoke in harness
 - [x] 271. River reflex smoke added to harness
 - [x] 272. Full harness rerun after latest River/Bytewax edits
-- [ ] 273. Tree-sitter smoke in harness
+- [x] 273. Tree-sitter slot smoke in harness with honest unavailable fallback
 - [x] 274. Bytewax live smoke in harness
 - [x] 275. Treelite router smoke in harness
 - [ ] 276. Drive map workflow smoke in harness
