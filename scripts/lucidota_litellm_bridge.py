@@ -195,9 +195,16 @@ def model_list(entries: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
         local_path = str(local.get("path") or "")
         if entry.get("provider") == "local" and local_path.endswith(".gguf"):
             # llama.cpp server exposes an OpenAI-compatible /v1 API; LiteLLM routes it via openai/*.
+            model_key = str(entry.get("model_name") or "").lower() + " " + local_path.lower()
+            if "mamba" in model_key:
+                api_base = os.environ.get("LUCIDOTA_MAMBA_API_BASE", "http://127.0.0.1:8081/v1")
+            elif "deepseek" in model_key:
+                api_base = os.environ.get("LUCIDOTA_DEEPSEEK_API_BASE", "http://127.0.0.1:8080/v1")
+            else:
+                api_base = os.environ.get("LUCIDOTA_LLAMA_API_BASE", "http://127.0.0.1:8080/v1")
             params: dict[str, Any] = {
                 "model": f"openai/{entry['model_name']}",
-                "api_base": os.environ.get("LUCIDOTA_LLAMA_API_BASE", "http://127.0.0.1:8080/v1"),
+                "api_base": api_base,
                 "api_key": os.environ.get("LUCIDOTA_LLAMA_API_KEY", "not-needed"),
             }
         else:

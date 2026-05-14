@@ -140,6 +140,18 @@ INSERT INTO lucidota_runtime.model_candidate (
         'Always-on stream listener target; exact model artifact not selected.'
     ),
     (
+        'mamba-1.4b-listener',
+        'listener',
+        'https://huggingface.co/tensorblock/mamba-1.4b-hf-GGUF',
+        '03_VAULT/models/mamba-1.4b-hf-Q2_K.gguf',
+        'apache-2.0',
+        1400000000,
+        'Q2_K GGUF',
+        900,
+        'accepted',
+        'Runnable Mamba GGUF listener fallback served locally with llama.cpp on port 8081.'
+    ),
+    (
         'deepseek-1.5b-indy_reads-reads',
         'heavy_hitter',
         'https://huggingface.co/bartowski/DeepSeek-R1-Distill-Qwen-1.5B-GGUF',
@@ -194,11 +206,11 @@ INSERT INTO lucidota_runtime.resident_loadout_slot (
     (
         'gtx1650-special-forces-v0',
         'listener',
-        'mamba2-1.3b-listener',
+        'mamba-1.4b-listener',
         1,
-        NULL,
+        900,
         10,
-        'Long-running stream listener.'
+        'Runnable local Mamba GGUF listener on llama.cpp :8081.'
     ),
     (
         'gtx1650-special-forces-v0',

@@ -14,7 +14,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - **River ML** `██████░░░░ 62%` — Installed and now writes online scores from workflow events. Live Bytewax stream and frozen feature schema pending.
 - **Bytewax** `██████░░░░ 62%` — Installed/imports. No live dataflow graph yet.
 - **Treelite** `███████░░░ 70%` — Installed/imports. No compiled router wired yet.
-- **Model runtime** `████████░░ 80%` — CUDA/llama.cpp/runtime imports, model governor, registry intent, Needle checkpoint, and DeepSeek Q4_K_M GGUF are present and wired for demo; Mamba and zero-refusal eval remain red.
+- **Model runtime** `█████████░ 90%` — CUDA/llama.cpp/runtime imports, model governor, registry intent, 6x Needle workers, DeepSeek GGUF, and Mamba GGUF are present and wired for demo; zero-refusal eval remains red.
 - **Drive map/import** `███████░░░ 72%` — Key nuclei located; full granular map and imports pending.
 - **Persona Indy_Reads** `███████░░░ 65%` — Runtime contract, local brief, local persona corpus/distillation, memory, queue, auth inventory, and regression loop exist; Drive/Gmail/Calendar adapters remain pending.
 - **Progress UI** `██████████ 100%` — Read-only terminal Big Board/Cockpit now render build bars, live workflow/wake/CAS/Body Capture/reflex counters, Drive/import/auth/evidence counters, scraper fleet readiness, GPU status, and JSON export.
@@ -34,7 +34,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - **007 Survey / Hop Pivot / Authorized Extractors** `█████████░ 85%` (19 done / 1 partial / 3 open)
 - **008 Body Capture / Capture / Evidence Diff** `█████████░ 93%` (23 done / 1 partial / 1 open)
 - **009 Drive / External Memory / Imports** `███████░░░ 72%` (15 done / 2 partial / 5 open)
-- **010 Model Runtime / Local Brain** `████████░░ 80%` (runtime/governor/registry present; Needle + DeepSeek local artifacts wired; Mamba/eval pending)
+- **010 Model Runtime / Local Brain** `█████████░ 90%` (runtime/governor/registry present; 6x Needle + DeepSeek + Mamba local artifacts wired; refusal eval pending)
 - **011 Indy_Reads / Persona / Assistant Layer** `████████░░ 75%` (16 done / 1 partial / 1 open)
 - **012 Big Board / UI / Progress Bars** `██████████ 100%` (18 done / 0 partial / 0 open)
 - **013 Security / Auth / Credentials** `████████░░ 82%` (14 done / 2 partial / 2 open)
@@ -271,7 +271,7 @@ Status key: `[x]` done/verified, `[~]` partial/prototype/wired-but-not-complete,
 - [x] 187. Drive import checksum gate specified in manifest skeleton
 - [x] 188. Wrong earlier dossier intake quarantined/ignored by policy
 
-### 010 Model Runtime / Local Brain — ████████░░ 80%
+### 010 Model Runtime / Local Brain — █████████░ 90%
 - [x] 189. CUDA toolkit installed
 - [x] 190. GPU visible
 - [x] 191. llama.cpp CUDA build exists
