@@ -24,21 +24,26 @@ def text_from_content(content):
 
 
 def anthropic_to_openai(payload):
+    # Local demo shim: keep prompts inside the 2k-8k llama.cpp context and ignore tool schemas.
+    # Claw's full Claude system prompt + tools can exceed small local model limits.
     messages = []
-    system = payload.get("system")
+    system = text_from_content(payload.get("system"))
     if system:
-        messages.append({"role": "system", "content": text_from_content(system)})
-    for m in payload.get("messages", []):
+        system = system[-2500:]
+        messages.append({"role": "system", "content": system})
+    for m in payload.get("messages", [])[-6:]:
         role = m.get("role", "user")
         if role not in {"user", "assistant", "system"}:
             role = "user"
-        messages.append({"role": role, "content": text_from_content(m.get("content"))})
+        content = text_from_content(m.get("content"))[-2500:]
+        messages.append({"role": role, "content": content})
     if not messages:
         messages = [{"role": "user", "content": "Hello"}]
+    requested = int(payload.get("max_tokens") or 512)
     return {
         "model": MODEL,
         "messages": messages,
-        "max_tokens": int(payload.get("max_tokens") or 1024),
+        "max_tokens": max(16, min(requested, 512)),
         "temperature": float(payload.get("temperature") or 0.2),
         "stream": False,
     }
@@ -51,8 +56,12 @@ def call_llama(payload):
         headers={"content-type": "application/json", "authorization": "Bearer not-needed"},
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=300) as resp:
-        data = json.loads(resp.read().decode())
+    try:
+        with urllib.request.urlopen(req, timeout=300) as resp:
+            data = json.loads(resp.read().decode())
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode(errors="replace")[:1000]
+        raise RuntimeError(f"upstream {exc.code}: {body}") from exc
     msg = data.get("choices", [{}])[0].get("message", {})
     text = msg.get("content") or msg.get("reasoning_content") or ""
     if not text.strip():
