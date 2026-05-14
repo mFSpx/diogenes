@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$ROOT/scripts/lucidota_start_deepseek_llama.sh" >/dev/null 2>&1 || true
+"$ROOT/scripts/lucidota_start_anthropic_proxy.sh" >/dev/null
+export ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-not-needed}"
+export ANTHROPIC_BASE_URL="${ANTHROPIC_BASE_URL:-http://127.0.0.1:8088}"
+MODEL="${CLAW_MODEL:-claude-sonnet-4-6}"
+exec "$ROOT/01_REPOS/claudecode/rust/target/release/claw" \
+  --model "$MODEL" \
+  --permission-mode danger-full-access \
+  --dangerously-skip-permissions \
+  "$@"
