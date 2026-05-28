@@ -3,12 +3,12 @@
 "Save This Prompt, Pass on this Handoff:"
 
 - Goal: RESOURCE_GOVERNED_CAPABILITY_BUILD
-- Generated: `2026-05-28T07:31:37Z`
-- Current step: 1/3
+- Generated: `2026-05-28T07:39:19Z`
+- Current step: 2/3
 - Status: active
 - Objective: Execute capability factory + DIOGENES/system-become under hard resource governance; Codex steers, deterministic/local/Groq workers chew, every PID owned, learn from failures, avoid thrash/OOM, and back up safely.
-- Completed: Added scripts/capability_pack_registry.py and tests; discovered the existing SIO-8 pack registry, mapped it into lucidota_investigation.capability_registry, wrote a receipt, applied 06_SCHEMA/018_investigation_artifact.sql to the live state DB, and verified the ontology-pack-sio8 row is persisted.
-- Next action: Continue with a small queue/orchestration slice that reuses existing Groq/local workers without inventing new islands; keep backup sterile and avoid the huge CAS history.
-- Resume command: `.venv/bin/python scripts/capability_pack_registry.py --execute --database-url postgresql:///lucidota_state --json register && source scripts/lucidota_pg_user_env.sh && psql -d lucidota_state -Atqc "select capability_key,lifecycle_status,run_state from lucidota_investigation.capability_registry where capability_key='ontology-pack-sio8'"`
+- Completed: Committed the governance and capability-pack work, pushed a fresh sanitized GitHub branch, applied the absurd-flow views, and spawned the Phase 1 edge dedupe worker under the resource governor; the worker is still chewing.
+- Next action: Wait for Phase 1 receipts, then continue bounded absurd-flow batches and report the deltas without touching huge history.
+- Resume command: `GIT_SSH_COMMAND='ssh -i ~/.ssh/lucidota_github_deploy_20260528_ed25519 -o IdentitiesOnly=yes' git push git@github.com:mFSpx/diogenes.git HEAD:refs/heads/lucidota-moon-push-20260528T0740Z && .venv/bin/python scripts/resource_governor.py spawn --execute --wait --json --owner moon_push_phase1 --purpose 'Edge cryptographic deduplication of legacy corpus' --requested-workers 1 --max-workers 1 --max-memory-mb 1024 --max-cpu-percent 60 --kill-policy bounded bash scripts/phase1_edge_dedupe.sh 09_STORAGE/krampuschewing_unpacked`
 
-Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: small, durable pack-registration slice landed; the cap registry now has an actual ontology-pack row instead of just a pretty JSON file. Tiny cryptid note: the SIO-8 pack is finally wearing a name tag.
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the bag is secured, the deterministic chew is hot, and the governor owns the worker PID. Tiny cryptid note: the moon-push grinder started to hum.
