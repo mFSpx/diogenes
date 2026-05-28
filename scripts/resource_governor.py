@@ -417,7 +417,7 @@ def cmd_spawn(args: argparse.Namespace) -> tuple[int, Path]:
     path = write_pid_registry(root, running, telemetry={"decision": decision, "snapshot": snap}, db_result=db_result)
     if args.wait:
         code = proc.wait(timeout=args.timeout if args.timeout else None)
-        finished = PidRegistration(proc.pid, args.owner, args.purpose, str(root), args.cmd, args.max_memory_mb, args.max_cpu_percent, args.kill_policy, "succeeded" if code == 0 else "failed", ended_at=now(), exit_code=code)
+        finished = PidRegistration(proc.pid, args.owner, args.purpose, str(root), args.worker_cmd, args.max_memory_mb, args.max_cpu_percent, args.kill_policy, "succeeded" if code == 0 else "failed", ended_at=now(), exit_code=code)
         path = write_pid_registry(root, finished, telemetry={"decision": decision}, db_result=record_pid_db(args.database_url, finished, path, {"decision": decision}) if args.execute else {"attempted": False})
         return code, path
     return 0, path

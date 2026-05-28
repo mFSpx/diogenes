@@ -28,6 +28,45 @@ def test_process_files_dry_run_uses_receipts_without_db(tmp_path, monkeypatch) -
     assert len(payload["records"]) == 2
 
 
+def test_discover_files_can_resume_after_cursor(tmp_path, monkeypatch) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    (root / "a.txt").write_text("a", encoding="utf-8")
+    (root / "b.txt").write_text("b", encoding="utf-8")
+    (root / "c.txt").write_text("c", encoding="utf-8")
+    monkeypatch.setattr(af, "ROOT", root)
+    files = af.discover_files(root, start_after="b.txt")
+    assert [p.name for p in files] == ["c.txt"]
+
+
+def test_record_learning_run_emits_river_run_sql() -> None:
+    captured: dict[str, object] = {}
+
+    class FakeConn:
+        def execute(self, sql, params):
+            captured["sql"] = sql
+            captured["params"] = params
+
+    af.record_learning_run(
+        FakeConn(),
+        {
+            "schema": "lucidota.absurd_flows.v1",
+            "root": "09_STORAGE/krampuschewing_unpacked",
+            "file_count": 3,
+            "processed_count": 2,
+            "deduped_count": 1,
+            "db_skipped_count": 0,
+            "batch_size_final": 4,
+            "batch_history": [{"batch_size": 4, "seconds": 0.5}],
+            "records": [{"source_path": "a", "db_action": "inserted", "file_kind": "text"}],
+        },
+    )
+    assert "INSERT INTO lucidota_learning.river_run" in captured["sql"]
+    assert captured["params"][0] == "succeeded"
+    assert captured["params"][1] == 3
+    assert captured["params"][2] == 2
+
+
 def test_phase1_edge_dedupe_script_dedupes_hashes(tmp_path) -> None:
     target = tmp_path / "krampuschewing_unpacked"
     target.mkdir()

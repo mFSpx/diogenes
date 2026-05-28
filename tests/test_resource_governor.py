@@ -1,3 +1,4 @@
+import argparse
 import json
 import subprocess
 import sys
@@ -143,3 +144,45 @@ def test_resource_governor_allows_json_flag_after_subcommand(tmp_path):
     assert proc.returncode == 0, proc.stderr + proc.stdout
     assert "RESOURCE_GOVERNOR=PASS" in proc.stdout
     assert "\"schema\": \"lucidota.resource_governor.preflight.v1\"" in proc.stdout
+
+
+def test_resource_governor_spawn_wait_uses_worker_cmd(tmp_path, monkeypatch):
+    class FakeProc:
+        pid = 4321
+
+        def wait(self, timeout=None):
+            return 0
+
+    captured = {}
+
+    def fake_popen(cmd, cwd=None, stdin=None, start_new_session=None):
+        captured["cmd"] = cmd
+        captured["cwd"] = cwd
+        return FakeProc()
+
+    monkeypatch.setattr(rg.subprocess, "Popen", fake_popen)
+    monkeypatch.setattr(rg.shutil, "which", lambda name: None)
+    monkeypatch.setattr(rg, "record_pid_db", lambda *a, **k: {"attempted": False})
+    monkeypatch.setattr(rg, "write_pid_registry", lambda *a, **k: tmp_path / "dummy.json")
+    rc, _ = rg.cmd_spawn(
+        argparse.Namespace(
+            root=str(tmp_path),
+            database_url="",
+            execute=True,
+            json=False,
+            requested_workers=1,
+            max_workers=1,
+            max_memory_mb=64,
+            max_cpu_percent=10.0,
+            kill_policy="bounded",
+            force=False,
+            wait=True,
+            timeout=None,
+            owner="pytest",
+            purpose="spawn wait",
+            worker_cmd=["bash", "-lc", "echo hi"],
+        )
+    )
+
+    assert rc == 0
+    assert captured["cmd"] == ["bash", "-lc", "echo hi"]

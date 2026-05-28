@@ -100,8 +100,12 @@ class FlowRecord:
     db_reason: str = ""
 
 
-def discover_files(root: Path, *, max_files: int | None = None) -> list[Path]:
+def discover_files(root: Path, *, max_files: int | None = None, start_after: str = "") -> list[Path]:
     files: list[Path] = []
+    cursor = start_after
+    marker = f"{root.name}/"
+    if marker in cursor:
+        cursor = cursor.split(marker, 1)[1]
     for path in sorted(root.rglob("*")):
         if path.is_dir():
             continue
@@ -109,6 +113,9 @@ def discover_files(root: Path, *, max_files: int | None = None) -> list[Path]:
         if any(part in IGNORE_DIRS for part in rel_parts):
             continue
         if path.name.startswith("."):
+            continue
+        rel_path = path.relative_to(root).as_posix()
+        if cursor and rel_path <= cursor:
             continue
         files.append(path)
         if max_files and len(files) >= max_files:
@@ -214,6 +221,39 @@ def link_case_artifact(conn: Any, case_key: str, sha256: str, source_path: str) 
     )
 
 
+def record_learning_run(conn: Any, payload: dict[str, Any], *, status: str = "succeeded") -> None:
+    detail = {
+        "schema": payload.get("schema", "lucidota.absurd_flows.v1"),
+        "root": payload.get("root"),
+        "file_count": payload.get("file_count", 0),
+        "processed_count": payload.get("processed_count", 0),
+        "deduped_count": payload.get("deduped_count", 0),
+        "db_skipped_count": payload.get("db_skipped_count", 0),
+        "batch_size_final": payload.get("batch_size_final", 0),
+        "batch_history": payload.get("batch_history", []),
+        "records_sample": [
+            {
+                "source_path": rec.get("source_path"),
+                "db_action": rec.get("db_action"),
+                "file_kind": rec.get("file_kind"),
+            }
+            for rec in (payload.get("records") or [])[:5]
+        ],
+    }
+    conn.execute(
+        """
+        INSERT INTO lucidota_learning.river_run(status, events_seen, examples_trained, detail)
+        VALUES (%s, %s, %s, %s::jsonb)
+        """,
+        (
+            status,
+            int(payload.get("file_count", 0)),
+            int(payload.get("processed_count", 0)),
+            json.dumps(detail, sort_keys=True),
+        ),
+    )
+
+
 def existing_sha256(conn: Any, sha_values: list[str]) -> set[str]:
     if not sha_values:
         return set()
@@ -232,8 +272,9 @@ def process_files(
     execute: bool = False,
     database_url: str | None = None,
     case_key: str = DEFAULT_CASE_KEY,
+    start_after: str = "",
 ) -> dict[str, Any]:
-    files = discover_files(root, max_files=max_files)
+    files = discover_files(root, max_files=max_files, start_after=start_after)
     receipts: list[FlowRecord] = []
     deduped = 0
     skipped_db = 0
@@ -318,6 +359,9 @@ def process_files(
             "batch_history": batch_history,
             "records": [asdict(r) for r in receipts],
         }
+        if execute and conn is not None:
+            record_learning_run(conn, payload, status="succeeded")
+            conn.commit()
         return payload
     finally:
         if conn is not None:
@@ -342,6 +386,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--chunk-size", type=int, default=64)
     p.add_argument("--max-files", type=int, default=None)
     p.add_argument("--case-key", default=DEFAULT_CASE_KEY)
+    p.add_argument("--start-after", default="")
     return p
 
 
@@ -354,6 +399,7 @@ def main() -> int:
         execute=bool(args.execute),
         database_url=args.database_url,
         case_key=args.case_key,
+        start_after=args.start_after,
     )
     receipt = write_receipt(payload)
     payload["receipt_path"] = rel(receipt)
