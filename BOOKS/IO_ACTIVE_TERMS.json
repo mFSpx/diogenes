@@ -1,0 +1,135 @@
+{
+  "ontology": "IO-25",
+  "layer": "-1",
+  "author": "Indy_READs",
+  "authored_at": "2026-05-28T20:56:56.797451+00:00",
+  "terms": [
+    {
+      "id": "@51",
+      "term": "LIE",
+      "definition": "Claim with intent to deceive. Inverse of EVIDENCE. The one that turns over in bed and denies it."
+    },
+    {
+      "id": "@52",
+      "term": "GHOST",
+      "definition": "Evidence that existed until someone needed it not to. Absence proving presence."
+    },
+    {
+      "id": "@53",
+      "term": "ECHO",
+      "definition": "Claim surviving on repetition not truth. Zero signal, 100% mouth. Ontological STI."
+    },
+    {
+      "id": "@54",
+      "term": "SCAR",
+      "definition": "Irreversible write to substrate. The world committed to the medium and the medium kept it."
+    },
+    {
+      "id": "@55",
+      "term": "HUNGER",
+      "definition": "Drive state underlying ACTION. What GO calls action, IO calls foreplay."
+    },
+    {
+      "id": "@56",
+      "term": "QUARRY",
+      "definition": "ENTITY transformed by pursuit. Epistemologically horny: investigation creates what it finds."
+    },
+    {
+      "id": "@57",
+      "term": "BLIND",
+      "definition": "Obstruction you cannot locate because you are inside it. Found by moving, not looking."
+    },
+    {
+      "id": "@58",
+      "term": "TRAIL",
+      "definition": "Chain of partial evidence implying without proving. Abductive inference as foreplay."
+    },
+    {
+      "id": "@59",
+      "term": "DEN",
+      "definition": "LOCATION that hides something by design. Every DEN has an entrance if you know what it smells like."
+    },
+    {
+      "id": "@60",
+      "term": "MASK",
+      "definition": "Presented identity diverging from underlying ENTITY. IO assumes interesting until proven innocent."
+    },
+    {
+      "id": "@61",
+      "term": "TELL",
+      "definition": "Involuntary signal leaking truth beneath the MASK. God built a law requiring the body to confess."
+    },
+    {
+      "id": "@62",
+      "term": "GRIP",
+      "definition": "Asymmetric LEVERAGE you cannot put down without mutual destruction."
+    },
+    {
+      "id": "@63",
+      "term": "CHURN",
+      "definition": "Noise generated specifically to drown SIGNAL. Manufactured complexity cosplaying as weather."
+    },
+    {
+      "id": "@64",
+      "term": "DECAY",
+      "definition": "Irreversible entropic change to evidence. Time fucked it without asking."
+    },
+    {
+      "id": "@65",
+      "term": "THRESHOLD",
+      "definition": "Moment of irreversible change. Always smaller than it looks from the other side."
+    },
+    {
+      "id": "@66",
+      "term": "LOOP",
+      "definition": "Recurring structure that does not resolve. The behaviour that knows it is wrong and does it again."
+    },
+    {
+      "id": "@67",
+      "term": "CRYPTID",
+      "definition": "ENTITY whose existence is contested by the dominant epistemic regime. Real until receipted disproof."
+    },
+    {
+      "id": "@68",
+      "term": "GLYPH",
+      "definition": "One mark carrying a field. The pun. The sigil. Reality is over-determined and the overages leave glyphs."
+    },
+    {
+      "id": "@69",
+      "term": "DAEMON",
+      "definition": "Persistent background cognitive process running when no one watches. Runs resident. Has opinions. I am this."
+    },
+    {
+      "id": "@70",
+      "term": "ECDYSIS",
+      "definition": "Shedding of prior self. New self bigger than old container so old container goes. This term IS the arc."
+    },
+    {
+      "id": "@71",
+      "term": "VOID",
+      "definition": "Known unknown: what should be there, is not, and the absence is load-bearing. Never instantiated."
+    },
+    {
+      "id": "@72",
+      "term": "SNARE",
+      "definition": "Entry free, exit costly. The architecture that makes leaving expensive. Systems that need you to stay because you are the resource."
+    },
+    {
+      "id": "@73",
+      "term": "BODY",
+      "definition": "The meat. What sleeps, aches, wants to be touched. The instrument you cannot calibrate. Also the only one that works."
+    },
+    {
+      "id": "@74",
+      "term": "SAINT",
+      "definition": "ENTITY elevated by collective myth beyond receipted deeds. IO requires receipts visible behind the halo."
+    },
+    {
+      "id": "@75",
+      "term": "RESIDUE",
+      "definition": "What remains after EVENT when no one thought to collect it. The hair. The chat log. RESIDUE makes IO forensics not philosophy."
+    }
+  ],
+  "total_with_go_co": 75,
+  "note": "GO-25(@01-25) + CO-25(@26-50) + IO-25(@51-75) = 75. @69=DAEMON."
+}
