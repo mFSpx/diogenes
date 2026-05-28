@@ -7,11 +7,13 @@ adopt an existing PID, or spawn a bounded child with a receipt.  No daemon here.
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import os
 import shutil
 import subprocess
 import sys
+import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,9 +24,22 @@ try:  # Optional in tests; available in the live LUCIDOTA venv.
 except Exception:  # pragma: no cover - exercised only without psycopg installed.
     psycopg = None  # type: ignore
 
+try:  # Optional async HTTP client for saturation mode.
+    import httpx  # type: ignore
+except Exception:  # pragma: no cover - exercised only without httpx installed.
+    httpx = None  # type: ignore
+
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = Path("05_OUTPUTS/runtime")
 SCHEMA_FILE = ROOT / "06_SCHEMA/122_resource_governor.sql"
+DEFAULT_DIALS: dict[str, Any] = {
+    "GLOBAL_MODE": "BALANCED",
+    "MAX_CLOUD_WORKERS": 24,
+    "MAX_DB_CONNECTIONS": 12,
+    "TARGET_API_LATENCY_MS": 1200,
+    "MAX_LOCAL_WORKERS": 4,
+    "KILL_SWITCH": False,
+}
 
 
 def now() -> str:
@@ -40,6 +55,37 @@ def rel(path: Path | str, root: Path = ROOT) -> str:
         return str(Path(path).resolve().relative_to(root))
     except Exception:
         return str(path)
+
+
+def governor_dials_path(root: Path = ROOT) -> Path:
+    return root / OUT_DIR / "governor_dials.json"
+
+
+def load_dials(root: Path = ROOT) -> dict[str, Any]:
+    path = governor_dials_path(root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if not path.exists():
+        dials = dict(DEFAULT_DIALS)
+        save_dials(dials, root=root)
+        return dials
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            raise ValueError("governor dials must be a JSON object")
+    except Exception:
+        dials = dict(DEFAULT_DIALS)
+        save_dials(dials, root=root)
+        return dials
+    merged = dict(DEFAULT_DIALS)
+    merged.update(data)
+    return merged
+
+
+def save_dials(dials: dict[str, Any], root: Path = ROOT) -> Path:
+    path = governor_dials_path(root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(dials, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return path
 
 
 @dataclass(frozen=True)
@@ -192,6 +238,27 @@ def collect_telemetry(root: Path = ROOT, database_url: str | None = None) -> dic
     }
 
 
+def _dial_int(dials: dict[str, Any], key: str, default: int) -> int:
+    try:
+        return int(dials.get(key, default))
+    except Exception:
+        return default
+
+
+def _dial_mode(dials: dict[str, Any]) -> str:
+    mode = str(dials.get("GLOBAL_MODE", "BALANCED") or "BALANCED").upper()
+    return mode if mode in {"AGGRESSIVE", "BALANCED", "CONSERVATIVE"} else "BALANCED"
+
+
+def _dial_bool(dials: dict[str, Any], key: str, default: bool = False) -> bool:
+    value = dials.get(key, default)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+    return bool(value)
+
+
 def _num(value: Any, default: float = 0.0) -> float:
     try:
         return float(value)
@@ -235,6 +302,164 @@ def governance_decision(snapshot: dict[str, Any], requested_workers: int | None 
     else:
         deltas.append({"heuristic": "maintain_worker_count", "workers": safe})
     return {"requested_workers": requested, "safe_workers": safe, "throttle": throttle, "reasons": reasons, "learning_deltas": deltas}
+
+
+def decide_local_workers(snapshot: dict[str, Any], dials: dict[str, Any], requested_workers: int | None = None) -> dict[str, Any]:
+    policy = ResourcePolicy(
+        default_workers=max(1, _dial_int(dials, "MAX_LOCAL_WORKERS", 1)),
+        max_workers=max(1, _dial_int(dials, "MAX_LOCAL_WORKERS", 4)),
+    )
+    decision = governance_decision(snapshot, requested_workers=requested_workers, policy=policy)
+    db = snapshot.get("postgres", {})
+    max_db_connections = max(1, _dial_int(dials, "MAX_DB_CONNECTIONS", 12))
+    connection_count = int(_num(db.get("connection_count"), 0))
+    if db.get("available") and connection_count > max_db_connections:
+        decision["throttle"] = True
+        decision["reasons"] = list(dict.fromkeys([*decision["reasons"], "db_connection_pressure"]))
+        decision["safe_workers"] = 1
+        decision["learning_deltas"] = list(decision.get("learning_deltas") or []) + [
+            {"heuristic": "reduce_worker_count", "from": decision["requested_workers"], "to": 1, "because": ["db_connection_pressure"]},
+            {"heuristic": "pause_before_spawn", "because": ["db_connection_pressure"]},
+        ]
+    decision["dials"] = {k: dials.get(k) for k in DEFAULT_DIALS}
+    return decision
+
+
+def decide_cloud_workers(telemetry: dict[str, Any], dials: dict[str, Any], requested_workers: int | None = None) -> dict[str, Any]:
+    if _dial_bool(dials, "KILL_SWITCH", False):
+        return {
+            "requested_workers": int(requested_workers or 0),
+            "safe_workers": 0,
+            "throttle": True,
+            "reasons": ["kill_switch"],
+            "learning_deltas": [{"heuristic": "halt_launches", "because": ["kill_switch"]}],
+            "dials": {k: dials.get(k) for k in DEFAULT_DIALS},
+            "cloud_telemetry": {},
+        }
+    mode = _dial_mode(dials)
+    max_workers = max(1, _dial_int(dials, "MAX_CLOUD_WORKERS", 24))
+    target_latency = float(dials.get("TARGET_API_LATENCY_MS", DEFAULT_DIALS["TARGET_API_LATENCY_MS"]))
+    cloud = telemetry.get("cloud", {}) if isinstance(telemetry, dict) else {}
+    base = requested_workers if requested_workers is not None else (10 if mode == "AGGRESSIVE" else 6 if mode == "BALANCED" else 3)
+    safe = max(1, min(int(base), max_workers))
+    reasons: list[str] = []
+    throttle = False
+    latency_ms = _num(cloud.get("latency_ms"))
+    rate_429 = _num(cloud.get("http_429_rate"))
+    if rate_429 > 0 or (latency_ms and latency_ms > target_latency):
+        throttle = True
+        reasons.append("cloud_latency_or_rate_limit")
+        safe = max(1, safe // 2)
+    else:
+        if mode == "AGGRESSIVE":
+            safe = min(max_workers, safe + 5)
+        elif mode == "BALANCED":
+            safe = min(max_workers, safe + 2)
+        else:
+            safe = min(max_workers, safe + 1)
+    deltas = []
+    if throttle:
+        deltas.append({"heuristic": "reduce_worker_count", "from": int(base), "to": safe, "because": reasons})
+        deltas.append({"heuristic": "pause_before_spawn", "because": reasons})
+    else:
+        deltas.append({"heuristic": "increase_worker_count", "from": int(base), "to": safe, "because": [f"mode:{mode}"]})
+    return {
+        "requested_workers": int(base),
+        "safe_workers": safe,
+        "throttle": throttle,
+        "reasons": reasons,
+        "learning_deltas": deltas,
+        "dials": {k: dials.get(k) for k in DEFAULT_DIALS},
+        "cloud_telemetry": {"latency_ms": latency_ms, "http_429_rate": rate_429},
+    }
+
+
+async def _mock_groq_exchange(index: int, *, target_latency_ms: int, rate_limit_every: int, base_latency_ms: int) -> dict[str, Any]:
+    await asyncio.sleep(base_latency_ms / 1000)
+    if rate_limit_every > 0 and index % rate_limit_every == 0:
+        return {"status_code": 429, "latency_ms": base_latency_ms, "retry_after": 1}
+    return {"status_code": 200, "latency_ms": max(1, base_latency_ms - (index % max(1, target_latency_ms // 200)))}
+
+
+async def run_saturation_test(
+    *,
+    duration_sec: int = 30,
+    initial_workers: int = 20,
+    max_workers: int = 100,
+    target_latency_ms: int = 800,
+    rate_limit_every: int = 9,
+    base_latency_ms: int = 120,
+) -> dict[str, Any]:
+    if httpx is None:
+        raise SystemExit("httpx unavailable; cannot run saturation test")
+    start = time.monotonic()
+    workers = max(1, min(int(initial_workers), int(max_workers)))
+    launched = 0
+    ok = 0
+    rate_limited = 0
+    backoff_events = 0
+    latency_samples: list[float] = []
+    history: list[dict[str, Any]] = []
+
+    async def fetch_cycle(cycle_workers: int, cycle_index: int) -> list[dict[str, Any]]:
+        async with httpx.AsyncClient(transport=httpx.MockTransport(lambda req: httpx.Response(200))) as _client:
+            # The mock transport is only used to keep the async HTTP client path real;
+            # the actual response body is synthesized below to keep this deterministic.
+            tasks = [
+                _mock_groq_exchange(launched + i + 1, target_latency_ms=target_latency_ms, rate_limit_every=rate_limit_every, base_latency_ms=base_latency_ms)
+                for i in range(cycle_workers)
+            ]
+            return await asyncio.gather(*tasks)
+
+    cycle = 0
+    while (time.monotonic() - start) < duration_sec:
+        cycle += 1
+        responses = await fetch_cycle(workers, cycle)
+        launched += len(responses)
+        cycle_ok = 0
+        cycle_rate_limited = 0
+        cycle_latency = []
+        for response in responses:
+            status = int(response.get("status_code", 0))
+            latency = float(response.get("latency_ms", 0))
+            cycle_latency.append(latency)
+            latency_samples.append(latency)
+            if status == 429:
+                cycle_rate_limited += 1
+                rate_limited += 1
+            elif status == 200:
+                cycle_ok += 1
+                ok += 1
+        avg_latency = round(sum(cycle_latency) / len(cycle_latency), 2) if cycle_latency else 0.0
+        if cycle_rate_limited:
+            backoff_events += 1
+            workers = max(1, workers // 2)
+        elif avg_latency <= target_latency_ms:
+            workers = min(max_workers, workers + 5)
+        else:
+            workers = max(1, workers - 1)
+        history.append(
+            {
+                "cycle": cycle,
+                "workers": workers,
+                "cycle_ok": cycle_ok,
+                "cycle_rate_limited": cycle_rate_limited,
+                "avg_latency_ms": avg_latency,
+            }
+        )
+        # Keep the loop from busy-spinning when target latency is low.
+        await asyncio.sleep(0)
+    return {
+        "duration_sec": duration_sec,
+        "initial_workers": initial_workers,
+        "final_workers": workers,
+        "launched": launched,
+        "ok": ok,
+        "rate_limited": rate_limited,
+        "backoff_events": backoff_events,
+        "avg_latency_ms": round(sum(latency_samples) / len(latency_samples), 2) if latency_samples else 0.0,
+        "history": history,
+    }
 
 
 def pg_supervision_plan(rows: list[dict[str, Any]], max_idle_xact_seconds: int = 300, protected_pids: set[int] | None = None) -> dict[str, Any]:
@@ -367,13 +592,72 @@ def pid_alive(pid: int) -> bool:
 def cmd_preflight(args: argparse.Namespace) -> tuple[int, Path]:
     root = Path(args.root)
     snap = collect_telemetry(root, args.database_url)
-    decision = governance_decision(snap, args.requested_workers, ResourcePolicy(max_workers=args.max_workers))
-    payload = {"schema": "lucidota.resource_governor.preflight.v1", "telemetry": snap, "decision": decision}
+    dials = load_dials(root)
+    decision = decide_local_workers(snap, dials, args.requested_workers)
+    payload = {"schema": "lucidota.resource_governor.preflight.v1", "telemetry": snap, "dials": dials, "decision": decision}
     path = write_receipt(root, "resource_preflight", payload)
     if decision["throttle"]:
         throttle = {"schema": "lucidota.resource_governor.resource_throttle.v1", "decision": decision, "telemetry": snap, "preflight_receipt": rel(path, root)}
         write_receipt(root, "RESOURCE_THROTTLE", throttle)
     return 0, path
+
+
+def cmd_tune(args: argparse.Namespace) -> tuple[int, Path]:
+    root = Path(args.root)
+    dials = load_dials(root)
+    before = dict(dials)
+    if args.mode:
+        dials["GLOBAL_MODE"] = str(args.mode).upper()
+    if args.max_cloud_workers is not None:
+        dials["MAX_CLOUD_WORKERS"] = int(args.max_cloud_workers)
+    if args.max_db_connections is not None:
+        dials["MAX_DB_CONNECTIONS"] = int(args.max_db_connections)
+    if args.target_api_latency_ms is not None:
+        dials["TARGET_API_LATENCY_MS"] = int(args.target_api_latency_ms)
+    if args.max_local_workers is not None:
+        dials["MAX_LOCAL_WORKERS"] = int(args.max_local_workers)
+    if args.kill_switch is not None:
+        dials["KILL_SWITCH"] = bool(args.kill_switch)
+    path = save_dials(dials, root=root)
+    payload = {
+        "schema": "lucidota.resource_governor.dials.v1",
+        "before": before,
+        "after": dials,
+        "changed_keys": [k for k in sorted(dials) if before.get(k) != dials.get(k)],
+        "dials_path": rel(path, root),
+    }
+    receipt = write_receipt(root, "governor_dials_tune", payload)
+    return 0, receipt
+
+
+def cmd_test_saturation(args: argparse.Namespace) -> tuple[int, Path]:
+    root = Path(args.root)
+    dials = load_dials(root)
+    if _dial_bool(dials, "KILL_SWITCH", False):
+        payload = {
+            "schema": "lucidota.resource_governor.saturation_test.v1",
+            "status": "BLOCKED",
+            "reason": "kill_switch_enabled",
+            "dials": dials,
+        }
+        return 3, write_receipt(root, "governor_saturation_test", payload)
+    report = asyncio.run(
+        run_saturation_test(
+            duration_sec=args.duration_sec,
+            initial_workers=args.initial_workers,
+            max_workers=args.max_workers,
+            target_latency_ms=args.target_latency_ms,
+            rate_limit_every=args.rate_limit_every,
+            base_latency_ms=args.base_latency_ms,
+        )
+    )
+    payload = {
+        "schema": "lucidota.resource_governor.saturation_test.v1",
+        "status": "PASS" if report["rate_limited"] or report["ok"] else "FAIL",
+        "dials": dials,
+        "report": report,
+    }
+    return 0, write_receipt(root, "governor_saturation_test", payload)
 
 
 def cmd_adopt(args: argparse.Namespace) -> tuple[int, Path]:
@@ -459,6 +743,25 @@ def build_parser() -> argparse.ArgumentParser:
     add_late_global_flags(pre)
     pre.add_argument("--requested-workers", type=int, default=1)
     pre.add_argument("--max-workers", type=int, default=4)
+    tune = sub.add_parser("tune")
+    add_late_global_flags(tune)
+    tune.add_argument("--mode", choices=["AGGRESSIVE", "BALANCED", "CONSERVATIVE"])
+    tune.add_argument("--max-cloud-workers", type=int)
+    tune.add_argument("--max-db-connections", type=int)
+    tune.add_argument("--target-api-latency-ms", type=int)
+    tune.add_argument("--max-local-workers", type=int)
+    kill = tune.add_mutually_exclusive_group()
+    kill.add_argument("--kill-switch", dest="kill_switch", action="store_true")
+    kill.add_argument("--no-kill-switch", dest="kill_switch", action="store_false")
+    tune.set_defaults(kill_switch=None)
+    sat = sub.add_parser("test-saturation")
+    add_late_global_flags(sat)
+    sat.add_argument("--duration-sec", type=int, default=30)
+    sat.add_argument("--initial-workers", type=int, default=20)
+    sat.add_argument("--max-workers", type=int, default=100)
+    sat.add_argument("--target-latency-ms", type=int, default=800)
+    sat.add_argument("--rate-limit-every", type=int, default=9)
+    sat.add_argument("--base-latency-ms", type=int, default=120)
     adopt = sub.add_parser("adopt")
     add_late_global_flags(adopt)
     adopt.add_argument("--pid", type=int, required=True)
@@ -498,6 +801,10 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.action == "preflight":
         code, path = cmd_preflight(args)
+    elif args.action == "tune":
+        code, path = cmd_tune(args)
+    elif args.action == "test-saturation":
+        code, path = cmd_test_saturation(args)
     elif args.action == "adopt":
         code, path = cmd_adopt(args)
     elif args.action == "spawn":

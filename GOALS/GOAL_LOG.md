@@ -3832,3 +3832,117 @@ Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: 
 - Resume command: `touch 05_OUTPUTS/runtime/absurd_flows.stop to pause future runs, or rm it to resume`
 
 Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the batcher now has a brake pedal, not just a throttle. Tiny cryptid note: the goblin can be told to sit down.
+
+---
+
+## Step 3/3 — Deterministic chew receipts and governor repair
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RESOURCE_GOVERNED_CAPABILITY_BUILD
+- Generated: `2026-05-28T07:59:00Z`
+- Current step: 3/3
+- Status: active
+- Objective: Execute capability factory + DIOGENES/system-become under hard resource governance; Codex steers, deterministic/local/Groq workers chew, every PID owned, learn from failures, avoid thrash/OOM, and back up safely.
+- Completed: The deterministic absurd_flows pipeline continues to advance with a 1-worker collar and laptop-friendly batches. The latest governed 20-file batch inserted 20/20 artifacts from the Luci/Lucidota corpus segment with no dedupe hits, and the stop-file latch remains available for immediate pause/cancel. Phase 1 edge dedupe remains fully measured at 160,904 files / 105,257 unique hashes / 55,647 duplicates.
+- Next action: Keep advancing the cursor in bounded governed batches when the machine is free; use the stop-file latch to pause or cancel immediately if laptop use needs priority.
+- Resume command: `touch 05_OUTPUTS/runtime/absurd_flows.stop to pause future runs, or rm it to resume`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the batcher is still behaving like a polite house guest. Tiny cryptid note: the goblin took a second lap and did not break the furniture.
+
+---
+
+## Step 3/3 — Keep thin governed batches advancing and refresh sibling repos
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RESOURCE_GOVERNED_CAPABILITY_BUILD
+- Generated: `2026-05-28T08:04:55Z`
+- Current step: 3/3
+- Status: active
+- Objective: Execute capability factory + DIOGENES/system-become under hard resource governance; Codex steers, deterministic/local/Groq workers chew, every PID owned, learn from failures, avoid thrash/OOM, and back up safely.
+- Completed: The thin governed absurd_flows batch landed successfully with 20/20 inserted, batch_size_final=4, and a fresh receipt at 05_OUTPUTS/runtime/absurd_flows_20260528T080144970136Z.json. I also checked the Dev Library manifest against the filesystem: there are 121 REPOS entries and zero missing local paths. Then I fetched refs for the local git repos under 01_REPOS; the current repo fetch hit anonymous HTTPS auth friction on GitLab, but the sibling repos updated cleanly.
+- Next action: Keep advancing the cursor in bounded governed batches when the machine is free; use the stop-file latch to pause or cancel immediately if laptop use needs priority. If you want the main repo fetched too, switch its origin to an auth-backed remote or provide a non-interactive credential path.
+- Resume command: `touch 05_OUTPUTS/runtime/absurd_flows.stop to pause future runs, or rm it to resume`
+
+Technical Summary Review and Dev Notes: Tiny house-guest batch behaved. The repo attic is intact: nothing missing, just a GitLab auth keyhole on the main origin. Cryptid note: the goblin kept its shoes on and did not trample the RAM.
+
+---
+
+## Step 3/3 — Keep thin governed batches advancing and record transport blockers
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RESOURCE_GOVERNED_CAPABILITY_BUILD
+- Generated: `2026-05-28T08:06:48Z`
+- Current step: 3/3
+- Status: active
+- Objective: Execute capability factory + DIOGENES/system-become under hard resource governance; Codex steers, deterministic/local/Groq workers chew, every PID owned, learn from failures, avoid thrash/OOM, and back up safely.
+- Completed: The latest governed absurd_flows batch landed successfully with 19/20 inserted and 1 DB skip, using batch_size_final=4. Fresh receipt: 05_OUTPUTS/runtime/absurd_flows_20260528T080620237542Z.json; fresh PID receipt: 05_OUTPUTS/runtime/pid_registry_434531_succeeded_20260528T080620293373Z.json. I also rechecked the Dev Library manifest: 121 REPOS entries, zero missing local paths. Repo fetch progress: sibling repos under 01_REPOS updated; the main repo origin is still blocked by GitLab SSH publickey auth, so it remains unfetched until a usable credential path exists.
+- Next action: Keep advancing the cursor in bounded governed batches when the machine is free; use the stop-file latch to pause or cancel immediately if laptop use needs priority. If you want the main repo fetched too, provide GitLab SSH credentials or a non-interactive token path, then switch origin and fetch.
+- Resume command: `touch 05_OUTPUTS/runtime/absurd_flows.stop to pause future runs, or rm it to resume`
+
+Technical Summary Review and Dev Notes: Still thin, still exact: the chew is moving, but GitLab wants a key and won’t let the main repo through on an unauthenticated lane. Cryptid note: the goblin now has a locksmith problem, not a RAM problem.
+
+---
+
+## Step 3/3 — Keep thin governed batches advancing and record transport blockers
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RESOURCE_GOVERNED_CAPABILITY_BUILD
+- Generated: `2026-05-28T08:08:04Z`
+- Current step: 3/3
+- Status: active
+- Objective: Execute capability factory + DIOGENES/system-become under hard resource governance; Codex steers, deterministic/local/Groq workers chew, every PID owned, learn from failures, avoid thrash/OOM, and back up safely.
+- Completed: The latest governed absurd_flows batch landed successfully with 20/20 inserted, batch_size_final=4, and a fresh receipt at 05_OUTPUTS/runtime/absurd_flows_20260528T080756029172Z.json. Fresh PID receipt: 05_OUTPUTS/runtime/pid_registry_435129_succeeded_20260528T080756074252Z.json. Resource governor stayed at safe_workers=1 with no throttle. The Dev Library manifest still matches the filesystem for all 121 REPOS entries. Repo fetch status is unchanged: sibling repos under 01_REPOS updated, but the main repo origin remains blocked by GitLab SSH publickey auth.
+- Next action: Keep advancing the cursor in bounded governed batches when the machine is free; use the stop-file latch to pause or cancel immediately if laptop use needs priority. If you want the main repo fetched too, provide GitLab SSH credentials or a non-interactive token path, then switch origin and fetch.
+- Resume command: `touch 05_OUTPUTS/runtime/absurd_flows.stop to pause future runs, or rm it to resume`
+
+Technical Summary Review and Dev Notes: Tiny batch, clean receipt, no thrash. The only real blocker still standing is GitLab asking for a proper key on the main repo. Cryptid note: the goblin has become a customs officer.
+
+---
+
+## Step 3/3 — Keep thin governed batches advancing and record transport blockers
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RESOURCE_GOVERNED_CAPABILITY_BUILD
+- Generated: `2026-05-28T08:09:04Z`
+- Current step: 3/3
+- Status: active
+- Objective: Execute capability factory + DIOGENES/system-become under hard resource governance; Codex steers, deterministic/local/Groq workers chew, every PID owned, learn from failures, avoid thrash/OOM, and back up safely.
+- Completed: Another governed absurd_flows batch completed with 20/20 inserted, batch_size_final=4, and a new receipt at 05_OUTPUTS/runtime/absurd_flows_20260528T080848543584Z.json. Fresh PID receipt: 05_OUTPUTS/runtime/pid_registry_435397_succeeded_20260528T080848588309Z.json. The governor still reports safe_workers=1 with no throttle. The Dev Library manifest remains consistent with disk for 121 REPOS entries and zero missing local paths. The main repo GitLab fetch blocker is unchanged: anonymous HTTPS fetch fails and SSH reports publickey denial, while sibling repos under 01_REPOS continue to fetch normally.
+- Next action: Keep advancing the cursor in bounded governed batches when the machine is free; use the stop-file latch to pause or cancel immediately if laptop use needs priority. If you want the main repo fetched too, provide GitLab SSH credentials or a non-interactive token path, then switch origin and fetch.
+- Resume command: `touch 05_OUTPUTS/runtime/absurd_flows.stop to pause future runs, or rm it to resume`
+
+Technical Summary Review and Dev Notes: Tiny batch, clean receipt, no throttle. The remaining blocker is transport, not compute. Cryptid note: the goblin is still at the gate checking credentials.
+
+---
+
+## Step 3/3 — Keep thin governed batches advancing and record transport blockers
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RESOURCE_GOVERNED_CAPABILITY_BUILD
+- Generated: `2026-05-28T08:19:14Z`
+- Current step: 3/3
+- Status: active
+- Objective: Execute capability factory + DIOGENES/system-become under hard resource governance; Codex steers, deterministic/local/Groq workers chew, every PID owned, learn from failures, avoid thrash/OOM, and back up safely.
+- Completed: Implemented live governor dials in 05_OUTPUTS/runtime/governor_dials.json with tune-time updates, added KILL_SWITCH, split cloud vs local worker decisions, and wired a 30s synthetic saturation test. New receipts: 05_OUTPUTS/runtime/governor_dials_tune_20260528T081812835798Z.json and 05_OUTPUTS/runtime/governor_saturation_test_20260528T081702005311Z.json. Also added async Groq fanout plumbing: scripts/groq_workorder_compiler.py and scripts/groq_batch_launcher.py. Proof: 7 new tests passed, and the async launcher executed 2 real Groq batches concurrently with receipts at 05_OUTPUTS/goals/groq_batch_launcher_20260528T081904263707Z.json, plus per-batch goal receipts in 05_OUTPUTS/goals/groq_goal_delegate_*.json. The local governor still protects the laptop, while cloud batches now fan out independently.
+- Next action: Keep advancing the remaining corpus by compiling more work orders into Groq batches and draining them through the async launcher; keep using the stop-file latch and tune CLI when laptop or DB pressure changes.
+- Resume command: `touch 05_OUTPUTS/runtime/absurd_flows.stop to pause future runs, or rm it to resume`
+
+Technical Summary Review and Dev Notes: The ECU now has real dials, a kill switch, and an async Groq lane. Tiny cryptid note: the goblin learned to shift gears instead of riding the clutch.
