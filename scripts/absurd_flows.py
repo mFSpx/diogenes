@@ -302,6 +302,7 @@ def process_files(
     database_url: str | None = None,
     case_key: str = DEFAULT_CASE_KEY,
     start_after: str = "",
+    stop_file: Path | None = None,
 ) -> dict[str, Any]:
     files = discover_files(root, max_files=max_files, start_after=start_after)
     receipts: list[FlowRecord] = []
@@ -311,6 +312,8 @@ def process_files(
     batch_size = max(1, int(chunk_size))
     batch_history: list[dict[str, Any]] = []
     db_seen: set[str] = set()
+    stopped = False
+    stop_reason = ""
     conn = None
     if execute:
         if psycopg is None:
@@ -324,13 +327,14 @@ def process_files(
         db_seen = existing_sha256(conn, [sha256_file(p) for p in files[: min(len(files), 256)]]) if files else set()
     try:
         for group in batch(files, batch_size):
+            if stop_file and Path(stop_file).exists():
+                stopped = True
+                stop_reason = f"stop_file_present:{rel(stop_file)}"
+                break
             started = datetime.now(timezone.utc)
-            batch_rows = 0
-            sha_values: list[str] = []
             batch_records: list[tuple[Path, str, int, str, str, Path]] = []
             for src in group:
                 sha = sha256_file(src)
-                sha_values.append(sha)
                 if sha in db_seen:
                     deduped += 1
                     receipts.append(FlowRecord(rel(src), sha, src.stat().st_size, mimetypes.guess_type(src.name)[0] or "", file_kind(src, mimetypes.guess_type(src.name)[0] or ""), rel(cas_target(sha)), db_action="skipped", db_reason="already_in_db"))
@@ -387,9 +391,11 @@ def process_files(
             "batch_size_final": batch_size,
             "batch_history": batch_history,
             "records": [asdict(r) for r in receipts],
+            "stopped": stopped,
+            "stop_reason": stop_reason,
         }
         if execute and conn is not None:
-            record_learning_run(conn, payload, status="succeeded")
+            record_learning_run(conn, payload, status="failed" if stopped else "succeeded")
             conn.commit()
         return payload
     finally:
@@ -416,6 +422,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-files", type=int, default=None)
     p.add_argument("--case-key", default=DEFAULT_CASE_KEY)
     p.add_argument("--start-after", default="")
+    p.add_argument("--stop-file", default=str(OUT_DIR / "absurd_flows.stop"))
     return p
 
 
@@ -429,6 +436,7 @@ def main() -> int:
         database_url=args.database_url,
         case_key=args.case_key,
         start_after=args.start_after,
+        stop_file=Path(args.stop_file) if args.stop_file else None,
     )
     receipt = write_receipt(payload)
     payload["receipt_path"] = rel(receipt)

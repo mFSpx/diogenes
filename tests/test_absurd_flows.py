@@ -70,6 +70,23 @@ def test_record_learning_run_emits_river_run_sql() -> None:
     assert captured["calls"][1][1][2] == "batch_size_final"
 
 
+def test_process_files_stop_file_triggers_graceful_stop(tmp_path, monkeypatch) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    (root / "one.txt").write_text("alpha", encoding="utf-8")
+    (root / "two.txt").write_text("beta", encoding="utf-8")
+    stop_file = tmp_path / "pause.stop"
+    stop_file.write_text("stop", encoding="utf-8")
+    monkeypatch.setattr(af, "ROOT", root)
+    monkeypatch.setattr(af, "CAS_ROOT", tmp_path / "cas")
+    monkeypatch.setattr(af, "OUT_DIR", tmp_path / "out")
+    payload = af.process_files(root, max_files=None, chunk_size=2, execute=False, stop_file=stop_file)
+    assert payload["stopped"] is True
+    assert payload["stop_reason"] == f"stop_file_present:{stop_file}"
+    assert payload["processed_count"] == 0
+    assert len(payload["records"]) == 0
+
+
 def test_phase1_edge_dedupe_script_dedupes_hashes(tmp_path) -> None:
     target = tmp_path / "krampuschewing_unpacked"
     target.mkdir()
