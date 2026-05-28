@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/028_ternary_lens_lab.sql

@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/019_korpus_krampii.sql

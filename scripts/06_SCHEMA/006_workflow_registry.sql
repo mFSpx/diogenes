@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/006_workflow_registry.sql

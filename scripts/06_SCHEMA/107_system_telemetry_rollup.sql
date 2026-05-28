@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/107_system_telemetry_rollup.sql

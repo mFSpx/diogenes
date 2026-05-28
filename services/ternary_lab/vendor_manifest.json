@@ -1,0 +1,95 @@
+{
+  "schema": "lucidota.ternary_lab.vendor_manifest.v1",
+  "fast_path_contract": "FairyFuse-compatible lenses must avoid FP16/FP32 LoRA matmuls in runtime hot-path inference.",
+  "classifications": ["usable_now", "research_only", "needs_conversion", "unsafe_for_fastpath", "unsupported"],
+  "vendors": [
+    {
+      "candidate_key": "microsoft_bitnet_cpp",
+      "family": "bitnet_runtime",
+      "display_name": "microsoft/BitNet / bitnet.cpp",
+      "source_uri": "https://github.com/microsoft/BitNet",
+      "license_id": "MIT",
+      "classification": "usable_now",
+      "fast_path_compatible": true,
+      "benchmark_required": false,
+      "notes": "Official low-bit BitNet inference framework. Compatible as backend surface, not an adapter lens."
+    },
+    {
+      "candidate_key": "microsoft_bitnet_b158_2b_4t_gguf",
+      "family": "packed_bitnet_deployment_weights",
+      "display_name": "microsoft/bitnet-b1.58-2B-4T GGUF deployment weights",
+      "source_uri": "https://huggingface.co/microsoft/bitnet-b1.58-2B-4T-gguf",
+      "license_id": "mit",
+      "classification": "usable_now",
+      "fast_path_compatible": true,
+      "benchmark_required": false,
+      "notes": "Deployment path for bitnet.cpp-compatible packed inference."
+    },
+    {
+      "candidate_key": "microsoft_bitnet_b158_2b_4t_bf16",
+      "family": "bf16_training_weights",
+      "display_name": "microsoft/bitnet-b1.58-2B-4T BF16 training weights",
+      "source_uri": "https://huggingface.co/microsoft/bitnet-b1.58-2B-4T-bf16",
+      "license_id": "mit",
+      "classification": "needs_conversion",
+      "fast_path_compatible": false,
+      "benchmark_required": true,
+      "notes": "Training/fine-tuning path only; not the packed runtime deployment artifact."
+    },
+    {
+      "candidate_key": "standard_peft_lora",
+      "family": "standard_lora",
+      "display_name": "Standard PEFT LoRA / QLoRA runtime adapter",
+      "source_uri": "https://github.com/huggingface/peft",
+      "license_id": "apache-2.0",
+      "classification": "unsafe_for_fastpath",
+      "fast_path_compatible": false,
+      "benchmark_required": true,
+      "notes": "Unsafe for FairyFuse fast path unless benchmark proves runtime avoids FP16/FP32 LoRA matmuls."
+    },
+    {
+      "candidate_key": "qa_lora",
+      "family": "quantization_aware_lora",
+      "display_name": "QA-LoRA",
+      "source_uri": "https://arxiv.org/abs/2309.14717",
+      "license_id": "research",
+      "classification": "research_only",
+      "fast_path_compatible": false,
+      "benchmark_required": true,
+      "notes": "Quantization-aware compiler candidate; not assumed BitNet/FairyFuse fast-path safe."
+    },
+    {
+      "candidate_key": "lowra_under_2bit",
+      "family": "below_2bit_lora",
+      "display_name": "LowRA under-2-bit LoRA",
+      "source_uri": "https://arxiv.org/abs/2502.08141",
+      "license_id": "research",
+      "classification": "research_only",
+      "fast_path_compatible": false,
+      "benchmark_required": true,
+      "notes": "Research/compiler candidate; not equivalent to a packed BitNet runtime lens."
+    },
+    {
+      "candidate_key": "qvac_fabric_bitnet_lora",
+      "family": "bitnet_lora_framework",
+      "display_name": "QVAC Fabric BitNet LoRA",
+      "source_uri": "https://huggingface.co/qvac/fabric-llm-finetune-bitnet",
+      "license_id": "apache-2.0",
+      "classification": "unsafe_for_fastpath",
+      "fast_path_compatible": false,
+      "benchmark_required": true,
+      "notes": "Public docs state adapters use FP16 precision; benchmark-gated and unsafe for FairyFuse fast path by default."
+    },
+    {
+      "candidate_key": "bitlora_quant_compatible",
+      "family": "bitnet_compatible_adapter_research",
+      "display_name": "BitLoRA quantization-compatible adapter candidates",
+      "source_uri": "https://doi.org/10.1016/j.eswa.2026.131397",
+      "license_id": "paper/proprietary-unknown",
+      "classification": "research_only",
+      "fast_path_compatible": false,
+      "benchmark_required": true,
+      "notes": "Promising paper/model-card class, but not locally proven or licensed as deployable FairyFuse artifact."
+    }
+  ]
+}

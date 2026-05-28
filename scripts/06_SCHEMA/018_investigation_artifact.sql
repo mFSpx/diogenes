@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/018_investigation_artifact.sql

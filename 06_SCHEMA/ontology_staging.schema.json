@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"OntologyStagingPacket","type":"object","required":["source_file","source_hash","extraction_method","entity_candidates","claim_candidates","event_candidates","confidence","status","promotion_blocker"],"properties":{"confidence":{"type":"integer","minimum":0,"maximum":10000},"status":{"enum":["STAGED","REJECTED"]}}}

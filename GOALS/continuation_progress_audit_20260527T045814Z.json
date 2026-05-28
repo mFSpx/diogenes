@@ -1,0 +1,121 @@
+{
+  "checks": {
+    "absurd_spine_queue_soak_pass": true,
+    "canonical_graph_scan_still_no_current_materialization": true,
+    "chrono_candidates_still_staged": true,
+    "full_reingest_still_receipted": true,
+    "goal_requirement_matrix_20_of_20_proven": true,
+    "graph_promotion_soak_no_canonical_count_change": true,
+    "project_brain_doc_authority_current_surface_pass": true
+  },
+  "completion_claimed": false,
+  "generated_at": "2026-05-27T04:58:14.485398Z",
+  "goal_complete": false,
+  "known_gaps_to_full_completion": [
+    "canonical_graph_materialization_not_executed; candidates_staged_pending_explicit_operator_materialization_authorization_and_policy_change",
+    "operator_declared_over_4h_error_free_completion_criterion_not_satisfied_in_this_active_goal_window",
+    "router_cost_awareness_is_policy_scored_not_live_pricing_ingested"
+  ],
+  "move_summary": "Closed stale Project Brain authority-map drift, brought the 20-requirement goal audit to PASS, and added graph-promotion plus ABSURD queue soak receipts without canonical graph writes.",
+  "receipts": {
+    "changed_file_sha256": {
+      "00_PROJECT_BRAIN/ACTIVE_INSTRUCTION_INDEX.md": "b7673a84c2aa3d0ded13a6ebd59ee010dd8032805efa009d1329716b8769df1c",
+      "00_PROJECT_BRAIN/RFCS/GOAL_REQUIREMENT_MATRIX.json": "52bbb3d4353d2111351386dd3031537962cb61977d93288c2ded6b30374dba34",
+      "scripts/lucidota_goal_audit.py": "d8ce3b7dec36d588ff4ebc428bfec5263d43622a7a07c904bf9de867df529b05",
+      "scripts/project_brain_doc_authority_check.py": "1fef520a41c9de103171098839da286929f6500d3954ce7628e0707f3b3c7bcc",
+      "tests/test_project_brain_doc_authority.py": "001543b4c393a18f4e8192d5c1a7fee5d3fd878255866776ee1c2afbd54a57c9"
+    },
+    "chrono_lane_execute": {
+      "passed": null,
+      "path": "05_OUTPUTS/chrono_ledger/chrono_lane_split_projection_gate_execute_20260527T044231330273Z.json",
+      "sha256": "e43bab7a9caf8a573a09b0cbbd5323abb59ded463ef1d60ad5b47ca73aea0178",
+      "status": "PASS",
+      "verdict": null
+    },
+    "full_reingest": {
+      "passed": null,
+      "path": "05_OUTPUTS/bitloops/full_reingest_batches/20260527T041930Z/full_existing_index_reingest_summary.json",
+      "sha256": "2d5718b6a6256719ff9de55144c8ef795b4014c065512b30f0bc5cd894d31671",
+      "status": "PASS",
+      "verdict": null
+    },
+    "goal_matrix_audit": {
+      "metrics": {
+        "proven_requirement_count": 20,
+        "requirement_count": 20,
+        "unproven_requirement_count": 0
+      },
+      "passed": true,
+      "path": "05_OUTPUTS/rfcs/lucidota_goal_audit_20260527T045602Z.json",
+      "sha256": "dc9e32cc54ad3a349797e7db58cd052a11b65bca057a518d55e0be78cc94cdec",
+      "status": null,
+      "verdict": null
+    },
+    "graph_promotion_soak": {
+      "metrics": {
+        "blockers": [],
+        "canonical_graph_writes_performed": false,
+        "counts_after": {
+          "graph_edge": 1379886,
+          "graph_item": 275547,
+          "graph_journal": 1647959
+        },
+        "counts_before": {
+          "graph_edge": 1379886,
+          "graph_item": 275547,
+          "graph_journal": 1647959
+        },
+        "db_writes_performed": true,
+        "execute_performed": true,
+        "graph_writes_performed": false,
+        "valid_packets": 3
+      },
+      "passed": null,
+      "path": "05_OUTPUTS/graph/graph_promotion_soak_test_20260527T045647198720Z.json",
+      "sha256": "ffcd225e3feae0fc07aeb0a426a005238f838b39ea73faf927ee120912334def",
+      "status": "PASS",
+      "verdict": null
+    },
+    "graph_scan": {
+      "passed": null,
+      "path": "05_OUTPUTS/swarm_submissions/canonical_graph_write_scan_integrated_swarm.json",
+      "sha256": "a9570a9f752ab18b7b84bce01b133abab96e04c8eb6eaed43bf6496a358640e4",
+      "status": null,
+      "verdict": "PASS"
+    },
+    "project_brain_doc_authority": {
+      "metrics": {
+        "active_spec_count": 8,
+        "errors": [],
+        "extra_active_specs": [],
+        "recursive_file_count": 135,
+        "top_level_file_count": 26,
+        "unmapped_top_level_files": []
+      },
+      "passed": true,
+      "path": "05_OUTPUTS/project_brain_doc_authority/project_brain_doc_authority_20260527T045426725561Z.json",
+      "sha256": "c4e6fcbe1180654becf3e6a5f54d176483448f99fbe753b36b1596f4ffd2593a",
+      "status": null,
+      "verdict": null
+    },
+    "spine_queue_soak": {
+      "metrics": {
+        "blockers": [],
+        "claimed": 29,
+        "dead_lettered": 0,
+        "duplicates_reused": 5,
+        "forced_failures": 4,
+        "inserted_new": 25,
+        "jobs_requested": 30,
+        "succeeded": 25
+      },
+      "passed": null,
+      "path": "05_OUTPUTS/absurd/spine_queue_soak_test_20260527T045652805366Z.json",
+      "sha256": "29e5e42ba83117dba8c72f631f52dc5279412a692c397633d35d1f50e22a5cbc",
+      "status": "PASS",
+      "verdict": null
+    }
+  },
+  "schema": "lucidota.goal.continuation_progress_audit.v1",
+  "status": "PASS_PROGRESS_GOAL_STILL_ACTIVE"
+}

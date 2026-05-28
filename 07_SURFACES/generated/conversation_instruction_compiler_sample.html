@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>LUCIDOTA Conversation Instruction Compiler Sample</title><style>body{font-family:system-ui,sans-serif;max-width:980px;margin:2rem auto;background:#101010;color:#eee}code,pre{background:#1d1d1d;color:#bdf;padding:.75rem;display:block;white-space:pre-wrap}.card{border:1px solid #444;padding:1rem;margin:1rem 0}.law{color:#ffd479}</style></head>
+<body>
+<h1>Conversation Instruction Compiler Sample</h1>
+<p class="law">No surface directly mutates canonical state. Interaction compiles plain-language instructions for the conversation/control plane.</p>
+<div class="card">
+<h2>Example affordance: select graph-promotion candidate</h2>
+<p>Use this generated artifact as a reusable surface pattern. Buttons may display/copy command-envelope JSON only; they do not call DB/API endpoints.</p>
+<pre id="instruction">Tell LUCIDOTA to selected target graph_packet:example using evidence 05_OUTPUTS/graph/example.json and artifact refs 07_SURFACES/generated/conversation_instruction_compiler_sample.html. Current state: {"status":"candidate"}. Allowed effect: stage_for_operator_review. Keep this as a conversation/control-plane instruction; do not mutate canonical graph or state directly.</pre>
+<pre id="envelope">{"protocol":"lucidota.surface_instruction_envelope.v1","surface_id":"conversation_instruction_compiler_sample","operator_action":"selected","target_refs":["graph_packet:example"],"evidence_refs":["05_OUTPUTS/graph/example.json"],"artifact_refs":["07_SURFACES/generated/conversation_instruction_compiler_sample.html"],"allowed_effect":"stage_for_operator_review","canonical_mutation_allowed":false,"conversation_required":true,"staging_only":true,"primary_signal":"plain_language_operator_instruction"}</pre>
+<button onclick="navigator.clipboard && navigator.clipboard.writeText(document.getElementById('instruction').innerText)">Copy instruction text</button>
+<button onclick="navigator.clipboard && navigator.clipboard.writeText(document.getElementById('envelope').innerText)">Copy envelope JSON</button>
+</div>
+</body></html>

@@ -1,0 +1,110 @@
+{
+  "schema": "lucidota.goal.dbos_gap_and_pony_progress.v1",
+  "generated_at_utc": "2026-05-27T05:43:26.545871Z",
+  "status": "PASS",
+  "dbos_gap_closure": {
+    "before_verdict": "DEGRADED",
+    "after_verdict": "PASS",
+    "after_warning_count": 0,
+    "after_checks": [
+      {
+        "hard": false,
+        "name": "abductive_db_os_ledger",
+        "returncode": 0,
+        "verdict": "PASS"
+      },
+      {
+        "hard": false,
+        "name": "model_audit_db_adapter",
+        "returncode": 0,
+        "verdict": "PASS"
+      },
+      {
+        "hard": false,
+        "name": "bytewax_db_os_stream_audit",
+        "returncode": 0,
+        "verdict": "PASS"
+      },
+      {
+        "hard": false,
+        "name": "krampuschewing_db_os_adapter",
+        "returncode": 0,
+        "verdict": "PASS"
+      },
+      {
+        "hard": false,
+        "name": "indy_reads_db_os_brief",
+        "returncode": 0,
+        "verdict": "PASS"
+      },
+      {
+        "hard": false,
+        "name": "abductive_next_move_engine",
+        "returncode": 0,
+        "verdict": "PASS"
+      },
+      {
+        "hard": false,
+        "name": "abductive_db_os_health_check",
+        "returncode": 0,
+        "verdict": "PASS"
+      }
+    ],
+    "adapter_scripts_added_or_reused": [
+      "scripts/model_audit_db_adapter.py",
+      "scripts/bytewax_db_os_stream_audit.py",
+      "scripts/krampuschewing_db_os_adapter.py",
+      "scripts/indy_reads_db_os_brief.py",
+      "scripts/abductive_db_os_health_check.py"
+    ],
+    "gate_patch": "scripts/abductive_db_os_gate.py now parses child verdict markers and has a command_plan test hook"
+  },
+  "ponyboy_second_pass": {
+    "master_verdict": "PASS",
+    "files_indexed": 64,
+    "files_hashed": 64,
+    "bytes_total": 74885458,
+    "hash_skipped_large_files": 0,
+    "graph_stage_verdict": "PASS",
+    "graph_candidates_emitted": 64,
+    "bitloops_status": "PASS",
+    "bitloops_compact_batch": {
+      "accepted": 102,
+      "canonical_graph_writes_performed": false,
+      "graph_mutation_candidates": 102,
+      "quarantine_failed": 0,
+      "recovered": 102,
+      "river_training_lane_count": 408,
+      "state_collapsed": true,
+      "status": "PASS"
+    },
+    "db_writes_performed": false,
+    "canonical_graph_writes_performed": false,
+    "model_calls_performed": false
+  },
+  "verification": {
+    "absurd_gate_verdict": "PASS",
+    "scanner_status": "PASS",
+    "tests": "18 focused tests passed in 1.12s: abductive_db_os, krampus graph stage, contradiction report, swarm router, Project Brain authority, RFC program",
+    "tickletrunk_total_tools": 1550,
+    "tickletrunk_script_count": 725,
+    "slop_audit_dbos_adapters": "PASS"
+  },
+  "receipt_refs": {
+    "dbos_gate_before": "05_OUTPUTS/abductive_db_os/abductive_db_os_gate_fast_20260527T053734936227Z.json",
+    "dbos_gate_after": "05_OUTPUTS/abductive_db_os/abductive_db_os_gate_fast_20260527T054012924178Z.json",
+    "absurd_gate_after": "05_OUTPUTS/absurd_abductive/absurd_gate_fast_20260527T054013280073Z.json",
+    "canonical_graph_write_scanner": "05_OUTPUTS/graph/canonical_graph_write_scanner_20260527T054014007564Z.json",
+    "tickletrunk_execute": "05_OUTPUTS/tickletrunk/tickletrunk_scan_20260527T054124Z.json",
+    "pony_master_summary": "05_OUTPUTS/krampuschewing/ponyboy_second_pass_master_summary_20260527T054251Z.json",
+    "pony_graph_summary": "05_OUTPUTS/krampuschewing/ponyboy_second_pass_graph_candidates_summary_20260527T054251Z.json",
+    "pony_bitloops_report": "05_OUTPUTS/bitloops/bitloops_automation_loop_20260527T054251809881Z.json",
+    "pony_bitloops_packet": "05_OUTPUTS/bitloops/ponyboy_second_pass_bitloops_graph_packet_20260527T054251Z.json",
+    "slop_audit_dbos_adapters": "05_OUTPUTS/slop_audit/slop_audit_law_20260527T054354513249Z.json"
+  },
+  "known_limits": [
+    "This closes the DB-OS soft gauntlet gap and advances PONYBOY staging; it is not full historical reingest completion or the >4h error-free criterion.",
+    "PONYBOY graph candidates remain staged; no canonical graph materialization was performed."
+  ],
+  "receipt_path": "GOALS/dbos_gap_closure_and_ponyboy_second_pass_20260527T054326540174Z.json"
+}

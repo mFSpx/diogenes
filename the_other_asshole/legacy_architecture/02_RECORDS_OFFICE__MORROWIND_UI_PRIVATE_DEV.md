@@ -1,0 +1,78 @@
+# Morrowind UI Private Dev Track
+
+## Intent
+
+Build a private, personal LUCIDOTA/Clawd interface skin inspired by and, for northern.strike's own local environment, potentially using locally owned Morrowind UI assets.
+
+This is a private-dev implementation plan. Most of the code and functionality built here can ship later after a separate public-release sanitization pass. The boundary is about literal copyrighted art/font/audio/game assets, not about suppressing the interface architecture.
+
+## Observed UI Pattern
+
+Morrowind's PC interface centers on a menu mode with independently visible/rearrangeable panels for stats, inventory, magic, and map. Bethesda support describes access to Stats, Inventory, Magic, and Map menus; public screenshots show those windows can be freely arranged. The relevant product idea is not only the art direction, but the functional shape: dense panels, draggable/rearrangeable windows, status strips, inventory-like lists, parchment/stone/metal feel, and RPG command surfaces.
+
+## LUCIDOTA Application
+
+Target the Clawd Rust terminal UI first:
+
+- `claw-cli/src/render.rs`: color theme, borders, markdown/code block rendering, table treatment, spinner treatment.
+- `claw-cli/src/app.rs` and `main.rs`: REPL shell, prompt/status surfaces, session panels, command reports.
+- Later: a richer TUI layer if the current stream renderer is too limited.
+
+## OpenMW Reference Track
+
+OpenMW is the clean FOSS reference for Morrowind-style implementation work:
+
+- OpenMW is a from-scratch GPL engine reimplementation, not a mod of `Morrowind.exe`.
+- It does not distribute Bethesda game content; users provide legally owned content themselves.
+- Its technology stack documents the useful split: engine code versus content assets.
+- OpenMW's Lua UI docs expose `MWUI`, including Morrowind-style templates for borders, thick borders, boxes, solid/transparent panels, and horizontal lines.
+
+Use OpenMW as the implementation/legal boundary model: code and UI concepts are buildable; literal copyrighted game assets stay local and ignored.
+
+Detailed local source map:
+
+- `02_RECORDS_OFFICE/OPENMW_UI_SOURCE_MAP.md`
+
+## Build Status Bars
+
+Build status bars are part of the private UI track and likely map well to the Morrowind health/magicka/fatigue visual language.
+
+Functional bars to implement:
+
+- Build phase progress: plan, kernel, interface, database, ingest, model runtime.
+- Health checks: CKDOG1, DBOS, Postgres, pgvector, AGE, Clawd bridge.
+- Token/budget pressure.
+- Background task/download/auth waits.
+- Quiet email/calendar side-process queue, without interrupting build flow.
+
+The bars must be real state views, not decorative lies.
+
+## Private Asset Boundary
+
+For this private dev repo:
+
+- Interface functionality, layout logic, theme switches, panel/window behavior, status bars, command surfaces, and original code belong in this repo.
+- Local Morrowind-derived assets may be used only from a lawful local install or user-provided local files, and must stay in ignored private asset paths.
+- Do not fetch, vendor, publish, or push Bethesda/Zenimax copyrighted game art, fonts, audio, or packed assets into the LUCIDOTA repo.
+
+For public release:
+
+- Keep the functionality and interaction model where useful.
+- Replace private literal game assets with original art, generated assets, or properly licensed FOSS assets.
+- Treat public release as a future sanitization/distribution pass, not the constraint that blocks current private development.
+
+## Tooling Installed
+
+- `chafa`: terminal image preview/conversion.
+- ImageMagick: image inspection/conversion/slicing.
+- `optipng`, `pngquant`: PNG optimization.
+- `caca-utils`: terminal graphics helpers.
+- `openmw`, `openmw-cs`: local reference engine/editor packages. Installed OpenMW binary reports 0.48.0.
+
+## First Implementation Slice
+
+1. Add a named `morrowind-private` theme switch for Clawd rendering.
+2. Implement palette, status bars, and box-drawing/border treatment without external art assets.
+3. Add status/report layout prototypes.
+4. Add private asset loading only from ignored local paths.
+5. Keep public default theme clean and asset-independent.

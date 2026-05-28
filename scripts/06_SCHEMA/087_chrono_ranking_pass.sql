@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/087_chrono_ranking_pass.sql

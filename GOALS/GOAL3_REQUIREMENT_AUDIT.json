@@ -1,0 +1,198 @@
+{
+  "canonical_graph_writes_performed": false,
+  "current_model_fabric": {
+    "healthy_needles": 6,
+    "heavy_live": [
+      "deepseek",
+      "mamba_cpu",
+      "bonsai",
+      "mamba_gpu"
+    ],
+    "live_count": 10,
+    "status_receipt": "05_OUTPUTS/goals/goal_model_fabric_control_20260526T042920Z.json"
+  },
+  "deletes_performed": false,
+  "fresh_verification": [
+    "43 passed in 0.60s",
+    "RECOVERY_MATRIX=PASS",
+    "NO_DELETE_GUARD=PASS",
+    "SLOP_AUDIT_LAW=PASS"
+  ],
+  "generated_at": "2026-05-26T04:29:42.608803Z",
+  "goal": "GOAL 3 \u2014 External Plugin Build Mode / Model Fabric Wiring",
+  "model_calls_performed": "local generation plus tiny Groq/Cohere execute receipts",
+  "overall_status": "complete",
+  "requirements": [
+    {
+      "evidence": [
+        "GOALS/AGENT_ORCHESTRATION_POLICY.md",
+        "scripts/goal_agent_packet.py",
+        "tests/test_goal_agent_packet.py"
+      ],
+      "id": "main_window_model_guard",
+      "requirement": "Do not change main-window model unless explicit safe operator path exists.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "GOALS/AGENT_ORCHESTRATION_POLICY.md",
+        "scripts/goal_agent_packet.py",
+        "05_OUTPUTS/goals/goal_agent_packet_20260526T042919Z.json"
+      ],
+      "id": "cheapest_capable_agent_policy",
+      "requirement": "Track cheapest capable tier and split high/mid/tiny deterministic work.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "scripts/goal_agent_packet.py",
+        "tests/test_goal_agent_packet.py",
+        "05_OUTPUTS/goals/goal_agent_packet_20260526T042919Z.json"
+      ],
+      "id": "coding_only_packet",
+      "requirement": "External agents get explicit coding-only prompts with file ownership, checks, no-revert/no-secret contract.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "GOALS/AGENT_ORCHESTRATION_POLICY.md",
+        "GOALS/EXTERNAL_PLUGIN_BUILD_MODE.md",
+        "scripts/language_router.py"
+      ],
+      "id": "operator_slop_allowed_orchestrator_slop_blocked",
+      "requirement": "Messy operator goals are accepted and translated into packets/receipts.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        {
+          "scripts/goal_agent_packet.py": 44,
+          "scripts/goal_dev_control.py": 56,
+          "scripts/goal_handoff.py": 63,
+          "scripts/goal_model_fabric_control.py": 89,
+          "scripts/recovery_matrix.py": 30
+        }
+      ],
+      "id": "under_100_loc_helpers",
+      "requirement": "GOALS helpers remain under ~100 LOC.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "GOALS/EXTERNAL_PLUGIN_BUILD_MODE.md",
+        "scripts/goal_agent_packet.py",
+        "scripts/goal_model_fabric_control.py"
+      ],
+      "id": "no_daemon_no_bottleneck",
+      "requirement": "GOALS layer is packet/control scripts, no resident GOALS daemon/model gateway.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "GOALS/EXTERNAL_PLUGIN_BUILD_MODE.md",
+        "GOALS/plugin_build_mode_bootstrap.json",
+        "05_OUTPUTS/goals/goal_agent_packet_20260526T042919Z.json"
+      ],
+      "id": "codex_first_byo_agent",
+      "requirement": "Codex-first packet works for Claude/OpenCode/Aider/Continue/generic CLI agents.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "GOALS/plugin_build_mode_bootstrap.json",
+        "scripts/goal_agent_packet.py",
+        "tests/test_goal_agent_packet.py"
+      ],
+      "id": "adapter_registry_source_of_truth",
+      "requirement": "GOALS has machine adapter registry and packet exporter reads it.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "GOALS/FOSS_REUSE_AUDIT.md",
+        "https://docs.litellm.ai/",
+        "https://aider.chat/docs/llms/openai-compat.html",
+        "https://dev.opencode.ai/docs/providers/",
+        "https://docs.continue.dev/customize/model-providers/top-level/openai"
+      ],
+      "id": "foss_reuse_checked",
+      "requirement": "FOSS agent/gateway options checked before local implementation.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "05_OUTPUTS/goals/goal3_key_location_scan_20260526T042723Z.json",
+        "05_OUTPUTS/model_invocations/groq_chat_execute_20260526T042742211026Z.json"
+      ],
+      "id": "groq_live_execute",
+      "requirement": "Groq key located in local secrets and live execute succeeded without printing key.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "05_OUTPUTS/goals/goal3_key_location_scan_20260526T042723Z.json",
+        "05_OUTPUTS/model_invocations/cohere_chat_execute_20260526T042747124164Z.json"
+      ],
+      "id": "cohere_live_execute",
+      "requirement": "Cohere key located in local secrets and live execute succeeded without printing key.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "scripts/lucidota_start_mamba_llama.sh",
+        "scripts/lucidota_start_bonsai_ternary_llama.sh",
+        "scripts/lucidota_start_deepseek_llama.sh",
+        "05_OUTPUTS/model_runtime/strict_model_stack_admission_latest.json",
+        "05_OUTPUTS/goals/goal_model_fabric_control_20260526T042920Z.json"
+      ],
+      "id": "llama_cpp_local_model_fabric",
+      "requirement": "llama.cpp heavy local lanes are wired and live.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "05_OUTPUTS/goals/goal_model_fabric_control_20260526T042920Z.json",
+        {
+          "healthy_needles": 6
+        }
+      ],
+      "id": "six_needles_live",
+      "requirement": "At least six Needles are live.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "05_OUTPUTS/goals/goal3_current_local_generation_smoke_20260526T042643Z.json",
+        "05_OUTPUTS/goals/goal3_mamba_gpu_generation_smoke_20260526T042837Z.json"
+      ],
+      "id": "heavy_generation_smoke",
+      "requirement": "DeepSeek GPU, Mamba CPU, Bonsai CPU, and Mamba GPU partial generated via local endpoints.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "scripts/goal_model_fabric_control.py",
+        "tests/test_goal_model_fabric_control.py",
+        "scripts/recovery_matrix.py",
+        "05_OUTPUTS/recovery/recovery_matrix_20260526T042919982083Z.json"
+      ],
+      "id": "recovery_stop_start_control",
+      "requirement": "Model fabric has status/start/stop receipts and recovery paths.",
+      "status": "proven"
+    },
+    {
+      "evidence": [
+        "GOALS/EXTERNAL_PLUGIN_BUILD_MODE.md",
+        "GOALS/FOSS_REUSE_AUDIT.md",
+        "GOALS/plugin_build_mode_bootstrap.json",
+        "scripts/goal_agent_packet.py",
+        "01_REPOS/llxprt-code/README.md",
+        "https://github.com/vybestack/llxprt-code"
+      ],
+      "id": "llxprt_code_reuse_wire_in",
+      "requirement": "llxprt-code is explicitly registered as an approved external coding agent reuse option in GOALS continuity docs and bootstrap registry.",
+      "status": "proven"
+    }
+  ],
+  "schema": "lucidota.goals.goal3_requirement_audit.v2"
+}

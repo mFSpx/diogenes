@@ -1,0 +1,45 @@
+# LUCIDOTA is a proof hoard; keep LLxprt startup/search fast and use TICKLETRUNK for discovery.
+.git/
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+dist/
+build/
+.cache/
+
+# Runtime/output/vault bulk stays local and should be opened intentionally.
+03_VAULT/
+04_RUNTIME/
+05_OUTPUTS/
+
+# External/vendored repos are searchable via TICKLETRUNK; include manually when needed.
+01_REPOS/llxprt-code/
+01_REPOS/llama.cpp/build*/
+01_REPOS/llama.cpp/models/
+
+# Heavy model/index artifacts.
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+*.parquet
+*.arrow
+*.faiss
+*.index
+*.safetensors
+*.gguf
+*.onnx
+*.pt
+*.pth
+*.ckpt
+*.log
+
+# Other large proof-hoard/object-storage trees; use TICKLETRUNK queries before opening intentionally.
+09_STORAGE/
+KRAMPUSCHEWING/
+BOOKS/
+01_REPOS/

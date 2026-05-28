@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/045_document_ingestion_pipeline.sql

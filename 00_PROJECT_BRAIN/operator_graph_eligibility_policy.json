@@ -1,0 +1,95 @@
+{
+  "schema": "lucidota.operator_graph_eligibility_policy.v1",
+  "status": "active",
+  "generated_at": "2026-05-27T17:30:54Z",
+  "authority_class": "operator_authored_assertion",
+  "source": "operator_directive_chat_2026-05-27",
+  "decision_summary": "Most facts from Rickshaw Robbery, Nordby Squeeze, and the operator's own life are graph-eligible by default. If a fact is wrong, preserve history and correct/retract later rather than blocking graph entry up front.",
+  "default_decision": "stage_or_materialize_with_existing_graph_gates",
+  "not_a_direct_write_bypass": true,
+  "correction_contract": {
+    "wrong_later_is_allowed": true,
+    "delete_history_on_correction": false,
+    "correction_states": [
+      "contested",
+      "corrected",
+      "retracted",
+      "superseded"
+    ],
+    "minimum_correction_record": [
+      "who_flagged_it",
+      "when_flagged",
+      "reason_or_counterevidence",
+      "replacement_claim_or_retraction"
+    ]
+  },
+  "global_exclusions": [
+    "secrets_credentials_tokens_private_keys",
+    "external_send_or_destructive_action_without_separate_command_authorization",
+    "direct_canonical_graph_write_outside_existing_helper_or_materialization_gate",
+    "facts_without_any_evidence_or_source_reference"
+  ],
+  "domains": [
+    {
+      "domain_key": "rickshaw_robbery",
+      "labels": [
+        "Rickshaw Robbery",
+        "rickshaw robbery",
+        "rickshaw"
+      ],
+      "graph_eligible": true,
+      "eligibility_scope": "most_case_facts",
+      "required_gates": [
+        "evidence_refs_required",
+        "authority_class_required",
+        "graph_promotion_gate_or_materialization_helper",
+        "correction_lane_available"
+      ],
+      "correction_mode": "operator_can_mark_wrong_later_without_deleting_history",
+      "default_authority_class": "operator_authored_assertion"
+    },
+    {
+      "domain_key": "nordby_squeeze",
+      "labels": [
+        "Nordby Squeeze",
+        "nordby squeeze",
+        "Nordby",
+        "Nordley Squeeze",
+        "nordley squeeze",
+        "Nordley",
+        "NORDLEY_SQUEEZECOPY",
+        "NORDLEY_SQUEEZE"
+      ],
+      "graph_eligible": true,
+      "eligibility_scope": "most_case_facts",
+      "required_gates": [
+        "evidence_refs_required",
+        "authority_class_required",
+        "graph_promotion_gate_or_materialization_helper",
+        "correction_lane_available"
+      ],
+      "correction_mode": "operator_can_mark_wrong_later_without_deleting_history",
+      "default_authority_class": "operator_authored_assertion",
+      "source_alias_note": "Repo artifacts use both Nordby/Nordley spellings; treat Nordley as the same local case lane for graph eligibility, subject to evidence refs and correction lanes."
+    },
+    {
+      "domain_key": "operator_life_facts",
+      "labels": [
+        "operator-life facts",
+        "operator life",
+        "personal chronology",
+        "personal facts"
+      ],
+      "graph_eligible": true,
+      "eligibility_scope": "most_operator_self_facts_and_personal_chronology_facts",
+      "required_gates": [
+        "evidence_refs_required",
+        "authority_class_required",
+        "graph_promotion_gate_or_materialization_helper",
+        "correction_lane_available"
+      ],
+      "correction_mode": "operator_can_mark_wrong_later_without_deleting_history",
+      "default_authority_class": "operator_authored_assertion"
+    }
+  ]
+}

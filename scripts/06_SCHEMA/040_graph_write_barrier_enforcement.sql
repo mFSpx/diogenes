@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/040_graph_write_barrier_enforcement.sql

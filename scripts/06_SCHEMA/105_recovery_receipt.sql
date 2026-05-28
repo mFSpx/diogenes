@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/105_recovery_receipt.sql

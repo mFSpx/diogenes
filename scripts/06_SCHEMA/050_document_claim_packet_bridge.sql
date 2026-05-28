@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/050_document_claim_packet_bridge.sql

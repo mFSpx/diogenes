@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/017_indy_reads_library.sql

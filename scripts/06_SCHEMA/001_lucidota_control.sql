@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/001_lucidota_control.sql

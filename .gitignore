@@ -1,0 +1,137 @@
+# Kernel repo is maintained independently.
+/01_REPOS/doggystyle/
+!/01_REPOS/README.md
+
+# Secrets and credentials. Commit templates, never live secrets.
+.env
+.env.*
+!.env.example
+*.env
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.asc
+*.gpg
+id_rsa*
+id_ed25519*
+*_token*
+*_secret*
+!scripts/lucidota_secret_quarantine.py
+*.credentials
+*.credentials.json
+credentials.json
+oauth_tokens.json
+oauth_credentials.json
+.oauth/
+secrets/
+.secrets/
+auth/
+.auth/
+
+# Runtime/state/vault material is local unless promoted deliberately.
+/03_VAULT/*
+!/03_VAULT/README.md
+/04_RUNTIME/*
+!/04_RUNTIME/README.md
+/05_OUTPUTS/*
+!/05_OUTPUTS/README.md
+!DIOGENES_EXPORT_MANIFEST.md
+!DIOGENES_RESTORE.md
+
+# Private local UI/theme assets, including personal game-asset experiments.
+/private_assets/
+/01_REPOS/claudecode/private_assets/
+/01_REPOS/claudecode/rust/private_assets/
+
+# Vendored Needle source is tracked; downloaded weights/caches stay local.
+/01_REPOS/needle/.data_cache/
+/01_REPOS/needle/checkpoints/
+/01_REPOS/needle/tokenizer/
+/01_REPOS/needle/.venv/
+
+# Vendored llama.cpp source is tracked; builds/models stay local.
+/01_REPOS/llama.cpp/build/
+/01_REPOS/llama.cpp/build-*/
+/01_REPOS/llama.cpp/models/
+/01_REPOS/llama.cpp/*.gguf
+/01_REPOS/llama.cpp/*.safetensors
+
+# Python/Rust/local build noise.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+htmlcov/
+target/
+.venv/
+venv/
+node_modules/
+dist/
+build/
+.cache/
+.claw-agents/
+.clawd-agents/
+
+# Databases, indexes, model/runtime weights.
+**/pgdata/
+**/pg_wal/
+**/postgresql-*/
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm
+*.bak
+*.tmp
+*.parquet
+*.arrow
+*.faiss
+*.index
+*.safetensors
+*.gguf
+*.onnx
+*.pt
+*.pth
+*.ckpt
+
+# Logs and temporary outputs.
+*.log
+logs/
+tmp/
+temp/
+**/logs/
+**/cache/
+
+# Editor/system files.
+.DS_Store
+*.swp
+.idea/
+.vscode/
+# Claw Code local artifacts
+.claw.json
+.claw/settings.local.json
+.claw/sessions/
+
+
+# Local Codex history/logs: retain on disk, never track.
+.codex/log/
+.codex/history.jsonl
+
+.superpowers/
+
+# LLxprt/agent startup performance: bulk proof-hoard storage is indexed via TICKLETRUNK, not crawled recursively.
+/09_STORAGE/
+/KRAMPUSCHEWING/
+/BOOKS/
+/01_REPOS/
+!/01_REPOS/README.md

@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/082_absurd_worker_contract_registry_enforcement.sql

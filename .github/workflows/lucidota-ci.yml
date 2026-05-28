@@ -1,0 +1,29 @@
+name: lucidota-ci-smoke
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+  pull_request:
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile gate scripts
+        run: |
+          python3 -m py_compile \
+            scripts/lucidota_ci_gate.py \
+            scripts/lucidota_status_ledger.py \
+            scripts/tickletrunk_scan.py \
+            scripts/lucidota_mega_gate.py
+      - name: Ledger checks without DB side effects
+        run: |
+          echo "GATE_SCOPE=remote_smoke_only_not_local_product_or_live_db_materialization"
+          python3 scripts/tickletrunk_scan.py --check
+          python3 scripts/lucidota_status_ledger.py --check
+          python3 scripts/durable_workflow_decision_check.py
+          python3 scripts/script_survival_coverage.py
+          python3 scripts/run_dev_order_methodology_checks.py

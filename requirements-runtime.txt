@@ -1,0 +1,13 @@
+# LUCIDOTA runtime Python stack.
+# Keep this in the project environment; system packages cover CUDA/OpenBLAS.
+dbos
+river
+treelite
+transformers
+accelerate
+peft
+safetensors
+sentencepiece
+datasets
+bitsandbytes
+

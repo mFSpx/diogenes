@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/067_chrono_queue_event_bridge_automation.sql

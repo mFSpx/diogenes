@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/039_absurd_real_work_loop.sql

@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"OperatorDecisionReceipt","type":"object","required":["decision_id","actor","decision_type","target_ref","reason","created_at","downstream_effect"],"properties":{"decision_type":{"enum":["ACCEPT","REJECT","DISMISS","APPROVE"]}}}

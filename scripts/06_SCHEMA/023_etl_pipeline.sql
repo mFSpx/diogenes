@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/023_etl_pipeline.sql

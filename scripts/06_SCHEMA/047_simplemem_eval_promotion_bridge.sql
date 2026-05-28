@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/047_simplemem_eval_promotion_bridge.sql

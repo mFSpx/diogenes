@@ -1,0 +1,137 @@
+{
+  "checks": {
+    "cost_policy_has_no_provider_or_network_calls": true,
+    "cost_sensitive_public_model_task_routes_cheapest_capable_lane": true,
+    "exact_receipt_task_remains_deterministic": true,
+    "goal_audit_still_20_of_20": true,
+    "graph_scan_no_canonical_writes": true,
+    "slop_audit_no_blockers": true
+  },
+  "completion_claimed": false,
+  "generated_at": "2026-05-27T05:02:47.362022Z",
+  "goal_complete": false,
+  "known_gaps_to_full_completion": [
+    "canonical_graph_materialization_not_executed; candidates_staged_pending_explicit_operator_materialization_authorization_and_policy_change",
+    "operator_declared_over_4h_error_free_completion_criterion_not_satisfied_in_this_active_goal_window"
+  ],
+  "note": "Router cost awareness uses caller-supplied/local relative cost metadata; it does not fetch current provider prices or call providers.",
+  "receipts": {
+    "changed_file_sha256": {
+      "scripts/lucidota_swarm_router.py": "889f2290c597fb8cc423fa7155ccd85ec47f5df9c792f94ef2d3c28ed81b9d55",
+      "tests/test_lucidota_swarm_router.py": "f2d4cc88befb251a28c8480bc2cc74e62fb6e1a105236e267a599f44211dd514"
+    },
+    "goal_audit": {
+      "metrics": {
+        "passed": true,
+        "proven_requirement_count": 20,
+        "requirement_count": 20
+      },
+      "passed": true,
+      "path": "05_OUTPUTS/rfcs/lucidota_goal_audit_20260527T045912Z.json",
+      "sha256": "9b163905b565ab543a8734b1eba9942013108b574c5f0c076923473142765e9a",
+      "status": null,
+      "verdict": null
+    },
+    "graph_scan": {
+      "metrics": {
+        "blockers": [],
+        "canonical_graph_materialization": false,
+        "canonical_graph_writes_performed": false,
+        "verdict": "PASS"
+      },
+      "passed": null,
+      "path": "05_OUTPUTS/swarm_submissions/canonical_graph_write_scan_router_cost_awareness.json",
+      "sha256": "2178d31ae8840006749078393c33093e858f9d6eb6cc0a7f398a9d100bc88d6c",
+      "status": null,
+      "verdict": "PASS"
+    },
+    "prior_continuation": {
+      "passed": null,
+      "path": "GOALS/continuation_progress_audit_20260527T045814Z.json",
+      "sha256": "87e1601f83225e87e2d684f814736b4dd97591d4712ff64b855950a3023ba893",
+      "status": "PASS_PROGRESS_GOAL_STILL_ACTIVE",
+      "verdict": null
+    },
+    "slop_audit": {
+      "metrics": {
+        "blockers": [],
+        "model_calls_performed": false,
+        "network_calls_performed": false,
+        "verdict": "REVIEW",
+        "warnings": [
+          {
+            "kind": "file_size_complexity_review",
+            "loc": 561,
+            "path": "scripts/lucidota_swarm_router.py",
+            "ratio_to_pocketflow": 5.61,
+            "tier": "over_5x_pocketflow"
+          }
+        ]
+      },
+      "passed": null,
+      "path": "05_OUTPUTS/slop_audit/slop_audit_law_20260527T050202321816Z.json",
+      "sha256": "ce696d190c4d3e9e3c5ba674aeed404738d40d17649d2124492d45e89ec106ae",
+      "status": null,
+      "verdict": "REVIEW"
+    }
+  },
+  "routing_samples": {
+    "cost_sensitive_public_model_task": {
+      "cost_evaluation": {
+        "expected_tokens": 2000,
+        "lanes": {
+          "cohere_like_context": {
+            "cost_units_per_1k_tokens": 100.0,
+            "estimated_cost_units": 200.0,
+            "network_calls": false,
+            "provider_calls": false,
+            "source": "task_metadata_override",
+            "unit": "relative_cost_units_per_1k_tokens"
+          },
+          "default_airlock": {
+            "cost_units_per_1k_tokens": 900.0,
+            "estimated_cost_units": 1800.0,
+            "network_calls": false,
+            "provider_calls": false,
+            "source": "task_metadata_override",
+            "unit": "relative_cost_units_per_1k_tokens"
+          },
+          "deterministic_workflow": {
+            "cost_units_per_1k_tokens": 0.0,
+            "estimated_cost_units": 0.0,
+            "network_calls": false,
+            "provider_calls": false,
+            "source": "default_relative_cost_units",
+            "unit": "relative_cost_units_per_1k_tokens"
+          },
+          "groq_like_fast": {
+            "cost_units_per_1k_tokens": 10.0,
+            "estimated_cost_units": 20.0,
+            "network_calls": false,
+            "provider_calls": false,
+            "source": "task_metadata_override",
+            "unit": "relative_cost_units_per_1k_tokens"
+          },
+          "local_sovereign": {
+            "cost_units_per_1k_tokens": 500.0,
+            "estimated_cost_units": 1000.0,
+            "network_calls": false,
+            "provider_calls": false,
+            "source": "task_metadata_override",
+            "unit": "relative_cost_units_per_1k_tokens"
+          }
+        },
+        "priority": "high"
+      },
+      "implicit_network": false,
+      "primary_lane": "groq_like_fast",
+      "provider_calls": false
+    },
+    "exact_receipt_task": {
+      "model_lane": false,
+      "primary_lane": "deterministic_workflow"
+    }
+  },
+  "schema": "lucidota.goal.router_cost_awareness_audit.v1",
+  "status": "PASS_ROUTER_COST_GAP_CLOSED_LOCALLY"
+}

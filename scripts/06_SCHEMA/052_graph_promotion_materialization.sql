@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/052_graph_promotion_materialization.sql

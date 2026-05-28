@@ -1,0 +1,51 @@
+{
+  "checkpointing": {
+    "enabled": true
+  },
+  "defaultProfile": "lucidota-groq-orchestrator",
+  "fileFiltering": {
+    "enableFuzzySearch": false,
+    "enableRecursiveFileSearch": false,
+    "respectGitIgnore": true,
+    "respectLlxprtIgnore": true
+  },
+  "hooks": {
+    "BeforeTool": [
+      {
+        "hooks": [
+          {
+            "command": "/home/mfspx/LUCIDOTA/.llxprt/hooks/lucidota_guard.py",
+            "description": "Audit LLxprt tool use and block obvious LUCIDOTA startup-law/secret mutations.",
+            "name": "lucidota-guard",
+            "timeout": 5000,
+            "type": "command"
+          }
+        ],
+        "matcher": "*"
+      }
+    ]
+  },
+  "providerHints": {
+    "orchestrator": "lucidota-groq",
+    "strategic": "lucidota-groq"
+  },
+  "tools": {
+    "autoAccept": false,
+    "enableHooks": true,
+    "enableToolOutputTruncation": true,
+    "truncateToolOutputThreshold": 4000000
+  },
+  "ui": {
+    "contextFileName": [
+      "LLXPRT.md",
+      "AGENTS.md",
+      "GOALS/CURRENT_HANDOFF.md"
+    ],
+    "hideContextSummary": false,
+    "hideModelInfo": false,
+    "memoryDiscoveryMaxDepth": 2,
+    "memoryDiscoveryMaxDirs": 300,
+    "showMemoryUsage": true,
+    "showStatusInTitle": true
+  }
+}

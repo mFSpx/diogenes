@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"SourceBundle","type":"object","required":["bundle_id","root_path","file_count","total_bytes","normal_count","quarantine_count","duplicate_groups","safety_policy"],"properties":{"bundle_id":{"type":"string"},"file_count":{"type":"integer"},"total_bytes":{"type":"integer"}}}

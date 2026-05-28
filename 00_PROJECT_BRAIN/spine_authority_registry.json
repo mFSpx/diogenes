@@ -1,0 +1,277 @@
+{
+  "schema": "lucidota.spine_authority_registry.v1",
+  "roles": [
+    {
+      "path": "scripts/cep_full_e2e.py",
+      "roles": [
+        "proof_furnace"
+      ],
+      "canonical_acceptor": false,
+      "canonical_graph_gate": false,
+      "direct_canonical_authority_claim": false,
+      "bypasses_canonical_gate": false,
+      "dangerous": false,
+      "quarantined": false
+    },
+    {
+      "path": "scripts/legacy/boring_beast.py",
+      "roles": [
+        "proof_furnace",
+        "legacy_danger_surface"
+      ],
+      "canonical_acceptor": false,
+      "canonical_graph_gate": false,
+      "direct_canonical_authority_claim": false,
+      "bypasses_canonical_gate": false,
+      "dangerous": true,
+      "quarantined": true,
+      "quarantine_reason": "legacy direct graph materialization path must refuse by default"
+    },
+    {
+      "path": "scripts/spine_surface_cep_worker.py",
+      "roles": [
+        "adapter_worker"
+      ],
+      "canonical_acceptor": false,
+      "canonical_graph_gate": false,
+      "must_route_through": [
+        "scripts/conversation_command_accept_worker.py",
+        "scripts/graph_promotion_gate.py"
+      ],
+      "bypasses_canonical_gate": false
+    },
+    {
+      "path": "scripts/conversation_command_accept_worker.py",
+      "roles": [
+        "canonical_acceptor"
+      ],
+      "canonical_acceptor": true,
+      "canonical_graph_gate": false,
+      "bypasses_canonical_gate": false
+    },
+    {
+      "path": "scripts/graph_promotion_gate.py",
+      "roles": [
+        "canonical_gate"
+      ],
+      "canonical_acceptor": false,
+      "canonical_graph_gate": true,
+      "bypasses_canonical_gate": false
+    },
+    {
+      "path": "scripts/graph_materialization_helper.py",
+      "roles": [
+        "materialization_helper_blocked_by_policy"
+      ],
+      "canonical_acceptor": false,
+      "canonical_graph_gate": false,
+      "materialization_helper": true,
+      "blocked_by_policy": true,
+      "bypasses_canonical_gate": false
+    },
+    {
+      "path": "scripts/absurd_graph_promotion_worker.py",
+      "roles": [
+        "adapter_worker"
+      ],
+      "canonical_acceptor": false,
+      "canonical_graph_gate": false,
+      "must_route_through": [
+        "scripts/graph_promotion_gate.py"
+      ],
+      "bypasses_canonical_gate": false
+    }
+  ],
+  "registry_version": "2026-05-20.spine-authority.absurd-v2",
+  "allowed_effect_vocabulary": [
+    "queue_absurd_work_order",
+    "stage_graph_packet",
+    "materialize_canonical_graph",
+    "no_canonical_mutation",
+    "external_command",
+    "operator_override"
+  ],
+  "authorities": [
+    {
+      "authority_key": "operator_authored_assertion",
+      "authority_class": "operator_authored_assertion",
+      "allowed_effects": [
+        "queue_absurd_work_order",
+        "stage_graph_packet",
+        "no_canonical_mutation",
+        "operator_override"
+      ],
+      "owning_subsystem": "operator_control_plane",
+      "required_evidence": [
+        "operator_instruction",
+        "evidence_ref"
+      ],
+      "permitted_lanes": [
+        "conversation_command_work_order",
+        "surface_cep",
+        "graph_promotion_dry_run",
+        "external_command_worker",
+        "operator_override",
+        "graph_promotion_execute"
+      ],
+      "override_requires": "operator_authored_assertion_with_evidence"
+    },
+    {
+      "authority_key": "raw_evidence",
+      "authority_class": "raw_evidence",
+      "allowed_effects": [
+        "stage_graph_packet",
+        "no_canonical_mutation"
+      ],
+      "owning_subsystem": "evidence_intake",
+      "required_evidence": [
+        "source_artifact_ref"
+      ],
+      "permitted_lanes": [
+        "graph_promotion_dry_run",
+        "conversation_command_work_order"
+      ]
+    },
+    {
+      "authority_key": "operator_defined_label",
+      "authority_class": "operator_defined_label",
+      "allowed_effects": [
+        "queue_absurd_work_order",
+        "stage_graph_packet",
+        "no_canonical_mutation"
+      ],
+      "owning_subsystem": "operator_control_plane",
+      "required_evidence": [
+        "operator_instruction"
+      ],
+      "permitted_lanes": [
+        "conversation_command_work_order",
+        "graph_promotion_dry_run",
+        "surface_cep"
+      ]
+    },
+    {
+      "authority_key": "deterministic_metric",
+      "authority_class": "deterministic_metric",
+      "allowed_effects": [
+        "stage_graph_packet",
+        "no_canonical_mutation"
+      ],
+      "owning_subsystem": "metrics_pipeline",
+      "required_evidence": [
+        "metric_receipt"
+      ],
+      "permitted_lanes": [
+        "graph_promotion_dry_run"
+      ]
+    },
+    {
+      "authority_key": "statistical_finding",
+      "authority_class": "statistical_finding",
+      "allowed_effects": [
+        "stage_graph_packet",
+        "no_canonical_mutation"
+      ],
+      "owning_subsystem": "analysis_pipeline",
+      "required_evidence": [
+        "analysis_receipt"
+      ],
+      "permitted_lanes": [
+        "graph_promotion_dry_run"
+      ]
+    },
+    {
+      "authority_key": "model_computed_finding",
+      "authority_class": "model_computed_finding",
+      "allowed_effects": [
+        "stage_graph_packet",
+        "no_canonical_mutation"
+      ],
+      "owning_subsystem": "model_runtime",
+      "required_evidence": [
+        "model_invocation_receipt"
+      ],
+      "permitted_lanes": [
+        "graph_promotion_dry_run"
+      ]
+    },
+    {
+      "authority_key": "stream_ml_finding",
+      "authority_class": "stream_ml_finding",
+      "allowed_effects": [
+        "stage_graph_packet",
+        "no_canonical_mutation"
+      ],
+      "owning_subsystem": "stream_ml",
+      "required_evidence": [
+        "stream_receipt"
+      ],
+      "permitted_lanes": [
+        "graph_promotion_dry_run"
+      ]
+    },
+    {
+      "authority_key": "graph_inferred_relation",
+      "authority_class": "graph_inferred_relation",
+      "allowed_effects": [
+        "stage_graph_packet",
+        "no_canonical_mutation"
+      ],
+      "owning_subsystem": "graph_reasoner",
+      "required_evidence": [
+        "inference_receipt"
+      ],
+      "permitted_lanes": [
+        "graph_promotion_dry_run"
+      ]
+    },
+    {
+      "authority_key": "operator_confirmed_finding",
+      "authority_class": "operator_confirmed_finding",
+      "allowed_effects": [
+        "stage_graph_packet",
+        "materialize_canonical_graph"
+      ],
+      "owning_subsystem": "graph_promotion",
+      "required_evidence": [
+        "operator_confirmation",
+        "evidence_ref",
+        "command_uuid"
+      ],
+      "permitted_lanes": [
+        "graph_promotion_dry_run",
+        "graph_promotion_execute"
+      ]
+    },
+    {
+      "authority_key": "canonical_doctrine",
+      "authority_class": "canonical_doctrine",
+      "allowed_effects": [
+        "stage_graph_packet",
+        "no_canonical_mutation"
+      ],
+      "owning_subsystem": "doctrine_registry",
+      "required_evidence": [
+        "doctrine_receipt"
+      ],
+      "permitted_lanes": [
+        "graph_promotion_dry_run"
+      ]
+    },
+    {
+      "authority_key": "external_action_authorized",
+      "authority_class": "external_action_authorized",
+      "allowed_effects": [
+        "external_command"
+      ],
+      "owning_subsystem": "external_command_worker",
+      "required_evidence": [
+        "operator_instruction",
+        "command_uuid"
+      ],
+      "permitted_lanes": [
+        "external_command_worker"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/110_omni_front_chrono_graph_materialization_lock.sql

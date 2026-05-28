@@ -1,0 +1,510 @@
+{
+  "generated_for": "ABSURD-centered abductive automation runtime",
+  "global_rules": {
+    "canonical_graph_materialization_requires_operator_approval": true,
+    "canonical_graph_tables_forbidden_this_sprint": [
+      "lucidota_go.graph_item",
+      "lucidota_go.graph_edge",
+      "lucidota_go.graph_journal"
+    ],
+    "default_backend_order": [
+      "postgres_staging",
+      "sqlite",
+      "jsonl"
+    ],
+    "mutation_default": "typed_staged_receipted_reversible",
+    "required_durable_logic": "ABSURD-style append/claim/step/receipt loops; no Docker; Bytewax stream organ mandatory when live processing is active"
+  },
+  "hard_distinctions": [
+    "CLAIM is not EVIDENCE",
+    "EVIDENCE is not CLAIM",
+    "HYPOTHESIS is not TRUTH",
+    "GRAPH_CANDIDATE is not CANONICAL_GRAPH_FACT",
+    "MODEL_OUTPUT is not AUTHORITY",
+    "RECEIPT is not SUCCESS unless verdict and checks prove success"
+  ],
+  "objects": {
+    "Claim": {
+      "allowed_statuses": [
+        "extracted",
+        "linked",
+        "unsupported",
+        "supported",
+        "contradicted",
+        "withdrawn"
+      ],
+      "failure_states": [
+        "no_source",
+        "overbroad",
+        "contradicted"
+      ],
+      "mutation_rules": "claim text immutable; corrections create new claim",
+      "parent_child_linkage": {
+        "children": [
+          "EvidenceLink"
+        ],
+        "parent": "Hypothesis|Receipt|Document"
+      },
+      "promotion_rules": "claim requires evidence links before graph staging",
+      "receipt_linkage": "exact source hash/path required",
+      "required_fields": [
+        "id",
+        "created_at_utc",
+        "text",
+        "source_ref",
+        "status"
+      ]
+    },
+    "CommandEnvelope": {
+      "allowed_statuses": [
+        "received",
+        "parsed",
+        "routed",
+        "queued",
+        "blocked",
+        "completed",
+        "dead_letter"
+      ],
+      "failure_states": [
+        "unparseable",
+        "forbidden_effect",
+        "missing_receipt"
+      ],
+      "mutation_rules": "append-only; correction by superseding envelope",
+      "parent_child_linkage": {
+        "children": [
+          "WorkOrder",
+          "Hypothesis",
+          "Claim"
+        ],
+        "parent": "operator/session"
+      },
+      "promotion_rules": "may create work orders; never directly canonical graph",
+      "receipt_linkage": "raw input hash and route receipt required",
+      "required_fields": [
+        "id",
+        "created_at_utc",
+        "source",
+        "raw_ref",
+        "intent",
+        "status",
+        "receipt_refs"
+      ]
+    },
+    "Evidence": {
+      "allowed_statuses": [
+        "stored",
+        "indexed",
+        "quoted",
+        "linked",
+        "quarantined",
+        "invalid"
+      ],
+      "failure_states": [
+        "missing_hash",
+        "unreadable",
+        "active_runtime_db_risk"
+      ],
+      "mutation_rules": "do not move/delete original evidence; derive copies only",
+      "parent_child_linkage": {
+        "children": [
+          "EvidenceLink"
+        ],
+        "parent": "Receipt|File|ExternalFetch"
+      },
+      "promotion_rules": "evidence supports claims; does not become claim",
+      "receipt_linkage": "custody receipt required",
+      "required_fields": [
+        "id",
+        "created_at_utc",
+        "kind",
+        "source_path_or_uri",
+        "source_hash",
+        "custody_status"
+      ]
+    },
+    "EvidenceLink": {
+      "allowed_statuses": [
+        "candidate",
+        "verified",
+        "contradictory",
+        "rejected"
+      ],
+      "failure_states": [
+        "weak_link",
+        "wrong_source",
+        "contradiction"
+      ],
+      "mutation_rules": "append-only relation changes",
+      "parent_child_linkage": {
+        "children": [
+          "GraphCandidate",
+          "RiverTrainingCandidate"
+        ],
+        "parent": "Claim+Evidence"
+      },
+      "promotion_rules": "verified links can justify graph candidate",
+      "receipt_linkage": "linking receipt required",
+      "required_fields": [
+        "id",
+        "claim_id",
+        "evidence_id",
+        "relation",
+        "confidence",
+        "receipt_ref"
+      ]
+    },
+    "GraphCandidate": {
+      "allowed_statuses": [
+        "staged",
+        "reviewed",
+        "approved_for_materialization",
+        "rejected",
+        "materialized"
+      ],
+      "failure_states": [
+        "missing_evidence",
+        "active_db_risk",
+        "duplicate",
+        "forbidden_direct_write"
+      ],
+      "mutation_rules": "staged only by default; canonical materialization separate",
+      "parent_child_linkage": {
+        "children": [
+          "Receipt"
+        ],
+        "parent": "Hypothesis|EvidenceLink|Receipt"
+      },
+      "promotion_rules": "operator-approved gate required before canonical graph",
+      "receipt_linkage": "candidate receipt and source evidence required",
+      "required_fields": [
+        "id",
+        "object_or_edge",
+        "payload",
+        "evidence_refs",
+        "status",
+        "receipt_ref"
+      ]
+    },
+    "Hypothesis": {
+      "allowed_statuses": [
+        "open",
+        "supported",
+        "contradicted",
+        "stale",
+        "promoted_candidate",
+        "rejected"
+      ],
+      "failure_states": [
+        "unsupported",
+        "ambiguous",
+        "contradicted"
+      ],
+      "mutation_rules": "never overwrite; add evidence links and verdict transitions",
+      "parent_child_linkage": {
+        "children": [
+          "Claim",
+          "EvidenceLink",
+          "GraphCandidate"
+        ],
+        "parent": "CommandEnvelope|CorpusPacket|OperatorHunch"
+      },
+      "promotion_rules": "hypothesis may become graph candidate, not truth",
+      "receipt_linkage": "source receipt or corpus packet required",
+      "required_fields": [
+        "id",
+        "created_at_utc",
+        "statement",
+        "status",
+        "claim_refs",
+        "evidence_refs"
+      ]
+    },
+    "ModelAuditBlock": {
+      "allowed_statuses": [
+        "MODEL_AUDIT_RECEIPT_PRESENT",
+        "MISSING_DEDICATED_MODEL_AUDIT",
+        "MISSING_VALID_AUDIT_OUTPUT",
+        "MISSING_REQUIRED_AUDITOR",
+        "MISSING_FRESH_MODEL_AUDIT",
+        "PENDING_UNTIL_5_TASKS"
+      ],
+      "failure_states": [
+        "invalid_json",
+        "wrong_auditor",
+        "stale_signature",
+        "missing_audit"
+      ],
+      "mutation_rules": "signature changes invalidate old audits",
+      "parent_child_linkage": {
+        "children": [
+          "ModelInvocation"
+        ],
+        "parent": "five WorkOrder/BoardMove receipts"
+      },
+      "promotion_rules": "complete block must pass before global audit PASS",
+      "receipt_linkage": "assigned-auditor valid JSON receipt required for complete block",
+      "required_fields": [
+        "block_id",
+        "block_signature",
+        "task_receipts",
+        "assigned_auditor",
+        "audit_status"
+      ]
+    },
+    "ModelInvocation": {
+      "allowed_statuses": [
+        "dry_run",
+        "executed",
+        "blocked",
+        "failed",
+        "audited"
+      ],
+      "failure_states": [
+        "missing_usage",
+        "invalid_json",
+        "wrong_auditor",
+        "timeout"
+      ],
+      "mutation_rules": "never edit receipt; supersede with new invocation",
+      "parent_child_linkage": {
+        "children": [
+          "ModelAuditBlock",
+          "Receipt"
+        ],
+        "parent": "WorkOrder|AuditBlock"
+      },
+      "promotion_rules": "model output is signal; bounded validators decide",
+      "receipt_linkage": "provider receipt required for percentages",
+      "required_fields": [
+        "id",
+        "provider",
+        "model",
+        "prompt_hash",
+        "output_hash",
+        "status",
+        "usage",
+        "receipt_ref"
+      ]
+    },
+    "NextMove": {
+      "allowed_statuses": [
+        "candidate",
+        "selected",
+        "queued",
+        "executed",
+        "rejected"
+      ],
+      "failure_states": [
+        "unsafe_effect",
+        "no_receipt_path",
+        "too_broad"
+      ],
+      "mutation_rules": "ranking can change; move_id immutable",
+      "parent_child_linkage": {
+        "children": [
+          "WorkOrder"
+        ],
+        "parent": "BoardState|HealthCheck"
+      },
+      "promotion_rules": "safe next moves may create work orders",
+      "receipt_linkage": "next move generation receipt required",
+      "required_fields": [
+        "move_id",
+        "source",
+        "class",
+        "target",
+        "why_now",
+        "expected_gain",
+        "risk",
+        "requires_operator_approval",
+        "commands",
+        "receipt_expected"
+      ]
+    },
+    "Receipt": {
+      "allowed_statuses": [
+        "PASS",
+        "FAIL",
+        "DEGRADED",
+        "BLOCKED",
+        "PARTIAL",
+        "PENDING"
+      ],
+      "failure_states": [
+        "missing_verdict",
+        "claim_without_check",
+        "lineage_collage"
+      ],
+      "mutation_rules": "receipts immutable; corrections create new receipts",
+      "parent_child_linkage": {
+        "children": [
+          "StatusLedgerUpdate",
+          "RiverTrainingCandidate"
+        ],
+        "parent": "any"
+      },
+      "promotion_rules": "receipt proves an event happened; not success unless verdict/checks prove success",
+      "receipt_linkage": "self path and hash recommended",
+      "required_fields": [
+        "id",
+        "schema",
+        "generated_at_utc",
+        "verdict_or_status",
+        "path",
+        "checks"
+      ]
+    },
+    "RiverTrainingCandidate": {
+      "allowed_statuses": [
+        "candidate",
+        "validated",
+        "rejected",
+        "trained"
+      ],
+      "failure_states": [
+        "missing_label",
+        "leakage",
+        "bad_feature"
+      ],
+      "mutation_rules": "append-only feature rows",
+      "parent_child_linkage": {
+        "children": [],
+        "parent": "Receipt|EvidenceLink|WorkOrder"
+      },
+      "promotion_rules": "validated rows may train River/Treelite snapshots",
+      "receipt_linkage": "feature snapshot receipt required",
+      "required_fields": [
+        "id",
+        "features",
+        "label_or_outcome",
+        "source_receipt",
+        "status"
+      ]
+    },
+    "StatusLedgerUpdate": {
+      "allowed_statuses": [
+        "candidate",
+        "applied",
+        "blocked",
+        "reverted"
+      ],
+      "failure_states": [
+        "unsupported_completion",
+        "stale_evidence"
+      ],
+      "mutation_rules": "no completion without proof",
+      "parent_child_linkage": {
+        "children": [
+          "Receipt"
+        ],
+        "parent": "Receipt|Gate"
+      },
+      "promotion_rules": "status ledger is operator-visible truth summary",
+      "receipt_linkage": "ledger update must cite evidence",
+      "required_fields": [
+        "id",
+        "target",
+        "status",
+        "evidence_refs",
+        "next_action"
+      ]
+    },
+    "StreamEvent": {
+      "allowed_statuses": [
+        "observed",
+        "processed",
+        "staged",
+        "failed",
+        "dead_letter"
+      ],
+      "failure_states": [
+        "runaway",
+        "forbidden_mutation",
+        "untyped_event"
+      ],
+      "mutation_rules": "bounded cadence; stop command documented",
+      "parent_child_linkage": {
+        "children": [
+          "WorkOrder",
+          "RiverTrainingCandidate",
+          "Receipt"
+        ],
+        "parent": "DB/file/source stream"
+      },
+      "promotion_rules": "stream may stage candidates only",
+      "receipt_linkage": "stream run receipt required",
+      "required_fields": [
+        "id",
+        "stream",
+        "source",
+        "event_type",
+        "status",
+        "receipt_ref"
+      ]
+    },
+    "SwarmUsageLedger": {
+      "allowed_statuses": [
+        "computed",
+        "partial",
+        "blocked"
+      ],
+      "failure_states": [
+        "fake_percentage",
+        "missing_usage"
+      ],
+      "mutation_rules": "main-window usage marked UNRECEIPTED unless explicit receipt exists",
+      "parent_child_linkage": {
+        "children": [
+          "StatusLedgerUpdate"
+        ],
+        "parent": "ModelInvocation receipts"
+      },
+      "promotion_rules": "ledger informs routing, not authority",
+      "receipt_linkage": "only receipt-backed usage counts as usage truth",
+      "required_fields": [
+        "id",
+        "generated_at_utc",
+        "provider_totals",
+        "receipt_refs"
+      ]
+    },
+    "WorkOrder": {
+      "allowed_statuses": [
+        "candidate",
+        "queued",
+        "claimed",
+        "running",
+        "passed",
+        "failed",
+        "blocked",
+        "superseded"
+      ],
+      "failure_states": [
+        "command_failed",
+        "missing_proof",
+        "unsafe_effect"
+      ],
+      "mutation_rules": "bounded retry; append status transitions",
+      "parent_child_linkage": {
+        "children": [
+          "Receipt",
+          "RiverTrainingCandidate"
+        ],
+        "parent": "CommandEnvelope|NextMove"
+      },
+      "promotion_rules": "passed work may stage graph candidates if evidence-backed",
+      "receipt_linkage": "execution receipt path required before passed",
+      "required_fields": [
+        "id",
+        "created_at_utc",
+        "class",
+        "target",
+        "status",
+        "commands",
+        "receipt_expected"
+      ]
+    }
+  },
+  "schema": "lucidota.absurd_abductive.objects.v1"
+}

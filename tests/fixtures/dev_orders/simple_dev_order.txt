@@ -1,0 +1,1 @@
+Create a harmless receipt-only test artifact and prove the runner records commands.

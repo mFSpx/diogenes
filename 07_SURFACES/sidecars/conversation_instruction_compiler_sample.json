@@ -1,0 +1,17 @@
+{
+  "view_key": "conversation_instruction_compiler_sample",
+  "title": "Conversation Instruction Compiler Sample",
+  "surface_id": "conversation_instruction_compiler_sample",
+  "surface_kind": "generated_instruction_compiler",
+  "source_state_path": null,
+  "html_path": "07_SURFACES/generated/conversation_instruction_compiler_sample.html",
+  "html_sha256": "8e7e5bcd7ddfa9a7673bab650c9d1a3917c2880f098f1a387921ad3b2acbee5b",
+  "generated_at": "2026-05-17T04:21:56.470034Z",
+  "why_it_exists": "Demonstrates generated surfaces as plain-language conversation instruction compilers, not dashboards.",
+  "reuse_policy": "declarative_metadata_only_until_surface_lifecycle_worker_reads_it",
+  "interaction_model": "Buttons display/copy command envelopes and plain-language instructions; no direct DB/API/canonical mutation.",
+  "plain_language_instruction_template": "Tell LUCIDOTA to {action} target {target_refs} using evidence {evidence_refs} and artifact refs {artifact_refs}. Current state: {current_object_state}. Allowed effect: {allowed_effect}.",
+  "canonical_mutation_allowed": false,
+  "conversation_required": true,
+  "command_envelope_schema": "lucidota.surface_instruction_envelope.v1"
+}

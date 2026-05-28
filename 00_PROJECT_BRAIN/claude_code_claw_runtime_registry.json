@@ -1,0 +1,29 @@
+{
+  "schema": "diogenes.claude_code_claw_runtime_registry.v1",
+  "updated_at": "2026-05-17T21:19:50.240936Z",
+  "command_surfaces": [
+    "claw",
+    "01_REPOS/claudecode/rust/crates/claw-cli/src/main.rs"
+  ],
+  "modified_paths": [
+    " M 01_REPOS/claudecode/rust/crates/claw-cli/src/main.rs",
+    " M 01_REPOS/claudecode/rust/crates/runtime/src/permissions.rs",
+    " M claw"
+  ],
+  "runtime_permissions": [
+    "01_REPOS/claudecode/rust/crates/runtime/src/permissions.rs"
+  ],
+  "gaps": {
+    "cep_emission": "MISSING",
+    "kernel_client": "MISSING",
+    "dbos_submission": "MISSING",
+    "tickletrunk_integration": "PARTIAL via AGENTS.md only",
+    "oracle_change_auditing": "UNKNOWN_UNPROVEN"
+  },
+  "required_next": [
+    "emit conversation_command envelope",
+    "call ckdog1-kernel authorize",
+    "submit DBOS job",
+    "record changed-file oracle"
+  ]
+}

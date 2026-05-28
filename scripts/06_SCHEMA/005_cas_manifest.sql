@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/005_cas_manifest.sql

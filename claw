@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$ROOT/scripts/lucidota_safe_ops_env.sh"
+"$ROOT/scripts/lucidota_start_strict_model_stack.sh" >/dev/null 2>&1 || true
+"$ROOT/scripts/lucidota_start_indy_reads_watcher.sh" >/dev/null 2>&1 || true
+"$ROOT/scripts/lucidota_start_indy_polycareer_watch.sh" >/dev/null 2>&1 || true
+unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN
+LUCIDOTA_SECRET_ENV="${LUCIDOTA_SECRET_ENV:-$HOME/.config/lucidota/secrets.env}"
+if [[ -f "$LUCIDOTA_SECRET_ENV" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$LUCIDOTA_SECRET_ENV"
+  set +a
+fi
+LUCIDOTA_GROQ_KEY_FILE="${LUCIDOTA_GROQ_KEY_FILE:-/tmp/lucidota_groq_key}"
+if [[ -r "$LUCIDOTA_GROQ_KEY_FILE" ]]; then
+  GROQ_API_KEY="$(tr -d '\r\n' < "$LUCIDOTA_GROQ_KEY_FILE")"
+  export GROQ_API_KEY
+fi
+export CLAW_LOCAL_GRAPH_RUNTIME="${CLAW_LOCAL_GRAPH_RUNTIME:-0}"
+export LUCIDOTA_HOME="${LUCIDOTA_HOME:-$ROOT}"
+export LUCIDOTA_LOCAL_API_KEY="${LUCIDOTA_LOCAL_API_KEY:-local-no-secret}"
+export LUCIDOTA_LOCAL_BASE_URL="${LUCIDOTA_LOCAL_BASE_URL:-http://127.0.0.1:8080/v1}"
+export LUCIDOTA_MAMBA_RAM_BASE_URL="${LUCIDOTA_MAMBA_RAM_BASE_URL:-http://127.0.0.1:8081/v1}"
+export LUCIDOTA_MAMBA_GPU_BASE_URL="${LUCIDOTA_MAMBA_GPU_BASE_URL:-http://127.0.0.1:8083/v1}"
+export GROQ_BASE_URL="${GROQ_BASE_URL:-https://api.groq.com/openai/v1}"
+export OPENAI_API_KEY="${OPENAI_API_KEY:-${GROQ_API_KEY:-}}"
+export OPENAI_BASE_URL="${OPENAI_BASE_URL:-$GROQ_BASE_URL}"
+export COHERE_BASE_URL="${COHERE_BASE_URL:-https://api.cohere.ai/compatibility/v1}"
+export CLAW_TOKEN_EFFICIENCY_MODE="${CLAW_TOKEN_EFFICIENCY_MODE:-local_first_cloud_optional}"
+MODEL="${CLAW_MODEL:-luci}"
+ARGS=(--model "$MODEL" --permission-mode danger-full-access --dangerously-skip-permissions)
+exec "$ROOT/01_REPOS/claudecode/rust/target/release/claw" "${ARGS[@]}" "$@"

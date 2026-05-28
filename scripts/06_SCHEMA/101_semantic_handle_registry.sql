@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/101_semantic_handle_registry.sql

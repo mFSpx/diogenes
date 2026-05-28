@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LUCIDOTA Architecture Map</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #060711; color: #eff7ff; margin: 0; padding: 20px; }
+        #chart { width: 100%; height: 85vh; background: #101827; border-radius: 12px; border: 1px solid #26384f; overflow: hidden; }
+        .node { box-sizing: border-box; position: absolute; overflow: hidden; color: white; padding: 4px; font-size: 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+        .node:hover { border-color: white; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        .label { font-weight: bold; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+        .value { font-size: 10px; opacity: 0.8; }
+        header { margin-bottom: 20px; }
+        h1 { margin: 0; font-size: 24px; color: #67e8ff; letter-spacing: 0.1em; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>LUCIDOTA SUBSYSTEM MAP</h1>
+        <p>Token-weighted distribution of 165 architecture files.</p>
+    </header>
+    <div id="chart" style="position: relative;"></div>
+
+    <script>
+        // A simplified hierarchical dataset representing your token map
+        const data = {
+            name: "LUCIDOTA ROOT (~340k Tokens)",
+            children: [
+                { name: "KRAMPUS (Intake)", color: "#4ade80", children: [{name: "korpus_krampii.py", value: 12000}, {name: "krampus_bounded_inventory.py", value: 8000}, {name: "krampus_rechronologize.py", value: 9500}] },
+                { name: "CHRONO LEDGER", color: "#60a5fa", children: [{name: "chrono_daemon_activation.py", value: 4500}, {name: "chrono_temporal_conflict_detector.py", value: 6200}, {name: "check_chrono_ledger_service.sh", value: 2000}] },
+                { name: "EXECUTION SPINE (Absurd/DBOS)", color: "#f87171", children: [{name: "boring_beast.py", value: 14500}, {name: "dbos_queue_spine.py", value: 11000}, {name: "dbos_worker_harness.py", value: 8500}] },
+                { name: "GRAPH & ONTOLOGY", color: "#c084fc", children: [{name: "graph_promotion_gate.py", value: 10500}, {name: "ontology_staging.py", value: 5000}, {name: "entity_candidate_registry.py", value: 3500}] },
+                { name: "AHOY (ML)", color: "#fb923c", children: [{name: "ahoy_train_xgboost_shap.py", value: 7000}, {name: "ahoy_run_batch.py", value: 4000}] },
+                { name: "CEP & SURFACES", color: "#a78bfa", children: [{name: "surface_instruction_compile.py", value: 8500}, {name: "cep_full_e2e.py", value: 12000}] },
+                { name: "MEMORY & CATCHME", color: "#f472b6", children: [{name: "simplemem_candidate_index.py", value: 6500}, {name: "demem_runtime_guard.py", value: 5500}] },
+                { name: "SAFETY & AUDIT", color: "#fbbf24", children: [{name: "lucidota_ruthless_gauntlet.py", value: 15500}, {name: "lucidota_mega_gate.py", value: 13000}] },
+                { name: "CORE ORCHESTRATION", color: "#94a3b8", children: [{name: "lucidota_ingest_watchdog.py", value: 14000}, {name: "lucidota_cockpit.py", value: 9000}] }
+            ]
+        };
+
+        const width = document.getElementById("chart").clientWidth;
+        const height = document.getElementById("chart").clientHeight;
+
+        const treemap = d3.treemap().size([width, height]).paddingInner(4).paddingOuter(12).paddingTop(24);
+        const root = d3.hierarchy(data).sum(d => d.value).sort((a, b) => b.value - a.value);
+        treemap(root);
+
+        const chart = d3.select("#chart");
+        
+        // Draw parent subsystem backgrounds
+        chart.selectAll(".parent")
+            .data(root.children)
+            .enter().append("div")
+            .style("position", "absolute").style("left", d => d.x0 + "px").style("top", d => d.y0 + "px")
+            .style("width", d => Math.max(0, d.x1 - d.x0) + "px").style("height", d => Math.max(0, d.y1 - d.y0) + "px")
+            .style("background", "rgba(255,255,255,0.05)").style("border", "1px solid rgba(255,255,255,0.1)")
+            .style("border-radius", "8px")
+            .html(d => `<div style="padding: 4px 8px; font-weight: bold; font-size: 11px; color: ${d.data.color}; letter-spacing: 0.05em; text-transform: uppercase;">${d.data.name}</div>`);
+
+        // Draw individual script nodes
+        chart.selectAll(".node")
+            .data(root.leaves())
+            .enter().append("div")
+            .attr("class", "node")
+            .style("left", d => d.x0 + "px").style("top", d => d.y0 + "px")
+            .style("width", d => Math.max(0, d.x1 - d.x0) + "px").style("height", d => Math.max(0, d.y1 - d.y0) + "px")
+            .style("background", d => d.parent.data.color)
+            .html(d => `<div class="label">${d.data.name}</div><div class="value">${d.value} tokens</div>`);
+    </script>
+</body>
+</html>

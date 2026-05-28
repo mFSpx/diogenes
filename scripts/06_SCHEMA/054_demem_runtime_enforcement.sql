@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/054_demem_runtime_enforcement.sql

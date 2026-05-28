@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/048_phase05_allowlisted_ingest.sql

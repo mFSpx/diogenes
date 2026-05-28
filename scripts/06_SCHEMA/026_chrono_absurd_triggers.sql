@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/026_chrono_absurd_triggers.sql

@@ -1,0 +1,65 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Marrow Loop Status</title>
+<style>body{font-family:system-ui,sans-serif;background:#111;color:#eee;margin:2rem}pre{white-space:pre-wrap;background:#1d1d1d;padding:1rem}button{padding:.5rem;margin:.25rem}</style></head>
+<body><h1>Marrow Loop Status</h1>
+<p>Interaction model: Buttons emit command envelopes; no direct DB/API mutation.</p>
+<button onclick="document.getElementById('envelope').hidden=false">Show Command Envelope JSON</button>
+<pre id="envelope" hidden>{&quot;direct_api_call&quot;:false,&quot;direct_db_write&quot;:false,&quot;intent&quot;:&quot;marrow_loop.surface_action&quot;,&quot;protocol&quot;:&quot;lucidota.command_envelope.v1&quot;,&quot;source_surface&quot;:&quot;marrow_loop_status&quot;}</pre>
+<h2>State</h2><pre># LUCIDOTA Marrow Loop State
+
+## Marrow Command 7f69842d-4f78-4016-a0a3-6c2dcef945c4
+
+- generated_at: 2026-05-17T01:55:22Z
+- receipt_path: `05_OUTPUTS/marrow_loop/command_receipt_20260517T015522Z.json`
+- raw_command: Shift focus to Boat Work
+- normalized_intent: project.shift_focus
+- authority_class: operator_authored_assertion
+- source: operator_cli
+- db_writes_performed: False
+- graph_writes_performed: False
+
+## Marrow Command b850680c-37bb-44e3-9e7a-92c87604bd87
+
+- generated_at: 2026-05-17T02:17:47Z
+- receipt_path: `05_OUTPUTS/marrow_loop/command_receipt_20260517T021747Z.json`
+- raw_command: Marrow Loop second iteration proof
+- normalized_intent: system.verify_second_iteration
+- authority_class: operator_authored_assertion
+- source: operator_cli
+- db_writes_performed: False
+- graph_writes_performed: False
+
+## Marrow Command e9df3068-c547-419c-b235-157047a657f1
+
+- generated_at: 2026-05-17T02:19:30Z
+- receipt_path: `05_OUTPUTS/marrow_loop/command_receipt_20260517T021930407705Z.json`
+- raw_command: Continue Boat Work planning
+- normalized_intent: project.continue_focus
+- authority_class: operator_authored_assertion
+- source: operator_cli
+- db_writes_performed: False
+- graph_writes_performed: False
+
+## Marrow Command 662b8cce-0a0a-4f68-ba52-59bc205370a9
+
+- generated_at: 2026-05-17T02:29:10Z
+- receipt_path: `05_OUTPUTS/marrow_loop/command_receipt_20260517T022910436137Z.json`
+- raw_command: {&quot;direct_api_call&quot;:false,&quot;direct_db_write&quot;:false,&quot;intent&quot;:&quot;marrow_loop.surface_action&quot;,&quot;protocol&quot;:&quot;lucidota.command_envelope.v1&quot;,&quot;source_surface&quot;:&quot;marrow_loop_status&quot;}
+- normalized_intent: marrow_loop.surface_action
+- authority_class: operator_authored_assertion
+- source: surface:marrow_loop_status
+- db_writes_performed: False
+- graph_writes_performed: False
+
+## Marrow Command 97ff18b1-a076-42de-9e15-7751a259ab4a
+
+- generated_at: 2026-05-17T19:29:20Z
+- receipt_path: `05_OUTPUTS/marrow_loop/command_receipt_20260517T192920441419Z.json`
+- raw_command: Round 95 integrated surfaces marrow cep proof
+- normalized_intent: system.integrated_loop_proof
+- authority_class: operator_authored_assertion
+- source: operator_cli
+- db_writes_performed: False
+- graph_writes_performed: False
+</pre>
+</body></html>

@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"ContradictionRecord","type":"object","required":["contradiction_id","severity","claim_ids","source_refs","resolution_status"],"properties":{"resolution_status":{"enum":["OPEN","RESOLVED","DISMISSED"]},"severity":{"enum":["LOW","MEDIUM","HIGH"]}}}

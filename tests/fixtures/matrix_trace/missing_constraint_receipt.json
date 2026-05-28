@@ -1,0 +1,1645 @@
+{
+  "schema": "lucidota.dev_order.final_receipt.v1",
+  "policy_version": "2026-05-18.dev-order-matrix.v1",
+  "verdict": "PASS",
+  "matrix_trace": [
+    {
+      "task_id": "T1",
+      "task_name": "Golden Path Regression",
+      "constraint_order": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "constraint_trace": [
+        {
+          "constraint": "A",
+          "name": "Declarative Contract Mapping",
+          "status": "applied",
+          "files_changed": [
+            "scripts/golden_path_regression_gate.py",
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "tests": [
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/golden_path_regression_gate.py --dry-run"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_lineage_id"
+          ],
+          "evidence": "T1/A enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "B",
+          "name": "Continuous State Validation",
+          "status": "applied",
+          "files_changed": [
+            "scripts/golden_path_regression_gate.py",
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "tests": [
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/golden_path_regression_gate.py --dry-run"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_lineage_id"
+          ],
+          "evidence": "T1/B enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "C",
+          "name": "Immutable Data Modeling",
+          "status": "applied",
+          "files_changed": [
+            "scripts/golden_path_regression_gate.py",
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "tests": [
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/golden_path_regression_gate.py --dry-run"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_lineage_id"
+          ],
+          "evidence": "T1/C enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "D",
+          "name": "Pure Logic Execution",
+          "status": "applied",
+          "files_changed": [
+            "scripts/golden_path_regression_gate.py",
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "tests": [
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/golden_path_regression_gate.py --dry-run"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_lineage_id"
+          ],
+          "evidence": "T1/D enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "E",
+          "name": "Zero-Trust Hardening",
+          "status": "applied",
+          "files_changed": [
+            "scripts/golden_path_regression_gate.py",
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "tests": [
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/golden_path_regression_gate.py --dry-run"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_lineage_id"
+          ],
+          "evidence": "T1/E enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "F",
+          "name": "Idempotent Infrastructure",
+          "status": "applied",
+          "files_changed": [
+            "scripts/golden_path_regression_gate.py",
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "tests": [
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/golden_path_regression_gate.py --dry-run"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_lineage_id"
+          ],
+          "evidence": "T1/F enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "G",
+          "name": "Deep Telemetry",
+          "status": "applied",
+          "files_changed": [
+            "scripts/golden_path_regression_gate.py",
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "tests": [
+            "tests/test_golden_path_regression_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/golden_path_regression_gate.py --dry-run"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_lineage_id"
+          ],
+          "evidence": "T1/G enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        }
+      ]
+    },
+    {
+      "task_id": "T2",
+      "task_name": "Direct Graph Write Fence",
+      "constraint_order": [
+        "D",
+        "F",
+        "E",
+        "A",
+        "C",
+        "B",
+        "G",
+        "H"
+      ],
+      "constraint_trace": [
+        {
+          "constraint": "D",
+          "name": "Pure Logic Execution",
+          "status": "applied",
+          "files_changed": [
+            "scripts/canonical_graph_write_scanner.py",
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "tests": [
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "commands": [
+            "python3 scripts/canonical_graph_write_scanner.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "unknown_danger_raw_graph_write"
+          ],
+          "evidence": "T2/D enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "F",
+          "name": "Idempotent Infrastructure",
+          "status": "applied",
+          "files_changed": [
+            "scripts/canonical_graph_write_scanner.py",
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "tests": [
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "commands": [
+            "python3 scripts/canonical_graph_write_scanner.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "unknown_danger_raw_graph_write"
+          ],
+          "evidence": "T2/F enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "E",
+          "name": "Zero-Trust Hardening",
+          "status": "applied",
+          "files_changed": [
+            "scripts/canonical_graph_write_scanner.py",
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "tests": [
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "commands": [
+            "python3 scripts/canonical_graph_write_scanner.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "unknown_danger_raw_graph_write"
+          ],
+          "evidence": "T2/E enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "A",
+          "name": "Declarative Contract Mapping",
+          "status": "applied",
+          "files_changed": [
+            "scripts/canonical_graph_write_scanner.py",
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "tests": [
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "commands": [
+            "python3 scripts/canonical_graph_write_scanner.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "unknown_danger_raw_graph_write"
+          ],
+          "evidence": "T2/A enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "C",
+          "name": "Immutable Data Modeling",
+          "status": "applied",
+          "files_changed": [
+            "scripts/canonical_graph_write_scanner.py",
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "tests": [
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "commands": [
+            "python3 scripts/canonical_graph_write_scanner.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "unknown_danger_raw_graph_write"
+          ],
+          "evidence": "T2/C enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "B",
+          "name": "Continuous State Validation",
+          "status": "applied",
+          "files_changed": [
+            "scripts/canonical_graph_write_scanner.py",
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "tests": [
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "commands": [
+            "python3 scripts/canonical_graph_write_scanner.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "unknown_danger_raw_graph_write"
+          ],
+          "evidence": "T2/B enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "G",
+          "name": "Deep Telemetry",
+          "status": "applied",
+          "files_changed": [
+            "scripts/canonical_graph_write_scanner.py",
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "tests": [
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "commands": [
+            "python3 scripts/canonical_graph_write_scanner.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "unknown_danger_raw_graph_write"
+          ],
+          "evidence": "T2/G enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "H",
+          "name": "Chaos & Fault Tolerance",
+          "status": "applied",
+          "files_changed": [
+            "scripts/canonical_graph_write_scanner.py",
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "tests": [
+            "tests/test_canonical_graph_write_scanner.py"
+          ],
+          "commands": [
+            "python3 scripts/canonical_graph_write_scanner.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "unknown_danger_raw_graph_write"
+          ],
+          "evidence": "T2/H enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        }
+      ]
+    },
+    {
+      "task_id": "T3",
+      "task_name": "Spine Authority Registry",
+      "constraint_order": [
+        "G",
+        "C",
+        "H",
+        "B",
+        "F",
+        "A",
+        "E",
+        "D"
+      ],
+      "constraint_trace": [
+        {
+          "constraint": "G",
+          "name": "Deep Telemetry",
+          "status": "applied",
+          "files_changed": [
+            "scripts/spine_authority_checker.py",
+            "tests/test_spine_authority_checker.py"
+          ],
+          "tests": [
+            "tests/test_spine_authority_checker.py"
+          ],
+          "commands": [
+            "python3 scripts/spine_authority_checker.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_authority"
+          ],
+          "evidence": "T3/G enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "C",
+          "name": "Immutable Data Modeling",
+          "status": "applied",
+          "files_changed": [
+            "scripts/spine_authority_checker.py",
+            "tests/test_spine_authority_checker.py"
+          ],
+          "tests": [
+            "tests/test_spine_authority_checker.py"
+          ],
+          "commands": [
+            "python3 scripts/spine_authority_checker.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_authority"
+          ],
+          "evidence": "T3/C enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "H",
+          "name": "Chaos & Fault Tolerance",
+          "status": "applied",
+          "files_changed": [
+            "scripts/spine_authority_checker.py",
+            "tests/test_spine_authority_checker.py"
+          ],
+          "tests": [
+            "tests/test_spine_authority_checker.py"
+          ],
+          "commands": [
+            "python3 scripts/spine_authority_checker.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_authority"
+          ],
+          "evidence": "T3/H enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "B",
+          "name": "Continuous State Validation",
+          "status": "applied",
+          "files_changed": [
+            "scripts/spine_authority_checker.py",
+            "tests/test_spine_authority_checker.py"
+          ],
+          "tests": [
+            "tests/test_spine_authority_checker.py"
+          ],
+          "commands": [
+            "python3 scripts/spine_authority_checker.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_authority"
+          ],
+          "evidence": "T3/B enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "F",
+          "name": "Idempotent Infrastructure",
+          "status": "applied",
+          "files_changed": [
+            "scripts/spine_authority_checker.py",
+            "tests/test_spine_authority_checker.py"
+          ],
+          "tests": [
+            "tests/test_spine_authority_checker.py"
+          ],
+          "commands": [
+            "python3 scripts/spine_authority_checker.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_authority"
+          ],
+          "evidence": "T3/F enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "A",
+          "name": "Declarative Contract Mapping",
+          "status": "applied",
+          "files_changed": [
+            "scripts/spine_authority_checker.py",
+            "tests/test_spine_authority_checker.py"
+          ],
+          "tests": [
+            "tests/test_spine_authority_checker.py"
+          ],
+          "commands": [
+            "python3 scripts/spine_authority_checker.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_authority"
+          ],
+          "evidence": "T3/A enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "E",
+          "name": "Zero-Trust Hardening",
+          "status": "applied",
+          "files_changed": [
+            "scripts/spine_authority_checker.py",
+            "tests/test_spine_authority_checker.py"
+          ],
+          "tests": [
+            "tests/test_spine_authority_checker.py"
+          ],
+          "commands": [
+            "python3 scripts/spine_authority_checker.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_authority"
+          ],
+          "evidence": "T3/E enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "D",
+          "name": "Pure Logic Execution",
+          "status": "applied",
+          "files_changed": [
+            "scripts/spine_authority_checker.py",
+            "tests/test_spine_authority_checker.py"
+          ],
+          "tests": [
+            "tests/test_spine_authority_checker.py"
+          ],
+          "commands": [
+            "python3 scripts/spine_authority_checker.py"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_authority"
+          ],
+          "evidence": "T3/D enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        }
+      ]
+    },
+    {
+      "task_id": "T4",
+      "task_name": "Same-Lineage Validator",
+      "constraint_order": [
+        "B",
+        "H",
+        "A",
+        "F",
+        "D",
+        "E",
+        "C",
+        "G"
+      ],
+      "constraint_trace": [
+        {
+          "constraint": "B",
+          "name": "Continuous State Validation",
+          "status": "applied",
+          "files_changed": [
+            "scripts/same_lineage_validator.py",
+            "tests/test_same_lineage_validator.py"
+          ],
+          "tests": [
+            "tests/test_same_lineage_validator.py"
+          ],
+          "commands": [
+            "python3 scripts/same_lineage_validator.py --receipt tests/fixtures/golden_path/valid_receipt_bundle.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_parent"
+          ],
+          "evidence": "T4/B enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "H",
+          "name": "Chaos & Fault Tolerance",
+          "status": "applied",
+          "files_changed": [
+            "scripts/same_lineage_validator.py",
+            "tests/test_same_lineage_validator.py"
+          ],
+          "tests": [
+            "tests/test_same_lineage_validator.py"
+          ],
+          "commands": [
+            "python3 scripts/same_lineage_validator.py --receipt tests/fixtures/golden_path/valid_receipt_bundle.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_parent"
+          ],
+          "evidence": "T4/H enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "A",
+          "name": "Declarative Contract Mapping",
+          "status": "applied",
+          "files_changed": [
+            "scripts/same_lineage_validator.py",
+            "tests/test_same_lineage_validator.py"
+          ],
+          "tests": [
+            "tests/test_same_lineage_validator.py"
+          ],
+          "commands": [
+            "python3 scripts/same_lineage_validator.py --receipt tests/fixtures/golden_path/valid_receipt_bundle.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_parent"
+          ],
+          "evidence": "T4/A enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "F",
+          "name": "Idempotent Infrastructure",
+          "status": "applied",
+          "files_changed": [
+            "scripts/same_lineage_validator.py",
+            "tests/test_same_lineage_validator.py"
+          ],
+          "tests": [
+            "tests/test_same_lineage_validator.py"
+          ],
+          "commands": [
+            "python3 scripts/same_lineage_validator.py --receipt tests/fixtures/golden_path/valid_receipt_bundle.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_parent"
+          ],
+          "evidence": "T4/F enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "D",
+          "name": "Pure Logic Execution",
+          "status": "applied",
+          "files_changed": [
+            "scripts/same_lineage_validator.py",
+            "tests/test_same_lineage_validator.py"
+          ],
+          "tests": [
+            "tests/test_same_lineage_validator.py"
+          ],
+          "commands": [
+            "python3 scripts/same_lineage_validator.py --receipt tests/fixtures/golden_path/valid_receipt_bundle.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_parent"
+          ],
+          "evidence": "T4/D enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "E",
+          "name": "Zero-Trust Hardening",
+          "status": "applied",
+          "files_changed": [
+            "scripts/same_lineage_validator.py",
+            "tests/test_same_lineage_validator.py"
+          ],
+          "tests": [
+            "tests/test_same_lineage_validator.py"
+          ],
+          "commands": [
+            "python3 scripts/same_lineage_validator.py --receipt tests/fixtures/golden_path/valid_receipt_bundle.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_parent"
+          ],
+          "evidence": "T4/E enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "C",
+          "name": "Immutable Data Modeling",
+          "status": "applied",
+          "files_changed": [
+            "scripts/same_lineage_validator.py",
+            "tests/test_same_lineage_validator.py"
+          ],
+          "tests": [
+            "tests/test_same_lineage_validator.py"
+          ],
+          "commands": [
+            "python3 scripts/same_lineage_validator.py --receipt tests/fixtures/golden_path/valid_receipt_bundle.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_parent"
+          ],
+          "evidence": "T4/C enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "G",
+          "name": "Deep Telemetry",
+          "status": "applied",
+          "files_changed": [
+            "scripts/same_lineage_validator.py",
+            "tests/test_same_lineage_validator.py"
+          ],
+          "tests": [
+            "tests/test_same_lineage_validator.py"
+          ],
+          "commands": [
+            "python3 scripts/same_lineage_validator.py --receipt tests/fixtures/golden_path/valid_receipt_bundle.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_parent"
+          ],
+          "evidence": "T4/G enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        }
+      ]
+    },
+    {
+      "task_id": "T5",
+      "task_name": "Status Ledger Evidence Gate",
+      "constraint_order": [
+        "E",
+        "G",
+        "D",
+        "C",
+        "A",
+        "H",
+        "F",
+        "B"
+      ],
+      "constraint_trace": [
+        {
+          "constraint": "E",
+          "name": "Zero-Trust Hardening",
+          "status": "applied",
+          "files_changed": [
+            "scripts/status_ledger_evidence_gate.py",
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "tests": [
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/status_ledger_evidence_gate.py --audit-ledger"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_evidence"
+          ],
+          "evidence": "T5/E enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "G",
+          "name": "Deep Telemetry",
+          "status": "applied",
+          "files_changed": [
+            "scripts/status_ledger_evidence_gate.py",
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "tests": [
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/status_ledger_evidence_gate.py --audit-ledger"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_evidence"
+          ],
+          "evidence": "T5/G enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "D",
+          "name": "Pure Logic Execution",
+          "status": "applied",
+          "files_changed": [
+            "scripts/status_ledger_evidence_gate.py",
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "tests": [
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/status_ledger_evidence_gate.py --audit-ledger"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_evidence"
+          ],
+          "evidence": "T5/D enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "C",
+          "name": "Immutable Data Modeling",
+          "status": "applied",
+          "files_changed": [
+            "scripts/status_ledger_evidence_gate.py",
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "tests": [
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/status_ledger_evidence_gate.py --audit-ledger"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_evidence"
+          ],
+          "evidence": "T5/C enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "A",
+          "name": "Declarative Contract Mapping",
+          "status": "applied",
+          "files_changed": [
+            "scripts/status_ledger_evidence_gate.py",
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "tests": [
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/status_ledger_evidence_gate.py --audit-ledger"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_evidence"
+          ],
+          "evidence": "T5/A enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "H",
+          "name": "Chaos & Fault Tolerance",
+          "status": "applied",
+          "files_changed": [
+            "scripts/status_ledger_evidence_gate.py",
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "tests": [
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/status_ledger_evidence_gate.py --audit-ledger"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_evidence"
+          ],
+          "evidence": "T5/H enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "F",
+          "name": "Idempotent Infrastructure",
+          "status": "applied",
+          "files_changed": [
+            "scripts/status_ledger_evidence_gate.py",
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "tests": [
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/status_ledger_evidence_gate.py --audit-ledger"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_evidence"
+          ],
+          "evidence": "T5/F enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "B",
+          "name": "Continuous State Validation",
+          "status": "applied",
+          "files_changed": [
+            "scripts/status_ledger_evidence_gate.py",
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "tests": [
+            "tests/test_status_ledger_evidence_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/status_ledger_evidence_gate.py --audit-ledger"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_evidence"
+          ],
+          "evidence": "T5/B enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        }
+      ]
+    },
+    {
+      "task_id": "T6",
+      "task_name": "Proof Kernel v1",
+      "constraint_order": [
+        "H",
+        "B",
+        "F",
+        "E",
+        "G",
+        "D",
+        "A",
+        "C"
+      ],
+      "constraint_trace": [
+        {
+          "constraint": "H",
+          "name": "Chaos & Fault Tolerance",
+          "status": "applied",
+          "files_changed": [
+            "scripts/proof_kernel.py",
+            "tests/test_proof_kernel.py"
+          ],
+          "tests": [
+            "tests/test_proof_kernel.py"
+          ],
+          "commands": [
+            "python3 scripts/proof_kernel.py text-ingest --text fixture"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_source_failure"
+          ],
+          "evidence": "T6/H enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "B",
+          "name": "Continuous State Validation",
+          "status": "applied",
+          "files_changed": [
+            "scripts/proof_kernel.py",
+            "tests/test_proof_kernel.py"
+          ],
+          "tests": [
+            "tests/test_proof_kernel.py"
+          ],
+          "commands": [
+            "python3 scripts/proof_kernel.py text-ingest --text fixture"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_source_failure"
+          ],
+          "evidence": "T6/B enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "F",
+          "name": "Idempotent Infrastructure",
+          "status": "applied",
+          "files_changed": [
+            "scripts/proof_kernel.py",
+            "tests/test_proof_kernel.py"
+          ],
+          "tests": [
+            "tests/test_proof_kernel.py"
+          ],
+          "commands": [
+            "python3 scripts/proof_kernel.py text-ingest --text fixture"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_source_failure"
+          ],
+          "evidence": "T6/F enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "E",
+          "name": "Zero-Trust Hardening",
+          "status": "applied",
+          "files_changed": [
+            "scripts/proof_kernel.py",
+            "tests/test_proof_kernel.py"
+          ],
+          "tests": [
+            "tests/test_proof_kernel.py"
+          ],
+          "commands": [
+            "python3 scripts/proof_kernel.py text-ingest --text fixture"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_source_failure"
+          ],
+          "evidence": "T6/E enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "G",
+          "name": "Deep Telemetry",
+          "status": "applied",
+          "files_changed": [
+            "scripts/proof_kernel.py",
+            "tests/test_proof_kernel.py"
+          ],
+          "tests": [
+            "tests/test_proof_kernel.py"
+          ],
+          "commands": [
+            "python3 scripts/proof_kernel.py text-ingest --text fixture"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_source_failure"
+          ],
+          "evidence": "T6/G enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "D",
+          "name": "Pure Logic Execution",
+          "status": "applied",
+          "files_changed": [
+            "scripts/proof_kernel.py",
+            "tests/test_proof_kernel.py"
+          ],
+          "tests": [
+            "tests/test_proof_kernel.py"
+          ],
+          "commands": [
+            "python3 scripts/proof_kernel.py text-ingest --text fixture"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_source_failure"
+          ],
+          "evidence": "T6/D enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "A",
+          "name": "Declarative Contract Mapping",
+          "status": "applied",
+          "files_changed": [
+            "scripts/proof_kernel.py",
+            "tests/test_proof_kernel.py"
+          ],
+          "tests": [
+            "tests/test_proof_kernel.py"
+          ],
+          "commands": [
+            "python3 scripts/proof_kernel.py text-ingest --text fixture"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_source_failure"
+          ],
+          "evidence": "T6/A enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "C",
+          "name": "Immutable Data Modeling",
+          "status": "applied",
+          "files_changed": [
+            "scripts/proof_kernel.py",
+            "tests/test_proof_kernel.py"
+          ],
+          "tests": [
+            "tests/test_proof_kernel.py"
+          ],
+          "commands": [
+            "python3 scripts/proof_kernel.py text-ingest --text fixture"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "missing_source_failure"
+          ],
+          "evidence": "T6/C enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        }
+      ]
+    },
+    {
+      "task_id": "T7",
+      "task_name": "Dev Order Matrix Enforcement",
+      "constraint_order": [
+        "F",
+        "A",
+        "E",
+        "G",
+        "B",
+        "C",
+        "H",
+        "D"
+      ],
+      "constraint_trace": [
+        {
+          "constraint": "F",
+          "name": "Idempotent Infrastructure",
+          "status": "applied",
+          "files_changed": [
+            "scripts/dev_order_matrix_wrapper.py",
+            "scripts/matrix_trace_checker.py",
+            "scripts/dev_order_gate.py",
+            "scripts/run_dev_order_methodology_checks.py",
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "tests": [
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/dev_order_matrix_wrapper.py --input tests/fixtures/dev_orders/simple_dev_order.txt --output 04_RUNTIME/dev_orders/wrapped/simple_dev_order.wrapped.txt --receipt-out 05_OUTPUTS/dev_order_matrix/wrap_manual_test.json",
+            "python3 scripts/matrix_trace_checker.py --receipt tests/fixtures/matrix_trace/valid_receipt.json",
+            "python3 scripts/dev_order_gate.py --receipt tests/fixtures/matrix_trace/valid_receipt.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "matrix_trace_missing_or_not_array"
+          ],
+          "evidence": "T7/F enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "A",
+          "name": "Declarative Contract Mapping",
+          "status": "applied",
+          "files_changed": [
+            "scripts/dev_order_matrix_wrapper.py",
+            "scripts/matrix_trace_checker.py",
+            "scripts/dev_order_gate.py",
+            "scripts/run_dev_order_methodology_checks.py",
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "tests": [
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/dev_order_matrix_wrapper.py --input tests/fixtures/dev_orders/simple_dev_order.txt --output 04_RUNTIME/dev_orders/wrapped/simple_dev_order.wrapped.txt --receipt-out 05_OUTPUTS/dev_order_matrix/wrap_manual_test.json",
+            "python3 scripts/matrix_trace_checker.py --receipt tests/fixtures/matrix_trace/valid_receipt.json",
+            "python3 scripts/dev_order_gate.py --receipt tests/fixtures/matrix_trace/valid_receipt.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "matrix_trace_missing_or_not_array"
+          ],
+          "evidence": "T7/A enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "E",
+          "name": "Zero-Trust Hardening",
+          "status": "applied",
+          "files_changed": [
+            "scripts/dev_order_matrix_wrapper.py",
+            "scripts/matrix_trace_checker.py",
+            "scripts/dev_order_gate.py",
+            "scripts/run_dev_order_methodology_checks.py",
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "tests": [
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/dev_order_matrix_wrapper.py --input tests/fixtures/dev_orders/simple_dev_order.txt --output 04_RUNTIME/dev_orders/wrapped/simple_dev_order.wrapped.txt --receipt-out 05_OUTPUTS/dev_order_matrix/wrap_manual_test.json",
+            "python3 scripts/matrix_trace_checker.py --receipt tests/fixtures/matrix_trace/valid_receipt.json",
+            "python3 scripts/dev_order_gate.py --receipt tests/fixtures/matrix_trace/valid_receipt.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "matrix_trace_missing_or_not_array"
+          ],
+          "evidence": "T7/E enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "G",
+          "name": "Deep Telemetry",
+          "status": "applied",
+          "files_changed": [
+            "scripts/dev_order_matrix_wrapper.py",
+            "scripts/matrix_trace_checker.py",
+            "scripts/dev_order_gate.py",
+            "scripts/run_dev_order_methodology_checks.py",
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "tests": [
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/dev_order_matrix_wrapper.py --input tests/fixtures/dev_orders/simple_dev_order.txt --output 04_RUNTIME/dev_orders/wrapped/simple_dev_order.wrapped.txt --receipt-out 05_OUTPUTS/dev_order_matrix/wrap_manual_test.json",
+            "python3 scripts/matrix_trace_checker.py --receipt tests/fixtures/matrix_trace/valid_receipt.json",
+            "python3 scripts/dev_order_gate.py --receipt tests/fixtures/matrix_trace/valid_receipt.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "matrix_trace_missing_or_not_array"
+          ],
+          "evidence": "T7/G enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "B",
+          "name": "Continuous State Validation",
+          "status": "applied",
+          "files_changed": [
+            "scripts/dev_order_matrix_wrapper.py",
+            "scripts/matrix_trace_checker.py",
+            "scripts/dev_order_gate.py",
+            "scripts/run_dev_order_methodology_checks.py",
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "tests": [
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/dev_order_matrix_wrapper.py --input tests/fixtures/dev_orders/simple_dev_order.txt --output 04_RUNTIME/dev_orders/wrapped/simple_dev_order.wrapped.txt --receipt-out 05_OUTPUTS/dev_order_matrix/wrap_manual_test.json",
+            "python3 scripts/matrix_trace_checker.py --receipt tests/fixtures/matrix_trace/valid_receipt.json",
+            "python3 scripts/dev_order_gate.py --receipt tests/fixtures/matrix_trace/valid_receipt.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "matrix_trace_missing_or_not_array"
+          ],
+          "evidence": "T7/B enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "C",
+          "name": "Immutable Data Modeling",
+          "status": "applied",
+          "files_changed": [
+            "scripts/dev_order_matrix_wrapper.py",
+            "scripts/matrix_trace_checker.py",
+            "scripts/dev_order_gate.py",
+            "scripts/run_dev_order_methodology_checks.py",
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "tests": [
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/dev_order_matrix_wrapper.py --input tests/fixtures/dev_orders/simple_dev_order.txt --output 04_RUNTIME/dev_orders/wrapped/simple_dev_order.wrapped.txt --receipt-out 05_OUTPUTS/dev_order_matrix/wrap_manual_test.json",
+            "python3 scripts/matrix_trace_checker.py --receipt tests/fixtures/matrix_trace/valid_receipt.json",
+            "python3 scripts/dev_order_gate.py --receipt tests/fixtures/matrix_trace/valid_receipt.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "matrix_trace_missing_or_not_array"
+          ],
+          "evidence": "T7/C enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "H",
+          "name": "Chaos & Fault Tolerance",
+          "status": "applied",
+          "files_changed": [
+            "scripts/dev_order_matrix_wrapper.py",
+            "scripts/matrix_trace_checker.py",
+            "scripts/dev_order_gate.py",
+            "scripts/run_dev_order_methodology_checks.py",
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "tests": [
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/dev_order_matrix_wrapper.py --input tests/fixtures/dev_orders/simple_dev_order.txt --output 04_RUNTIME/dev_orders/wrapped/simple_dev_order.wrapped.txt --receipt-out 05_OUTPUTS/dev_order_matrix/wrap_manual_test.json",
+            "python3 scripts/matrix_trace_checker.py --receipt tests/fixtures/matrix_trace/valid_receipt.json",
+            "python3 scripts/dev_order_gate.py --receipt tests/fixtures/matrix_trace/valid_receipt.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "matrix_trace_missing_or_not_array"
+          ],
+          "evidence": "T7/H enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        },
+        {
+          "constraint": "D",
+          "name": "Pure Logic Execution",
+          "status": "applied",
+          "files_changed": [
+            "scripts/dev_order_matrix_wrapper.py",
+            "scripts/matrix_trace_checker.py",
+            "scripts/dev_order_gate.py",
+            "scripts/run_dev_order_methodology_checks.py",
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "tests": [
+            "tests/test_dev_order_matrix_wrapper.py",
+            "tests/test_matrix_trace_checker.py",
+            "tests/test_dev_order_gate.py"
+          ],
+          "commands": [
+            "python3 scripts/dev_order_matrix_wrapper.py --input tests/fixtures/dev_orders/simple_dev_order.txt --output 04_RUNTIME/dev_orders/wrapped/simple_dev_order.wrapped.txt --receipt-out 05_OUTPUTS/dev_order_matrix/wrap_manual_test.json",
+            "python3 scripts/matrix_trace_checker.py --receipt tests/fixtures/matrix_trace/valid_receipt.json",
+            "python3 scripts/dev_order_gate.py --receipt tests/fixtures/matrix_trace/valid_receipt.json"
+          ],
+          "receipt_fields": [
+            "matrix_trace",
+            "verdict",
+            "blockers",
+            "canonical_graph_writes"
+          ],
+          "failure_conditions": [
+            "matrix_trace_missing_or_not_array"
+          ],
+          "evidence": "T7/D enforced by code, tests, receipts, and gate command",
+          "blocker": null
+        }
+      ]
+    }
+  ],
+  "commands_run": [
+    {
+      "command": "python3 scripts/run_dev_order_methodology_checks.py",
+      "rc": 0,
+      "result": "PASS"
+    }
+  ],
+  "files_changed": [
+    "06_SCHEMA/dev_order_matrix_policy.v1.json",
+    "scripts/dev_order_matrix_wrapper.py",
+    "scripts/matrix_trace_checker.py",
+    "scripts/dev_order_gate.py",
+    "scripts/run_dev_order_methodology_checks.py",
+    "tests/test_dev_order_matrix_wrapper.py",
+    "tests/test_matrix_trace_checker.py",
+    "tests/test_dev_order_gate.py"
+  ],
+  "receipts_written": [
+    "05_OUTPUTS/dev_order_matrix/dev_order_methodology_example.json"
+  ],
+  "canonical_graph_materialization": false,
+  "canonical_graph_writes": false,
+  "canonical_graph_writes_performed": false,
+  "blockers": []
+}

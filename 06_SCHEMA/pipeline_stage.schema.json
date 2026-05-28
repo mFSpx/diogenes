@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LucidotaPipelineStageContract",
+  "type": "object",
+  "required": ["stage_name", "component_name", "input_schema", "output_schema", "receipt_type"],
+  "properties": {
+    "stage_name": {"type": "string", "minLength": 1},
+    "component_name": {"type": "string", "minLength": 1},
+    "input_schema": {"type": "object"},
+    "output_schema": {"type": "object"},
+    "receipt_type": {"type": "string", "minLength": 1}
+  }
+}
