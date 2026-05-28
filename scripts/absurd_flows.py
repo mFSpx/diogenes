@@ -252,6 +252,35 @@ def record_learning_run(conn: Any, payload: dict[str, Any], *, status: str = "su
             json.dumps(detail, sort_keys=True),
         ),
     )
+    examples = int(payload.get("file_count", 0))
+    successes = int(payload.get("processed_count", 0))
+    failures = int(payload.get("deduped_count", 0)) + int(payload.get("db_skipped_count", 0))
+    success_rate = (successes / examples) if examples else 0.0
+    conn.execute(
+        """
+        INSERT INTO lucidota_learning.river_score(source, phase, decision, examples, successes, failures, success_rate, river_prediction, model_kind)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (source, phase, decision) DO UPDATE SET
+            examples = EXCLUDED.examples,
+            successes = EXCLUDED.successes,
+            failures = EXCLUDED.failures,
+            success_rate = EXCLUDED.success_rate,
+            river_prediction = EXCLUDED.river_prediction,
+            model_kind = EXCLUDED.model_kind,
+            updated_at = now()
+        """,
+        (
+            "absurd_flows",
+            "krampuschew",
+            "batch_size_final",
+            examples,
+            successes,
+            failures,
+            success_rate,
+            float(payload.get("batch_size_final", 0) or 0),
+            "river_online_batch_size_heuristic",
+        ),
+    )
 
 
 def existing_sha256(conn: Any, sha_values: list[str]) -> set[str]:

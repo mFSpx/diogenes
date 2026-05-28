@@ -3,12 +3,12 @@
 "Save This Prompt, Pass on this Handoff:"
 
 - Goal: RESOURCE_GOVERNED_CAPABILITY_BUILD
-- Generated: `2026-05-28T07:39:19Z`
-- Current step: 2/3
+- Generated: `2026-05-28T07:55:00Z`
+- Current step: 3/3
 - Status: active
 - Objective: Execute capability factory + DIOGENES/system-become under hard resource governance; Codex steers, deterministic/local/Groq workers chew, every PID owned, learn from failures, avoid thrash/OOM, and back up safely.
-- Completed: Committed the governance and capability-pack work, pushed a fresh sanitized GitHub branch, applied the absurd-flow views, and spawned the Phase 1 edge dedupe worker under the resource governor; the worker is still chewing.
-- Next action: Wait for Phase 1 receipts, then continue bounded absurd-flow batches and report the deltas without touching huge history.
-- Resume command: `GIT_SSH_COMMAND='ssh -i ~/.ssh/lucidota_github_deploy_20260528_ed25519 -o IdentitiesOnly=yes' git push git@github.com:mFSpx/diogenes.git HEAD:refs/heads/lucidota-moon-push-20260528T0740Z && .venv/bin/python scripts/resource_governor.py spawn --execute --wait --json --owner moon_push_phase1 --purpose 'Edge cryptographic deduplication of legacy corpus' --requested-workers 1 --max-workers 1 --max-memory-mb 1024 --max-cpu-percent 60 --kill-policy bounded bash scripts/phase1_edge_dedupe.sh 09_STORAGE/krampuschewing_unpacked`
+- Completed: Phase 1 edge dedupe remains fully measured at 160,904 files / 105,257 unique hashes / 55,647 duplicates. The absurd_flows deterministic pipeline now records both river_run and river_score learning rows, the resume cursor advances correctly, and governed batches are making real forward progress: the latest 20-file batch processed 19 unique artifacts and updated the batch-size heuristic to a 0.950 success rate. The governor spawn wait path remains fixed and tested.
+- Next action: Keep advancing the cursor in bounded governed batches until the remaining corpus is exhausted or a real blocker appears; continue updating learning telemetry from runtime receipts.
+- Resume command: `Run absurd_flows under the resource governor with the current cursor and inspect the latest river_score row.`
 
-Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the bag is secured, the deterministic chew is hot, and the governor owns the worker PID. Tiny cryptid note: the moon-push grinder started to hum.
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the chew is no longer orbiting the same file stump; it is walking the corpus and learning as it goes. Tiny cryptid note: the batch goblin got a promotion and a scorecard.

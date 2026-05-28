@@ -44,8 +44,7 @@ def test_record_learning_run_emits_river_run_sql() -> None:
 
     class FakeConn:
         def execute(self, sql, params):
-            captured["sql"] = sql
-            captured["params"] = params
+            captured.setdefault("calls", []).append((sql, params))
 
     af.record_learning_run(
         FakeConn(),
@@ -61,10 +60,14 @@ def test_record_learning_run_emits_river_run_sql() -> None:
             "records": [{"source_path": "a", "db_action": "inserted", "file_kind": "text"}],
         },
     )
-    assert "INSERT INTO lucidota_learning.river_run" in captured["sql"]
-    assert captured["params"][0] == "succeeded"
-    assert captured["params"][1] == 3
-    assert captured["params"][2] == 2
+    assert "INSERT INTO lucidota_learning.river_run" in captured["calls"][0][0]
+    assert captured["calls"][0][1][0] == "succeeded"
+    assert captured["calls"][0][1][1] == 3
+    assert captured["calls"][0][1][2] == 2
+    assert "INSERT INTO lucidota_learning.river_score" in captured["calls"][1][0]
+    assert captured["calls"][1][1][0] == "absurd_flows"
+    assert captured["calls"][1][1][1] == "krampuschew"
+    assert captured["calls"][1][1][2] == "batch_size_final"
 
 
 def test_phase1_edge_dedupe_script_dedupes_hashes(tmp_path) -> None:

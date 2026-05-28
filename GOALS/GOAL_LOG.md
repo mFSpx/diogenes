@@ -3737,3 +3737,79 @@ Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: 
 - Resume command: `GIT_SSH_COMMAND='ssh -i ~/.ssh/lucidota_github_deploy_20260528_ed25519 -o IdentitiesOnly=yes' git push git@github.com:mFSpx/diogenes.git HEAD:refs/heads/lucidota-moon-push-20260528T0740Z && .venv/bin/python scripts/resource_governor.py spawn --execute --wait --json --owner moon_push_phase1 --purpose 'Edge cryptographic deduplication of legacy corpus' --requested-workers 1 --max-workers 1 --max-memory-mb 1024 --max-cpu-percent 60 --kill-policy bounded bash scripts/phase1_edge_dedupe.sh 09_STORAGE/krampuschewing_unpacked`
 
 Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the bag is secured, the deterministic chew is hot, and the governor owns the worker PID. Tiny cryptid note: the moon-push grinder started to hum.
+
+---
+
+## Step 3/3 — Report capture while Phase 1 chews
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RESOURCE_GOVERNED_CAPABILITY_BUILD
+- Generated: `2026-05-28T07:40:10Z`
+- Current step: 3/3
+- Status: active
+- Objective: Execute capability factory + DIOGENES/system-become under hard resource governance; Codex steers, deterministic/local/Groq workers chew, every PID owned, learn from failures, avoid thrash/OOM, and back up safely.
+- Completed: The deterministic stack is in motion: capability-pack registration is live in Postgres, absurd-flow views are applied, the sanitized GitHub branch was pushed and verified, and the Phase 1 edge-dedupe worker is owned by the resource governor and still chewing.
+- Next action: Wait for the Phase 1 mapping/receipt to settle, then continue bounded absurd-flow batches or finalize the moon-push report with the new receipt hashes.
+- Resume command: `ps -p 372758 -o pid=,etime=,cmd= && GIT_SSH_COMMAND='ssh -i ~/.ssh/lucidota_github_deploy_20260528_ed25519 -o IdentitiesOnly=yes' git ls-remote git@github.com:mFSpx/diogenes.git refs/heads/lucidota-moon-push-20260528T0740Z && .venv/bin/python scripts/resource_governor.py spawn --execute --wait --json --owner moon_push_phase1 --purpose 'Edge cryptographic deduplication of legacy corpus' --requested-workers 1 --max-workers 1 --max-memory-mb 1024 --max-cpu-percent 60 --kill-policy bounded bash scripts/phase1_edge_dedupe.sh 09_STORAGE/krampuschewing_unpacked`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the win is saved, the worker is alive, and the remaining work is now receipt waiting rather than invention. Tiny cryptid note: the grinder is warm and the ledger is catching up.
+
+---
+
+## Step 3/3 — Deterministic chew receipts and governor repair
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RESOURCE_GOVERNED_CAPABILITY_BUILD
+- Generated: `2026-05-28T07:45:26Z`
+- Current step: 3/3
+- Status: active
+- Objective: Execute capability factory + DIOGENES/system-become under hard resource governance; Codex steers, deterministic/local/Groq workers chew, every PID owned, learn from failures, avoid thrash/OOM, and back up safely.
+- Completed: Phase 1 edge dedupe finished a 160,904-file scan with 105,257 unique hashes and 55,647 exact duplicates; absurd_flows executed two governed batches against 09_STORAGE/krampuschewing_unpacked, inserting 20 new artifacts and then skipping 10 already-ingested files; resource_governor spawn bug was fixed and covered by tests; the sanitized GitHub moon-push branch remains verified.
+- Next action: Continue bounded absurd-flow batches until the corpus is finished or a real blocker appears; keep the governor authoritative and do not touch the huge-history push path.
+- Resume command: `latest=$(ls -1t 05_OUTPUTS/runtime/absurd_flows_*.json | head -n 1); jq '{processed_count,deduped_count,batch_size_final,receipt_path}' "" && latest=$(ls -1t 05_OUTPUTS/runtime/phase1_edge_dedupe_*.json | head -n 1); jq '{total_files,unique_hashes,deduped_files,mapping_path}' "" && .venv/bin/python scripts/resource_governor.py spawn --execute --wait --json --owner moon_push_absurd_flows --purpose 'Deterministic hash/copy/dedupe and artifact registration for legacy corpus' --requested-workers 1 --max-workers 1 --max-memory-mb 1024 --max-cpu-percent 60 --kill-policy bounded bash -lc '.venv/bin/python scripts/absurd_flows.py --root 09_STORAGE/krampuschewing_unpacked --max-files 10 --chunk-size 4 --execute --database-url postgresql:///lucidota_state --json'`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: receipts now prove the machine is doing math, not vibes. Tiny cryptid note: the dedupe goblin counted 55,647 duplicates and stayed in its cage.
+
+---
+
+## Step 3/3 — Deterministic chew receipts and governor repair
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RESOURCE_GOVERNED_CAPABILITY_BUILD
+- Generated: `2026-05-28T07:50:07Z`
+- Current step: 3/3
+- Status: active
+- Objective: Execute capability factory + DIOGENES/system-become under hard resource governance; Codex steers, deterministic/local/Groq workers chew, every PID owned, learn from failures, avoid thrash/OOM, and back up safely.
+- Completed: Phase 1 edge dedupe is fully measured at 160,904 files / 105,257 unique hashes / 55,647 duplicates. The absurd_flows deterministic pipeline now records learning runs into lucidota_learning.river_run, the resume cursor is normalized, and governed batch loops are advancing through 09_STORAGE/krampuschewing_unpacked with receipts even when a page is all duplicates. The governor spawn wait bug was fixed and tested.
+- Next action: Keep advancing the cursor in bounded governed batches until fresh unique files or the next real blocker appears; continue updating learning telemetry from runtime receipts.
+- Resume command: `bounded governor batch loop over absurd_flows using normalized cursor`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the chew finally has a real cursor, and the machine is remembering its runtimes instead of just chewing the same doorframe. Tiny cryptid note: the dedupe goblin learned how to walk forward.
+
+---
+
+## Step 3/3 — Deterministic chew receipts and governor repair
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RESOURCE_GOVERNED_CAPABILITY_BUILD
+- Generated: `2026-05-28T07:55:00Z`
+- Current step: 3/3
+- Status: active
+- Objective: Execute capability factory + DIOGENES/system-become under hard resource governance; Codex steers, deterministic/local/Groq workers chew, every PID owned, learn from failures, avoid thrash/OOM, and back up safely.
+- Completed: Phase 1 edge dedupe remains fully measured at 160,904 files / 105,257 unique hashes / 55,647 duplicates. The absurd_flows deterministic pipeline now records both river_run and river_score learning rows, the resume cursor advances correctly, and governed batches are making real forward progress: the latest 20-file batch processed 19 unique artifacts and updated the batch-size heuristic to a 0.950 success rate. The governor spawn wait path remains fixed and tested.
+- Next action: Keep advancing the cursor in bounded governed batches until the remaining corpus is exhausted or a real blocker appears; continue updating learning telemetry from runtime receipts.
+- Resume command: `Run absurd_flows under the resource governor with the current cursor and inspect the latest river_score row.`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the chew is no longer orbiting the same file stump; it is walking the corpus and learning as it goes. Tiny cryptid note: the batch goblin got a promotion and a scorecard.
