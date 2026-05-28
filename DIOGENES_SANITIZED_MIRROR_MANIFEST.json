@@ -1,32 +1,7 @@
 {
-  "branch": "lucidota-sanitized-backup-20260528T072505Z",
-  "excluded_classes": [
-    "git_history",
-    "01_REPOS",
-    "03_VAULT",
-    "04_RUNTIME",
-    "05_OUTPUTS",
-    "09_STORAGE",
-    "KRAMPUSCHEWING",
-    "BOOKS",
-    "scripts/03_VAULT",
-    "archives",
-    "model_weights",
-    "db_dumps",
-    "secrets"
-  ],
-  "file_count": 1459,
-  "generated_at": "2026-05-28T07:25:05Z",
+  "file_count": 1460,
+  "includes_cycle_report": true,
   "large_files_over_20mb": [],
-  "resource_governor_files": [
-    "scripts/resource_governor.py",
-    "tests/test_resource_governor.py",
-    "06_SCHEMA/122_resource_governor.sql",
-    "scripts/apply_lucidota_control_schema.sh"
-  ],
-  "schema": "lucidota.diogenes_sanitized_mirror_manifest.v1",
-  "source_dirty": true,
-  "source_head": "0f1cb093f827860a6a685575472455c8e588732f",
-  "source_root": "/home/mfspx/LUCIDOTA",
-  "total_bytes": 35186785
+  "total_bytes": 35192790,
+  "updated_at": "2026-05-28T07:26:48Z"
 }
