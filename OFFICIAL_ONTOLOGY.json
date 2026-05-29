@@ -1,8 +1,14 @@
 {
+  "system": "DIOGENES/LUCIDOTA",
+  "official_ontology": "GO-25",
   "active_ontology_name": "Global Ontology",
   "active_ontology_short": "GO",
   "active_storage_namespace": "lucidota_go",
-  "active_term_count_with_extensions": 48,
+  "version": "1.0",
+  "locked_at": "2026-05-29",
+  "locked_by": "operator",
+  "term_count": 25,
+  "extension_terms": "NONE — GO-25 only. Complexity via ternary state, not term proliferation.",
   "active_terms": [
     "ENTITY",
     "ATTRIBUTE",
@@ -30,62 +36,23 @@
     "MODE",
     "COMMENT"
   ],
-  "active_terms_file": "/home/mfspx/LUCIDOTA/BOOKS/GO_ACTIVE_TERMS.json",
-  "approval_policy": "operator may approve single items or batches",
-  "archived_ontology": {
-    "name": "ROOT-414",
-    "path": "/home/mfspx/Documents/ROOT_414/00_PROJECT_BRAIN/414_PRIMITIVE_CRIES",
-    "rule": "Do not use as active system ontology unless explicitly reactivated. Historical artifacts are preserved outside the active LUCIDOTA repo tree.",
-    "status": "archived_reference_storage_externalized"
-  },
-  "canonical_human_readme": "README.md",
+  "core_sentence": "ENTITY has ATTRIBUTE; ENTITY has RELATIONSHIP to ENTITY; ACTION is taken; EVENT happens over TIME; EVIDENCE supports CLAIM; CLAIM forms HYPOTHESIS; OPERATOR selects working reality under MODE; SIGNAL reveals PATTERN; GLOW is observer-specific; VISIBILITY is public; TOOL runs ALGORITHM via OPERATOR under MODE; COMMENT stores judgment; NAUGHTY/NICE mark ternary judgment state.",
+  "ternary_doctrine": "All complexity is expressed via ternary state on these 25 terms. No new terms. A CLAIM is +1 (supported), 0 (unknown), -1 (refuted). A SIGNAL is +1 (glow), 0 (noise), -1 (threat). NAUGHTY/NICE are the mythic poles of the same ternary axis. The ontology does not grow — the state space does.",
   "compressed_dashboard": {
-    "BLOOM": "VISIBILITY/GLOW",
-    "CLOCK": "TIME",
-    "HEAT": "FRICTION plus NAUGHTY/NICE when mythic mode is active",
+    "TARGETS": "ENTITY",
+    "INTEL": "ATTRIBUTE + EVIDENCE + SIGNAL",
     "HOOKS": "RELATIONSHIP",
-    "INTEL": "ATTRIBUTE/EVIDENCE/SIGNAL",
+    "PLAYS": "ACTION + EVENT + CLAIM",
+    "CLOCK": "TIME",
+    "BLOOM": "VISIBILITY + GLOW",
     "JUICE": "LEVERAGE",
-    "PLAYS": "ACTION/EVENT/CLAIM",
-    "TARGETS": "ENTITY"
+    "HEAT": "FRICTION + NAUGHTY/NICE"
   },
-  "core_sentence": "ENTITY has ATTRIBUTE; ENTITY has RELATIONSHIP to ENTITY; ACTION is taken; EVENT happens over TIME; EVIDENCE supports CLAIM; CLAIM forms HYPOTHESIS; OPERATOR selects WORKING_REALITY under MODE; CONTRADICTION is preserved as EVIDENCE; SIGNAL reveals PATTERN; GLOW is observer-specific; VISIBILITY is public; TOOL runs ALGORITHM via OPERATOR under MODE; COMMENT stores judgment; NAUGHTY/NICE mark mythic judgment state; REALITY remains beyond full system possession.",
-  "documentation_policy": "one README only for human doctrine; active references must be JSON/SQL/code, with old MD historical only",
-  "effective_date": "2026-05-14",
-  "evidence_policy": "approved CLAIM requires proof/evidence note; HYPOTHESIS may be inferred with confidence; WORKING_REALITY is operator-selected for action, not truth; CONTRADICTION must be preserved; maps valid as scoped maps",
-  "extension_terms": [
-    "CLUE",
-    "BOOK",
-    "HUNCH",
-    "LEAD",
-    "SOURCE",
-    "WITNESS",
-    "THREAT",
-    "RUMOUR",
-    "LOCATION",
-    "LOSE",
-    "FIND",
-    "ANOMALY",
-    "STORY",
-    "IDEAL",
-    "LORE",
-    "LICENSE",
-    "REGULATOR",
-    "GOVERNMENT",
-    "LAW",
-    "RULE",
-    "REALITY",
-    "WORKING_REALITY",
-    "CONTRADICTION"
-  ],
-  "grading_schema_path": "/home/mfspx/LUCIDOTA/BOOKS/GO_GAME_GRADING_SCHEMA.json",
+  "graph_sql_schema": "06_SCHEMA/016_go_graph_core.sql",
+  "graph_item_schema": "BOOKS/GO_GRAPH_ITEM_ENVELOPE.schema.json",
   "graph_edge_schema": "BOOKS/GO_GRAPH_EDGE_ENVELOPE.schema.json",
   "graph_identity_rules": "BOOKS/GO_GRAPH_IDENTITY_VERSIONING_RULES.json",
-  "graph_item_schema": "BOOKS/GO_GRAPH_ITEM_ENVELOPE.schema.json",
-  "graph_shape": "multiple layered maps with universal UUID custody envelopes",
-  "graph_sql_schema": "06_SCHEMA/016_go_graph_core.sql",
   "graph_storage_rules": "BOOKS/GO_GRAPH_STORAGE_PROMOTION_RULES.json",
-  "indy_reads_graph_policy": "no automatic graph promotion; game rows remain CSV/staging unless explicitly promoted by operator",
   "initial_graph_layers": [
     "digital_world",
     "physical_world",
@@ -99,63 +66,41 @@
     "glow",
     "map"
   ],
-  "main_ai_persona": {
-    "adapter_registry": "04_RUNTIME/indy_reads_adapter_registry.json",
-    "config": "04_RUNTIME/indy_reads_persona_config.json",
-    "graph_policy": "no automatic promotion; explicit operator promotion only",
-    "id": "INDY_READs",
-    "pronouns": "she/her"
-  },
-  "official_ontology": "GO-25",
   "ontology_humility_contract": {
-    "canon": "00_PROJECT_BRAIN/ACTIVE_SPEC/07_WORKING_REALITY_LAW.md",
-    "layer_order": [
-      "REALITY",
-      "EVIDENCE",
-      "HYPOTHESIS",
-      "WORKING_REALITY"
-    ],
     "ontology_is_truth": false,
     "ontology_role": "structured_hypothesis_ecology",
     "operator_role": "abductive_chooser_of_working_reality_under_receipt_discipline",
     "rejected_hypotheses_preserved": true,
-    "runtime_recorder": "scripts/working_reality_record.py",
-    "runtime_schema": "06_SCHEMA/117_working_reality_law.sql",
-    "truth_role": "reality_test_target_not_fully_possessed_by_system",
-    "working_reality_requires": [
-      "evidence",
-      "hypothesis",
-      "working_reality",
-      "move",
-      "result",
-      "record_for_future"
-    ]
+    "canon": "00_PROJECT_BRAIN/ACTIVE_SPEC/07_WORKING_REALITY_LAW.md"
   },
   "postgres_plan": {
-    "bootstrap_command": "scripts/lucidota_go_ingest.py bootstrap-dbs",
-    "init_storage_command": "scripts/lucidota_go_ingest.py init",
-    "status": "postgres_now",
-    "surfaces": {
-      "state": {
-        "database": "lucidota_state",
-        "default_dsn": "postgresql:///lucidota_state",
-        "dsn_env": "LUCIDOTA_GO_STATE_DSN",
-        "purpose": "workflow/runtime/control state",
-        "write_rule": "no graph/vault/evidence truth lives here"
-      },
-      "storage": {
-        "database": "lucidota_storage",
-        "default_dsn": "postgresql:///lucidota_storage",
-        "dsn_env": "LUCIDOTA_GO_STORAGE_DSN",
-        "purpose": "graph/vault/evidence storage",
-        "schema": "lucidota_go",
-        "write_rule": "GO graph items, edges, layers, staging packets, and journals live here"
-      }
+    "state": {
+      "database": "lucidota_state",
+      "dsn_env": "LUCIDOTA_GO_STATE_DSN",
+      "default_dsn": "postgresql:///lucidota_state",
+      "purpose": "workflow/runtime/control state",
+      "write_rule": "no graph truth lives here"
+    },
+    "storage": {
+      "database": "lucidota_storage",
+      "dsn_env": "LUCIDOTA_GO_STORAGE_DSN",
+      "default_dsn": "postgresql:///lucidota_storage",
+      "purpose": "graph items, edges, layers, staging, journals",
+      "schema": "lucidota_go"
     }
   },
-  "schema_path": "/home/mfspx/LUCIDOTA/BOOKS/GO_ONTOLOGY_SCHEMA.json",
+  "archived_ontology": {
+    "name": "ROOT-414",
+    "status": "archived_reference_storage_externalized",
+    "rule": "Do not reactivate unless explicit operator order."
+  },
+  "approval_policy": "operator approves single items or batches",
   "staging_policy": "all parser outputs stage until operator removes HITL requirement",
-  "status": "active_official",
-  "system": "DIOGENES/LUCIDOTA",
-  "version": "0.1"
+  "documentation_policy": "one README for human doctrine; active references are JSON/SQL/code only",
+  "main_ai_persona": {
+    "id": "INDY_READs",
+    "pronouns": "she/her",
+    "graph_policy": "no automatic promotion; explicit operator promotion only",
+    "config": "04_RUNTIME/indy_reads_persona_config.json"
+  }
 }

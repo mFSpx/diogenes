@@ -77,7 +77,7 @@ export LD_LIBRARY_PATH="/usr/local/lib/ollama/cuda_v12${LD_LIBRARY_PATH:+:$LD_LI
 # LUCIDOTA venv: activate so all scripts get psycopg, river, bytewax, etc.
 # Safe to source multiple times; skip if already active.
 _LUCIDOTA_VENV="/home/mfspx/LUCIDOTA/.venv"
-if [[ "${VIRTUAL_ENV}" != "${_LUCIDOTA_VENV}" ]] && [[ -f "${_LUCIDOTA_VENV}/bin/activate" ]]; then
+if [[ "${VIRTUAL_ENV:-}" != "${_LUCIDOTA_VENV}" ]] && [[ -f "${_LUCIDOTA_VENV}/bin/activate" ]]; then
   source "${_LUCIDOTA_VENV}/bin/activate"
 fi
 unset _LUCIDOTA_VENV
