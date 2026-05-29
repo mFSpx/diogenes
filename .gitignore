@@ -35,10 +35,12 @@ auth/
 # Runtime/state/vault material is local unless promoted deliberately.
 /03_VAULT/*
 !/03_VAULT/README.md
+!/03_VAULT/router/
 /04_RUNTIME/*
 !/04_RUNTIME/README.md
 /05_OUTPUTS/*
 !/05_OUTPUTS/README.md
+!/05_OUTPUTS/treelite/
 !DIOGENES_EXPORT_MANIFEST.md
 !DIOGENES_RESTORE.md
 
@@ -141,7 +143,8 @@ scripts/cases/
 
 # LLxprt/agent startup performance: bulk proof-hoard storage is indexed via TICKLETRUNK, not crawled recursively.
 /09_STORAGE/
-/KRAMPUSCHEWING/
+/KRAMPUSCHEWING/*
+!/KRAMPUSCHEWING/Paused_AHOY/
 /BOOKS/
 /01_REPOS/
 !/01_REPOS/README.md
