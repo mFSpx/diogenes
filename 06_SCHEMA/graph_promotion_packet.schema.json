@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"GraphPromotionPacket","type":"object","required":["packet_id","staging_ref","authority_class","evidence_refs","decision","canonical_mutation_allowed"],"properties":{"decision":{"enum":["DRY_RUN","REJECTED","APPROVED"]},"canonical_mutation_allowed":{"type":"boolean"}}}

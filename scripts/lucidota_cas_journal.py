@@ -5,7 +5,7 @@ This is the filesystem half of dual-write recovery: if bytes land but the DB
 metadata commit dies, the ignored journal gives the reconciler source context.
 """
 from __future__ import annotations
-import argparse, json, time
+import argparse, json, os, sys, time
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -19,18 +19,19 @@ def append_record(record: dict, journal: Path = DEFAULT_JOURNAL) -> None:
         fh.write(json.dumps(payload, sort_keys=True)+'\n')
         fh.flush()
         try:
-            import os
             os.fsync(fh.fileno())
-        except OSError:
-            pass
+        except OSError as exc:
+            print(f"cas journal fsync warning: {exc}", file=sys.stderr)
 
 
 def load_records(journal: Path = DEFAULT_JOURNAL) -> list[dict]:
     if not journal.exists(): return []
     out=[]
     for line in journal.read_text(errors='ignore').splitlines():
-        try: out.append(json.loads(line))
-        except json.JSONDecodeError: pass
+        try:
+            out.append(json.loads(line))
+        except json.JSONDecodeError as exc:
+            print(f"cas journal corrupt line skipped: {exc}", file=sys.stderr)
     return out
 
 

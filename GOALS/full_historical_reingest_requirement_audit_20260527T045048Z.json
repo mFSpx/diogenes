@@ -1,0 +1,193 @@
+{
+  "checks": {
+    "audit_db_pass": true,
+    "chrono_lane_projection_candidates_staged": true,
+    "chrono_timeline_projection_refreshed": true,
+    "claim_chain_pass": true,
+    "conservation_verify_pass": true,
+    "cursor_pass": true,
+    "deterministic_not_model_zero_docs": true,
+    "full_conservation_pass": true,
+    "full_reingest_all_rows_recovered": true,
+    "full_reingest_no_purge_no_graph_write": true,
+    "graph_scan_pass_no_canonical_materialization": true,
+    "llm_lanes_encoded_in_router": true,
+    "llm_underuse_red_team_present": true,
+    "phase_c_conservation_verified": true,
+    "projection_claims_pass": true,
+    "source_audit_pass": true,
+    "source_trust_pass": true,
+    "swarm_integration_pass": true
+  },
+  "completion_claimed": false,
+  "generated_at": "2026-05-27T04:50:48.162741Z",
+  "goal_complete": false,
+  "known_gaps_to_full_completion": [
+    "canonical_graph_materialization_not_executed; candidates_staged_pending_explicit_operator_materialization_authorization_and_policy_change",
+    "operator_declared_over_4h_error_free_completion_criterion_not_satisfied_in_this_active_goal_window",
+    "router_cost_awareness_is_policy_scored_not_live_pricing_ingested"
+  ],
+  "missing_receipts": [],
+  "receipts": {
+    "audit_db": {
+      "path": "05_OUTPUTS/chrono_ledger/chrono_audit_db_report_pass_20260527T044605321063Z.json",
+      "sha256": "291d0d0e42f84998375bcf4b4b6957814c14b62b0b8b320a8e9a7817185a8ee5",
+      "status": "PASS",
+      "verdict": null
+    },
+    "claim_chain": {
+      "path": "05_OUTPUTS/chrono_ledger/chrono_claim_chain_replay_audit_gate_20260527T044610190919Z.json",
+      "sha256": "4baf702d188203c4a6562f8305ac0737aca4a1fa968b6bc73601a131bf8bb7c7",
+      "status": "PASS",
+      "verdict": null
+    },
+    "conservation_verify": {
+      "path": "05_OUTPUTS/chrono_ledger/chrono_conservation_verify_pass_20260527T044610969391Z.json",
+      "sha256": "8d6a495c328b04f387afe479c6801d51643123960aebea3c1b51c82b563db0b3",
+      "status": "PASS",
+      "verdict": null
+    },
+    "cursor": {
+      "path": "05_OUTPUTS/chrono_ledger/chrono_replay_cursor_validator_pass_20260527T044605946723Z.json",
+      "sha256": "e5f6b00c8f7359c9e56a21bb48dccc90d00076cb4e088b8cc4da17574eb27ca6",
+      "status": "PASS",
+      "verdict": null
+    },
+    "full_conservation": {
+      "path": "05_OUTPUTS/chrono_ledger/chrono_full_conservation_gate_20260527T044607678898Z.json",
+      "sha256": "8fb9cc9d132c709dffff7a6744573c7061c339a9b0c08ed7bec1ce0e4348e79a",
+      "status": "PASS",
+      "verdict": null
+    },
+    "full_reingest": {
+      "metrics": {
+        "accepted_total": 102778,
+        "canonical_graph_writes_performed": false,
+        "db_writes_performed": false,
+        "graph_blocker_count": 0,
+        "graph_mutation_candidates_total": 102778,
+        "graph_writes_performed": false,
+        "inventory_batch_count": 415,
+        "ledger_entries": 415,
+        "ledger_row_count": 102778,
+        "purge_or_destroy_count": 0,
+        "recovered_total": 102778,
+        "write_violation_count": 0
+      },
+      "path": "05_OUTPUTS/bitloops/full_reingest_batches/20260527T041930Z/full_existing_index_reingest_summary.json",
+      "sha256": "2d5718b6a6256719ff9de55144c8ef795b4014c065512b30f0bc5cd894d31671",
+      "status": "PASS",
+      "verdict": null
+    },
+    "graph_scan": {
+      "metrics": {
+        "blockers": [],
+        "canonical_graph_materialization": false,
+        "canonical_graph_writes_performed": false,
+        "verdict": "PASS"
+      },
+      "path": "05_OUTPUTS/swarm_submissions/canonical_graph_write_scan_integrated_swarm.json",
+      "sha256": "a9570a9f752ab18b7b84bce01b133abab96e04c8eb6eaed43bf6496a358640e4",
+      "status": null,
+      "verdict": "PASS"
+    },
+    "lane_execute": {
+      "lane_counts": {
+        "LANE_ARTIFACT_CUSTODY": 16817,
+        "LANE_CASE_EVENT": 5887,
+        "LANE_SYSTEM_RUNTIME": 21218
+      },
+      "metrics": {
+        "batch_clusters_upserted": 15,
+        "blocked_candidates_upserted": null,
+        "blockers": [],
+        "claims_normalized": 43922,
+        "claims_seen": 43922,
+        "db_writes_performed": true,
+        "file_projection_rows_upserted": 18627,
+        "graph_writes_performed": false,
+        "promotion_candidates_upserted": 18627
+      },
+      "path": "05_OUTPUTS/chrono_ledger/chrono_lane_split_projection_gate_execute_20260527T044231330273Z.json",
+      "sha256": "e43bab7a9caf8a573a09b0cbbd5323abb59ded463ef1d60ad5b47ca73aea0178",
+      "status": "PASS",
+      "verdict": null
+    },
+    "phase_c": {
+      "metrics": {
+        "claims_without_file_uuid": 711,
+        "file_scope_claims_without_file_uuid": 0,
+        "ranking_result_count": 18627,
+        "ranking_violations": 0,
+        "runtime_event_claims_without_file_uuid": 711,
+        "temporal_conservation_passed": true,
+        "total_claims": 43922,
+        "total_files_covered": 18627
+      },
+      "path": "05_OUTPUTS/chrono_ledger/chrono_ledger_phase_c_report_20260527T044552Z.json",
+      "sha256": "1ffc0ab93a0f19769c74e146bc9ec6131476b152c4a27a3e2942d2d962f9767c",
+      "status": "verified",
+      "verdict": null
+    },
+    "projection_claims": {
+      "path": "05_OUTPUTS/chrono_ledger/chrono_projection_claim_verifier_20260527T044605525735Z.json",
+      "sha256": "0a47220ea6415da692ddeab517541ccd223059208cf454043ca6cb806877f3ee",
+      "status": "PASS",
+      "verdict": null
+    },
+    "source_audit": {
+      "path": "05_OUTPUTS/chrono_ledger/chrono_conservation_verify_source_audit_pass_20260527T044611715874Z.json",
+      "sha256": "c04bee31f92b3cbb49ea15e1459c20064e212ed068e161b8cbed98d6004b4e13",
+      "status": "PASS",
+      "verdict": null
+    },
+    "source_trust": {
+      "path": "05_OUTPUTS/chrono_ledger/chrono_source_trust_validator_pass_20260527T044605705510Z.json",
+      "sha256": "5c08d61bd3301d2dc7650923e68dae98ea833c634ee91f52735ecbb46fac8744",
+      "status": "PASS",
+      "verdict": null
+    },
+    "swarm_integration": {
+      "metrics": {
+        "integrated_scripts": {
+          "red_team_suite": "scripts/bitloops_red_team_suite.py",
+          "swarm_router": "scripts/lucidota_swarm_router.py",
+          "ui_dashboard": "scripts/lucidota_swarm_dashboard.py"
+        },
+        "slop_audit_verdict": "REVIEW_WITHOUT_BLOCKERS"
+      },
+      "path": "05_OUTPUTS/swarm_submissions/swarm_integration_receipt_20260527T043940Z.json",
+      "sha256": "9036942ab6f5e3b544c8b4d6b386fef129cbcbbe532a74b6da97f682610009d2",
+      "status": "PASS",
+      "verdict": null
+    },
+    "timeline_projection_refresh": {
+      "metrics": {
+        "broken_claim_links": 0,
+        "db_writes_performed": true,
+        "graph_writes_performed": false,
+        "ranking_violations": 0,
+        "refreshed_rows": 18627,
+        "selected_files": 18627
+      },
+      "path": "05_OUTPUTS/chrono_ledger/chrono_timeline_projection_refresh_execute_20260527T044608973560Z.json",
+      "sha256": "10bce4e7067aec62e3800ca28cd3d805ffb42abb9aed0b3f6654f3c6a10ec21f",
+      "status": "PASS",
+      "verdict": null
+    }
+  },
+  "schema": "lucidota.goal.final_requirement_audit.v2",
+  "script_sha256": {
+    "scripts/bitloops_red_team_suite.py": "109489e6235684a38e5a310d847beb8bb532f126ed112da8a99197e48f995803",
+    "scripts/chrono_lane_split_projection_gate.py": "1bc68168aec3bd69418eeec45f3f5b363d49c116631313964fafc75bfcd4689f",
+    "scripts/chrono_phase_c_conservation_report.py": "4050f4c3ee848822631fa0a651afc16506c48b464f57b9360a66b2744418ab1b",
+    "scripts/lucidota_swarm_dashboard.py": "50f1318e70f24a304a0282b671be302bd47c7e7a1bea93efe97460f67192f08e",
+    "scripts/lucidota_swarm_router.py": "cbc7af04fd63a06c0109e31fbfef20206cacc3414a9e18aeebe5e5fe2c90e6f6"
+  },
+  "status": "PASS_STAGED_WITH_EXPLICIT_GAPS",
+  "subagent_audits": {
+    "deterministic_first_not_model_zero": "PASS; advisory gap live pricing/cost metadata not ingested by router",
+    "graph_materialization": "PASS safe/no current canon writes; GAP materialization intentionally blocked/pending explicit operator command",
+    "historical_chrono_receipts": "PASS no blockers"
+  }
+}

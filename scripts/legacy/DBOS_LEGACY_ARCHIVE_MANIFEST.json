@@ -1,0 +1,421 @@
+{
+  "archived_count": 104,
+  "files": [
+    {
+      "from": "scripts/absurd_worker_script.py",
+      "to": "scripts/legacy/absurd_worker_script.py"
+    },
+    {
+      "from": "scripts/absurd_worker_spine.py",
+      "to": "scripts/legacy/absurd_worker_spine.py"
+    },
+    {
+      "from": "scripts/absured_worker_script.py",
+      "to": "scripts/legacy/absured_worker_script.py"
+    },
+    {
+      "from": "scripts/agentsi.py",
+      "to": "scripts/legacy/agentsi.py"
+    },
+    {
+      "from": "scripts/audit_verdict_enforcer.py",
+      "to": "scripts/legacy/audit_verdict_enforcer.py"
+    },
+    {
+      "from": "scripts/boring_beast.py",
+      "to": "scripts/legacy/boring_beast.py"
+    },
+    {
+      "from": "scripts/boring_beast_event_chain_verify.py",
+      "to": "scripts/legacy/boring_beast_event_chain_verify.py"
+    },
+    {
+      "from": "scripts/boring_beast_loop_runner.py",
+      "to": "scripts/legacy/boring_beast_loop_runner.py"
+    },
+    {
+      "from": "scripts/catchme_context_guard.py",
+      "to": "scripts/legacy/catchme_context_guard.py"
+    },
+    {
+      "from": "scripts/catchme_sensitivity_map.py",
+      "to": "scripts/legacy/catchme_sensitivity_map.py"
+    },
+    {
+      "from": "scripts/cep_graph_packet_stager.py",
+      "to": "scripts/legacy/cep_graph_packet_stager.py"
+    },
+    {
+      "from": "scripts/chrono_daemon_activation_refresher.py",
+      "to": "scripts/legacy/chrono_daemon_activation_refresher.py"
+    },
+    {
+      "from": "scripts/chrono_queue_event_bridge.py",
+      "to": "scripts/legacy/chrono_queue_event_bridge.py"
+    },
+    {
+      "from": "scripts/chrono_service_health_recorder.py",
+      "to": "scripts/legacy/chrono_service_health_recorder.py"
+    },
+    {
+      "from": "scripts/conversation_command_accept_worker.py",
+      "to": "scripts/legacy/conversation_command_accept_worker.py"
+    },
+    {
+      "from": "scripts/conversation_command_idempotency_probe.py",
+      "to": "scripts/legacy/conversation_command_idempotency_probe.py"
+    },
+    {
+      "from": "scripts/conversation_command_status_worker.py",
+      "to": "scripts/legacy/conversation_command_status_worker.py"
+    },
+    {
+      "from": "scripts/daemon_supervision_preflight.py",
+      "to": "scripts/legacy/daemon_supervision_preflight.py"
+    },
+    {
+      "from": "scripts/dbos_chrono_worker.py",
+      "to": "scripts/legacy/dbos_chrono_worker.py"
+    },
+    {
+      "from": "scripts/dbos_consume_one.py",
+      "to": "scripts/legacy/dbos_consume_one.py"
+    },
+    {
+      "from": "scripts/dbos_corpus_job_bridge.py",
+      "to": "scripts/legacy/dbos_corpus_job_bridge.py"
+    },
+    {
+      "from": "scripts/dbos_dead_letter_review.py",
+      "to": "scripts/legacy/dbos_dead_letter_review.py"
+    },
+    {
+      "from": "scripts/dbos_document_parse_worker.py",
+      "to": "scripts/legacy/dbos_document_parse_worker.py"
+    },
+    {
+      "from": "scripts/dbos_fault_injector.py",
+      "to": "scripts/legacy/dbos_fault_injector.py"
+    },
+    {
+      "from": "scripts/dbos_graph_promotion_worker.py",
+      "to": "scripts/legacy/dbos_graph_promotion_worker.py"
+    },
+    {
+      "from": "scripts/dbos_intake_worker.py",
+      "to": "scripts/legacy/dbos_intake_worker.py"
+    },
+    {
+      "from": "scripts/dbos_krampus_worker.py",
+      "to": "scripts/legacy/dbos_krampus_worker.py"
+    },
+    {
+      "from": "scripts/dbos_queue_hardening_check.py",
+      "to": "scripts/legacy/dbos_queue_hardening_check.py"
+    },
+    {
+      "from": "scripts/dbos_queue_metrics_exporter.py",
+      "to": "scripts/legacy/dbos_queue_metrics_exporter.py"
+    },
+    {
+      "from": "scripts/dbos_queue_scheduler_probe.py",
+      "to": "scripts/legacy/dbos_queue_scheduler_probe.py"
+    },
+    {
+      "from": "scripts/dbos_queue_soak_test.py",
+      "to": "scripts/legacy/dbos_queue_soak_test.py"
+    },
+    {
+      "from": "scripts/dbos_queue_spine.py",
+      "to": "scripts/legacy/dbos_queue_spine.py"
+    },
+    {
+      "from": "scripts/dbos_retry_dead_letter_probe.py",
+      "to": "scripts/legacy/dbos_retry_dead_letter_probe.py"
+    },
+    {
+      "from": "scripts/dbos_retry_policy.py",
+      "to": "scripts/legacy/dbos_retry_policy.py"
+    },
+    {
+      "from": "scripts/dbos_river_worker.py",
+      "to": "scripts/legacy/dbos_river_worker.py"
+    },
+    {
+      "from": "scripts/dbos_skip_locked_contention_probe.py",
+      "to": "scripts/legacy/dbos_skip_locked_contention_probe.py"
+    },
+    {
+      "from": "scripts/dbos_stale_lock_recovery_probe.py",
+      "to": "scripts/legacy/dbos_stale_lock_recovery_probe.py"
+    },
+    {
+      "from": "scripts/dbos_surface_cep_worker.py",
+      "to": "scripts/legacy/dbos_surface_cep_worker.py"
+    },
+    {
+      "from": "scripts/dbos_transition_law_probe.py",
+      "to": "scripts/legacy/dbos_transition_law_probe.py"
+    },
+    {
+      "from": "scripts/dbos_worker_contract_registry_check.py",
+      "to": "scripts/legacy/dbos_worker_contract_registry_check.py"
+    },
+    {
+      "from": "scripts/dbos_worker_harness.py",
+      "to": "scripts/legacy/dbos_worker_harness.py"
+    },
+    {
+      "from": "scripts/dbos_worker_heartbeat_probe.py",
+      "to": "scripts/legacy/dbos_worker_heartbeat_probe.py"
+    },
+    {
+      "from": "scripts/dbos_worker_supervisor_preflight.py",
+      "to": "scripts/legacy/dbos_worker_supervisor_preflight.py"
+    },
+    {
+      "from": "scripts/demem_runtime_guard.py",
+      "to": "scripts/legacy/demem_runtime_guard.py"
+    },
+    {
+      "from": "scripts/diogenes_30_phase_audit.py",
+      "to": "scripts/legacy/diogenes_30_phase_audit.py"
+    },
+    {
+      "from": "scripts/execution_record_writer.py",
+      "to": "scripts/legacy/execution_record_writer.py"
+    },
+    {
+      "from": "scripts/graph_promotion_evidence_resolver.py",
+      "to": "scripts/legacy/graph_promotion_evidence_resolver.py"
+    },
+    {
+      "from": "scripts/graph_promotion_materialize.py",
+      "to": "scripts/legacy/graph_promotion_materialize.py"
+    },
+    {
+      "from": "scripts/idempotency_duplicate_probe.py",
+      "to": "scripts/legacy/idempotency_duplicate_probe.py"
+    },
+    {
+      "from": "scripts/intake_custody_job_bridge.py",
+      "to": "scripts/legacy/intake_custody_job_bridge.py"
+    },
+    {
+      "from": "scripts/korpus_krampii.py",
+      "to": "scripts/legacy/korpus_krampii.py"
+    },
+    {
+      "from": "scripts/lucidota_artifact_ingest.py",
+      "to": "scripts/legacy/lucidota_artifact_ingest.py"
+    },
+    {
+      "from": "scripts/lucidota_basic_workflows.py",
+      "to": "scripts/legacy/lucidota_basic_workflows.py"
+    },
+    {
+      "from": "scripts/lucidota_big_board.py",
+      "to": "scripts/legacy/lucidota_big_board.py"
+    },
+    {
+      "from": "scripts/lucidota_body_capture.py",
+      "to": "scripts/legacy/lucidota_body_capture.py"
+    },
+    {
+      "from": "scripts/lucidota_bytewax_mini.py",
+      "to": "scripts/legacy/lucidota_bytewax_mini.py"
+    },
+    {
+      "from": "scripts/lucidota_chatdump_timeline.py",
+      "to": "scripts/legacy/lucidota_chatdump_timeline.py"
+    },
+    {
+      "from": "scripts/lucidota_clawd_runtime.py",
+      "to": "scripts/legacy/lucidota_clawd_runtime.py"
+    },
+    {
+      "from": "scripts/lucidota_commdump_timeline.py",
+      "to": "scripts/legacy/lucidota_commdump_timeline.py"
+    },
+    {
+      "from": "scripts/lucidota_dbos_big_board.py",
+      "to": "scripts/legacy/lucidota_dbos_big_board.py"
+    },
+    {
+      "from": "scripts/lucidota_dbos_brain_child.py",
+      "to": "scripts/legacy/lucidota_dbos_brain_child.py"
+    },
+    {
+      "from": "scripts/lucidota_dbos_dispatch.py",
+      "to": "scripts/legacy/lucidota_dbos_dispatch.py"
+    },
+    {
+      "from": "scripts/lucidota_dbos_drive_map.py",
+      "to": "scripts/legacy/lucidota_dbos_drive_map.py"
+    },
+    {
+      "from": "scripts/lucidota_dbos_external_draft.py",
+      "to": "scripts/legacy/lucidota_dbos_external_draft.py"
+    },
+    {
+      "from": "scripts/lucidota_dbos_replay.py",
+      "to": "scripts/legacy/lucidota_dbos_replay.py"
+    },
+    {
+      "from": "scripts/lucidota_dbos_signoff.py",
+      "to": "scripts/legacy/lucidota_dbos_signoff.py"
+    },
+    {
+      "from": "scripts/lucidota_dbos_smoke.py",
+      "to": "scripts/legacy/lucidota_dbos_smoke.py"
+    },
+    {
+      "from": "scripts/lucidota_dbos_survey.py",
+      "to": "scripts/legacy/lucidota_dbos_survey.py"
+    },
+    {
+      "from": "scripts/lucidota_dbos_watcher.py",
+      "to": "scripts/legacy/lucidota_dbos_watcher.py"
+    },
+    {
+      "from": "scripts/lucidota_dev_preflight.py",
+      "to": "scripts/legacy/lucidota_dev_preflight.py"
+    },
+    {
+      "from": "scripts/lucidota_hard_truth_math.py",
+      "to": "scripts/legacy/lucidota_hard_truth_math.py"
+    },
+    {
+      "from": "scripts/lucidota_hop_pivot.py",
+      "to": "scripts/legacy/lucidota_hop_pivot.py"
+    },
+    {
+      "from": "scripts/lucidota_indy_brief.py",
+      "to": "scripts/legacy/lucidota_indy_brief.py"
+    },
+    {
+      "from": "scripts/lucidota_indy_library_ingest.py",
+      "to": "scripts/legacy/lucidota_indy_library_ingest.py"
+    },
+    {
+      "from": "scripts/lucidota_indy_polycareer.py",
+      "to": "scripts/legacy/lucidota_indy_polycareer.py"
+    },
+    {
+      "from": "scripts/lucidota_indy_reads_watcher.py",
+      "to": "scripts/legacy/lucidota_indy_reads_watcher.py"
+    },
+    {
+      "from": "scripts/lucidota_indy_regression.py",
+      "to": "scripts/legacy/lucidota_indy_regression.py"
+    },
+    {
+      "from": "scripts/lucidota_litellm_bridge.py",
+      "to": "scripts/legacy/lucidota_litellm_bridge.py"
+    },
+    {
+      "from": "scripts/lucidota_model_artifact_readiness.py",
+      "to": "scripts/legacy/lucidota_model_artifact_readiness.py"
+    },
+    {
+      "from": "scripts/lucidota_progress_monitor.py",
+      "to": "scripts/legacy/lucidota_progress_monitor.py"
+    },
+    {
+      "from": "scripts/lucidota_river_reflex.py",
+      "to": "scripts/legacy/lucidota_river_reflex.py"
+    },
+    {
+      "from": "scripts/lucidota_ruthless_gauntlet.py",
+      "to": "scripts/legacy/lucidota_ruthless_gauntlet.py"
+    },
+    {
+      "from": "scripts/lucidota_source_policy_seed.py",
+      "to": "scripts/legacy/lucidota_source_policy_seed.py"
+    },
+    {
+      "from": "scripts/lucidota_stream_river_worker.sh",
+      "to": "scripts/legacy/lucidota_stream_river_worker.sh"
+    },
+    {
+      "from": "scripts/lucidota_survey.py",
+      "to": "scripts/legacy/lucidota_survey.py"
+    },
+    {
+      "from": "scripts/lucidota_treelite_router.py",
+      "to": "scripts/legacy/lucidota_treelite_router.py"
+    },
+    {
+      "from": "scripts/lucidota_wake_bus.py",
+      "to": "scripts/legacy/lucidota_wake_bus.py"
+    },
+    {
+      "from": "scripts/lucidota_workflow_registry.py",
+      "to": "scripts/legacy/lucidota_workflow_registry.py"
+    },
+    {
+      "from": "scripts/marrow_cep_bridge.py",
+      "to": "scripts/legacy/marrow_cep_bridge.py"
+    },
+    {
+      "from": "scripts/marrow_dbos_bridge.py",
+      "to": "scripts/legacy/marrow_dbos_bridge.py"
+    },
+    {
+      "from": "scripts/phase05_brain_archaeology_prep.py",
+      "to": "scripts/legacy/phase05_brain_archaeology_prep.py"
+    },
+    {
+      "from": "scripts/phase05_workflow_blueprint_generator.py",
+      "to": "scripts/legacy/phase05_workflow_blueprint_generator.py"
+    },
+    {
+      "from": "scripts/post_gate_target_selector.py",
+      "to": "scripts/legacy/post_gate_target_selector.py"
+    },
+    {
+      "from": "scripts/production_readiness_eval.py",
+      "to": "scripts/legacy/production_readiness_eval.py"
+    },
+    {
+      "from": "scripts/runtime_status_ledger_updater.py",
+      "to": "scripts/legacy/runtime_status_ledger_updater.py"
+    },
+    {
+      "from": "scripts/simplemem_candidate_index.py",
+      "to": "scripts/legacy/simplemem_candidate_index.py"
+    },
+    {
+      "from": "scripts/simplemem_promotion_bridge.py",
+      "to": "scripts/legacy/simplemem_promotion_bridge.py"
+    },
+    {
+      "from": "scripts/surface_instruction_compile_dry_run.py",
+      "to": "scripts/legacy/surface_instruction_compile_dry_run.py"
+    },
+    {
+      "from": "scripts/system_runtime_facts_refresh.py",
+      "to": "scripts/legacy/system_runtime_facts_refresh.py"
+    },
+    {
+      "from": "scripts/system_state_desync_detector.py",
+      "to": "scripts/legacy/system_state_desync_detector.py"
+    },
+    {
+      "from": "scripts/system_telemetry_exporter.py",
+      "to": "scripts/legacy/system_telemetry_exporter.py"
+    },
+    {
+      "from": "scripts/tracer_claim_packet_bridge.py",
+      "to": "scripts/legacy/tracer_claim_packet_bridge.py"
+    },
+    {
+      "from": "scripts/work_order_loader.py",
+      "to": "scripts/legacy/work_order_loader.py"
+    },
+    {
+      "from": "scripts/worker_command_registry.py",
+      "to": "scripts/legacy/worker_command_registry.py"
+    }
+  ]
+}

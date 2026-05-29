@@ -148,8 +148,20 @@ INSERT INTO lucidota_runtime.model_candidate (
         1400000000,
         'Q2_K GGUF',
         900,
+        'watch',
+        'Legacy small Mamba fallback only; not the active strict-stack listener after the Falcon3-Mamba 7B Q2 lane was promoted.'
+    ),
+    (
+        'falcon3-mamba-7b-listener',
+        'listener',
+        'https://huggingface.co/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF',
+        '03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf',
+        'TII Falcon License',
+        7000000000,
+        'Q2_K GGUF',
+        0,
         'accepted',
-        'Runnable Mamba GGUF listener fallback served locally with llama.cpp on port 8081.'
+        'Current strict-stack Mamba listener/planner lane served by llama.cpp on CPU/RAM port 8081; GPU partial copy is optional/preemptible.'
     ),
     (
         'deepseek-1.5b-indy_reads-reads',
@@ -206,11 +218,11 @@ INSERT INTO lucidota_runtime.resident_loadout_slot (
     (
         'gtx1650-special-forces-v0',
         'listener',
-        'mamba-1.4b-listener',
+        'falcon3-mamba-7b-listener',
         1,
-        900,
+        0,
         10,
-        'Runnable local Mamba GGUF listener on llama.cpp :8081.'
+        'Current strict-stack local Mamba listener/planner on llama.cpp :8081; spark aliases here, not optional GPU :8083.'
     ),
     (
         'gtx1650-special-forces-v0',

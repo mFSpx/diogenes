@@ -1,5 +1,5 @@
 -- LUCIDOTA learning/reflex schema.
--- DBOS/Postgres are durable truth; River updates lightweight online hints from committed events.
+-- ABSURD/Postgres are durable truth; River updates lightweight online hints from committed events.
 
 CREATE SCHEMA IF NOT EXISTS lucidota_learning;
 

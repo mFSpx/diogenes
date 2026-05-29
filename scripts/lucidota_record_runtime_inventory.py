@@ -13,7 +13,7 @@ import psycopg
 
 
 MODULES = [
-    "dbos",
+    "absurd",
     "river",
     "treelite",
     "transformers",

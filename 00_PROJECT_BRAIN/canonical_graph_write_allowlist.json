@@ -1,0 +1,51 @@
+{
+  "schema": "lucidota.canonical_graph_write_allowlist.v1",
+  "sacred_tables": [
+    "lucidota_go.graph_item",
+    "lucidota_go.graph_edge",
+    "lucidota_go.graph_journal"
+  ],
+  "allowed_materialization_helpers": [
+    "scripts/graph_materialization_helper.py",
+    "scripts/krampuschewing_graph_materialize.py"
+  ],
+  "staging_only_modules": [
+    "scripts/graph_promotion_gate.py",
+    "scripts/dbos_graph_promotion_worker.py"
+  ],
+  "test_fixture_modules": [
+    "scripts/graph_write_blocker_probe.py",
+    "scripts/graph_edge_write_blocker_probe.py",
+    "scripts/graph_item_approval_guard_probe.py",
+    "scripts/boring_beast_loop_runner.py"
+  ],
+  "legacy_blocked_modules": [
+    "scripts/boring_beast.py",
+    "scripts/lucidota_artifact_ingest.py",
+    "scripts/lucidota_clawd_runtime.py",
+    "scripts/lucidota_dev_preflight.py",
+    "scripts/lucidota_go_ingest.py",
+    "scripts/lucidota_indy_library_ingest.py",
+    "scripts/lucidota_markdown_ingest_archive.py"
+  ],
+  "helper_owned_internal_modules": [
+    "scripts/graph_promotion_materialize.py",
+    "scripts/graph_edge_materialize.py"
+  ],
+  "single_allowed_materialization_helper": "scripts/graph_materialization_helper.py",
+  "krampuschewing_materializer_role": "approved_single_purpose_materializer_for_krampuschewing_chrono_graph",
+  "operator_graph_eligibility_policy": {
+    "policy_path": "00_PROJECT_BRAIN/operator_graph_eligibility_policy.json",
+    "status": "active",
+    "authorized_domains": [
+      "rickshaw_robbery",
+      "nordby_squeeze",
+      "operator_life_facts"
+    ],
+    "direct_graph_write_shortcut": false,
+    "canonical_materialization_requires_existing_helper": true,
+    "correction_lane_required": true,
+    "operator_authorized_at": "2026-05-27",
+    "note": "This changes graph eligibility/default staging posture for these fact domains; it does not bypass graph promotion gates, evidence refs, command envelopes, journals, or materialization helper checks."
+  }
+}

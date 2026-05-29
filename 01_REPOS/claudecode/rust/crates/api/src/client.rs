@@ -23,6 +23,9 @@ pub enum ProviderClient {
     ClawApi(ClawApiClient),
     Xai(OpenAiCompatClient),
     OpenAi(OpenAiCompatClient),
+    Groq(OpenAiCompatClient),
+    Cohere(OpenAiCompatClient),
+    LucidotaLocal(OpenAiCompatClient),
 }
 
 impl ProviderClient {
@@ -46,6 +49,19 @@ impl ProviderClient {
             ProviderKind::OpenAi => Ok(Self::OpenAi(OpenAiCompatClient::from_env(
                 OpenAiCompatConfig::openai(),
             )?)),
+            ProviderKind::Groq => Ok(Self::Groq(OpenAiCompatClient::from_env(
+                OpenAiCompatConfig::groq(),
+            )?)),
+            ProviderKind::Cohere => Ok(Self::Cohere(OpenAiCompatClient::from_env(
+                OpenAiCompatConfig::cohere(),
+            )?)),
+            ProviderKind::LucidotaLocal => Ok(Self::LucidotaLocal(
+                OpenAiCompatClient::new(
+                    std::env::var("LUCIDOTA_LOCAL_API_KEY").unwrap_or_else(|_| "local".to_string()),
+                    OpenAiCompatConfig::lucidota_local(),
+                )
+                .with_base_url(local_base_url_for_model(&resolved_model)),
+            )),
         }
     }
 
@@ -55,6 +71,9 @@ impl ProviderClient {
             Self::ClawApi(_) => ProviderKind::ClawApi,
             Self::Xai(_) => ProviderKind::Xai,
             Self::OpenAi(_) => ProviderKind::OpenAi,
+            Self::Groq(_) => ProviderKind::Groq,
+            Self::Cohere(_) => ProviderKind::Cohere,
+            Self::LucidotaLocal(_) => ProviderKind::LucidotaLocal,
         }
     }
 
@@ -64,7 +83,11 @@ impl ProviderClient {
     ) -> Result<MessageResponse, ApiError> {
         match self {
             Self::ClawApi(client) => send_via_provider(client, request).await,
-            Self::Xai(client) | Self::OpenAi(client) => send_via_provider(client, request).await,
+            Self::Xai(client)
+            | Self::OpenAi(client)
+            | Self::Groq(client)
+            | Self::Cohere(client)
+            | Self::LucidotaLocal(client) => send_via_provider(client, request).await,
         }
     }
 
@@ -76,10 +99,28 @@ impl ProviderClient {
             Self::ClawApi(client) => stream_via_provider(client, request)
                 .await
                 .map(MessageStream::ClawApi),
-            Self::Xai(client) | Self::OpenAi(client) => stream_via_provider(client, request)
+            Self::Xai(client)
+            | Self::OpenAi(client)
+            | Self::Groq(client)
+            | Self::Cohere(client)
+            | Self::LucidotaLocal(client) => stream_via_provider(client, request)
                 .await
                 .map(MessageStream::OpenAiCompat),
         }
+    }
+}
+
+fn local_base_url_for_model(model: &str) -> String {
+    let key = model.to_ascii_lowercase();
+    if key == "luci" || key == "mamba7b-ram" {
+        std::env::var("LUCIDOTA_MAMBA_RAM_BASE_URL")
+            .unwrap_or_else(|_| "http://127.0.0.1:8081/v1".to_string())
+    } else if key == "mamba7b-gpu" {
+        std::env::var("LUCIDOTA_MAMBA_GPU_BASE_URL")
+            .unwrap_or_else(|_| "http://127.0.0.1:8083/v1".to_string())
+    } else {
+        std::env::var("LUCIDOTA_LOCAL_BASE_URL")
+            .unwrap_or_else(|_| "http://127.0.0.1:8080/v1".to_string())
     }
 }
 

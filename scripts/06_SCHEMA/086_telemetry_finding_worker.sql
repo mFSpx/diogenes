@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/086_telemetry_finding_worker.sql

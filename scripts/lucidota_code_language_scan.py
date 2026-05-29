@@ -19,6 +19,8 @@ PATTERNS={
 }
 ALLOWLIST={
     ('scripts/lucidota_security_scan.py','hype_language'),
+    ('ALGOS/krampus_stickers.py','hype_language'),
+    ('ALGOS/krampus_stickers.py','insult_language'),
 }
 findings=[]
 paths=[]

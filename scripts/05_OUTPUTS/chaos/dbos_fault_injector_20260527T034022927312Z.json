@@ -1,0 +1,10 @@
+{
+  "action": "dbos_fault_injector",
+  "execute_performed": false,
+  "facts": {},
+  "blockers": [
+    "EXECUTE_REQUIRED_FOR_FAULT_FIXTURE"
+  ],
+  "status": "FAIL",
+  "report_path": "05_OUTPUTS/chaos/dbos_fault_injector_20260527T034022927312Z.json"
+}

@@ -1,0 +1,65 @@
+{
+  "checks": {
+    "chrono_candidates_still_staged": true,
+    "full_reingest_still_pass": true,
+    "goal_audit_20_of_20": true,
+    "graph_scan_no_current_canonical_writes": true,
+    "materialization_preflight_ready_canon_locked": true,
+    "router_cost_gap_closed": true
+  },
+  "completion_claimed": false,
+  "generated_at": "2026-05-27T05:07:20.056341Z",
+  "goal_complete": false,
+  "known_gaps_to_full_completion": [
+    "operator_authorization_required_before_current_run_canonical_materialization",
+    "bulk_selection_policy_required_before_materializing_18627_staged_candidates",
+    "operator_declared_over_4h_error_free_completion_criterion_not_satisfied_in_this_active_goal_window"
+  ],
+  "receipts": {
+    "chrono_lane": {
+      "passed": null,
+      "path": "05_OUTPUTS/chrono_ledger/chrono_lane_split_projection_gate_execute_20260527T044231330273Z.json",
+      "sha256": "e43bab7a9caf8a573a09b0cbbd5323abb59ded463ef1d60ad5b47ca73aea0178",
+      "status": "PASS",
+      "verdict": null
+    },
+    "full_reingest": {
+      "passed": null,
+      "path": "05_OUTPUTS/bitloops/full_reingest_batches/20260527T041930Z/full_existing_index_reingest_summary.json",
+      "sha256": "2d5718b6a6256719ff9de55144c8ef795b4014c065512b30f0bc5cd894d31671",
+      "status": "PASS",
+      "verdict": null
+    },
+    "goal_audit": {
+      "passed": true,
+      "path": "05_OUTPUTS/rfcs/lucidota_goal_audit_20260527T045912Z.json",
+      "sha256": "9b163905b565ab543a8734b1eba9942013108b574c5f0c076923473142765e9a",
+      "status": null,
+      "verdict": null
+    },
+    "graph_scan": {
+      "passed": null,
+      "path": "05_OUTPUTS/swarm_submissions/canonical_graph_write_scan_router_cost_awareness.json",
+      "sha256": "2178d31ae8840006749078393c33093e858f9d6eb6cc0a7f398a9d100bc88d6c",
+      "status": null,
+      "verdict": "PASS"
+    },
+    "materialization_readiness": {
+      "passed": null,
+      "path": "GOALS/materialization_readiness_audit_20260527T050700Z.json",
+      "sha256": "e6db0fe69fe526b74fa46de60b583b0e56dccb6cffdd7376db445f53f4491efd",
+      "status": "PASS_PREFLIGHT_READY_CANON_LOCKED",
+      "verdict": null
+    },
+    "router_cost": {
+      "passed": null,
+      "path": "GOALS/router_cost_awareness_audit_20260527T050247Z.json",
+      "sha256": "3308edb0174bc48112fa4703ee4c3eb6539288a4ec160e016c1b1add0c1088f3",
+      "status": "PASS_ROUTER_COST_GAP_CLOSED_LOCALLY",
+      "verdict": null
+    }
+  },
+  "resolved_gap": "materialization_preflight_readiness_proven_without_current_canonical_writes",
+  "schema": "lucidota.goal.continuation_progress_audit.v3",
+  "status": "PASS_PROGRESS_GOAL_STILL_ACTIVE"
+}

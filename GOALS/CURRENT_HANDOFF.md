@@ -2,13 +2,28 @@
 
 "Save This Prompt, Pass on this Handoff:"
 
-- Goal: RESOURCE_GOVERNED_CAPABILITY_BUILD
-- Generated: `2026-05-28T08:19:14Z`
-- Current step: 3/3
+- Goal: KANT69 migration — PREP everything (done), then co-design the ingestion/ETL flow suite with Northern (Sonnet), built by Groq/locals.
+- Generated: `2026-05-28T22:30:00Z`
+- Current step: Opus prep complete; awaiting Opus→Sonnet flip + context clear, then workflow co-design.
 - Status: active
-- Objective: Execute capability factory + DIOGENES/system-become under hard resource governance; Codex steers, deterministic/local/Groq workers chew, every PID owned, learn from failures, avoid thrash/OOM, and back up safely.
-- Completed: Implemented live governor dials in 05_OUTPUTS/runtime/governor_dials.json with tune-time updates, added KILL_SWITCH, split cloud vs local worker decisions, and wired a 30s synthetic saturation test. New receipts: 05_OUTPUTS/runtime/governor_dials_tune_20260528T081812835798Z.json and 05_OUTPUTS/runtime/governor_saturation_test_20260528T081702005311Z.json. Also added async Groq fanout plumbing: scripts/groq_workorder_compiler.py and scripts/groq_batch_launcher.py. Proof: 7 new tests passed, and the async launcher executed 2 real Groq batches concurrently with receipts at 05_OUTPUTS/goals/groq_batch_launcher_20260528T081904263707Z.json, plus per-batch goal receipts in 05_OUTPUTS/goals/groq_goal_delegate_*.json. The local governor still protects the laptop, while cloud batches now fan out independently.
-- Next action: Keep advancing the remaining corpus by compiling more work orders into Groq batches and draining them through the async launcher; keep using the stop-file latch and tune CLI when laptop or DB pressure changes.
-- Resume command: `touch 05_OUTPUTS/runtime/absurd_flows.stop to pause future runs, or rm it to resume`
 
-Technical Summary Review and Dev Notes: The ECU now has real dials, a kill switch, and an async Groq lane. Tiny cryptid note: the goblin learned to shift gears instead of riding the clutch.
+## What this Opus session produced (the prep tranche)
+1. **Disk reclaim:** 36G→97G free (~61GB). Killed trash 17.9GB audit-text, stray duplicate vault `scripts/03_VAULT` (15,994 CAS dupes; 1,095 unique files KEPT), redundant unpacked copies. More available (9.5GB regenerable repo snapshot; 35GB unique stray-vault to migrate to canonical CAS).
+2. **ORGAN_REGISTRY / CAPABILITY_LEDGER** (the gate before flow design): `00_PROJECT_BRAIN/organ_registry/` — `ORGAN_REGISTRY.json` (745 organs) + `.md` summary + 5 shards (scripts/schema/streaming_ml/percyphon_math/ingestion).
+3. **System canon mapped to me:** `BOOKS/.indy_reads/INDY_SYSTEM_UNDERSTANDING.md`.
+4. **Cache pack:** `GOALS/SONNET_CACHE_PACK.md` — exact 60-min cache (Tier A spine ~21.4K tok + ingestion working set + lazy-load + live-query tiers).
+5. Memories written: organ-registry gate, percyphon/villagers/AHOY, production ethos creed, sudo+disk authority, ouroboros ingest sequence, KANT69 migration sequence, Spencer's algo source.
+
+## Ground truth (verify, don't trust blindly)
+- ~92/122 schema files UNAPPLIED (chrono 025-027, ABSURD spine 035, graph-promotion 034/044/052, write-barriers 040/074). Live = base band + GO graph core `016` (`lucidota_storage.lucidota_go`).
+- Bytewax→River stream spine BROKEN (service execs bare python3). Only river-governor Hoeffding tree live.
+- `term_registry` = 45 rows (target 75); `CO_ACTIVE_TERMS.json` MISSING; @26-@50 GO/CO ID collision = convergence landmine.
+- Two DBs still split (`lucidota_state`/`lucidota_storage`); KANT69 wants one instance + scoped schemas.
+
+## Next action on resume (Sonnet)
+1. Load the Tier A spine from `GOALS/SONNET_CACHE_PACK.md`.
+2. Query live state (phase_ledger, runtime_status_fact, term count, df, /proc/pressure).
+3. Riff ingestion/ETL workflows conceptually WITH Northern (no Groq for design).
+4. Preconditions before heavy run: install missing ingestion deps (`50_ingestion.json` pip line), fix stream-river service, disk/resource budget receipt.
+5. Design law: ABSURD=durable queue+custody, PocketFlow=intra-job microflow (idempotent), no "ingested=true", only 4 materializers write graph truth.
+6. Ouroboros bar: INGEST-1 backlog → INGEST-2 repo history → INGEST-3 GDrive diff (needs Northern OAuth).

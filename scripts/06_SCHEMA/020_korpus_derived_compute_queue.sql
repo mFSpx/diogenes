@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/020_korpus_derived_compute_queue.sql

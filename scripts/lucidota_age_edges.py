@@ -74,7 +74,7 @@ def main():
               WHERE cas_uri IS NOT NULL AND cas_uri <> ''
               ORDER BY created_at DESC LIMIT %s
             """, (args.limit,)).fetchall()
-        except Exception:
+        except psycopg.Error:
             crows=[]
         for source,cas_uri,sha256,size_bytes,mime,kind in crows:
             cypher=f"""

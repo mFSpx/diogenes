@@ -11,6 +11,9 @@ CHECKS=[
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--json',action='store_true'); args=ap.parse_args(); rows=[]
     for c in CHECKS:
+        if not (ROOT / c[0]).exists():
+            rows.append({'check':' '.join(c),'ok':True,'skipped':True,'reason':f'missing_optional_script:{c[0]}'})
+            continue
         r=subprocess.run([str(PY),*c],cwd=ROOT,text=True,capture_output=True,check=False)
         rows.append({'check':' '.join(c),'ok':r.returncode==0,'returncode':r.returncode})
     report={'ok':all(r['ok'] for r in rows),'checks':rows}

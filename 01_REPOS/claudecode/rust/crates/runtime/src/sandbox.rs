@@ -4,6 +4,8 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
+pub const PEAK_RSS_LIMIT_KB: u64 = 50 * 1024;
+
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
 #[serde(rename_all = "kebab-case")]
 pub enum FilesystemIsolationMode {
@@ -80,6 +82,38 @@ pub struct LinuxSandboxCommand {
     pub program: String,
     pub args: Vec<String>,
     pub env: Vec<(String, String)>,
+}
+
+pub fn parse_status_peak_rss_kb(status_text: &str) -> Option<u64> {
+    parse_status_memory_field_kb(status_text, "VmHWM")
+        .or_else(|| parse_status_memory_field_kb(status_text, "VmRSS"))
+}
+
+pub fn enforce_peak_rss_limit_from_status(status_text: &str, max_kb: u64) -> Result<u64, String> {
+    let peak_kb = parse_status_peak_rss_kb(status_text)
+        .ok_or_else(|| "missing VmHWM/VmRSS field in process status".to_string())?;
+    if peak_kb > max_kb {
+        return Err(format!(
+            "process peak RSS {peak_kb} KiB exceeds maximum {max_kb} KiB"
+        ));
+    }
+    Ok(peak_kb)
+}
+
+pub fn enforce_current_process_peak_rss_limit(max_kb: u64) -> Result<u64, String> {
+    let status = fs::read_to_string("/proc/self/status")
+        .map_err(|error| format!("failed to read /proc/self/status: {error}"))?;
+    enforce_peak_rss_limit_from_status(&status, max_kb)
+}
+
+fn parse_status_memory_field_kb(status_text: &str, field: &str) -> Option<u64> {
+    status_text.lines().find_map(|line| {
+        let (name, rest) = line.split_once(':')?;
+        if name != field {
+            return None;
+        }
+        rest.split_whitespace().next()?.parse::<u64>().ok()
+    })
 }
 
 impl SandboxConfig {
@@ -285,8 +319,9 @@ fn command_exists(command: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::{
-        build_linux_sandbox_command, detect_container_environment_from, FilesystemIsolationMode,
-        SandboxConfig, SandboxDetectionInputs,
+        build_linux_sandbox_command, detect_container_environment_from,
+        enforce_peak_rss_limit_from_status, parse_status_peak_rss_kb, FilesystemIsolationMode,
+        SandboxConfig, SandboxDetectionInputs, PEAK_RSS_LIMIT_KB,
     };
     use std::path::Path;
 
@@ -360,5 +395,32 @@ mod tests {
             assert!(launcher.args.iter().any(|arg| arg == "--mount"));
             assert!(launcher.args.iter().any(|arg| arg == "--net") == status.network_active);
         }
+    }
+
+    #[test]
+    fn parses_peak_rss_from_proc_status_text() {
+        let status = "Name:\ttest\nVmRSS:\t  1234 kB\nVmHWM:\t  2345 kB\n";
+
+        assert_eq!(parse_status_peak_rss_kb(status), Some(2345));
+    }
+
+    #[test]
+    fn peak_rss_guard_blocks_above_50mb_ceiling() {
+        let status = "VmHWM:\t  60000 kB\n";
+
+        let error = enforce_peak_rss_limit_from_status(status, PEAK_RSS_LIMIT_KB)
+            .expect_err("over ceiling rejected");
+
+        assert!(error.contains("exceeds maximum"));
+    }
+
+    #[test]
+    fn peak_rss_guard_accepts_below_ceiling() {
+        let status = "VmRSS:\t  4096 kB\n";
+
+        let rss = enforce_peak_rss_limit_from_status(status, PEAK_RSS_LIMIT_KB)
+            .expect("below ceiling accepted");
+
+        assert_eq!(rss, 4096);
     }
 }

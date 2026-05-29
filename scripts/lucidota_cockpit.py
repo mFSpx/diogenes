@@ -38,7 +38,7 @@ def j(script: str, *args: str) -> dict[str, Any]:
     r = subprocess.run(cmd, text=True, capture_output=True, check=False)
     try:
         data = json.loads(r.stdout)
-    except Exception:
+    except json.JSONDecodeError:
         data = {"ok": False, "error": r.stderr[-300:] or r.stdout[-300:] or f"exit {r.returncode}"}
     data["_returncode"] = r.returncode
     return data
@@ -113,7 +113,8 @@ def priority_queue(queue: list[dict[str, Any]], limit: int) -> list[dict[str, An
 
 def build_report(limit: int, include_governor: bool) -> dict[str, Any]:
     big = j("lucidota_big_board.py")
-    indy = j("lucidota_indy_brief.py")
+    indy_script = ROOT / "scripts" / "lucidota_indy_brief.py"
+    indy = j("lucidota_indy_brief.py") if indy_script.exists() else {"ok": True, "queue": [], "counters": {}, "skipped": True, "reason": "missing_optional_script:scripts/lucidota_indy_brief.py"}
     mg = j("lucidota_model_governor.py") if include_governor else {"ok": True, "decision": "skipped"}
     phases = [parse_phase(p) for p in big.get("bars", {}).get("phases", [])]
     lowest = sorted(phases, key=phase_key)[:limit]

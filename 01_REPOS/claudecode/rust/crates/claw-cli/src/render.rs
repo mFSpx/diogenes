@@ -7,10 +7,51 @@ use crossterm::style::{Color, Print, ResetColor, SetForegroundColor, Stylize};
 use crossterm::terminal::{Clear, ClearType};
 use crossterm::{execute, queue};
 use pulldown_cmark::{CodeBlockKind, Event, Options, Parser, Tag, TagEnd};
+use serde::{Deserialize, Serialize};
 use syntect::easy::HighlightLines;
 use syntect::highlighting::{Theme, ThemeSet};
 use syntect::parsing::SyntaxSet;
 use syntect::util::{as_24_bit_terminal_escaped, LinesWithEndings};
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct WorkerStats {
+    pub worker_id: String,
+    pub queue_name: String,
+    pub state: String,
+    pub persona_profile: Option<String>,
+    pub active_jobs: u64,
+    pub completed_jobs: u64,
+    pub failed_jobs: u64,
+}
+
+pub fn parse_worker_stats_stream(stream_json: &str) -> Result<Vec<WorkerStats>, serde_json::Error> {
+    serde_json::from_str(stream_json)
+}
+
+pub fn render_worker_stats_panel(stats: &[WorkerStats]) -> String {
+    if stats.is_empty() {
+        return "Workers: none reported".to_string();
+    }
+    let mut lines = vec!["Workers".to_string()];
+    for worker in stats {
+        let persona = worker.persona_profile.as_deref().unwrap_or("none");
+        let marker = if worker.state.eq_ignore_ascii_case("running") && worker.active_jobs > 0 {
+            "ACTIVE"
+        } else {
+            "idle"
+        };
+        lines.push(format!(
+            "  {marker:<6} {:<18} queue={:<18} persona={:<18} active={} done={} failed={}",
+            worker.worker_id,
+            worker.queue_name,
+            persona,
+            worker.active_jobs,
+            worker.completed_jobs,
+            worker.failed_jobs
+        ));
+    }
+    lines.join("\n")
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ColorTheme {
@@ -770,7 +811,10 @@ fn strip_ansi(input: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{strip_ansi, ColorTheme, MarkdownStreamState, Spinner, TerminalRenderer};
+    use super::{
+        parse_worker_stats_stream, render_worker_stats_panel, strip_ansi, ColorTheme,
+        MarkdownStreamState, Spinner, TerminalRenderer,
+    };
 
     #[test]
     fn renders_markdown_with_styling_and_lists() {
@@ -884,8 +928,25 @@ mod tests {
             }
         );
 
-        let rendered = renderer.render_markdown("| Thing | State |\n| --- | --- |\n| CKDOG1 | online |");
+        let rendered =
+            renderer.render_markdown("| Thing | State |\n| --- | --- |\n| CKDOG1 | online |");
         assert!(strip_ansi(&rendered).contains("CKDOG1"));
         assert!(rendered.contains('\u{1b}'));
+    }
+
+    #[test]
+    fn worker_stats_stream_renders_active_persona_profiles() {
+        let stream = r#"[
+          {"worker_id":"w1","queue_name":"korpus","state":"running","persona_profile":"operator","active_jobs":2,"completed_jobs":7,"failed_jobs":0},
+          {"worker_id":"w2","queue_name":"graph","state":"idle","persona_profile":null,"active_jobs":0,"completed_jobs":1,"failed_jobs":1}
+        ]"#;
+
+        let stats = parse_worker_stats_stream(stream).expect("worker stats json parses");
+        let panel = render_worker_stats_panel(&stats);
+
+        assert!(panel.contains("ACTIVE"));
+        assert!(panel.contains("persona=operator"));
+        assert!(panel.contains("queue=korpus"));
+        assert!(panel.contains("failed=1"));
     }
 }

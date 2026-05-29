@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/088_cruelty_protocols_output.sql

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")"
+source scripts/llxprt_groq_login_bind.sh
+exec python3 scripts/llxprt_project2501.py launch "$@"

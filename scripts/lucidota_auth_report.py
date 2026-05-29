@@ -6,11 +6,14 @@ import argparse
 import datetime as dt
 import json
 import re
+import os
 from pathlib import Path
+
+import psycopg
 
 ROOT = Path(__file__).resolve().parents[1]
 AUTH_INVENTORY = ROOT / "02_RECORDS_OFFICE" / "AUTH_INVENTORY.md"
-DEFAULT_OUTPUT = ROOT / "02_RECORDS_OFFICE" / "AUTH_REPORT_2026_05_14.md"
+DEFAULT_OUTPUT = ROOT / "05_OUTPUTS" / "auth_surface_report.txt"
 
 SECRET_VALUE_PATTERNS = [
     re.compile(r"AIza[0-9A-Za-z_\-]{20,}"),
@@ -27,8 +30,21 @@ def assert_no_secret_values(text: str) -> None:
         raise SystemExit(f"secret-like value pattern found; refusing output: {hits}")
 
 
+def read_inventory() -> str:
+    if AUTH_INVENTORY.exists():
+        return AUTH_INVENTORY.read_text(encoding="utf-8")
+    try:
+        dsn = os.environ.get("LUCIDOTA_GO_STORAGE_DSN", "postgresql:///lucidota_storage")
+        with psycopg.connect(dsn, connect_timeout=3) as conn:
+            row = conn.execute(
+                "SELECT excerpt FROM lucidota_indy.markdown_artifact WHERE original_path='02_RECORDS_OFFICE/AUTH_INVENTORY.md' LIMIT 1"
+            ).fetchone()
+        return row[0] if row else ""
+    except psycopg.Error:
+        return ""
+
 def render(today: str) -> str:
-    src = AUTH_INVENTORY.read_text(encoding="utf-8")
+    src = read_inventory()
     assert_no_secret_values(src)
     body = f"""# Auth Surface Report
 
@@ -61,7 +77,7 @@ network lookup, no token copying, and no credential validation were performed.
 
 ## Check Result
 
-- Secret-like value pattern scan over input inventory and generated report: pass.
+- Secret-like value pattern scan over input inventory and generated report: ok.
 - Operational status changed: none; report only.
 """
     assert_no_secret_values(body)
@@ -86,7 +102,7 @@ def main() -> int:
     if args.check:
         if missing:
             raise SystemExit(f"missing required sections: {missing}")
-        print("auth surface report check: pass")
+        print("auth surface report check: ok")
         return 0
 
     args.output.parent.mkdir(parents=True, exist_ok=True)

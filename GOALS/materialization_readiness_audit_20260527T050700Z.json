@@ -1,0 +1,92 @@
+{
+  "canonical_graph_writes_performed": false,
+  "checks": {
+    "journal_completeness_passes_without_blockers": true,
+    "journal_replay_passes": true,
+    "materialization_dry_run_preflight_allowed": true,
+    "missing_command_is_blocked_without_writes": true,
+    "policy_preflight_requires_command_envelope": true,
+    "receipt_query_finds_prior_smoke_receipt": true,
+    "router_cost_gap_still_closed": true
+  },
+  "completion_claimed": false,
+  "generated_at": "2026-05-27T05:07:00.855472Z",
+  "goal_complete": false,
+  "interpretation": {
+    "blocked_surface": "Missing command envelopes are rejected before writes; graph_promotion_gate materialize remains hardening-blocked by design.",
+    "historical_materialization_receipts": "Prior smoke materializations exist and replay/journal checks pass, but no current-run canonical materialization was performed.",
+    "ready_surface": "Existing graph_promotion_materialize.py dry-run can validate an explicit command envelope and graph_promoter preflight without writes."
+  },
+  "receipts": {
+    "continuation": {
+      "passed": null,
+      "path": "GOALS/continuation_progress_audit_20260527T050350Z.json",
+      "sha256": "dc8f0e6eccc6d0e6f625663678789b6c261a08382d53872848d611a282ce2d0c",
+      "status": "PASS_PROGRESS_GOAL_STILL_ACTIVE",
+      "verdict": null
+    },
+    "journal_completeness": {
+      "passed": null,
+      "path": "05_OUTPUTS/graph/graph_journal_completeness_pass_20260527T050625648282Z.json",
+      "sha256": "47dc7ab4b175b0c2f10bc588a13c132eb7280956aee39968c0db69400176cba9",
+      "status": "PASS",
+      "verdict": null
+    },
+    "journal_replay": {
+      "passed": null,
+      "path": "05_OUTPUTS/graph/graph_journal_replay_audit_20260527T050625847295Z.json",
+      "sha256": "9005452f98fcd689a55931f55d75fd1bcc2a0466958dcd7a442adc9818a1ad44",
+      "status": "PASS",
+      "verdict": null
+    },
+    "materialize_blocked_no_command": {
+      "passed": null,
+      "path": "05_OUTPUTS/graph/graph_promotion_materialize_blocked_20260527T050551187128Z.json",
+      "sha256": "6faaf0f8c04806bfd5381e7357618b721d43510835a738182c5a8df533978e33",
+      "status": null,
+      "verdict": null
+    },
+    "materialize_dry_run": {
+      "passed": null,
+      "path": "05_OUTPUTS/graph/graph_promotion_materialize_dry_run_20260527T050616250982Z.json",
+      "sha256": "7e61bb26a302fe95b347f2ed98bc188f388e5e973bbeed606e5c4ce75d73e248",
+      "status": null,
+      "verdict": null
+    },
+    "policy_check_no_command": {
+      "passed": null,
+      "path": "05_OUTPUTS/graph_promotion/graph_promotion_policy_check_20260527T050542299745Z.json",
+      "sha256": "3a6fd5a68c2d48b20f5fa6c06d5a2d771fd673a97d9eecd62b1a4ec212ac7fcc",
+      "status": null,
+      "verdict": null
+    },
+    "receipt_query": {
+      "passed": null,
+      "path": "05_OUTPUTS/graph/graph_materialization_receipt_query_20260527T050626030467Z.json",
+      "sha256": "f7d68bc4634b2c33caa2ae4579257e7b0164fe64ab2f93b2252eb1ec282f41ef",
+      "status": "PASS",
+      "verdict": null
+    },
+    "router_cost": {
+      "passed": null,
+      "path": "GOALS/router_cost_awareness_audit_20260527T050247Z.json",
+      "sha256": "3308edb0174bc48112fa4703ee4c3eb6539288a4ec160e016c1b1add0c1088f3",
+      "status": "PASS_ROUTER_COST_GAP_CLOSED_LOCALLY",
+      "verdict": null
+    },
+    "script_sha256": {
+      "scripts/graph_journal_completeness_check.py": "2370c50bd47120a593e7077de90c1c1781da03c9f0753fd01653d2f4cc12e30f",
+      "scripts/graph_journal_replay_audit.py": "592447d44b69e13338093f03c38beea752d299fd19685d52666e6f6cb8b5393e",
+      "scripts/graph_materialization_helper.py": "d21885a9dd88bb4e10f2d87100474b66498ce3bd85877f4aaa5588f2ae317fa5",
+      "scripts/graph_promotion_materialize.py": "7929c67a9fe5e8c50ef90cc4e8d0f0298dff4c4261e70e0d0323b5e313dbca82",
+      "scripts/graph_promotion_policy_check.py": "3dcd17ca20cba62f0c45c52472bf906dd9c2e6f17e65b9bd32f5de9599448282"
+    }
+  },
+  "remaining_gaps_to_full_completion": [
+    "operator_authorization_required_before_current_run_canonical_materialization",
+    "bulk_selection_policy_required_before_materializing_18627_staged_candidates",
+    "operator_declared_over_4h_error_free_completion_criterion_not_satisfied_in_this_active_goal_window"
+  ],
+  "schema": "lucidota.goal.materialization_readiness_audit.v1",
+  "status": "PASS_PREFLIGHT_READY_CANON_LOCKED"
+}

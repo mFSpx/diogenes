@@ -14,12 +14,17 @@ api = { path = "../api" }
 commands = { path = "../commands" }
 compat-harness = { path = "../compat-harness" }
 crossterm = "0.28"
+ed25519-dalek = "2"
+hex = "0.4"
 prost = "0.14.3"
+postgres = { version = "0.19", features = ["with-serde_json-1"] }
 pulldown-cmark = "0.13"
 rustyline = "15"
 runtime = { path = "../runtime" }
 plugins = { path = "../plugins" }
+serde = { version = "1", features = ["derive"] }
 serde_json.workspace = true
+sha2 = "0.10"
 syntect = "5"
 tokio = { version = "1", features = ["rt-multi-thread", "time"] }
 tonic = { version = "0.14.6", features = ["transport"] }

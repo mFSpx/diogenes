@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"ModelInvocationReceipt","type":"object","required":["model_id","backend","input_sha256","output_sha256","real_inference_performed","vram_budget_mb"],"properties":{"real_inference_performed":{"type":"boolean"},"vram_budget_mb":{"type":"integer"}}}

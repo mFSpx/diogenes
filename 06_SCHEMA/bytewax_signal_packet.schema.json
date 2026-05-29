@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lucidota.bytewax_signal_packet.schema.v1",
+  "title": "LUCIDOTA Bytewax Signal Packet",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "epistemic_flag",
+    "epistemic_certainty",
+    "validation_schema"
+  ],
+  "properties": {
+    "epistemic_flag": {
+      "type": "string",
+      "enum": ["FACT", "PROBABLE", "POSSIBLE", "BULLSHIT", "SURE_MAYBE"]
+    },
+    "epistemic_certainty": {
+      "type": "object",
+      "required": ["schema", "epistemic_flag", "allowed_flags", "source", "classification_method", "generated_at"],
+      "additionalProperties": true,
+      "properties": {
+        "schema": {
+          "const": "lucidota.bytewax.signal_packet_certainty.v1"
+        },
+        "epistemic_flag": {
+          "type": "string",
+          "enum": ["FACT", "PROBABLE", "POSSIBLE", "BULLSHIT", "SURE_MAYBE"]
+        },
+        "allowed_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["FACT", "PROBABLE", "POSSIBLE", "BULLSHIT", "SURE_MAYBE"]
+          },
+          "minItems": 5
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ontology_terms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prompt_injection_detected": {
+          "type": "boolean"
+        },
+        "classification_method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "transport": {
+          "type": "string"
+        },
+        "generated_at": {
+          "type": "string"
+        }
+      }
+    },
+    "validation_schema": {
+      "const": "06_SCHEMA/bytewax_signal_packet.schema.json"
+    },
+    "lora_swap_token_threshold": {
+      "type": "integer",
+      "enum": [256, 512]
+    },
+    "treelite_date_router_enabled": {
+      "type": "boolean"
+    },
+    "temporal_lora_policy": {
+      "type": "object",
+      "required": ["schema", "lora_swap_token_threshold", "max_context_tokens", "deepseek_context_mode", "date_extraction_router", "vram_policy"],
+      "additionalProperties": true,
+      "properties": {
+        "schema": {
+          "const": "lucidota.bytewax.temporal_lora_policy.v1"
+        },
+        "fragile_temporal_source": {
+          "type": "string"
+        },
+        "lora_swap_token_threshold": {
+          "type": "integer",
+          "enum": [256, 512]
+        },
+        "max_context_tokens": {
+          "type": "integer",
+          "enum": [256, 512]
+        },
+        "deepseek_context_mode": {
+          "type": "string"
+        },
+        "date_extraction_router": {
+          "type": "string"
+        },
+        "treelite_artifact": {
+          "type": "string"
+        },
+        "vram_policy": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

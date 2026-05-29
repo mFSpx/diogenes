@@ -20,6 +20,7 @@ id_rsa*
 id_ed25519*
 *_token*
 *_secret*
+!scripts/lucidota_secret_quarantine.py
 *.credentials
 *.credentials.json
 credentials.json
@@ -38,6 +39,8 @@ auth/
 !/04_RUNTIME/README.md
 /05_OUTPUTS/*
 !/05_OUTPUTS/README.md
+!DIOGENES_EXPORT_MANIFEST.md
+!DIOGENES_RESTORE.md
 
 # Private local UI/theme assets, including personal game-asset experiments.
 /private_assets/
@@ -77,11 +80,19 @@ build/
 .clawd-agents/
 
 # Databases, indexes, model/runtime weights.
+**/pgdata/
+**/pg_wal/
+**/postgresql-*/
 *.sqlite
 *.sqlite3
 *.db
+*.dump
 *.db-wal
 *.db-shm
+*.sqlite-wal
+*.sqlite-shm
+*.bak
+*.tmp
 *.parquet
 *.arrow
 *.faiss
@@ -98,9 +109,39 @@ build/
 logs/
 tmp/
 temp/
+**/logs/
+**/cache/
 
 # Editor/system files.
 .DS_Store
 *.swp
 .idea/
 .vscode/
+# Claw Code local artifacts
+.claw.json
+.claw/settings.local.json
+.claw/sessions/
+
+
+# Local Codex history/logs: retain on disk, never track.
+.codex/log/
+.codex/history.jsonl
+
+.superpowers/
+
+# Personal agent/session state — local only.
+.claude/
+.agents/
+.lucidota_agents/
+.claw/
+
+# CAS / evidence hoard inside scripts — 35GB, local only.
+scripts/03_VAULT/
+scripts/cases/
+
+# LLxprt/agent startup performance: bulk proof-hoard storage is indexed via TICKLETRUNK, not crawled recursively.
+/09_STORAGE/
+/KRAMPUSCHEWING/
+/BOOKS/
+/01_REPOS/
+!/01_REPOS/README.md

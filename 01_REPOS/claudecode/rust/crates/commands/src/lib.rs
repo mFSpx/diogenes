@@ -240,6 +240,14 @@ const SLASH_COMMAND_SPECS: &[SlashCommandSpec] = &[
         category: SlashCommandCategory::Automation,
     },
     SlashCommandSpec {
+        name: "goals",
+        aliases: &["goal"],
+        summary: "Run a persistent-goal kicker with completion and blocked audits",
+        argument_hint: Some("[objective]"),
+        resume_supported: false,
+        category: SlashCommandCategory::Automation,
+    },
+    SlashCommandSpec {
         name: "teleport",
         aliases: &[],
         summary: "Jump to a file or symbol by searching the workspace",
@@ -329,6 +337,9 @@ pub enum SlashCommand {
     Ultraplan {
         task: Option<String>,
     },
+    Goals {
+        objective: Option<String>,
+    },
     Teleport {
         target: Option<String>,
     },
@@ -411,6 +422,9 @@ impl SlashCommand {
             },
             "ultraplan" => Self::Ultraplan {
                 task: remainder_after_command(trimmed, command),
+            },
+            "goals" | "goal" => Self::Goals {
+                objective: remainder_after_command(trimmed, command),
             },
             "teleport" => Self::Teleport {
                 target: remainder_after_command(trimmed, command),
@@ -1766,6 +1780,7 @@ pub fn handle_slash_command(
         | SlashCommand::Pr { .. }
         | SlashCommand::Issue { .. }
         | SlashCommand::Ultraplan { .. }
+        | SlashCommand::Goals { .. }
         | SlashCommand::Teleport { .. }
         | SlashCommand::DebugToolCall
         | SlashCommand::Model { .. }
@@ -2145,7 +2160,7 @@ mod tests {
         assert!(help.contains("aliases: /plugins, /marketplace"));
         assert!(help.contains("/agents"));
         assert!(help.contains("/skills"));
-        assert_eq!(slash_command_specs().len(), 28);
+        assert_eq!(slash_command_specs().len(), 29);
         assert_eq!(resume_supported_slash_commands().len(), 13);
     }
 

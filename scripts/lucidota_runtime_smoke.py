@@ -16,6 +16,7 @@ import sys
 
 IMPORTS = [
     "dbos",
+    "absurd_queue_spine",
     "river",
     "bytewax",
     "treelite",

@@ -1,0 +1,127 @@
+{
+  "schema": "diogenes.gpu_model_runtime_registry.v1",
+  "updated_at": "2026-05-27T18:52:55.338710Z",
+  "detected_gpu": "Sun May 17 14:19:49 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.126.18             Driver Version: 580.126.18     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce GTX 1650        Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   48C    P8              2W /   50W |       2MiB /   4096MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|  No running processes found                                                             |\n+-----------------------------------------------------------------------------------------+\n",
+  "torch_probe": "torch_probe_error ModuleNotFoundError(\"No module named 'torch'\")\n",
+  "vram_budget_rules": {
+    "gtx_1650_4gb": "prefer <=2B quantized GGUF; cap context/batch; record model hash/device; no heavy server claims"
+  },
+  "llama_cpp_available": true,
+  "ollama_available": true,
+  "gguf_inventory": [
+    {
+      "path": "03_VAULT/models/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
+      "size_bytes": 1117320800,
+      "kind": "gguf",
+      "runtime_status": "active_strict_stack"
+    },
+    {
+      "path": "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
+      "size_bytes": 2565011808,
+      "kind": "gguf",
+      "runtime_status": "active_strict_stack"
+    },
+    {
+      "path": "03_VAULT/models/prism-ml/Ternary-Bonsai-4B-gguf/Ternary-Bonsai-4B-Q2_0.gguf",
+      "size_bytes": 1074969344,
+      "kind": "gguf",
+      "runtime_status": "active_strict_stack"
+    },
+    {
+      "path": "03_VAULT/models/mamba-1.4b-hf-Q2_K.gguf",
+      "size_bytes": 525594560,
+      "kind": "gguf",
+      "runtime_status": "legacy_reference"
+    }
+  ],
+  "feasible_now": [
+    "metadata registry",
+    "llama.cpp smoke if model chosen",
+    "CPU/low VRAM GLiNER/doc parsing"
+  ],
+  "feasible_later": [
+    "BGE reranker after weights",
+    "ModernBERT after weights",
+    "FairyFuse after real backend"
+  ],
+  "fantasy_or_rejected": [
+    "unbounded 4GB VRAM inference",
+    "claiming GPU runtime because nvidia-smi exists"
+  ],
+  "provenance_requirements": [
+    "command_envelope_uuid",
+    "model_path",
+    "model_sha256",
+    "device",
+    "vram_profile",
+    "prompt/input hash",
+    "output hash"
+  ],
+  "strict_runtime_alignment": {
+    "source": "scripts/lucidota_strict_model_stack_admission.py",
+    "verified_by": "tests/test_model_runtime_registry_alignment.py",
+    "active_model_paths": [
+      "03_VAULT/models/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
+      "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
+      "03_VAULT/models/prism-ml/Ternary-Bonsai-4B-gguf/Ternary-Bonsai-4B-Q2_0.gguf",
+      "03_VAULT/models/needle/needle.pkl"
+    ],
+    "required_services": [
+      {
+        "name": "deepseek_r1_qwen_1p5b_gpu",
+        "model_path": "03_VAULT/models/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
+        "port": 8080,
+        "required": true,
+        "device_lane": "nvidia_vram_model_only"
+      },
+      {
+        "name": "mamba7b_ram",
+        "model_path": "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
+        "port": 8081,
+        "required": true,
+        "device_lane": "system_ram_cpu"
+      },
+      {
+        "name": "bonsai4b_ram",
+        "model_path": "03_VAULT/models/prism-ml/Ternary-Bonsai-4B-gguf/Ternary-Bonsai-4B-Q2_0.gguf",
+        "port": 8082,
+        "required": true,
+        "device_lane": "system_ram_cpu"
+      },
+      {
+        "name": "mamba7b_gpu_partial",
+        "model_path": "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
+        "port": 8083,
+        "required": false,
+        "device_lane": "nvidia_vram_model_only_preemptible"
+      },
+      {
+        "name": "needle_swarm_6x",
+        "model_path": "03_VAULT/models/needle/needle.pkl",
+        "port": null,
+        "required": true,
+        "device_lane": "system_ram_cpu"
+      },
+      {
+        "name": "indy_reads_watcher",
+        "model_path": "BOOKS/.indy_reads",
+        "port": null,
+        "required": true,
+        "device_lane": "system_ram_cpu"
+      }
+    ],
+    "spark_alias": "needle_0",
+    "legacy_mamba_1_4b_status": "reference_only_not_active_loadout",
+    "mamba_gpu_partial_status": "optional_preemptible"
+  },
+  "current_gpu_probe": {
+    "name": "NVIDIA GeForce GTX 1650",
+    "memory_total_mb": 4096,
+    "memory_used_mb": 1096,
+    "memory_free_mb": 2619,
+    "temperature_c": 53,
+    "utilization_gpu_percent": 0,
+    "source": "nvidia-smi --query-gpu",
+    "updated_at": "2026-05-27T18:52:55.338710Z"
+  }
+}

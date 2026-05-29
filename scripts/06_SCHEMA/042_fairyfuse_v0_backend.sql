@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/042_fairyfuse_v0_backend.sql

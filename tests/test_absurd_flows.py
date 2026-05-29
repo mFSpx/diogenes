@@ -13,6 +13,98 @@ def test_file_kind_and_batch_helpers() -> None:
     assert af.batch([Path("a"), Path("b"), Path("c")], 2) == [[Path("a"), Path("b")], [Path("c")]]
 
 
+def test_batch_by_bytes_aggregates_until_payload_cap() -> None:
+    items = [
+        Path("a.txt"),
+        Path("b.txt"),
+        Path("c.txt"),
+    ]
+    sizes = {
+        "a.txt": 10,
+        "b.txt": 20,
+        "c.txt": 30,
+    }
+
+    groups = af.batch_by_bytes(items, max_bytes=30, size_lookup=lambda p: sizes[p.name])
+
+    assert groups == [[Path("a.txt"), Path("b.txt")], [Path("c.txt")]]
+
+
+def test_process_files_can_cap_payload_bytes(tmp_path, monkeypatch) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    (root / "one.txt").write_bytes(b"aaaa")
+    (root / "two.txt").write_bytes(b"bbbb")
+    (root / "three.txt").write_bytes(b"cc")
+    monkeypatch.setattr(af, "ROOT", root)
+    monkeypatch.setattr(af, "CAS_ROOT", tmp_path / "cas")
+    monkeypatch.setattr(af, "OUT_DIR", tmp_path / "out")
+
+    payload = af.process_files(root, max_files=None, max_bytes=8, chunk_size=64, execute=False)
+
+    assert payload["ok"] is True
+    assert payload["file_count"] == 2
+    assert payload["processed_count"] == 0
+    assert payload["batch_size_final"] == 64
+    assert len(payload["batch_history"]) == 1
+    assert payload["batch_history"][0]["batch_size"] == 2
+    assert payload["batch_history"][0]["batch_bytes"] == 6
+
+
+def test_process_files_can_use_inventory_jsonl_without_rescanning(tmp_path, monkeypatch) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    (root / "keep.txt").write_bytes(b"keep")
+    (root / "skip.bin").write_bytes(b"x" * 11)
+    inventory = tmp_path / "inventory.jsonl"
+    inventory.write_text(
+        "\n".join(
+            [
+                json.dumps({"path": "keep.txt", "size_bytes": 4, "status": "OK"}),
+                json.dumps({"path": "skip.bin", "size_bytes": 11, "status": "OK"}),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(af, "ROOT", root)
+    monkeypatch.setattr(af, "CAS_ROOT", tmp_path / "cas")
+    monkeypatch.setattr(af, "OUT_DIR", tmp_path / "out")
+
+    payload = af.process_files(root, input_jsonl=inventory, max_bytes=10, chunk_size=64, execute=False)
+
+    assert payload["file_count"] == 1
+    assert payload["records"][0]["source_path"].endswith("keep.txt")
+    assert payload["records"][0]["db_action"] == "dry-run"
+
+
+def test_process_files_inventory_jsonl_respects_cursor(tmp_path, monkeypatch) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    for name in ["a.txt", "b.txt", "c.txt"]:
+        (root / name).write_bytes(name.encode("utf-8"))
+    inventory = tmp_path / "inventory.jsonl"
+    inventory.write_text(
+        "\n".join(
+            [
+                json.dumps({"path": "a.txt", "size_bytes": 5, "status": "OK"}),
+                json.dumps({"path": "b.txt", "size_bytes": 5, "status": "OK"}),
+                json.dumps({"path": "c.txt", "size_bytes": 5, "status": "OK"}),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(af, "ROOT", root)
+    monkeypatch.setattr(af, "CAS_ROOT", tmp_path / "cas")
+    monkeypatch.setattr(af, "OUT_DIR", tmp_path / "out")
+
+    payload = af.process_files(root, input_jsonl=inventory, start_after="b.txt", max_bytes=10, chunk_size=64, execute=False)
+
+    assert payload["file_count"] == 1
+    assert payload["records"][0]["source_path"].endswith("c.txt")
+
+
 def test_process_files_dry_run_uses_receipts_without_db(tmp_path, monkeypatch) -> None:
     root = tmp_path / "root"
     root.mkdir()

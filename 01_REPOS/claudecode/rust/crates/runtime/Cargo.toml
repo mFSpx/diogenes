@@ -13,7 +13,11 @@ plugins = { path = "../plugins" }
 regex = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json.workspace = true
-tokio = { version = "1", features = ["io-util", "macros", "process", "rt", "rt-multi-thread", "time"] }
+http = "1"
+hyper-util = { version = "0.1", features = ["tokio"] }
+tokio = { version = "1", features = ["io-util", "macros", "net", "process", "rt", "rt-multi-thread", "time"] }
+tonic = { version = "0.14.6", features = ["transport"] }
+tower = "0.5"
 walkdir = "2"
 
 [lints]

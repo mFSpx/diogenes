@@ -1,5 +1,5 @@
 -- LUCIDOTA control-plane schema.
--- These tables are boring on purpose: DBOS, Clawd, and the future Big Board need
+-- These tables are boring on purpose: ABSURD, Clawd, and the future Big Board need
 -- stable state surfaces before we build richer UI.
 
 CREATE SCHEMA IF NOT EXISTS lucidota_control;

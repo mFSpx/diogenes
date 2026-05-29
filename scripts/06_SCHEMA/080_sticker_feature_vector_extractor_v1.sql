@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/080_sticker_feature_vector_extractor_v1.sql

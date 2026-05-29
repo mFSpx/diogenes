@@ -8,7 +8,7 @@ folder with a manifest trail. There is intentionally no delete mode here.
 """
 from __future__ import annotations
 
-import argparse, hashlib, json, os, shutil
+import argparse, hashlib, json, os, shutil, sys
 from pathlib import Path
 import psycopg
 
@@ -45,8 +45,8 @@ def load_references(conn)->set[str]:
     for sql in queries:
         try:
             refs.update(r[0] for r in conn.execute(sql).fetchall())
-        except Exception:
-            pass
+        except Exception as exc:
+            print(f"warning: CAS reference query failed: {exc}", file=sys.stderr)
     return refs
 
 
@@ -72,7 +72,7 @@ def main()->int:
                 for rec in load_records():
                     if rec.get('sha256') and rec.get('stage') == 'written':
                         journal[rec['sha256']] = rec
-            except Exception:
+            except (OSError, json.JSONDecodeError):
                 journal={}
         row=conn.execute("""
             INSERT INTO lucidota_vault.cas_gc_run (mode,status,detail)

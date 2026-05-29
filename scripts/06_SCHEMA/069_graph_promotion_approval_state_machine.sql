@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/069_graph_promotion_approval_state_machine.sql

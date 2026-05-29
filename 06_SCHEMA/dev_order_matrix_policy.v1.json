@@ -1,0 +1,105 @@
+{
+  "schema": "lucidota.dev_order_matrix_policy.v1",
+  "policy_version": "2026-05-18.dev-order-matrix.v1",
+  "constraint_dictionary": {
+    "A": {
+      "name": "Declarative Contract Mapping",
+      "description": "Define exact JSON/schema/CLI/input/output contracts before implementation claims."
+    },
+    "B": {
+      "name": "Continuous State Validation",
+      "description": "Validate preconditions, intermediate state, and postconditions. Never trust final text alone."
+    },
+    "C": {
+      "name": "Immutable Data Modeling",
+      "description": "Preserve hashes, bytes, IDs, timestamps, lineage, custody, and append-only records."
+    },
+    "D": {
+      "name": "Pure Logic Execution",
+      "description": "Keep deterministic validation logic separate from IO, side effects, DB writes, and CLI glue."
+    },
+    "E": {
+      "name": "Zero-Trust Hardening",
+      "description": "Reject self-report, loose authority, receipt collage, raw graph writes, broad claims, and missing evidence."
+    },
+    "F": {
+      "name": "Idempotent Infrastructure",
+      "description": "Reruns must not duplicate truth, mutate canonical graph unexpectedly, or regenerate lineage incorrectly."
+    },
+    "G": {
+      "name": "Deep Telemetry",
+      "description": "Emit compact receipts with commands run, rc, files read/written, evidence refs, blockers, and verdict."
+    },
+    "H": {
+      "name": "Chaos & Fault Tolerance",
+      "description": "Test missing files, malformed receipts, duplicate IDs, swapped children, dirty repo, failed DB, and partial runs."
+    }
+  },
+  "canonical_task_orders": {
+    "T1": {
+      "task_name": "Golden Path Regression",
+      "constraint_order": ["A", "B", "C", "D", "E", "F", "G", "H"]
+    },
+    "T2": {
+      "task_name": "Direct Graph Write Fence",
+      "constraint_order": ["D", "F", "E", "A", "C", "B", "G", "H"]
+    },
+    "T3": {
+      "task_name": "Spine Authority Registry",
+      "constraint_order": ["G", "C", "H", "B", "F", "A", "E", "D"]
+    },
+    "T4": {
+      "task_name": "Same-Lineage Validator",
+      "constraint_order": ["B", "H", "A", "F", "D", "E", "C", "G"]
+    },
+    "T5": {
+      "task_name": "Status Ledger Evidence Gate",
+      "constraint_order": ["E", "G", "D", "C", "A", "H", "F", "B"]
+    },
+    "T6": {
+      "task_name": "Proof Kernel v1",
+      "constraint_order": ["H", "B", "F", "E", "G", "D", "A", "C"]
+    },
+    "T7": {
+      "task_name": "Dev Order Matrix Enforcement",
+      "constraint_order": ["F", "A", "E", "G", "B", "C", "H", "D"]
+    }
+  },
+  "matrix_trace_schema": {
+    "required_task_fields": ["task_id", "task_name", "constraint_order", "constraint_trace"],
+    "required_constraint_fields": ["constraint", "name", "status", "files_changed", "tests", "commands", "receipt_fields", "failure_conditions", "evidence", "blocker"],
+    "evidence_link_fields": ["files_changed", "tests", "commands", "receipt_fields", "failure_conditions"],
+    "allowed_statuses": ["applied", "blocked", "not_applicable"]
+  },
+  "required_receipt_fields": [
+    "schema",
+    "verdict",
+    "matrix_trace",
+    "commands_run",
+    "files_changed",
+    "receipts_written",
+    "canonical_graph_materialization",
+    "canonical_graph_writes"
+  ],
+  "failure_rules": [
+    "matrix_trace must be a JSON array, not prose",
+    "all T1-T7 task groups must be present exactly once",
+    "each task constraint_order must match canonical_task_orders exactly",
+    "each task must list A-H exactly once in constraint_trace",
+    "applied constraints require at least one evidence link field",
+    "blocked and not_applicable constraints require a concrete blocker/reason",
+    "PASS is forbidden when matrix_trace is incomplete",
+    "T7 PASS requires wrapper/checker/gate/runner/test integration evidence"
+  ],
+  "t7_required_paths": [
+    "scripts/dev_order_matrix_wrapper.py",
+    "scripts/matrix_trace_checker.py",
+    "scripts/dev_order_gate.py",
+    "scripts/run_dev_order_methodology_checks.py",
+    "tests/test_dev_order_matrix_wrapper.py",
+    "tests/test_matrix_trace_checker.py",
+    "tests/test_dev_order_gate.py"
+  ],
+  "canonical_graph_materialization_allowed_by_default": false,
+  "canonical_graph_writes_allowed_by_default": false
+}

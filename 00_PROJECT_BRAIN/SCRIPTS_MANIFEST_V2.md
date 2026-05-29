@@ -1,0 +1,462 @@
+# LUCIDOTA Scripts Manifest v2
+
+Generated: 2026-05-20
+
+## Summary
+- **total_files**: 823
+- **python_files**: 409
+- **shell_files**: 24
+- **legacy_files**: 173
+- **good**: 758
+- **needs_hardening**: 55
+- **trash_or_legacy**: 10
+- **parse_fail_py**: 0
+- **with_missing_refs**: 55
+
+## Top Risk Scripts (lowest health score)
+- `scripts/legacy/diogenes_30_phase_audit.py` score=0 lines=725 flags=daemon_word,dbos_word,todo missing_refs=8
+- `scripts/legacy/DBOS_LEGACY_ARCHIVE_MANIFEST.json` score=0 lines=421 flags=legacy_word missing_refs=98
+- `scripts/legacy/lucidota_ruthless_gauntlet.py` score=2 lines=200 flags=daemon_word,dbos_word missing_refs=6
+- `scripts/legacy/dbos_consume_one.py` score=2 lines=102 flags=dbos_word missing_refs=6
+- `scripts/updated_abcd_sequence_runner.py` score=19 lines=584 flags=sleep_loop,while_true missing_refs=5
+- `scripts/legacy/work_order_loader.py` score=32 lines=78 flags=dbos_word missing_refs=4
+- `scripts/krampuschewing_role_discovery.py` score=50 lines=223 flags=hardcoded_home missing_refs=3
+- `scripts/phase05_workflow_blueprint_synthesizer.py` score=55 lines=379 flags=none missing_refs=3
+- `scripts/legacy/boring_beast_loop_runner.py` score=62 lines=229 flags=dbos_word missing_refs=2
+- `scripts/legacy/dbos_worker_heartbeat_probe.py` score=62 lines=48 flags=dbos_word missing_refs=2
+- `scripts/tickletrunk_scan.py` score=70 lines=662 flags=none missing_refs=2
+- `scripts/lucidota_operator_demo.py` score=70 lines=24 flags=none missing_refs=2
+- `scripts/legacy/execution_record_writer.py` score=73 lines=191 flags=shell_true missing_refs=1
+- `scripts/legacy/chrono_queue_event_bridge.py` score=77 lines=248 flags=dbos_word,sleep_loop missing_refs=1
+- `scripts/legacy/dbos_document_parse_worker.py` score=77 lines=248 flags=dbos_word missing_refs=1
+- `scripts/legacy/phase05_workflow_blueprint_generator.py` score=77 lines=204 flags=dbos_word missing_refs=1
+- `scripts/legacy/chrono_service_health_recorder.py` score=77 lines=197 flags=daemon_word,dbos_word missing_refs=1
+- `scripts/legacy/__pycache__/boring_beast_loop_runner.cpython-312.pyc` score=77 lines=190 flags=dbos_word,legacy_word missing_refs=1
+- `scripts/legacy/dbos_dead_letter_review.py` score=77 lines=181 flags=dbos_word missing_refs=1
+- `scripts/legacy/intake_custody_job_bridge.py` score=77 lines=172 flags=dbos_word missing_refs=1
+- `scripts/legacy/dbos_retry_dead_letter_probe.py` score=77 lines=122 flags=dbos_word missing_refs=1
+- `scripts/legacy/dbos_worker_harness.py` score=77 lines=91 flags=dbos_word missing_refs=1
+- `scripts/legacy/dbos_corpus_job_bridge.py` score=77 lines=70 flags=dbos_word missing_refs=1
+- `scripts/legacy/marrow_dbos_bridge.py` score=77 lines=67 flags=dbos_word missing_refs=1
+- `scripts/legacy/dbos_retry_policy.py` score=77 lines=53 flags=dbos_word missing_refs=1
+- `scripts/legacy/conversation_command_idempotency_probe.py` score=77 lines=51 flags=dbos_word missing_refs=1
+- `scripts/legacy/conversation_command_status_worker.py` score=77 lines=47 flags=dbos_word missing_refs=1
+- `scripts/legacy/dbos_queue_metrics_exporter.py` score=77 lines=45 flags=dbos_word missing_refs=1
+- `scripts/unified_absurd_ingest_worker.py` score=79 lines=1995 flags=daemon_word,sleep_loop,while_true missing_refs=1
+- `scripts/indy_reads.py` score=79 lines=658 flags=hardcoded_home,os_system,while_true missing_refs=0
+- `scripts/lucidota_414_game.py` score=79 lines=258 flags=hardcoded_home,os_system,while_true missing_refs=0
+- `scripts/lucidota_status_ledger.py` score=80 lines=418 flags=daemon_word,hardcoded_home missing_refs=1
+- `scripts/run_instruction_hygiene.py` score=80 lines=318 flags=daemon_word,legacy_word,shell_true missing_refs=0
+- `scripts/hypertimeline_engine.py` score=81 lines=646 flags=hardcoded_home,legacy_word,while_true missing_refs=0
+- `scripts/bytewax_abductive_blender.py` score=85 lines=1353 flags=sleep_loop missing_refs=1
+- `scripts/__pycache__/unified_absurd_ingest_worker.cpython-312.pyc` score=85 lines=1084 flags=daemon_word missing_refs=1
+- `scripts/__pycache__/bytewax_abductive_blender.cpython-312.pyc` score=85 lines=926 flags=none missing_refs=1
+- `scripts/graph_materialization_helper.py` score=85 lines=447 flags=none missing_refs=1
+- `scripts/cep_full_e2e.py` score=85 lines=341 flags=none missing_refs=1
+- `scripts/legacy/graph_promotion_materialize.py` score=85 lines=340 flags=none missing_refs=1
+
+## Largest Scripts (complexity hotspots)
+- `scripts/unified_absurd_ingest_worker.py` lines=1995 score=79
+- `scripts/legacy/lucidota_artifact_ingest.py` lines=1641 score=100
+- `scripts/korpus_krampii.py` lines=1518 score=92
+- `scripts/legacy/korpus_krampii.py` lines=1517 score=92
+- `scripts/bytewax_abductive_blender.py` lines=1353 score=85
+- `scripts/lucidota_ingest_watchdog.py` lines=1249 score=92
+- `scripts/__pycache__/unified_absurd_ingest_worker.cpython-312.pyc` lines=1084 score=85
+- `scripts/__pycache__/lucidota_artifact_ingest.cpython-312.pyc` lines=1009 score=95
+- `scripts/legacy/__pycache__/lucidota_artifact_ingest.cpython-312.pyc` lines=1009 score=95
+- `scripts/legacy/__pycache__/korpus_krampii.cpython-312.pyc` lines=996 score=92
+- `scripts/boring_beast.py` lines=995 score=92
+- `scripts/__pycache__/korpus_krampii.cpython-312.pyc` lines=990 score=92
+- `scripts/legacy/boring_beast.py` lines=958 score=92
+- `scripts/__pycache__/bytewax_abductive_blender.cpython-312.pyc` lines=926 score=85
+- `scripts/__pycache__/lucidota_ingest_watchdog.cpython-312.pyc` lines=799 score=92
+- `scripts/__pycache__/boring_beast.cpython-312.pyc` lines=757 score=92
+- `scripts/ahoy_million_replay.py` lines=753 score=100
+- `scripts/legacy/__pycache__/boring_beast.cpython-312.pyc` lines=736 score=92
+- `scripts/legacy/diogenes_30_phase_audit.py` lines=725 score=0
+- `scripts/chrono_lane_split_projection_gate.py` lines=685 score=100
+- `scripts/legacy/lucidota_chatdump_timeline.py` lines=668 score=94
+- `scripts/tickletrunk_scan.py` lines=662 score=70
+- `scripts/indy_reads.py` lines=658 score=79
+- `scripts/absurd_river_worker.py` lines=654 score=100
+- `scripts/legacy/dbos_river_worker.py` lines=654 score=92
+- `scripts/hypertimeline_engine.py` lines=646 score=81
+- `scripts/legacy/lucidota_survey.py` lines=618 score=100
+- `scripts/lucidota_go_ingest.py` lines=614 score=100
+- `scripts/legacy/lucidota_indy_library_ingest.py` lines=613 score=100
+- `scripts/matrix_stream_executor.py` lines=590 score=94
+- `scripts/updated_abcd_sequence_runner.py` lines=584 score=19
+- `scripts/__pycache__/hypertimeline_engine.cpython-312.pyc` lines=581 score=87
+- `scripts/legacy/lucidota_dbos_brain_child.py` lines=516 score=92
+- `scripts/krampus_rechronologize.py` lines=511 score=100
+- `scripts/legacy/lucidota_commdump_timeline.py` lines=510 score=94
+- `scripts/lucidota_omni_front_sprint_orchestrator.py` lines=489 score=100
+- `scripts/__pycache__/indy_reads.cpython-312.pyc` lines=477 score=95
+- `scripts/legacy/lucidota_indy_brief.py` lines=475 score=100
+- `scripts/signal_aggregator.py` lines=465 score=100
+- `scripts/krampuschewing_archive_unpack.py` lines=462 score=94
+
+## Missing Script Reference Findings
+- `scripts/__pycache__/bytewax_abductive_blender.cpython-312.pyc` -> missing: scripts/graph_promotion_evidence_resolver.py
+- `scripts/__pycache__/post_gate_target_selector.cpython-312.pyc` -> missing: scripts/post_gate_target_selector.py
+- `scripts/__pycache__/unified_absurd_ingest_worker.cpython-312.pyc` -> missing: scripts/graph_promotion_evidence_resolver.py
+- `scripts/boring_beast_full_e2e.py` -> missing: scripts/runtime_status_ledger_updater.py
+- `scripts/bytewax_abductive_blender.py` -> missing: scripts/graph_promotion_evidence_resolver.py
+- `scripts/cep_full_e2e.py` -> missing: scripts/conversation_command_status_worker.py
+- `scripts/graph_materialization_helper.py` -> missing: scripts/graph_promotion_materialize.py
+- `scripts/graph_materialization_rollback_probe.py` -> missing: scripts/graph_promotion_materialize.py
+- `scripts/graph_promotion_full_e2e.py` -> missing: scripts/graph_promotion_materialize.py
+- `scripts/krampuschewing_role_discovery.py` -> missing: scripts/lucidota_chatdump_timeline.py, scripts/lucidota_commdump_timeline.py, scripts/lucidota_hard_truth_math.py
+- `scripts/legacy/DBOS_LEGACY_ARCHIVE_MANIFEST.json` -> missing: scripts/absurd_worker_script.py, scripts/absurd_worker_spine.py, scripts/absured_worker_script.py, scripts/agentsi.py, scripts/audit_verdict_enforcer.py, scripts/boring_beast_event_chain_verify.py, scripts/boring_beast_loop_runner.py, scripts/catchme_context_guard.py, scripts/catchme_sensitivity_map.py, scripts/cep_graph_packet_stager.py, scripts/chrono_daemon_activation_refresher.py, scripts/chrono_queue_event_bridge.py, scripts/chrono_service_health_recorder.py, scripts/conversation_command_idempotency_probe.py, scripts/conversation_command_status_worker.py, scripts/daemon_supervision_preflight.py, scripts/dbos_chrono_worker.py, scripts/dbos_consume_one.py, scripts/dbos_corpus_job_bridge.py, scripts/dbos_dead_letter_review.py, scripts/dbos_document_parse_worker.py, scripts/dbos_fault_injector.py, scripts/dbos_graph_promotion_worker.py, scripts/dbos_intake_worker.py, scripts/dbos_krampus_worker.py, scripts/dbos_queue_hardening_check.py, scripts/dbos_queue_metrics_exporter.py, scripts/dbos_queue_scheduler_probe.py, scripts/dbos_queue_soak_test.py, scripts/dbos_queue_spine.py, scripts/dbos_retry_dead_letter_probe.py, scripts/dbos_retry_policy.py, scripts/dbos_river_worker.py, scripts/dbos_skip_locked_contention_probe.py, scripts/dbos_stale_lock_recovery_probe.py, scripts/dbos_surface_cep_worker.py, scripts/dbos_transition_law_probe.py, scripts/dbos_worker_contract_registry_check.py, scripts/dbos_worker_harness.py, scripts/dbos_worker_heartbeat_probe.py, scripts/dbos_worker_supervisor_preflight.py, scripts/demem_runtime_guard.py, scripts/diogenes_30_phase_audit.py, scripts/execution_record_writer.py, scripts/graph_promotion_evidence_resolver.py, scripts/graph_promotion_materialize.py, scripts/idempotency_duplicate_probe.py, scripts/intake_custody_job_bridge.py, scripts/lucidota_artifact_ingest.py, scripts/lucidota_basic_workflows.py, scripts/lucidota_big_board.py, scripts/lucidota_body_capture.py, scripts/lucidota_bytewax_mini.py, scripts/lucidota_chatdump_timeline.py, scripts/lucidota_clawd_runtime.py, scripts/lucidota_commdump_timeline.py, scripts/lucidota_dbos_big_board.py, scripts/lucidota_dbos_brain_child.py, scripts/lucidota_dbos_dispatch.py, scripts/lucidota_dbos_drive_map.py, scripts/lucidota_dbos_external_draft.py, scripts/lucidota_dbos_replay.py, scripts/lucidota_dbos_signoff.py, scripts/lucidota_dbos_smoke.py, scripts/lucidota_dbos_survey.py, scripts/lucidota_dbos_watcher.py, scripts/lucidota_dev_preflight.py, scripts/lucidota_hard_truth_math.py, scripts/lucidota_hop_pivot.py, scripts/lucidota_indy_brief.py, scripts/lucidota_indy_library_ingest.py, scripts/lucidota_indy_polycareer.py, scripts/lucidota_indy_reads_watcher.py, scripts/lucidota_indy_regression.py, scripts/lucidota_litellm_bridge.py, scripts/lucidota_model_artifact_readiness.py, scripts/lucidota_progress_monitor.py, scripts/lucidota_river_reflex.py, scripts/lucidota_ruthless_gauntlet.py, scripts/lucidota_source_policy_seed.py, scripts/lucidota_stream_river_worker.sh, scripts/lucidota_survey.py, scripts/lucidota_treelite_router.py, scripts/lucidota_wake_bus.py, scripts/lucidota_workflow_registry.py, scripts/marrow_cep_bridge.py, scripts/marrow_dbos_bridge.py, scripts/phase05_brain_archaeology_prep.py, scripts/phase05_workflow_blueprint_generator.py, scripts/post_gate_target_selector.py, scripts/production_readiness_eval.py, scripts/runtime_status_ledger_updater.py, scripts/simplemem_promotion_bridge.py, scripts/system_state_desync_detector.py, scripts/system_telemetry_exporter.py, scripts/tracer_claim_packet_bridge.py, scripts/work_order_loader.py, scripts/worker_command_registry.py
+- `scripts/legacy/__pycache__/boring_beast_loop_runner.cpython-312.pyc` -> missing: scripts/boring_beast_loop_runner.py
+- `scripts/legacy/__pycache__/execution_record_writer.cpython-312.pyc` -> missing: scripts/execution_record_writer.py
+- `scripts/legacy/__pycache__/post_gate_target_selector.cpython-312.pyc` -> missing: scripts/post_gate_target_selector.py
+- `scripts/legacy/audit_verdict_enforcer.py` -> missing: scripts/audit_verdict_enforcer.py
+- `scripts/legacy/boring_beast_loop_runner.py` -> missing: scripts/boring_beast.py;scripts/boring_beast_loop_runner.py, scripts/boring_beast_loop_runner.py
+- `scripts/legacy/catchme_context_guard.py` -> missing: scripts/catchme_context_guard.py
+- `scripts/legacy/cep_graph_packet_stager.py` -> missing: scripts/cep_graph_packet_stager.py
+- `scripts/legacy/chrono_queue_event_bridge.py` -> missing: scripts/chrono_queue_event_bridge.py
+- `scripts/legacy/chrono_service_health_recorder.py` -> missing: scripts/chrono_service_health_recorder.py
+- `scripts/legacy/conversation_command_idempotency_probe.py` -> missing: scripts/conversation_command_idempotency_probe.py
+- `scripts/legacy/conversation_command_status_worker.py` -> missing: scripts/conversation_command_status_worker.py
+- `scripts/legacy/daemon_supervision_preflight.py` -> missing: scripts/lucidota_stream_river_worker.sh
+- `scripts/legacy/dbos_consume_one.py` -> missing: scripts/chrono_queue_event_bridge.py, scripts/dbos_consume_one.py, scripts/dbos_krampus_worker.py, scripts/dbos_river_worker.py, scripts/execution_record_writer.py, scripts/tracer_claim_packet_bridge.py
+- `scripts/legacy/dbos_corpus_job_bridge.py` -> missing: scripts/dbos_corpus_job_bridge.py
+- `scripts/legacy/dbos_dead_letter_review.py` -> missing: scripts/dbos_dead_letter_review.py
+- `scripts/legacy/dbos_document_parse_worker.py` -> missing: scripts/dbos_document_parse_worker.py
+- `scripts/legacy/dbos_queue_metrics_exporter.py` -> missing: scripts/dbos_queue_metrics_exporter.py
+- `scripts/legacy/dbos_retry_dead_letter_probe.py` -> missing: scripts/dbos_retry_dead_letter_probe.py
+- `scripts/legacy/dbos_retry_policy.py` -> missing: scripts/dbos_retry_policy.py
+- `scripts/legacy/dbos_worker_harness.py` -> missing: scripts/chrono_queue_event_bridge.py
+- `scripts/legacy/dbos_worker_heartbeat_probe.py` -> missing: scripts/dbos_consume_one.py, scripts/dbos_worker_heartbeat_probe.py
+- `scripts/legacy/demem_runtime_guard.py` -> missing: scripts/demem_runtime_guard.py
+- `scripts/legacy/diogenes_30_phase_audit.py` -> missing: scripts/catchme_context_guard.py, scripts/dbos_document_parse_worker.py, scripts/dbos_krampus_worker.py, scripts/dbos_queue_spine.py, scripts/dbos_river_worker.py, scripts/dbos_surface_cep_worker.py, scripts/demem_runtime_guard.py, scripts/phase05_brain_archaeology_prep.py
+- `scripts/legacy/execution_record_writer.py` -> missing: scripts/execution_record_writer.py
+- `scripts/legacy/graph_promotion_materialize.py` -> missing: scripts/graph_promotion_materialize.py
+- `scripts/legacy/intake_custody_job_bridge.py` -> missing: scripts/intake_custody_job_bridge.py
+- `scripts/legacy/lucidota_dev_preflight.py` -> missing: scripts/lucidota_dev_preflight.py
+- `scripts/legacy/lucidota_ruthless_gauntlet.py` -> missing: scripts/*.py, scripts/dbos_corpus_job_bridge.py, scripts/dbos_krampus_worker.py, scripts/dbos_queue_spine.py, scripts/diogenes_30_phase_audit.py, scripts/lucidota_ruthless_gauntlet.py
+- `scripts/legacy/marrow_cep_bridge.py` -> missing: scripts/marrow_cep_bridge.py
+- `scripts/legacy/marrow_dbos_bridge.py` -> missing: scripts/marrow_dbos_bridge.py
+- `scripts/legacy/phase05_brain_archaeology_prep.py` -> missing: scripts/catchme_sensitivity_map.py
+- `scripts/legacy/phase05_workflow_blueprint_generator.py` -> missing: scripts/phase05_workflow_blueprint_generator.py
+- `scripts/legacy/post_gate_target_selector.py` -> missing: scripts/post_gate_target_selector.py
+- `scripts/legacy/tracer_claim_packet_bridge.py` -> missing: scripts/tracer_claim_packet_bridge.py
+- `scripts/legacy/work_order_loader.py` -> missing: scripts/chrono_queue_event_bridge.py, scripts/dbos_krampus_worker.py, scripts/dbos_river_worker.py, scripts/tracer_claim_packet_bridge.py
+- `scripts/lucidota_mega_gate.py` -> missing: scripts/post_gate_target_selector.py
+- `scripts/lucidota_operator_demo.py` -> missing: scripts/lucidota_indy_brief.py, scripts/lucidota_survey.py
+- `scripts/lucidota_regression_dashboard.py` -> missing: scripts/lucidota_indy_regression.py
+- `scripts/lucidota_status_ledger.py` -> missing: scripts/post_gate_target_selector.py
+- `scripts/phase05_workflow_blueprint_synthesizer.py` -> missing: scripts/absurd_consume_one.py, scripts/graph_promotion_materialize.py, scripts/work_order_loader.py
+- `scripts/recovery_matrix.py` -> missing: scripts/absurd_stale_lock_recovery_probe.py
+- `scripts/tickletrunk_scan.py` -> missing: scripts/lucidota_body_capture.py, scripts/lucidota_survey.py
+- `scripts/unified_absurd_ingest_worker.py` -> missing: scripts/graph_promotion_evidence_resolver.py
+- `scripts/updated_abcd_sequence_runner.py` -> missing: scripts/boring_beast_event_chain_verify.py, scripts/post_gate_target_selector.py, scripts/production_readiness_eval.py, scripts/system_state_desync_detector.py, scripts/system_telemetry_exporter.py
+
+## Bucketed Inventory
+
+### good
+- `scripts/__pycache__/absurd_chrono_worker.cpython-312.pyc` (score 100, lines 241)
+- `scripts/__pycache__/absurd_corpus_job_bridge.cpython-312.pyc` (score 100, lines 89)
+- `scripts/__pycache__/absurd_graph_promotion_worker.cpython-312.pyc` (score 100, lines 73)
+- `scripts/__pycache__/absurd_intake_worker.cpython-312.pyc` (score 100, lines 87)
+- `scripts/__pycache__/absurd_queue_spine.cpython-312.pyc` (score 100, lines 220)
+- `scripts/__pycache__/absurd_river_worker.cpython-312.pyc` (score 100, lines 412)
+- `scripts/__pycache__/absurd_worker_runner.cpython-312.pyc` (score 100, lines 34)
+- `scripts/__pycache__/absurd_worker_script.cpython-312.pyc` (score 92, lines 122)
+- `scripts/__pycache__/absurd_worker_spine.cpython-312.pyc` (score 100, lines 147)
+- `scripts/__pycache__/absured_worker_script.cpython-312.pyc` (score 92, lines 122)
+- `scripts/__pycache__/activity_tree_ingest_dry_run.cpython-312.pyc` (score 100, lines 46)
+- `scripts/__pycache__/ahoy_abba3_check.cpython-312.pyc` (score 100, lines 42)
+- `scripts/__pycache__/ahoy_absurd_workflow.cpython-312.pyc` (score 100, lines 193)
+- `scripts/__pycache__/ahoy_apply_xgboost_treelite.cpython-312.pyc` (score 100, lines 19)
+- `scripts/__pycache__/ahoy_audit_dataset.cpython-312.pyc` (score 100, lines 21)
+- `scripts/__pycache__/ahoy_build_strategy_dataset.cpython-312.pyc` (score 100, lines 24)
+- `scripts/__pycache__/ahoy_explain_strategy_model.cpython-312.pyc` (score 100, lines 26)
+- `scripts/__pycache__/ahoy_export_strategy_treelite.cpython-312.pyc` (score 100, lines 20)
+- `scripts/__pycache__/ahoy_export_treelite.cpython-312.pyc` (score 100, lines 25)
+- `scripts/__pycache__/ahoy_ingest_sources.cpython-312.pyc` (score 100, lines 122)
+- `scripts/__pycache__/ahoy_million_replay.cpython-312.pyc` (score 100, lines 456)
+- `scripts/__pycache__/ahoy_rule_audit.cpython-312.pyc` (score 100, lines 56)
+- `scripts/__pycache__/ahoy_run_batch.cpython-312.pyc` (score 100, lines 126)
+- `scripts/__pycache__/ahoy_run_one_game.cpython-312.pyc` (score 100, lines 25)
+- `scripts/__pycache__/ahoy_strategy_ontology_adapter.cpython-312.pyc` (score 100, lines 49)
+- `scripts/__pycache__/ahoy_train_offline_tree.cpython-312.pyc` (score 100, lines 28)
+- `scripts/__pycache__/ahoy_train_smuggler_river.cpython-312.pyc` (score 100, lines 42)
+- `scripts/__pycache__/ahoy_train_strategy_xgboost.cpython-312.pyc` (score 100, lines 20)
+- `scripts/__pycache__/ahoy_train_xgboost_shap.cpython-312.pyc` (score 100, lines 18)
+- `scripts/__pycache__/authority_class_mapper.cpython-312.pyc` (score 100, lines 115)
+- `scripts/__pycache__/behavioral_memory_dry_run.cpython-312.pyc` (score 100, lines 38)
+- `scripts/__pycache__/boring_beast.cpython-312.pyc` (score 92, lines 757)
+- `scripts/__pycache__/boring_beast_event_chain_verify.cpython-312.pyc` (score 100, lines 39)
+- `scripts/__pycache__/boring_beast_full_e2e.cpython-312.pyc` (score 100, lines 52)
+- `scripts/__pycache__/bytewax_chrono_lane_normalizer.cpython-312.pyc` (score 92, lines 131)
+- `scripts/__pycache__/canonical_graph_write_scanner.cpython-312.pyc` (score 92, lines 72)
+- `scripts/__pycache__/case_dashboard_data.cpython-312.pyc` (score 100, lines 56)
+- `scripts/__pycache__/case_packet_compiler.cpython-312.pyc` (score 95, lines 55)
+- `scripts/__pycache__/case_packet_renderer.cpython-312.pyc` (score 100, lines 21)
+- `scripts/__pycache__/case_pipeline_dispatch.cpython-312.pyc` (score 100, lines 49)
+- `scripts/__pycache__/case_workspace.cpython-312.pyc` (score 95, lines 42)
+- `scripts/__pycache__/catchme_scope_contract_dry_run.cpython-312.pyc` (score 100, lines 35)
+- `scripts/__pycache__/cep_builder.cpython-312.pyc` (score 100, lines 20)
+- `scripts/__pycache__/cep_full_e2e.cpython-312.pyc` (score 100, lines 129)
+- `scripts/__pycache__/cep_to_kernel_route.cpython-312.pyc` (score 100, lines 14)
+- `scripts/__pycache__/check_all_lucidota_services.cpython-312.pyc` (score 100, lines 42)
+- `scripts/__pycache__/chroma_gliner_bounded_probe.cpython-312.pyc` (score 100, lines 143)
+- `scripts/__pycache__/chrono_audit_db_report.cpython-312.pyc` (score 100, lines 33)
+- `scripts/__pycache__/chrono_claim_chain_replay_audit_gate.cpython-312.pyc` (score 100, lines 49)
+- `scripts/__pycache__/chrono_conservation_verify.cpython-312.pyc` (score 100, lines 212)
+- `scripts/__pycache__/chrono_dead_letter_replay.cpython-312.pyc` (score 100, lines 73)
+- `scripts/__pycache__/chrono_freeze_mtime.cpython-312.pyc` (score 100, lines 122)
+- `scripts/__pycache__/chrono_from_inventory.cpython-312.pyc` (score 95, lines 35)
+- `scripts/__pycache__/chrono_full_conservation_gate.cpython-312.pyc` (score 100, lines 50)
+- `scripts/__pycache__/chrono_lane_split_projection_gate.cpython-312.pyc` (score 100, lines 394)
+- `scripts/__pycache__/chrono_ledger_duplicate_reclaimer.cpython-312.pyc` (score 100, lines 239)
+- `scripts/__pycache__/chrono_missed_event_simulation.cpython-312.pyc` (score 100, lines 55)
+- `scripts/__pycache__/chrono_mtime_freeze_discrepancy.cpython-312.pyc` (score 100, lines 53)
+- `scripts/__pycache__/chrono_mtime_snapshot_audit.cpython-312.pyc` (score 100, lines 63)
+- `scripts/__pycache__/chrono_phase_c_conservation_report.cpython-312.pyc` (score 100, lines 220)
+- `scripts/__pycache__/chrono_projection_claim_verifier.cpython-312.pyc` (score 100, lines 41)
+- `scripts/__pycache__/chrono_ranking_pass.cpython-312.pyc` (score 100, lines 64)
+- `scripts/__pycache__/chrono_replay_cursor_validator.cpython-312.pyc` (score 100, lines 66)
+- `scripts/__pycache__/chrono_service_activation_report.cpython-312.pyc` (score 100, lines 78)
+- `scripts/__pycache__/chrono_snapshot_line_slicer.cpython-312.pyc` (score 100, lines 117)
+- `scripts/__pycache__/chrono_source_trust_validator.cpython-312.pyc` (score 100, lines 41)
+- `scripts/__pycache__/chrono_temporal_claim_invalidate.cpython-312.pyc` (score 100, lines 63)
+- `scripts/__pycache__/chrono_temporal_conflict_detector.cpython-312.pyc` (score 100, lines 48)
+- `scripts/__pycache__/chrono_timeline_projection_refresh.cpython-312.pyc` (score 100, lines 53)
+- `scripts/__pycache__/chunk_to_staging.cpython-312.pyc` (score 95, lines 33)
+- `scripts/__pycache__/ckdog_kernel_events.cpython-312.pyc` (score 100, lines 19)
+- `scripts/__pycache__/ckdog_kernel_route_plan.cpython-312.pyc` (score 100, lines 26)
+- `scripts/__pycache__/claim_clusterer.cpython-312.pyc` (score 100, lines 17)
+- `scripts/__pycache__/claim_support_score.cpython-312.pyc` (score 100, lines 33)
+- `scripts/__pycache__/claim_table_compiler.cpython-312.pyc` (score 100, lines 46)
+- `scripts/__pycache__/content_store.cpython-312.pyc` (score 100, lines 32)
+- `scripts/__pycache__/contradiction_report.cpython-312.pyc` (score 100, lines 30)
+- `scripts/__pycache__/control_packet_ledger.cpython-312.pyc` (score 100, lines 21)
+- `scripts/__pycache__/conversation_command_accept_worker.cpython-312.pyc` (score 100, lines 170)
+- `scripts/__pycache__/cruelty_protocols_guard.cpython-312.pyc` (score 100, lines 65)
+- `scripts/__pycache__/daemon_supervision_preflight.cpython-312.pyc` (score 100, lines 168)
+- `scripts/__pycache__/decision_boundary_memory_dry_run.cpython-312.pyc` (score 100, lines 35)
+- `scripts/__pycache__/demem_surface_boundary_bridge_dry_run.cpython-312.pyc` (score 100, lines 34)
+- `scripts/__pycache__/dev_order_gate.cpython-312.pyc` (score 100, lines 76)
+- `scripts/__pycache__/dev_order_matrix_wrapper.cpython-312.pyc` (score 100, lines 131)
+- `scripts/__pycache__/diogenes_stub_kernel.cpython-312.pyc` (score 100, lines 73)
+- `scripts/__pycache__/document_claim_packet_worker.cpython-312.pyc` (score 100, lines 212)
+- `scripts/__pycache__/document_parse_bakeoff.cpython-312.pyc` (score 100, lines 59)
+- `scripts/__pycache__/document_parse_ingest.cpython-312.pyc` (score 100, lines 85)
+- `scripts/__pycache__/document_parse_router.cpython-312.pyc` (score 95, lines 50)
+- `scripts/__pycache__/durable_workflow_decision_check.cpython-312.pyc` (score 92, lines 75)
+- `scripts/__pycache__/entity_candidate_registry.cpython-312.pyc` (score 100, lines 23)
+- `scripts/__pycache__/epistemic_trace_dry_run.cpython-312.pyc` (score 100, lines 31)
+- `scripts/__pycache__/event_candidate_registry.cpython-312.pyc` (score 95, lines 23)
+- `scripts/__pycache__/experienced_colleague_eval_seed_dry_run.cpython-312.pyc` (score 100, lines 30)
+- `scripts/__pycache__/export_bundle.cpython-312.pyc` (score 100, lines 37)
+- `scripts/__pycache__/fast_recall_scout_dry_run.cpython-312.pyc` (score 100, lines 52)
+- `scripts/__pycache__/gauntlet_state_promoter.cpython-312.pyc` (score 100, lines 163)
+- `scripts/__pycache__/generate_lucidota_architecture_manifest.cpython-312.pyc` (score 100, lines 35)
+- `scripts/__pycache__/gliner_claim_packet_dry_run.cpython-312.pyc` (score 100, lines 50)
+- `scripts/__pycache__/golden_path_regression_gate.cpython-312.pyc` (score 100, lines 92)
+- `scripts/__pycache__/gpu_runtime_budget.cpython-312.pyc` (score 100, lines 10)
+- `scripts/__pycache__/graph_candidate.cpython-312.pyc` (score 95, lines 43)
+- `scripts/__pycache__/graph_canonical_mutation_detector.cpython-312.pyc` (score 100, lines 54)
+- `scripts/__pycache__/graph_edge_materialize.cpython-312.pyc` (score 100, lines 60)
+- `scripts/__pycache__/graph_edge_write_blocker_probe.cpython-312.pyc` (score 100, lines 41)
+- `scripts/__pycache__/graph_item_approval_guard_probe.cpython-312.pyc` (score 100, lines 38)
+- `scripts/__pycache__/graph_journal_completeness_check.cpython-312.pyc` (score 100, lines 87)
+- `scripts/__pycache__/graph_journal_replay_audit.cpython-312.pyc` (score 100, lines 43)
+- `scripts/__pycache__/graph_materialization_helper.cpython-312.pyc` (score 100, lines 215)
+- `scripts/__pycache__/graph_materialization_receipt_query.cpython-312.pyc` (score 100, lines 58)
+- `scripts/__pycache__/graph_materialization_rollback_probe.cpython-312.pyc` (score 100, lines 35)
+- `scripts/__pycache__/graph_promotion.cpython-312.pyc` (score 100, lines 19)
+- `scripts/__pycache__/graph_promotion_approval_worker.cpython-312.pyc` (score 100, lines 175)
+- `scripts/__pycache__/graph_promotion_dry_run.cpython-312.pyc` (score 100, lines 74)
+- `scripts/__pycache__/graph_promotion_execute.cpython-312.pyc` (score 100, lines 122)
+- `scripts/__pycache__/graph_promotion_full_e2e.cpython-312.pyc` (score 100, lines 57)
+- `scripts/__pycache__/graph_promotion_gate.cpython-312.pyc` (score 100, lines 134)
+- `scripts/__pycache__/graph_promotion_orphan_detector.cpython-312.pyc` (score 100, lines 40)
+- `scripts/__pycache__/graph_promotion_packet_reviewer.cpython-312.pyc` (score 100, lines 50)
+- `scripts/__pycache__/graph_promotion_policy_check.cpython-312.pyc` (score 100, lines 44)
+- `scripts/__pycache__/graph_promotion_soak_test.cpython-312.pyc` (score 100, lines 67)
+- `scripts/__pycache__/graph_role_policy_validator.cpython-312.pyc` (score 100, lines 43)
+- `scripts/__pycache__/graph_store_adapter.cpython-312.pyc` (score 100, lines 37)
+- `scripts/__pycache__/graph_write_blocker_probe.cpython-312.pyc` (score 100, lines 97)
+- `scripts/__pycache__/hipporag_locked_gate_report.cpython-312.pyc` (score 100, lines 32)
+- `scripts/__pycache__/import_export_bundle.cpython-312.pyc` (score 100, lines 27)
+- `scripts/__pycache__/import_policy.cpython-312.pyc` (score 95, lines 31)
+- `scripts/__pycache__/indy_reads.cpython-312.pyc` (score 95, lines 477)
+- `scripts/__pycache__/instruction_conflict_scanner.cpython-312.pyc` (score 92, lines 62)
+- `scripts/__pycache__/interpretability_eval_bench_dry_run.cpython-312.pyc` (score 100, lines 29)
+- `scripts/__pycache__/kernel_control_packet.cpython-312.pyc` (score 100, lines 82)
+- `scripts/__pycache__/kernel_packet_cli.cpython-312.pyc` (score 100, lines 32)
+- `scripts/__pycache__/korpus_derived_compute_worker.cpython-312.pyc` (score 100, lines 279)
+- `scripts/__pycache__/korpus_krampii.cpython-312.pyc` (score 92, lines 990)
+- `scripts/__pycache__/krampus_bounded_inventory.cpython-312.pyc` (score 100, lines 85)
+- `scripts/__pycache__/krampus_chrono_ledger.cpython-312.pyc` (score 100, lines 86)
+- `scripts/__pycache__/krampus_extension_policy.cpython-312.pyc` (score 95, lines 30)
+- `scripts/__pycache__/krampus_inventory.cpython-312.pyc` (score 100, lines 8)
+- `scripts/__pycache__/krampus_rechronologize.cpython-312.pyc` (score 100, lines 280)
+- `scripts/__pycache__/krampus_time_machine.cpython-312.pyc` (score 100, lines 125)
+- `scripts/__pycache__/krampuschewing_archive_unpack.cpython-312.pyc` (score 100, lines 285)
+- `scripts/__pycache__/krampuschewing_chrono_graph.cpython-312.pyc` (score 100, lines 189)
+- `scripts/__pycache__/krampuschewing_derived_recovery_gate.cpython-312.pyc` (score 100, lines 108)
+- `scripts/__pycache__/krampuschewing_graph_materialize.cpython-312.pyc` (score 100, lines 100)
+- `scripts/__pycache__/krampuschewing_graph_stage.cpython-312.pyc` (score 100, lines 100)
+- `scripts/__pycache__/krampuschewing_large_file_validate.cpython-312.pyc` (score 100, lines 177)
+- `scripts/__pycache__/krampuschewing_master_index.cpython-312.pyc` (score 100, lines 204)
+- `scripts/__pycache__/krampuschewing_reclassify_index.cpython-312.pyc` (score 100, lines 139)
+- `scripts/__pycache__/krampuschewing_river_rows.cpython-312.pyc` (score 100, lines 130)
+- `scripts/__pycache__/krampuschewing_role_discovery.cpython-312.pyc` (score 95, lines 117)
+- `scripts/__pycache__/latent_mode_registry_scan_dry_run.cpython-312.pyc` (score 100, lines 29)
+- `scripts/__pycache__/longmemeval_seed_generator.cpython-312.pyc` (score 100, lines 47)
+- `scripts/__pycache__/lucidota_414_benchmark.cpython-312.pyc` (score 100, lines 104)
+- `scripts/__pycache__/lucidota_414_game.cpython-312.pyc` (score 95, lines 175)
+- `scripts/__pycache__/lucidota_414_gauntlet_game.cpython-312.pyc` (score 100, lines 148)
+- `scripts/__pycache__/lucidota_414_ingest.cpython-312.pyc` (score 100, lines 200)
+- `scripts/__pycache__/lucidota_414_packet_quality.cpython-312.pyc` (score 100, lines 125)
+- `scripts/__pycache__/lucidota_acceptance.cpython-312.pyc` (score 100, lines 41)
+- `scripts/__pycache__/lucidota_age_edges.cpython-312.pyc` (score 100, lines 99)
+- `scripts/__pycache__/lucidota_algos_smoke.cpython-312.pyc` (score 100, lines 186)
+- `scripts/__pycache__/lucidota_anthropic_llama_proxy.cpython-312.pyc` (score 100, lines 87)
+- `scripts/__pycache__/lucidota_artifact_ingest.cpython-312.pyc` (score 95, lines 1009)
+- `scripts/__pycache__/lucidota_auth_report.cpython-312.pyc` (score 100, lines 83)
+- `scripts/__pycache__/lucidota_body_capture_evidence.cpython-312.pyc` (score 100, lines 145)
+- `scripts/__pycache__/lucidota_body_capture_policy.cpython-312.pyc` (score 100, lines 82)
+- `scripts/__pycache__/lucidota_brain_ingest.cpython-312.pyc` (score 95, lines 148)
+- `scripts/__pycache__/lucidota_browser_body_capture.cpython-312.pyc` (score 100, lines 73)
+- `scripts/__pycache__/lucidota_cas_gc.cpython-312.pyc` (score 100, lines 102)
+- `scripts/__pycache__/lucidota_cas_index.cpython-312.pyc` (score 100, lines 73)
+- `scripts/__pycache__/lucidota_cas_journal.cpython-312.pyc` (score 100, lines 36)
+- `scripts/__pycache__/lucidota_chaos_suite.cpython-312.pyc` (score 100, lines 38)
+- `scripts/__pycache__/lucidota_ci_gate.cpython-312.pyc` (score 100, lines 61)
+- `scripts/__pycache__/lucidota_cli.cpython-312.pyc` (score 100, lines 107)
+- `scripts/__pycache__/lucidota_cockpit.cpython-312.pyc` (score 100, lines 124)
+- `scripts/__pycache__/lucidota_code_language_scan.cpython-312.pyc` (score 100, lines 35)
+- `scripts/__pycache__/lucidota_decision_delta.cpython-312.pyc` (score 100, lines 125)
+- `scripts/__pycache__/lucidota_deploy_dry_run.cpython-312.pyc` (score 100, lines 48)
+- `scripts/__pycache__/lucidota_drive_import_manifest.cpython-312.pyc` (score 100, lines 107)
+- `scripts/__pycache__/lucidota_drive_manifest.cpython-312.pyc` (score 100, lines 28)
+- `scripts/__pycache__/lucidota_extractor_registry.cpython-312.pyc` (score 100, lines 29)
+- `scripts/__pycache__/lucidota_fabric_press.cpython-312.pyc` (score 100, lines 169)
+- `scripts/__pycache__/lucidota_go_ingest.cpython-312.pyc` (score 100, lines 374)
+- `scripts/__pycache__/lucidota_indy_contract.cpython-312.pyc` (score 100, lines 34)
+- `scripts/__pycache__/lucidota_indy_corpus.cpython-312.pyc` (score 100, lines 154)
+- `scripts/__pycache__/lucidota_indy_lora_train.cpython-312.pyc` (score 100, lines 93)
+- `scripts/__pycache__/lucidota_ingest_watchdog.cpython-312.pyc` (score 92, lines 799)
+- `scripts/__pycache__/lucidota_kernel_api_smoke.cpython-312.pyc` (score 100, lines 78)
+- `scripts/__pycache__/lucidota_markdown_ingest_archive.cpython-312.pyc` (score 92, lines 99)
+- `scripts/__pycache__/lucidota_mega_gate.cpython-312.pyc` (score 100, lines 143)
+- `scripts/__pycache__/lucidota_model_governor.cpython-312.pyc` (score 100, lines 199)
+- `scripts/__pycache__/lucidota_model_governor_smoke.cpython-312.pyc` (score 100, lines 44)
+- `scripts/__pycache__/lucidota_model_registry.cpython-312.pyc` (score 100, lines 40)
+- `scripts/__pycache__/lucidota_needle_worker.cpython-312.pyc` (score 100, lines 60)
+- `scripts/__pycache__/lucidota_omni_front_sprint_orchestrator.cpython-312.pyc` (score 100, lines 293)
+- `scripts/__pycache__/lucidota_operator_demo.cpython-312.pyc` (score 100, lines 21)
+- `scripts/__pycache__/lucidota_pipeline.cpython-312.pyc` (score 100, lines 59)
+- `scripts/__pycache__/lucidota_production_signoff.cpython-312.pyc` (score 100, lines 44)
+- `scripts/__pycache__/lucidota_progress.cpython-312.pyc` (score 100, lines 21)
+- `scripts/__pycache__/lucidota_progress_monitor.cpython-312.pyc` (score 100, lines 174)
+- `scripts/__pycache__/lucidota_record_runtime_inventory.cpython-312.pyc` (score 100, lines 51)
+- `scripts/__pycache__/lucidota_regression_dashboard.cpython-312.pyc` (score 100, lines 26)
+- `scripts/__pycache__/lucidota_release_checklist.cpython-312.pyc` (score 100, lines 25)
+- `scripts/__pycache__/lucidota_release_gate.cpython-312.pyc` (score 100, lines 56)
+- `scripts/__pycache__/lucidota_release_manifest.cpython-312.pyc` (score 100, lines 53)
+- `scripts/__pycache__/lucidota_runtime_smoke.cpython-312.pyc` (score 100, lines 72)
+- `scripts/__pycache__/lucidota_secret_quarantine.cpython-312.pyc` (score 100, lines 52)
+- `scripts/__pycache__/lucidota_security_quarantine_gate.cpython-312.pyc` (score 100, lines 125)
+- `scripts/__pycache__/lucidota_security_scan.cpython-312.pyc` (score 100, lines 69)
+- `scripts/__pycache__/lucidota_status_ledger.cpython-312.pyc` (score 95, lines 311)
+- `scripts/__pycache__/lucidota_surface_emit_command.cpython-312.pyc` (score 100, lines 32)
+- `scripts/__pycache__/lucidota_surface_promote.cpython-312.pyc` (score 100, lines 79)
+- `scripts/__pycache__/lucidota_validator_noise_stress.cpython-312.pyc` (score 100, lines 44)
+- `scripts/__pycache__/lucidota_wake_bus_audit.cpython-312.pyc` (score 100, lines 28)
+- `scripts/__pycache__/lucidota_wiki_query.cpython-312.pyc` (score 100, lines 38)
+- `scripts/__pycache__/marrow_loop_apply.cpython-312.pyc` (score 100, lines 72)
+- `scripts/__pycache__/marrow_loop_render_surface.cpython-312.pyc` (score 100, lines 74)
+- `scripts/__pycache__/marrow_state_append_only_verify.cpython-312.pyc` (score 100, lines 60)
+- `scripts/__pycache__/master_eye_review_worker.cpython-312.pyc` (score 100, lines 143)
+- `scripts/__pycache__/matrix_stream_executor.cpython-312.pyc` (score 100, lines 269)
+
+### needs_hardening
+- `scripts/__pycache__/bytewax_abductive_blender.cpython-312.pyc` (score 85, lines 926)
+- `scripts/__pycache__/hypertimeline_engine.cpython-312.pyc` (score 87, lines 581)
+- `scripts/__pycache__/krampuschewing_recovery_gate.cpython-312.pyc` (score 87, lines 105)
+- `scripts/__pycache__/lucidota_clawd_runtime.cpython-312.pyc` (score 87, lines 281)
+- `scripts/__pycache__/post_gate_target_selector.cpython-312.pyc` (score 85, lines 188)
+- `scripts/__pycache__/unified_absurd_ingest_worker.cpython-312.pyc` (score 85, lines 1084)
+- `scripts/boring_beast_full_e2e.py` (score 85, lines 90)
+- `scripts/bytewax_abductive_blender.py` (score 85, lines 1353)
+- `scripts/cep_full_e2e.py` (score 85, lines 341)
+- `scripts/graph_materialization_helper.py` (score 85, lines 447)
+- `scripts/graph_materialization_rollback_probe.py` (score 85, lines 41)
+- `scripts/graph_promotion_full_e2e.py` (score 85, lines 42)
+- `scripts/hypertimeline_engine.py` (score 81, lines 646)
+- `scripts/indy_reads.py` (score 79, lines 658)
+- `scripts/krampuschewing_recovery_gate.py` (score 87, lines 178)
+- `scripts/legacy/__pycache__/boring_beast_loop_runner.cpython-312.pyc` (score 77, lines 190)
+- `scripts/legacy/__pycache__/execution_record_writer.cpython-312.pyc` (score 85, lines 114)
+- `scripts/legacy/__pycache__/lucidota_clawd_runtime.cpython-312.pyc` (score 87, lines 281)
+- `scripts/legacy/__pycache__/post_gate_target_selector.cpython-312.pyc` (score 85, lines 188)
+- `scripts/legacy/audit_verdict_enforcer.py` (score 85, lines 129)
+- `scripts/legacy/catchme_context_guard.py` (score 85, lines 159)
+- `scripts/legacy/cep_graph_packet_stager.py` (score 85, lines 56)
+- `scripts/legacy/chrono_queue_event_bridge.py` (score 77, lines 248)
+- `scripts/legacy/chrono_service_health_recorder.py` (score 77, lines 197)
+- `scripts/legacy/conversation_command_idempotency_probe.py` (score 77, lines 51)
+- `scripts/legacy/conversation_command_status_worker.py` (score 77, lines 47)
+- `scripts/legacy/daemon_supervision_preflight.py` (score 85, lines 338)
+- `scripts/legacy/dbos_corpus_job_bridge.py` (score 77, lines 70)
+- `scripts/legacy/dbos_dead_letter_review.py` (score 77, lines 181)
+- `scripts/legacy/dbos_document_parse_worker.py` (score 77, lines 248)
+- `scripts/legacy/dbos_queue_metrics_exporter.py` (score 77, lines 45)
+- `scripts/legacy/dbos_retry_dead_letter_probe.py` (score 77, lines 122)
+- `scripts/legacy/dbos_retry_policy.py` (score 77, lines 53)
+- `scripts/legacy/dbos_worker_harness.py` (score 77, lines 91)
+- `scripts/legacy/demem_runtime_guard.py` (score 85, lines 159)
+- `scripts/legacy/execution_record_writer.py` (score 73, lines 191)
+- `scripts/legacy/graph_promotion_materialize.py` (score 85, lines 340)
+- `scripts/legacy/intake_custody_job_bridge.py` (score 77, lines 172)
+- `scripts/legacy/lucidota_big_board.py` (score 86, lines 384)
+- `scripts/legacy/lucidota_dev_preflight.py` (score 85, lines 164)
+- `scripts/legacy/marrow_cep_bridge.py` (score 85, lines 233)
+- `scripts/legacy/marrow_dbos_bridge.py` (score 77, lines 67)
+- `scripts/legacy/phase05_brain_archaeology_prep.py` (score 85, lines 193)
+- `scripts/legacy/phase05_workflow_blueprint_generator.py` (score 77, lines 204)
+- `scripts/legacy/post_gate_target_selector.py` (score 85, lines 298)
+- `scripts/legacy/tracer_claim_packet_bridge.py` (score 85, lines 121)
+- `scripts/lucidota_414_game.py` (score 79, lines 258)
+- `scripts/lucidota_mega_gate.py` (score 85, lines 291)
+- `scripts/lucidota_operator_demo.py` (score 70, lines 24)
+- `scripts/lucidota_regression_dashboard.py` (score 85, lines 20)
+- `scripts/lucidota_status_ledger.py` (score 80, lines 418)
+- `scripts/recovery_matrix.py` (score 85, lines 19)
+- `scripts/run_instruction_hygiene.py` (score 80, lines 318)
+- `scripts/tickletrunk_scan.py` (score 70, lines 662)
+- `scripts/unified_absurd_ingest_worker.py` (score 79, lines 1995)
+
+### trash_or_legacy
+- `scripts/krampuschewing_role_discovery.py` (score 50, lines 223)
+- `scripts/legacy/DBOS_LEGACY_ARCHIVE_MANIFEST.json` (score 0, lines 421)
+- `scripts/legacy/boring_beast_loop_runner.py` (score 62, lines 229)
+- `scripts/legacy/dbos_consume_one.py` (score 2, lines 102)
+- `scripts/legacy/dbos_worker_heartbeat_probe.py` (score 62, lines 48)
+- `scripts/legacy/diogenes_30_phase_audit.py` (score 0, lines 725)
+- `scripts/legacy/lucidota_ruthless_gauntlet.py` (score 2, lines 200)
+- `scripts/legacy/work_order_loader.py` (score 32, lines 78)
+- `scripts/phase05_workflow_blueprint_synthesizer.py` (score 55, lines 379)
+- `scripts/updated_abcd_sequence_runner.py` (score 19, lines 584)
+
+
+## Deep Audit Addendum (2026-05-20)
+- **active_total**: 332
+- **active_python**: 306
+- **active_shell**: 23
+- **active_missing_refs**: 16
+- **active_while_true**: 9
+- **active_shell_true**: 2
+- **active_os_system**: 3
+- **active_hardcoded_home**: 14
+- **legacy_total**: 173
+- **pycache_total**: 385
+- Deep report: `05_OUTPUTS/script_audit/SCRIPTS_DEEP_AUDIT_REPORT_20260520.md`

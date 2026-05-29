@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lucidota.proof_object.v1",
+  "type": "object",
+  "required": ["schema", "proof_id", "source_type", "original_path_or_uri", "stored_artifact_path", "sha256", "size", "created_at", "ingested_at", "extractor_status", "custody_events"],
+  "properties": {
+    "schema": {"const": "lucidota.proof_object.v1"},
+    "proof_id": {"type": "string", "pattern": "^proof_[0-9a-f]{32}$"},
+    "source_type": {"enum": ["file", "text_note", "command_output", "code_diff"]},
+    "original_path_or_uri": {"type": "string"},
+    "stored_artifact_path": {"type": "string"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "size": {"type": "integer", "minimum": 0},
+    "created_at": {"type": "string"},
+    "ingested_at": {"type": "string"},
+    "extractor_status": {"type": "string"},
+    "custody_events": {"type": "array", "minItems": 1},
+    "truth_promotion": {"const": false},
+    "canonical_graph_writes_performed": {"const": false}
+  }
+}

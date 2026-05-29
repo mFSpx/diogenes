@@ -1,0 +1,1 @@
+{"stage_names":["intake","parse","timeline","staging","graph_candidate","case_packet"],"min_stage_count":6,"min_claims":2,"min_graph_candidates":2}

@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/008_hop_pivot.sql

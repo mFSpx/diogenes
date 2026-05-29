@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"KrampusCustodyRow","type":"object","required":["relative_path","size_bytes","sha256","kind","duplicate_of"],"properties":{"relative_path":{"type":"string"},"size_bytes":{"type":"integer"},"sha256":{"type":"string"},"kind":{"type":"string"},"duplicate_of":{"type":["string","null"]}}}

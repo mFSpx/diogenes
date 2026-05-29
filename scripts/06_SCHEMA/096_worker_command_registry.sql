@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/096_worker_command_registry.sql

@@ -1,0 +1,15 @@
+{
+  "canonical_mutation_allowed": false,
+  "generated_at": "2026-05-17T19:29:20Z",
+  "html_sha256": "2cdd1b9b333111f34561e9cf6004f7d168c05ffa659587748d605e0aa00e5522",
+  "interaction_model": "Buttons emit command envelopes; no direct DB/API mutation.",
+  "pheromone_enforcement": "NOT_YET_WIRED",
+  "promotion_status": "generated_not_promoted",
+  "reuse_policy": "Read-only projection; regenerate from marrow_state.md. Declarative metadata only until promotion/pheromone lifecycle is wired.",
+  "source_state_path": "05_OUTPUTS/marrow_loop/marrow_state.md",
+  "state_sha256": "f7329d9c9cbd7c1c4742925b1d7fdd6f9d8475f7d2d829ec8d7f04b9a3e73970",
+  "surface_lifecycle_status": "scaffolded",
+  "title": "Marrow Loop Status",
+  "view_key": "marrow_loop_status",
+  "why_it_exists": "Shows append-only Marrow Loop command state as a reusable generated surface."
+}

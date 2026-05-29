@@ -1,0 +1,16 @@
+{
+  "schema": "lucidota.durable_workflow_decision.v1",
+  "current_decision": {
+    "durable_workflow_substrate": "ABSURD",
+    "dbos_status": "legacy_compatibility_only",
+    "dbos_may_remain_for_existing_receipts_or_old_scripts": true,
+    "new_dbos_architecture_allowed": false,
+    "new_work_should_target": "ABSURD/Postgres"
+  },
+  "rules": [
+    "Do not expand DBOS as current architecture.",
+    "Do not rename legacy DBOS receipts unless preserving provenance.",
+    "Any DBOS-era logic ported forward must be renamed to generic workflow or Absurd terminology.",
+    "Pre-Rust finish may keep DBOS scripts only if needed to validate existing golden-path receipts."
+  ]
+}

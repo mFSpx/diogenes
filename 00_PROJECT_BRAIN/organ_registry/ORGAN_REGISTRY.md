@@ -1,0 +1,249 @@
+# ORGAN REGISTRY / CAPABILITY LEDGER
+
+> Generated 2026-05-29T02:03:29.423014Z · **751 organs** · the precondition gate for flow design (KANT69). Machine-readable master: `ORGAN_REGISTRY.json`. Per-domain detail: the `NN_*.json` shards.
+
+## Counts by shard
+- `10_scripts.json` — 459
+- `20_schema.json` — 151
+- `30_streaming_ml.json` — 9
+- `40_percyphon_math.json` — 117
+- `50_ingestion.json` — 9
+- `60_spencer_signal_bench.json` — 6
+
+## By type
+- script: 459
+- schema: 105
+- validator: 93
+- schema_json: 21
+- math_algo: 19
+- function: 11
+- receipt_writer: 8
+- ops: 6
+- embedding_model: 6
+- ingestion_tool: 6
+- percyphon_component: 4
+- bytewax_stream: 2
+- river_model: 2
+- stream_service: 2
+- xgboost: 2
+- kernel: 2
+- treelite: 1
+- villager_component: 1
+- lane: 1
+
+## By classification
+- active: 529
+- reference: 88
+- canon: 70
+- staging: 15
+- function: 13
+- dangerous: 12
+- authority_gate: 9
+- ops: 6
+- materializer: 4
+- view: 3
+- receipt_writer: 1
+- corpse: 1
+
+## By wiring
+- standalone: 424
+- luci: 132
+- unapplied: 99
+- applied: 50
+- claw: 19
+- lying_around: 14
+- service: 11
+- unknown: 2
+
+## Graph-safety (mutation class)
+- receipt_only: 294
+- read_only: 106
+- safe: 95
+- candidate_writer: 25
+- no graph: 20
+- queue_writer: 16
+- custody_writer: 12
+- external_effect: 10
+- authority_gate: 8
+- no graph touch: 5
+- materializer: 4
+- none: 3
+- timeline data; no graph: 2
+- control plane; no graph: 2
+- observation only: 2
+- appends temporal evidence only: 2
+- contract only: 2
+- candidate contract; not truth: 2
+- custody contract: 2
+- safe (test): 2
+- no graph touch; control plane only: 1
+- advisory hints only; no graph truth: 1
+- custody metadata only: 1
+- bounded hints only: 1
+- pivot candidates only; not canonical graph: 1
+- advisory routing only: 1
+- ref rows only: 1
+- metadata/refs only; no graph: 1
+- local supervised memory; no graph: 1
+- OWNS canonical graph_item/edge/journal; promotion gate must guard writes (barrier 040/074 NOT applied live): 1
+- embeddings/chunks; no canonical graph: 1
+- GO graph anchors as refs; evidence custody only: 1
+- custody/dedup substrate; no canonical graph: 1
+- lease queue; raw ingest must not depend on it: 1
+- metrics not diagnoses; no graph: 1
+- append-only temporal evidence; no graph: 1
+- nervous-system NOTIFY only: 1
+- append-only; no graph: 1
+- research registry; no graph: 1
+- emits command envelope; never mutates canonical state directly: 1
+- scaffold; no corpus ingest; no graph: 1
+- documentation only; no GRANT/REVOKE: 1
+- promotion gate scaffold; requires evidence+authority_class+decision; no direct mutation: 1
+- durable queue; no graph: 1
+- candidates only; no graph/custody/temporal mutation: 1
+- THE write barrier; guards canonical graph: 1
+- control plane; canonical writes blocked: 1
+- router registration; no graph: 1
+- contract registry; no graph: 1
+- promotion preflight gate; no direct mutation: 1
+- parser output = evidence candidate, never graph truth: 1
+- path/scope policy; no graph: 1
+- candidates remain NOT_TRUTH; no graph mutation: 1
+- hash-addressed custody; no graph: 1
+- custody event; no graph: 1
+- evidence candidates, not truth: 1
+- writes design_atom candidates only; no graph: 1
+- materializer receipt; the only legal canonical-write path: 1
+- promotion_allowed=false by table law: 1
+- boundary check; grants no mutation authority: 1
+- blocks unsafe context use before extraction: 1
+- labels only; no promotion/graph: 1
+- gate audit; no direct mutation: 1
+- no direct canonical mutation introduced here: 1
+- blueprint provenance only; no graph: 1
+- queues work only; no graph: 1
+- materialized requires materialization receipt; no direct mutation: 1
+- reviews Phase 0.5 artifacts; no graph: 1
+- derived view; temporal_claim is archive: 1
+- stages commands only; no graph: 1
+- candidates only; no graph/temporal mutation: 1
+- journal writes allowed only inside promotion txn: 1
+- queues candidate work only; no graph: 1
+- evidence candidate only; no graph: 1
+- packet dedupe only; no canonical mutation: 1
+- preserves operator labels; no graph: 1
+- custody evidence; downstream queued; no graph: 1
+- deterministic metrics; no graph: 1
+- staging instructions only; no graph: 1
+- registry only; no graph: 1
+- computed findings only; no graph: 1
+- evidence resolution; no canonical mutation: 1
+- append-only; timeline is projection: 1
+- external action requires explicit operator authorization: 1
+- maps authority class for promotion gate: 1
+- append-only invalidation; evidence preserved: 1
+- supports promotion edge materialization: 1
+- candidates only; no graph: 1
+- staging receipt; no canonical mutation: 1
+- no corpus ingest; no graph: 1
+- derived projection; claims are archive: 1
+- findings only; no graph: 1
+- protects running runs; no graph: 1
+- derived tables; temporal_claim is archive; promotion candidate gated by allowed-fn: 1
+- idempotency lock; temporal_claim append-only: 1
+- async staging; no graph: 1
+- graph writes remain staged_only: 1
+- hints/metrics only; no graph: 1
+- indexes on canonical graph cols; GO-25 vocab unchanged: 1
+- receipts only; no canonical graph: 1
+- pre-stage hygiene on staging_packet; model lanes stay periphery: 1
+- manifest/corpse evidence; no deletion, no graph: 1
+- learning loss bridge; no graph: 1
+- alias dedupe in lucidota_go; deterministic only: 1
+- resolved rows stay in history; view spans go integrity: 1
+- excludes bulk/binary/dumps; no graph: 1
+- FK-backed provenance; no graph: 1
+- control-plane governance; no graph: 1
+- derived views; no graph: 1
+- payload contract; no mutation: 1
+- staging instruction contract: 1
+- promotion packet contract; gate-bound: 1
+- append-only evidence contract: 1
+- evidence candidate contract: 1
+- NOT_TRUTH candidate contract: 1
+- staging contract: 1
+- operator-confirmed receipt contract: 1
+- receipt contract: 1
+- proof contract: 1
+- stage contract: 1
+- status receipt contract: 1
+- bounded hint contract: 1
+- policy contract: 1
+- policy doc; no mutation: 1
+- receipt_only; no graph: 1
+- receipt_only; checker: 1
+- read_only audit; THE write-barrier checker (esp. critical since 040/074 triggers UNAPPLIED): 1
+- read_only audit: 1
+- contract gate; no graph: 1
+- receipt_only/governor; no canonical graph write: 1
+- receipt_only by doctrine; canonical graph writes forbidden from workers: 1
+- read_only on workflow_event; receipt_only writer into lucidota_learning. Never touches canonical graph or temporal tables.: 1
+- read_only on workflow_event; receipt_only/candidate writer into lucidota_learning. No graph/temporal mutation (wrapper asserts canonical+temporal counts unchanged).: 1
+- candidate/receipt writer into runtime_status_fact only (advisory RULE fact). No graph/temporal/custody mutation. Cannot write truth.: 1
+- Inherits receipt_only safety of its children.: 1
+- candidate_writer: spans are graph_promotion_candidate=true, never written to canonical graph; asserts canonical+temporal counts unchanged and dead-letters on violation.: 1
+- receipt_only into learning tables; no canonical graph writes.: 1
+- read_only inputs; writes only file receipts + big_board.json. Declared advisory_training_candidate, no graph writes.: 1
+- receipt_only; no graph writes.: 1
+- Isolated; not wired to any LUCIDOTA gate or graph.: 1
+- safe: pure deterministic SHA arithmetic, no DB, no model call, no canonical write; output is scaffold candidate not truth: 1
+- safe: inert data container: 1
+- safe by construction: hard-codes canonical_mutation_allowed=False and refuses non-operator authority; enqueue-only via ABSURD lane: 1
+- safe: routing/ledger only; canonical_mutation_allowed faithfully echoed but no canonical write performed here: 1
+- external; DO NOT modify here. LUCIDOTA does not write its canonical graph via this kernel.: 1
+- safe: declarative contract; explicit truth_boundary forbids promoting scaffolds to fact: 1
+- safe: receipt wrapper: 1
+- safe: pure scoring/gating, no DB or graph write: 1
+- safe: pure scoring: 1
+- receipt_only / external_effect (writes runtime receipts + can persist a governor decision via conn; no canonical graph write): 1
+- safe (read-only subprocess): 1
+- safe (read-only): 1
+- safe (planning only): 1
+- custody/receipt write (state DB only, no graph): 1
+- external_effect (HTTP to local model server): 1
+- external_effect + receipt_only: 1
+- safe (tests, archived): 1
+
+## DANGEROUS organs (gate these)
+- `scripts/lucidota_body_capture_evidence.py` — Body Capture evidence bundle + text/Wayback diff.
+- `scripts/lucidota_body_capture_policy.py` — Body Capture watcher policy evaluator.
+- `scripts/lucidota_browser_body_capture.py` — Body Capture browser capture contract.
+- `scripts/lucidota_chaos_suite.py` — unknown
+- `scripts/lucidota_hitman_loop.sh` — unknown
+- `scripts/lucidota_validator_noise_stress.py` — EQ-001..EQ-100 synthetic low-quality stress inventory.
+- `scripts/mega_gate_fault_injector.py` — unknown
+- `scripts/real_stress_test.py` — Explicit, raw calibration factors
+- `scripts/safe_stress_test.py` — unknown
+- `scripts/status_ledger_fault_injector.py` — unknown
+- `scripts/lucidota_secret_quarantine.py` — Plan and create redacted copies for secret-bearing Lucidota files.
+- `scripts/lucidota_security_quarantine_gate.py` — LUCIDOTA security quarantine gate.
+
+## CANONICAL MATERIALIZERS (only these may write graph truth)
+- `scripts/graph_edge_materialize.py` — Materialize a graph edge through the governed promotion path.
+- `scripts/graph_promotion_execute.py` — Execute-gated graph promotion packet/decision writer.
+- `scripts/graph_promotion_materialize.py` — Materialize an evidence-gated graph promotion packet into canonical graph.
+- `scripts/krampuschewing_graph_materialize.py` — KRAMPUSCHEWING Streaming Graph Materializer (Absurd COPY Pipeline)
+
+## CRITICAL STATE FLAGS
+- ~92/122 schema files are UNAPPLIED — chrono (025-027), ABSURD queue spine (035), graph-promotion pipeline (034/044/052), write-barriers (040/074). Live = base band + GO graph storage core (016).
+- Bytewax->River stream spine BROKEN: lucidota-stream-river service execs bare python3 (no psycopg) -> 0 rows trained. Only lucidota_river_governor (Hoeffding, ~539 samples) is live.
+- Write-barrier triggers UNAPPLIED -> canonical_graph_write_scanner.py is the only active graph guard.
+- term_registry = 45 rows in lucidota_storage.lucidota_go (target 75); CO_ACTIVE_TERMS.json MISSING; @26-@50 GO/CO ID collision is the convergence landmine.
+
+## INGESTION SHORTLIST (models/tools on disk)
+- bge-m3 — chunk embedding, 1024-dim multilingual (04_RUNTIME/models/bge-m3/)
+- modernbert-base — encoder embed/rerank; ONNX int8/q4 = CPU-cheap (04_RUNTIME/models/modernbert-base/)
+- gliner_small-v2.1 — zero-shot NER / entity extraction (03_VAULT/models/gliner/urchade_gliner_small-v2.1/)
+- smoldocling-256m — doc-layout / OCR-ish VLM, ONNX q4 80MB (04_RUNTIME/models/smoldocling-256m-preview/)
+- falcon3-mamba-7b-gguf — generation (Mamba SSM cortex) via llama.cpp (03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/)
+- deepseek-r1-1.5b-gguf — small reasoning generation (03_VAULT/models/bartowski/DeepSeek-R1-Distill-Qwen-1.5B-GGUF/)

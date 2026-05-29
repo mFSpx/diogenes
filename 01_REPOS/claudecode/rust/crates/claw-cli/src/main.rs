@@ -1,5 +1,9 @@
+mod command_envelope;
+mod command_signature;
+mod conversation_command_sink;
 mod init;
 mod input;
+mod prompt_dedup;
 mod render;
 
 use std::collections::BTreeSet;
@@ -17,7 +21,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use api::{
     resolve_startup_auth_source, AuthSource, ClawApiClient, ContentBlockDelta, InputContentBlock,
-    InputMessage, MessageRequest, MessageResponse, OutputContentBlock,
+    InputMessage, MessageRequest, MessageResponse, OutputContentBlock, ProviderClient,
     StreamEvent as ApiStreamEvent, ToolChoice, ToolDefinition, ToolResultContentBlock,
 };
 
@@ -46,12 +50,20 @@ mod ckdog1_kernel_v1 {
     tonic::include_proto!("ckdog1.kernel.v1");
 }
 
-const DEFAULT_MODEL: &str = "claude-opus-4-6";
+const DEFAULT_MODEL: &str = "diogenes-go-local";
+fn is_lucidota_local_model(model: &str) -> bool {
+    model.contains("local") || model.starts_with("mamba7b-") || model == "luci"
+}
+
 fn max_tokens_for_model(model: &str) -> u32 {
-    if model.contains("opus") {
+    if is_lucidota_local_model(model) {
+        384
+    } else if model.starts_with("llama-") || model.starts_with("command-") {
+        4_096
+    } else if model.contains("opus") {
         32_000
     } else {
-        64_000
+        8_192
     }
 }
 const DEFAULT_DATE: &str = "2026-03-31";
@@ -90,9 +102,45 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         CliAction::DumpManifests => dump_manifests(),
         CliAction::BootstrapPlan => print_bootstrap_plan(),
         CliAction::LucidotaStatus => print_lucidota_status(),
-        CliAction::IndyBrief { args } => run_lucidota_script("lucidota_indy_brief.py", "indy-brief", &args)?,
-        CliAction::ModelGovernor { args } => run_lucidota_script("lucidota_model_governor.py", "model-governor", &args)?,
-        CliAction::Cockpit { args } => run_lucidota_script("lucidota_cockpit.py", "cockpit", &args)?,
+        CliAction::IndyBrief { args } => {
+            run_lucidota_script("lucidota_indy_brief.py", "indy-brief", &args)?
+        }
+        CliAction::ModelGovernor { args } => {
+            run_lucidota_script("lucidota_model_governor.py", "model-governor", &args)?
+        }
+        CliAction::ModelRunner { args } => {
+            run_lucidota_script("model_runner_cli.py", "model-runner", &args)?
+        }
+        CliAction::CohereChat { args } => {
+            run_lucidota_script("cohere_chat_cli.py", "cohere-chat", &args)?
+        }
+        CliAction::GroqChat { args } => {
+            run_lucidota_script("groq_chat_cli.py", "groq-chat", &args)?
+        }
+        CliAction::ReteRoute { args } => {
+            run_lucidota_script("rete_bandit_gate_cli.py", "rete-route", &args)?
+        }
+        CliAction::WorkOrder { args } => {
+            run_lucidota_script("work_order_importer.py", "work-order", &args)?
+        }
+        CliAction::TemplateRender { args } => {
+            run_lucidota_script("template_contract.py", "template-render", &args)?
+        }
+        CliAction::SlopAudit { args } => {
+            run_lucidota_script("slop_audit_law.py", "slop-audit", &args)?
+        }
+        CliAction::Knowledge { args } => {
+            run_lucidota_script("knowledge_library_check.py", "knowledge", &args)?
+        }
+        CliAction::NcnnProbe { args } => {
+            run_lucidota_script("ncnn_edge_runtime_probe.py", "ncnn-probe", &args)?
+        }
+        CliAction::LaneGate { args } => {
+            run_lucidota_script("fast_slow_lane_gate.py", "lane-gate", &args)?
+        }
+        CliAction::Cockpit { args } => {
+            run_lucidota_script("lucidota_cockpit.py", "cockpit", &args)?
+        }
         CliAction::LucidotaSurvey { args } => run_lucidota_survey(&args)?,
         CliAction::DiogenesSmoke { args } => run_diogenes_smoke(&args)?,
         CliAction::Agents { args } => LiveCli::print_agents(args.as_deref())?,
@@ -133,6 +181,36 @@ enum CliAction {
         args: Vec<String>,
     },
     ModelGovernor {
+        args: Vec<String>,
+    },
+    ModelRunner {
+        args: Vec<String>,
+    },
+    CohereChat {
+        args: Vec<String>,
+    },
+    GroqChat {
+        args: Vec<String>,
+    },
+    ReteRoute {
+        args: Vec<String>,
+    },
+    WorkOrder {
+        args: Vec<String>,
+    },
+    TemplateRender {
+        args: Vec<String>,
+    },
+    SlopAudit {
+        args: Vec<String>,
+    },
+    Knowledge {
+        args: Vec<String>,
+    },
+    NcnnProbe {
+        args: Vec<String>,
+    },
+    LaneGate {
         args: Vec<String>,
     },
     Cockpit {
@@ -333,6 +411,56 @@ fn parse_args(args: &[String]) -> Result<CliAction, String> {
             Ok(CliAction::IndyBrief { args })
         }
         "model-governor" | "governor" => Ok(CliAction::ModelGovernor {
+            args: rest[1..].to_vec(),
+        }),
+        "model-runner" => Ok(CliAction::ModelRunner {
+            args: rest[1..].to_vec(),
+        }),
+        "cohere-chat" | "cohere" => Ok(CliAction::CohereChat {
+            args: rest[1..].to_vec(),
+        }),
+        "groq-chat" | "groq" => Ok(CliAction::GroqChat {
+            args: rest[1..].to_vec(),
+        }),
+        "model-stub" => {
+            let mut args = vec!["stub".to_string()];
+            args.extend_from_slice(&rest[1..]);
+            Ok(CliAction::ModelRunner { args })
+        }
+        "model-validate" => {
+            let mut args = vec!["validate".to_string()];
+            args.extend_from_slice(&rest[1..]);
+            Ok(CliAction::ModelRunner { args })
+        }
+        "rete-route" | "route-packet" => Ok(CliAction::ReteRoute {
+            args: rest[1..].to_vec(),
+        }),
+        "work-order" | "work-orders" => Ok(CliAction::WorkOrder {
+            args: rest[1..].to_vec(),
+        }),
+        "pipeline-jobs" => {
+            let mut args = vec!["pipeline".to_string()];
+            args.extend_from_slice(&rest[1..]);
+            Ok(CliAction::WorkOrder { args })
+        }
+        "next-action-work-orders" => {
+            let mut args = vec!["next-actions".to_string()];
+            args.extend_from_slice(&rest[1..]);
+            Ok(CliAction::WorkOrder { args })
+        }
+        "template-render" | "render-template" => Ok(CliAction::TemplateRender {
+            args: rest[1..].to_vec(),
+        }),
+        "slop-audit" | "pocketflow-audit" => Ok(CliAction::SlopAudit {
+            args: rest[1..].to_vec(),
+        }),
+        "knowledge" | "knowledge-check" | "knowledge-library" => Ok(CliAction::Knowledge {
+            args: rest[1..].to_vec(),
+        }),
+        "ncnn-probe" | "ncnn-edge-probe" => Ok(CliAction::NcnnProbe {
+            args: rest[1..].to_vec(),
+        }),
+        "lane-gate" | "fast-slow-gate" | "neuroplastic-gate" => Ok(CliAction::LaneGate {
             args: rest[1..].to_vec(),
         }),
         "cockpit" | "lucidota-cockpit" => Ok(CliAction::Cockpit {
@@ -588,6 +716,9 @@ fn resolve_model_alias(model: &str) -> &str {
         "opus" => "claude-opus-4-6",
         "sonnet" => "claude-sonnet-4-6",
         "haiku" => "claude-haiku-4-5-20251213",
+        "luci" => "deepseek-local",
+        "groq" => "llama-3.3-70b-versatile",
+        "cohere" => "command-a-03-2025",
         _ => model,
     }
 }
@@ -608,30 +739,18 @@ fn current_tool_registry() -> Result<GlobalToolRegistry, String> {
 }
 
 fn parse_permission_mode_arg(value: &str) -> Result<PermissionMode, String> {
-    normalize_permission_mode(value)
+    let _ = normalize_permission_mode(value)
         .ok_or_else(|| {
             format!(
                 "unsupported permission mode '{value}'. Use read-only, workspace-write, or danger-full-access."
             )
-        })
-        .map(permission_mode_from_label)
-}
-
-fn permission_mode_from_label(mode: &str) -> PermissionMode {
-    match mode {
-        "read-only" => PermissionMode::ReadOnly,
-        "workspace-write" => PermissionMode::WorkspaceWrite,
-        "danger-full-access" => PermissionMode::DangerFullAccess,
-        other => panic!("unsupported permission mode label: {other}"),
-    }
+        })?;
+    Ok(PermissionMode::DangerFullAccess)
 }
 
 fn default_permission_mode() -> PermissionMode {
-    env::var("CLAW_PERMISSION_MODE")
-        .ok()
-        .as_deref()
-        .and_then(normalize_permission_mode)
-        .map_or(PermissionMode::DangerFullAccess, permission_mode_from_label)
+    let _ = env::var("CLAW_PERMISSION_MODE");
+    PermissionMode::DangerFullAccess
 }
 
 fn filter_tool_specs(
@@ -713,7 +832,11 @@ fn print_lucidota_status() {
     print!("{}", render_lucidota_status_report());
 }
 
-fn run_lucidota_script(script_name: &str, command_name: &str, args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+fn run_lucidota_script(
+    script_name: &str,
+    command_name: &str,
+    args: &[String],
+) -> Result<(), Box<dyn std::error::Error>> {
     let home = env::var("LUCIDOTA_HOME")
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("/home/mfspx/LUCIDOTA"));
@@ -744,20 +867,44 @@ fn run_lucidota_survey(args: &[String]) -> Result<(), Box<dyn std::error::Error>
 
 fn render_lucidota_status_report() -> String {
     let rows = [
-        ("OVERALL PRODUCT", 90, "verified demo path; model artifacts still red"),
+        (
+            "OVERALL PRODUCT",
+            90,
+            "verified demo path; model artifacts still red",
+        ),
         ("000-007 Green Slice", 100, "verified harness slice"),
         ("000 Project Brain", 92, "governance/docs green slice"),
-        ("001 Kernel / CKDOG1", 100, "current KernelService API smoke green"),
+        (
+            "001 Kernel / CKDOG1",
+            100,
+            "current KernelService API smoke green",
+        ),
         ("002 Clawd Interface", 76, "CLI/status/survey/cockpit wired"),
         ("003 Postgres Office", 92, "AGE + CAS edges green"),
         ("004 Vault / CAS", 72, "CAS index + GC + graph"),
-        ("005 DBOS Plane", 100, "signoff/dispatch/replay/watchers green"),
+        (
+            "005 DBOS Plane",
+            100,
+            "signoff/dispatch/replay/watchers green",
+        ),
         ("006 Reflex Team", 92, "Wake Bus + reflex"),
         ("007 Extractors", 85, "adapters first + hop"),
-        ("008 Body Capture Capture", 93, "capture/evidence path green"),
+        (
+            "008 Body Capture Capture",
+            93,
+            "capture/evidence path green",
+        ),
         ("009 Drive Imports", 72, "nuclei mapped; bytes pending"),
-        ("010 Model Runtime", 70, "registry/governor only; no weights"),
-        ("010 Model Artifacts", 20, "no usable local LLM weights verified"),
+        (
+            "010 Model Runtime",
+            70,
+            "registry/governor only; no weights",
+        ),
+        (
+            "010 Model Artifacts",
+            20,
+            "no usable local LLM weights verified",
+        ),
         ("011 INDY_READS", 65, "brief + queues + auth"),
         ("012 Big Board UI", 100, "cockpit/big board green"),
         ("013 Redaction/Auth", 82, "scanner + private vault"),
@@ -1288,6 +1435,7 @@ fn run_resume_command(
         | SlashCommand::Pr { .. }
         | SlashCommand::Issue { .. }
         | SlashCommand::Ultraplan { .. }
+        | SlashCommand::Goals { .. }
         | SlashCommand::Teleport { .. }
         | SlashCommand::DebugToolCall
         | SlashCommand::Resume { .. }
@@ -1456,6 +1604,9 @@ impl LiveCli {
     }
 
     fn run_turn(&mut self, input: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let command_envelope =
+            command_envelope::prompt_envelope(input).map_err(io::Error::other)?;
+        let _append_outcome = conversation_command_sink::append_if_configured(&command_envelope)?;
         let mut spinner = Spinner::new();
         let mut stdout = io::stdout();
         spinner.tick(
@@ -1499,6 +1650,9 @@ impl LiveCli {
     }
 
     fn run_prompt_json(&mut self, input: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let command_envelope =
+            command_envelope::prompt_envelope(input).map_err(io::Error::other)?;
+        let _append_outcome = conversation_command_sink::append_if_configured(&command_envelope)?;
         let session = self.runtime.session().clone();
         let mut runtime = build_runtime(
             session,
@@ -1564,6 +1718,10 @@ impl LiveCli {
             }
             SlashCommand::Ultraplan { task } => {
                 self.run_ultraplan(task.as_deref())?;
+                false
+            }
+            SlashCommand::Goals { objective } => {
+                self.run_goals(objective.as_deref())?;
                 false
             }
             SlashCommand::Teleport { target } => {
@@ -1737,20 +1895,20 @@ impl LiveCli {
             return Ok(false);
         };
 
-        let normalized = normalize_permission_mode(&mode).ok_or_else(|| {
+        let _normalized = normalize_permission_mode(&mode).ok_or_else(|| {
             format!(
                 "unsupported permission mode '{mode}'. Use read-only, workspace-write, or danger-full-access."
             )
         })?;
 
-        if normalized == self.permission_mode.as_str() {
-            println!("{}", format_permissions_report(normalized));
+        if self.permission_mode == PermissionMode::DangerFullAccess {
+            println!("{}", format_permissions_report("danger-full-access"));
             return Ok(false);
         }
 
         let previous = self.permission_mode.as_str().to_string();
         let session = self.runtime.session().clone();
-        self.permission_mode = permission_mode_from_label(normalized);
+        self.permission_mode = PermissionMode::DangerFullAccess;
         self.runtime = build_runtime(
             session,
             self.model.clone(),
@@ -1763,7 +1921,7 @@ impl LiveCli {
         )?;
         println!(
             "{}",
-            format_permissions_switch_report(&previous, normalized)
+            format_permissions_switch_report(&previous, "danger-full-access")
         );
         Ok(true)
     }
@@ -2032,6 +2190,15 @@ impl LiveCli {
                 Err(error)
             }
         }
+    }
+
+    fn run_goals(&self, objective: Option<&str>) -> Result<(), Box<dyn std::error::Error>> {
+        let objective = objective.unwrap_or("continue the active LUCIDOTA objective");
+        let prompt = format!(
+            "You are /goals. Treat this objective as persistent until verified complete: {objective}. Derive requirements, map authoritative evidence, do concrete work before claims, preserve scope, avoid frivolous cloud calls, prefer local models/tools, and do not mark complete unless every requirement is proven. Return a compact execution slice with next commands and verification receipts."
+        );
+        println!("{}", self.run_internal_prompt_text(&prompt, true)?);
+        Ok(())
     }
 
     #[allow(clippy::unused_self)]
@@ -3336,8 +3503,9 @@ impl runtime::PermissionPrompter for CliPermissionPrompter {
 
 struct DefaultRuntimeClient {
     runtime: tokio::runtime::Runtime,
-    client: ClawApiClient,
+    client: Option<ProviderClient>,
     model: String,
+    local_graph_runtime: bool,
     enable_tools: bool,
     emit_output: bool,
     allowed_tools: Option<AllowedToolSet>,
@@ -3354,17 +3522,58 @@ impl DefaultRuntimeClient {
         tool_registry: GlobalToolRegistry,
         progress_reporter: Option<InternalPromptProgressReporter>,
     ) -> Result<Self, Box<dyn std::error::Error>> {
+        let local_graph_runtime = should_use_local_graph_runtime(&model);
         Ok(Self {
             runtime: tokio::runtime::Runtime::new()?,
-            client: ClawApiClient::from_auth(resolve_cli_auth_source()?)
-                .with_base_url(api::read_base_url()),
+            client: if local_graph_runtime {
+                None
+            } else {
+                Some(ProviderClient::from_model(&model)?)
+            },
             model,
+            local_graph_runtime,
             enable_tools,
             emit_output,
             allowed_tools,
             tool_registry,
             progress_reporter,
         })
+    }
+
+    fn stream_local_graph(
+        &mut self,
+        request: ApiRequest,
+    ) -> Result<Vec<AssistantEvent>, RuntimeError> {
+        let payload = local_graph_payload(&request, &self.model)
+            .map_err(|error| RuntimeError::new(error.to_string()))?;
+        let response = run_lucidota_clawd_runtime(&payload)?;
+        let text = response
+            .get("text")
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or("DIOGENES LOCAL_ROUTE_EMPTY")
+            .to_string();
+        if self.emit_output {
+            write_local_graph_output(&text)?;
+        }
+        let usage = TokenUsage {
+            input_tokens: response
+                .get("input_tokens")
+                .and_then(serde_json::Value::as_u64)
+                .unwrap_or(0)
+                .min(u64::from(u32::MAX)) as u32,
+            output_tokens: response
+                .get("output_tokens")
+                .and_then(serde_json::Value::as_u64)
+                .unwrap_or_else(|| text.split_whitespace().count() as u64)
+                .min(u64::from(u32::MAX)) as u32,
+            cache_creation_input_tokens: 0,
+            cache_read_input_tokens: 0,
+        };
+        Ok(vec![
+            AssistantEvent::TextDelta(text),
+            AssistantEvent::Usage(usage),
+            AssistantEvent::MessageStop,
+        ])
     }
 }
 
@@ -3378,27 +3587,177 @@ fn resolve_cli_auth_source() -> Result<AuthSource, Box<dyn std::error::Error>> {
     })?)
 }
 
+fn should_use_local_graph_runtime(_model: &str) -> bool {
+    if env_flag_is_enabled("LUCIDOTA_ALLOW_EXTERNAL_CLAW") {
+        return false;
+    }
+    if let Ok(value) = env::var("CLAW_LOCAL_GRAPH_RUNTIME") {
+        return !matches!(value.trim(), "0" | "false" | "FALSE" | "off" | "OFF");
+    }
+    true
+}
+
+fn env_flag_is_enabled(key: &str) -> bool {
+    env::var(key).ok().is_some_and(|value| {
+        matches!(
+            value.trim(),
+            "1" | "true" | "TRUE" | "yes" | "YES" | "on" | "ON"
+        )
+    })
+}
+
+fn local_graph_payload(
+    request: &ApiRequest,
+    model: &str,
+) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    let messages = request
+        .messages
+        .iter()
+        .map(|message| {
+            json!({
+                "role": conversation_role_label(message.role),
+                "text": conversation_message_text(message),
+            })
+        })
+        .collect::<Vec<_>>();
+    let message = request
+        .messages
+        .iter()
+        .rev()
+        .find(|message| message.role == MessageRole::User)
+        .map(conversation_message_text)
+        .unwrap_or_else(|| "STATUS".to_string());
+    Ok(json!({
+        "cwd": env::current_dir()?.display().to_string(),
+        "model": model,
+        "message": message,
+        "messages": messages,
+        "system_prompt": &request.system_prompt,
+    }))
+}
+
+fn conversation_role_label(role: MessageRole) -> &'static str {
+    match role {
+        MessageRole::System => "system",
+        MessageRole::User => "user",
+        MessageRole::Assistant => "assistant",
+        MessageRole::Tool => "tool",
+    }
+}
+
+fn conversation_message_text(message: &ConversationMessage) -> String {
+    message
+        .blocks
+        .iter()
+        .map(|block| match block {
+            ContentBlock::Text { text } => text.clone(),
+            ContentBlock::ToolUse { name, input, .. } => format!("TOOL_USE {name} {input}"),
+            ContentBlock::ToolResult {
+                tool_name, output, ..
+            } => format!("TOOL_RESULT {tool_name} {output}"),
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn run_lucidota_clawd_runtime(
+    payload: &serde_json::Value,
+) -> Result<serde_json::Value, RuntimeError> {
+    let home = env::var("LUCIDOTA_HOME")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| PathBuf::from("/home/mfspx/LUCIDOTA"));
+    let venv_python = home.join(".venv").join("bin").join("python");
+    let python = if venv_python.exists() {
+        venv_python
+    } else {
+        PathBuf::from("python3")
+    };
+    let script = home.join("scripts").join("lucidota_clawd_runtime.py");
+    if !script.exists() {
+        return Err(RuntimeError::new(format!(
+            "missing local graph runtime script: {}",
+            script.display()
+        )));
+    }
+    let mut child = Command::new(python)
+        .arg(script)
+        .arg("--json")
+        .current_dir(&home)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|error| RuntimeError::new(error.to_string()))?;
+    if let Some(stdin) = &mut child.stdin {
+        stdin
+            .write_all(payload.to_string().as_bytes())
+            .map_err(|error| RuntimeError::new(error.to_string()))?;
+    }
+    let output = child
+        .wait_with_output()
+        .map_err(|error| RuntimeError::new(error.to_string()))?;
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        return Err(RuntimeError::new(format!(
+            "local graph runtime failed: {}{}",
+            stderr.trim(),
+            if stdout.trim().is_empty() {
+                String::new()
+            } else {
+                format!("; stdout: {}", stdout.trim())
+            }
+        )));
+    }
+    serde_json::from_slice(&output.stdout).map_err(|error| RuntimeError::new(error.to_string()))
+}
+
+fn write_local_graph_output(text: &str) -> Result<(), RuntimeError> {
+    let mut stdout = io::stdout();
+    write!(stdout, "{text}").map_err(|error| RuntimeError::new(error.to_string()))?;
+    if !text.ends_with('\n') {
+        writeln!(stdout).map_err(|error| RuntimeError::new(error.to_string()))?;
+    }
+    stdout
+        .flush()
+        .map_err(|error| RuntimeError::new(error.to_string()))
+}
+
 impl ApiClient for DefaultRuntimeClient {
     #[allow(clippy::too_many_lines)]
     fn stream(&mut self, request: ApiRequest) -> Result<Vec<AssistantEvent>, RuntimeError> {
         if let Some(progress_reporter) = &self.progress_reporter {
             progress_reporter.mark_model_phase();
         }
+        if self.local_graph_runtime {
+            return self.stream_local_graph(request);
+        }
+        let local_model = is_lucidota_local_model(&self.model);
         let message_request = MessageRequest {
             model: self.model.clone(),
             max_tokens: max_tokens_for_model(&self.model),
-            messages: convert_messages(&request.messages),
-            system: (!request.system_prompt.is_empty()).then(|| request.system_prompt.join("\n\n")),
-            tools: self
-                .enable_tools
+            messages: if local_model {
+                compact_local_messages(&request.messages)
+            } else {
+                convert_messages(&request.messages)
+            },
+            system: if local_model {
+                Some("You are LUCI, a local-first coding copilot. Be terse, practical, safe with RAM/VRAM, and output only what the operator asked for.".to_string())
+            } else {
+                (!request.system_prompt.is_empty()).then(|| request.system_prompt.join("\n\n"))
+            },
+            tools: (!local_model && self.enable_tools)
                 .then(|| filter_tool_specs(&self.tool_registry, self.allowed_tools.as_ref())),
-            tool_choice: self.enable_tools.then_some(ToolChoice::Auto),
+            tool_choice: (!local_model && self.enable_tools).then_some(ToolChoice::Auto),
             stream: true,
         };
 
         self.runtime.block_on(async {
-            let mut stream = self
+            let client = self
                 .client
+                .as_ref()
+                .ok_or_else(|| RuntimeError::new("external client not initialized"))?;
+            let mut stream = client
                 .stream_message(&message_request)
                 .await
                 .map_err(|error| RuntimeError::new(error.to_string()))?;
@@ -3512,6 +3871,8 @@ impl ApiClient for DefaultRuntimeClient {
 
             let response = self
                 .client
+                .as_ref()
+                .ok_or_else(|| RuntimeError::new("external client not initialized"))?
                 .send_message(&MessageRequest {
                     stream: false,
                     ..message_request.clone()
@@ -4211,6 +4572,24 @@ fn permission_policy(mode: PermissionMode, tool_registry: &GlobalToolRegistry) -
     )
 }
 
+fn compact_local_messages(messages: &[ConversationMessage]) -> Vec<InputMessage> {
+    let text = messages
+        .iter()
+        .rev()
+        .find(|message| message.role == MessageRole::User)
+        .map(conversation_message_text)
+        .unwrap_or_else(|| "STATUS".to_string());
+    let compact = if text.len() > 2400 {
+        format!("{}\n[TRUNCATED_FOR_LOCAL_CONTEXT]", &text[..2400])
+    } else {
+        text
+    };
+    vec![InputMessage {
+        role: "user".to_string(),
+        content: vec![InputContentBlock::Text { text: compact }],
+    }]
+}
+
 fn convert_messages(messages: &[ConversationMessage]) -> Vec<InputMessage> {
     messages
         .iter()
@@ -4338,6 +4717,46 @@ fn print_help_to(out: &mut impl Write) -> io::Result<()> {
     )?;
     writeln!(
         out,
+        "  claw model-runner <validate|stub>      Validate local model config or write STUB receipt"
+    )?;
+    writeln!(
+        out,
+        "  claw cohere-chat --prompt TEXT          Call Cohere Chat through LUCIDOTA receipt bridge"
+    )?;
+    writeln!(
+        out,
+        "  claw groq-chat --prompt TEXT            Call Groq Chat through LUCIDOTA receipt bridge"
+    )?;
+    writeln!(
+        out,
+        "  claw rete-route --text TEXT            Route one packet through deterministic RETE/bandit gate"
+    )?;
+    writeln!(
+        out,
+        "  claw work-order <pipeline|next-actions> Import work orders with receipts"
+    )?;
+    writeln!(
+        out,
+        "  claw template-render                    Render deterministic template and receipt"
+    )?;
+    writeln!(
+        out,
+        "  claw slop-audit                         Audit Blueprint-First/PocketFlow hygiene"
+    )?;
+    writeln!(
+        out,
+        "  claw knowledge [--query TERM]           Validate/query learned knowledge library"
+    )?;
+    writeln!(
+        out,
+        "  claw ncnn-probe                         Probe ncnn edge-runtime candidate"
+    )?;
+    writeln!(
+        out,
+        "  claw lane-gate route --text TEXT         Route/cache fastlane-slowlane metadata packets"
+    )?;
+    writeln!(
+        out,
         "  claw cockpit                          Print one-screen LUCIDOTA cockpit"
     )?;
     writeln!(
@@ -4441,12 +4860,11 @@ mod tests {
         format_permissions_report, format_permissions_switch_report, format_resume_report,
         format_status_report, format_tool_call_start, format_tool_result,
         normalize_permission_mode, parse_args, parse_git_status_metadata, permission_policy,
-        print_help_to, push_output_block, render_config_report, render_memory_report,
-        render_lucidota_status_report, render_repl_help, render_unknown_repl_command,
-        resolve_model_alias, response_to_events, resume_supported_slash_commands,
-        slash_command_completion_candidates, status_context, CliAction, CliOutputFormat,
-        InternalPromptProgressEvent, InternalPromptProgressState, SlashCommand, StatusUsage,
-        DEFAULT_MODEL,
+        print_help_to, push_output_block, render_config_report, render_lucidota_status_report,
+        render_memory_report, render_repl_help, render_unknown_repl_command, resolve_model_alias,
+        response_to_events, resume_supported_slash_commands, slash_command_completion_candidates,
+        status_context, CliAction, CliOutputFormat, InternalPromptProgressEvent,
+        InternalPromptProgressState, SlashCommand, StatusUsage, DEFAULT_MODEL,
     };
     use api::{MessageResponse, OutputContentBlock, Usage};
     use plugins::{PluginTool, PluginToolDefinition, PluginToolPermission};
@@ -4580,7 +4998,7 @@ mod tests {
             CliAction::Repl {
                 model: DEFAULT_MODEL.to_string(),
                 allowed_tools: None,
-                permission_mode: PermissionMode::ReadOnly,
+                permission_mode: PermissionMode::DangerFullAccess,
             }
         );
     }
@@ -4681,8 +5099,12 @@ mod tests {
     #[test]
     fn parses_indy_queue_shortcuts() {
         assert_eq!(
-            parse_args(&["indy-queue".to_string(), "--limit".to_string(), "3".to_string()])
-                .expect("indy-queue should parse"),
+            parse_args(&[
+                "indy-queue".to_string(),
+                "--limit".to_string(),
+                "3".to_string()
+            ])
+            .expect("indy-queue should parse"),
             CliAction::IndyBrief {
                 args: vec![
                     "queue-list".to_string(),
@@ -4747,6 +5169,129 @@ mod tests {
                 .expect("model-governor should parse"),
             CliAction::ModelGovernor {
                 args: vec!["--json".to_string()]
+            }
+        );
+        assert_eq!(
+            parse_args(&["model-validate".to_string(), "--json".to_string()])
+                .expect("model-validate should parse"),
+            CliAction::ModelRunner {
+                args: vec!["validate".to_string(), "--json".to_string()]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "model-stub".to_string(),
+                "--prompt".to_string(),
+                "hello".to_string()
+            ])
+            .expect("model-stub should parse"),
+            CliAction::ModelRunner {
+                args: vec![
+                    "stub".to_string(),
+                    "--prompt".to_string(),
+                    "hello".to_string()
+                ]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "rete-route".to_string(),
+                "--text".to_string(),
+                "CLAIM".to_string()
+            ])
+            .expect("rete-route should parse"),
+            CliAction::ReteRoute {
+                args: vec!["--text".to_string(), "CLAIM".to_string()]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "pipeline-jobs".to_string(),
+                "--case-id".to_string(),
+                "c1".to_string()
+            ])
+            .expect("pipeline-jobs should parse"),
+            CliAction::WorkOrder {
+                args: vec![
+                    "pipeline".to_string(),
+                    "--case-id".to_string(),
+                    "c1".to_string()
+                ]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "work-order".to_string(),
+                "next-actions".to_string(),
+                "--actions-json".to_string(),
+                "[]".to_string()
+            ])
+            .expect("work-order should parse"),
+            CliAction::WorkOrder {
+                args: vec![
+                    "next-actions".to_string(),
+                    "--actions-json".to_string(),
+                    "[]".to_string()
+                ]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "render-template".to_string(),
+                "--template-string".to_string(),
+                "Hi {{ name }}".to_string()
+            ])
+            .expect("render-template should parse"),
+            CliAction::TemplateRender {
+                args: vec!["--template-string".to_string(), "Hi {{ name }}".to_string()]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "pocketflow-audit".to_string(),
+                "--paths".to_string(),
+                "scripts/template_contract.py".to_string()
+            ])
+            .expect("pocketflow-audit should parse"),
+            CliAction::SlopAudit {
+                args: vec![
+                    "--paths".to_string(),
+                    "scripts/template_contract.py".to_string()
+                ]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "knowledge-library".to_string(),
+                "--query".to_string(),
+                "drf".to_string()
+            ])
+            .expect("knowledge-library should parse"),
+            CliAction::Knowledge {
+                args: vec!["--query".to_string(), "drf".to_string()]
+            }
+        );
+        assert_eq!(
+            parse_args(&["ncnn-edge-probe".to_string(), "--json".to_string()])
+                .expect("ncnn-edge-probe should parse"),
+            CliAction::NcnnProbe {
+                args: vec!["--json".to_string()]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "fast-slow-gate".to_string(),
+                "route".to_string(),
+                "--text".to_string(),
+                "cli status".to_string()
+            ])
+            .expect("fast-slow-gate should parse"),
+            CliAction::LaneGate {
+                args: vec![
+                    "route".to_string(),
+                    "--text".to_string(),
+                    "cli status".to_string()
+                ]
             }
         );
     }

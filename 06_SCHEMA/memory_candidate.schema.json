@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"MemoryCandidate","type":"object","required":["memory_id","claim_id","status","source_refs"],"properties":{"status":{"enum":["CANDIDATE","ACCEPTED","REJECTED"]}}}

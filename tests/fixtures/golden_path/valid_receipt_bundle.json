@@ -1,0 +1,307 @@
+{
+  "schema": "lucidota.lineage.receipt_bundle.v1",
+  "receipt_contract_version": "golden-path-regression-v1",
+  "generated_at": "2026-05-17T23:40:07Z",
+  "lineage_id": "11111111-1111-4111-8111-111111111111",
+  "command_uuid": "22222222-2222-4222-8222-222222222222",
+  "idempotency_key": "golden-path:22222222-2222-4222-8222-222222222222:v1",
+  "job_uuid": "33333333-3333-4333-8333-333333333333",
+  "worker_receipt_uuid": "44444444-4444-4444-8444-444444444444",
+  "audit_uuid": "55555555-5555-4555-8555-555555555555",
+  "operator_instruction": "Golden path fixture: prove one instruction lineage without canonical graph materialization.",
+  "materialization_performed": false,
+  "canonical_graph_writes_performed": false,
+  "canonical_graph_counts": {
+    "before": {
+      "graph_item": 0,
+      "graph_edge": 0,
+      "graph_journal": 0
+    },
+    "after": {
+      "graph_item": 0,
+      "graph_edge": 0,
+      "graph_journal": 0
+    }
+  },
+  "absurd_event_rows": [
+    {
+      "command_uuid": "22222222-2222-4222-8222-222222222222",
+      "idempotency_key": "golden-path:22222222-2222-4222-8222-222222222222:v1",
+      "job_uuid": "33333333-3333-4333-8333-333333333333",
+      "event_kind": "enqueued",
+      "created_at": "2026-05-17T23:40:02Z"
+    }
+  ],
+  "receipts": [
+    {
+      "schema": "lucidota.lineage.receipt.v1",
+      "receipt_type": "operator_instruction",
+      "receipt_uuid": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+      "receipt_path": "tests/fixtures/golden_path/operator_instruction.json",
+      "parent_receipt_hash": null,
+      "created_at": "2026-05-17T23:40:00Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111",
+      "command_uuid": "22222222-2222-4222-8222-222222222222",
+      "idempotency_key": "golden-path:22222222-2222-4222-8222-222222222222:v1",
+      "job_uuid": "33333333-3333-4333-8333-333333333333",
+      "worker_receipt_uuid": "44444444-4444-4444-8444-444444444444",
+      "audit_uuid": "55555555-5555-4555-8555-555555555555",
+      "status": "PASS",
+      "payload": {
+        "step_index": 0,
+        "no_canonical_graph_materialization": true,
+        "allowed_effect": "queue_absurd_work_order"
+      },
+      "operator_instruction": "Golden path fixture: prove one instruction lineage without canonical graph materialization.",
+      "evidence_refs": [],
+      "receipt_hash": "6441f1465d0a18fb5b84eab63e51a207a8c6dab24f7dc13fb4d83a9a162b9728"
+    },
+    {
+      "schema": "lucidota.lineage.receipt.v1",
+      "receipt_type": "conversation_command",
+      "receipt_uuid": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+      "receipt_path": "tests/fixtures/golden_path/conversation_command.json",
+      "parent_receipt_hash": "6441f1465d0a18fb5b84eab63e51a207a8c6dab24f7dc13fb4d83a9a162b9728",
+      "created_at": "2026-05-17T23:40:01Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111",
+      "command_uuid": "22222222-2222-4222-8222-222222222222",
+      "idempotency_key": "golden-path:22222222-2222-4222-8222-222222222222:v1",
+      "job_uuid": "33333333-3333-4333-8333-333333333333",
+      "worker_receipt_uuid": "44444444-4444-4444-8444-444444444444",
+      "audit_uuid": "55555555-5555-4555-8555-555555555555",
+      "status": "PASS",
+      "payload": {
+        "step_index": 1,
+        "no_canonical_graph_materialization": true,
+        "allowed_effect": "queue_absurd_work_order"
+      },
+      "evidence_refs": [
+        {
+          "path": "tests/fixtures/golden_path/operator_instruction.json",
+          "receipt_hash": "6441f1465d0a18fb5b84eab63e51a207a8c6dab24f7dc13fb4d83a9a162b9728",
+          "created_at": "2026-05-17T23:40:00Z",
+          "lineage_id": "11111111-1111-4111-8111-111111111111"
+        }
+      ],
+      "receipt_hash": "4c3471797603928b117385f874d00fadc585d25a574d8755dbbe358d570d0d81"
+    },
+    {
+      "schema": "lucidota.lineage.receipt.v1",
+      "receipt_type": "absurd_queue",
+      "receipt_uuid": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3",
+      "receipt_path": "tests/fixtures/golden_path/absurd_queue.json",
+      "parent_receipt_hash": "4c3471797603928b117385f874d00fadc585d25a574d8755dbbe358d570d0d81",
+      "created_at": "2026-05-17T23:40:02Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111",
+      "command_uuid": "22222222-2222-4222-8222-222222222222",
+      "idempotency_key": "golden-path:22222222-2222-4222-8222-222222222222:v1",
+      "job_uuid": "33333333-3333-4333-8333-333333333333",
+      "worker_receipt_uuid": "44444444-4444-4444-8444-444444444444",
+      "audit_uuid": "55555555-5555-4555-8555-555555555555",
+      "status": "PASS",
+      "payload": {
+        "step_index": 2,
+        "no_canonical_graph_materialization": true,
+        "absurd_event_rows": [
+          {
+            "command_uuid": "22222222-2222-4222-8222-222222222222",
+            "idempotency_key": "golden-path:22222222-2222-4222-8222-222222222222:v1",
+            "job_uuid": "33333333-3333-4333-8333-333333333333",
+            "event_kind": "enqueued"
+          }
+        ]
+      },
+      "queue_name": "surface_cep",
+      "evidence_refs": [
+        {
+          "path": "tests/fixtures/golden_path/conversation_command.json",
+          "receipt_hash": "4c3471797603928b117385f874d00fadc585d25a574d8755dbbe358d570d0d81",
+          "created_at": "2026-05-17T23:40:01Z",
+          "lineage_id": "11111111-1111-4111-8111-111111111111"
+        }
+      ],
+      "receipt_hash": "d5acb8a3fd6e44f6929dab1d41437543e8715ad9014db12f84b7f2f635b6689e"
+    },
+    {
+      "schema": "lucidota.lineage.receipt.v1",
+      "receipt_type": "worker_execution",
+      "receipt_uuid": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4",
+      "receipt_path": "tests/fixtures/golden_path/worker_execution.json",
+      "parent_receipt_hash": "d5acb8a3fd6e44f6929dab1d41437543e8715ad9014db12f84b7f2f635b6689e",
+      "created_at": "2026-05-17T23:40:03Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111",
+      "command_uuid": "22222222-2222-4222-8222-222222222222",
+      "idempotency_key": "golden-path:22222222-2222-4222-8222-222222222222:v1",
+      "job_uuid": "33333333-3333-4333-8333-333333333333",
+      "worker_receipt_uuid": "44444444-4444-4444-8444-444444444444",
+      "audit_uuid": "55555555-5555-4555-8555-555555555555",
+      "status": "PASS",
+      "payload": {
+        "step_index": 3,
+        "no_canonical_graph_materialization": true
+      },
+      "execution_uuid": "surface_cep:33333333-3333-4333-8333-333333333333",
+      "evidence_refs": [
+        {
+          "path": "tests/fixtures/golden_path/absurd_queue.json",
+          "receipt_hash": "d5acb8a3fd6e44f6929dab1d41437543e8715ad9014db12f84b7f2f635b6689e",
+          "created_at": "2026-05-17T23:40:02Z",
+          "lineage_id": "11111111-1111-4111-8111-111111111111"
+        }
+      ],
+      "receipt_hash": "ba2c1c7009b938db0a39d2dfa9d644b4c17fd24a9b879b6f448420a8323f2bd7"
+    },
+    {
+      "schema": "lucidota.lineage.receipt.v1",
+      "receipt_type": "worker_receipt",
+      "receipt_uuid": "44444444-4444-4444-8444-444444444444",
+      "receipt_path": "tests/fixtures/golden_path/worker_receipt.json",
+      "parent_receipt_hash": "ba2c1c7009b938db0a39d2dfa9d644b4c17fd24a9b879b6f448420a8323f2bd7",
+      "created_at": "2026-05-17T23:40:04Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111",
+      "command_uuid": "22222222-2222-4222-8222-222222222222",
+      "idempotency_key": "golden-path:22222222-2222-4222-8222-222222222222:v1",
+      "job_uuid": "33333333-3333-4333-8333-333333333333",
+      "worker_receipt_uuid": "44444444-4444-4444-8444-444444444444",
+      "audit_uuid": "55555555-5555-4555-8555-555555555555",
+      "status": "PASS",
+      "payload": {
+        "step_index": 4,
+        "no_canonical_graph_materialization": true
+      },
+      "execution_uuid": "surface_cep:33333333-3333-4333-8333-333333333333",
+      "evidence_refs": [
+        {
+          "path": "tests/fixtures/golden_path/worker_execution.json",
+          "receipt_hash": "ba2c1c7009b938db0a39d2dfa9d644b4c17fd24a9b879b6f448420a8323f2bd7",
+          "created_at": "2026-05-17T23:40:03Z",
+          "lineage_id": "11111111-1111-4111-8111-111111111111"
+        }
+      ],
+      "receipt_hash": "a573447e654fde1a9a62cc5215db7a4541de710fac2fee68d7093d2876d90da9"
+    },
+    {
+      "schema": "lucidota.lineage.receipt.v1",
+      "receipt_type": "graph_staging",
+      "receipt_uuid": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa6",
+      "receipt_path": "tests/fixtures/golden_path/graph_staging.json",
+      "parent_receipt_hash": "a573447e654fde1a9a62cc5215db7a4541de710fac2fee68d7093d2876d90da9",
+      "created_at": "2026-05-17T23:40:05Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111",
+      "command_uuid": "22222222-2222-4222-8222-222222222222",
+      "idempotency_key": "golden-path:22222222-2222-4222-8222-222222222222:v1",
+      "job_uuid": "33333333-3333-4333-8333-333333333333",
+      "worker_receipt_uuid": "44444444-4444-4444-8444-444444444444",
+      "audit_uuid": "55555555-5555-4555-8555-555555555555",
+      "status": "PASS",
+      "payload": {
+        "step_index": 5,
+        "no_canonical_graph_materialization": true
+      },
+      "canonical_graph_writes_performed": false,
+      "canonical_graph_counts": {
+        "before": {
+          "graph_item": 0,
+          "graph_edge": 0,
+          "graph_journal": 0
+        },
+        "after": {
+          "graph_item": 0,
+          "graph_edge": 0,
+          "graph_journal": 0
+        }
+      },
+      "evidence_refs": [
+        {
+          "path": "tests/fixtures/golden_path/worker_receipt.json",
+          "receipt_hash": "a573447e654fde1a9a62cc5215db7a4541de710fac2fee68d7093d2876d90da9",
+          "created_at": "2026-05-17T23:40:04Z",
+          "lineage_id": "11111111-1111-4111-8111-111111111111"
+        }
+      ],
+      "receipt_hash": "6d12d7f21dd8635865e9c348e8cbf191a7a1cb863135787dd0351964110ac492"
+    },
+    {
+      "schema": "lucidota.lineage.receipt.v1",
+      "receipt_type": "audit",
+      "receipt_uuid": "55555555-5555-4555-8555-555555555555",
+      "receipt_path": "tests/fixtures/golden_path/audit.json",
+      "parent_receipt_hash": "6d12d7f21dd8635865e9c348e8cbf191a7a1cb863135787dd0351964110ac492",
+      "created_at": "2026-05-17T23:40:06Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111",
+      "command_uuid": "22222222-2222-4222-8222-222222222222",
+      "idempotency_key": "golden-path:22222222-2222-4222-8222-222222222222:v1",
+      "job_uuid": "33333333-3333-4333-8333-333333333333",
+      "worker_receipt_uuid": "44444444-4444-4444-8444-444444444444",
+      "audit_uuid": "55555555-5555-4555-8555-555555555555",
+      "status": "PASS",
+      "payload": {
+        "step_index": 6,
+        "no_canonical_graph_materialization": true
+      },
+      "verdict": "PASS",
+      "canonical_graph_writes_performed": false,
+      "materialization_performed": false,
+      "evidence_refs": [
+        {
+          "path": "tests/fixtures/golden_path/worker_receipt.json",
+          "receipt_hash": "a573447e654fde1a9a62cc5215db7a4541de710fac2fee68d7093d2876d90da9",
+          "created_at": "2026-05-17T23:40:04Z",
+          "lineage_id": "11111111-1111-4111-8111-111111111111"
+        },
+        {
+          "path": "tests/fixtures/golden_path/graph_staging.json",
+          "receipt_hash": "6d12d7f21dd8635865e9c348e8cbf191a7a1cb863135787dd0351964110ac492",
+          "created_at": "2026-05-17T23:40:05Z",
+          "lineage_id": "11111111-1111-4111-8111-111111111111"
+        }
+      ],
+      "receipt_hash": "2986ed9205f069f21b2309ede2da251a2b9f3213a8a2df7734a5d83f1e1b00f4"
+    }
+  ],
+  "evidence_refs": [
+    {
+      "path": "tests/fixtures/golden_path/operator_instruction.json",
+      "receipt_hash": "f4c4d2822feb66a7c67da406abd57089ef2ec725b0953128016d184a4794e86a",
+      "created_at": "2026-05-17T23:40:00Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111"
+    },
+    {
+      "path": "tests/fixtures/golden_path/conversation_command.json",
+      "receipt_hash": "3ef1552fecec29952e070aea65c0405332bc82304fa65241258bddc0f93895c6",
+      "created_at": "2026-05-17T23:40:01Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111"
+    },
+    {
+      "path": "tests/fixtures/golden_path/absurd_queue.json",
+      "receipt_hash": "ec3ba1e5b945d9e5569774739fc7c6e3263b5c12635fefc4cb1bc6e8dc842129",
+      "created_at": "2026-05-17T23:40:02Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111"
+    },
+    {
+      "path": "tests/fixtures/golden_path/worker_execution.json",
+      "receipt_hash": "1f10d08ff882ab6a6064eba9fac210f70c9625274d5142da7bfee0186297dab7",
+      "created_at": "2026-05-17T23:40:03Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111"
+    },
+    {
+      "path": "tests/fixtures/golden_path/worker_receipt.json",
+      "receipt_hash": "97aedfbf952d9efc2601cf05e582e714105d6d9702309a22408ceead74d75d76",
+      "created_at": "2026-05-17T23:40:04Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111"
+    },
+    {
+      "path": "tests/fixtures/golden_path/graph_staging.json",
+      "receipt_hash": "42257f704f94845ec4b66ef63524c3eaa4feb5a81107b8fad76dbb60c21e8fc8",
+      "created_at": "2026-05-17T23:40:05Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111"
+    },
+    {
+      "path": "tests/fixtures/golden_path/audit.json",
+      "receipt_hash": "f3b9754c30ba5ade9d19d55f6ee76bffd51e89479e3b1903e661609f645d2d74",
+      "created_at": "2026-05-17T23:40:06Z",
+      "lineage_id": "11111111-1111-4111-8111-111111111111"
+    }
+  ],
+  "bundle_hash": "fc8dcb2a12c5d6f8cd6f48ff4121d503d285f8e0f5cff9f31d365e265e671b21"
+}

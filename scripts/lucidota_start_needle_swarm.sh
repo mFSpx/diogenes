@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/scripts/lucidota_safe_ops_env.sh"
 COUNT="${LUCIDOTA_NEEDLE_COUNT:-6}"
 BASE_PORT="${LUCIDOTA_NEEDLE_BASE_PORT:-8090}"
 PY="$ROOT/.venv/bin/python"

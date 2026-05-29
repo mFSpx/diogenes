@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/053_simplemem_candidate_index.sql

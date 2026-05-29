@@ -1,5 +1,5 @@
 -- Survey / hop-pivot intake schema for LUCIDOTA.
--- Light, local, boring tables: durable surface for Clawd, DBOS, Bytewax, and Big Board.
+-- Light, local, boring tables: durable surface for Clawd, ABSURD, Bytewax, and Big Board.
 
 CREATE SCHEMA IF NOT EXISTS lucidota_survey;
 

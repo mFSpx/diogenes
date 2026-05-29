@@ -16,6 +16,9 @@ use super::{Provider, ProviderFuture};
 
 pub const DEFAULT_XAI_BASE_URL: &str = "https://api.x.ai/v1";
 pub const DEFAULT_OPENAI_BASE_URL: &str = "https://api.openai.com/v1";
+pub const DEFAULT_GROQ_BASE_URL: &str = "https://api.groq.com/openai/v1";
+pub const DEFAULT_COHERE_BASE_URL: &str = "https://api.cohere.ai/compatibility/v1";
+pub const DEFAULT_LUCIDOTA_LOCAL_BASE_URL: &str = "http://127.0.0.1:8080/v1";
 const REQUEST_ID_HEADER: &str = "request-id";
 const ALT_REQUEST_ID_HEADER: &str = "x-request-id";
 const DEFAULT_INITIAL_BACKOFF: Duration = Duration::from_millis(200);
@@ -32,6 +35,9 @@ pub struct OpenAiCompatConfig {
 
 const XAI_ENV_VARS: &[&str] = &["XAI_API_KEY"];
 const OPENAI_ENV_VARS: &[&str] = &["OPENAI_API_KEY"];
+const GROQ_ENV_VARS: &[&str] = &["GROQ_API_KEY"];
+const COHERE_ENV_VARS: &[&str] = &["COHERE_API_KEY"];
+const LOCAL_ENV_VARS: &[&str] = &["LUCIDOTA_LOCAL_API_KEY"];
 
 impl OpenAiCompatConfig {
     #[must_use]
@@ -54,10 +60,40 @@ impl OpenAiCompatConfig {
         }
     }
     #[must_use]
+    pub const fn groq() -> Self {
+        Self {
+            provider_name: "Groq",
+            api_key_env: "GROQ_API_KEY",
+            base_url_env: "GROQ_BASE_URL",
+            default_base_url: DEFAULT_GROQ_BASE_URL,
+        }
+    }
+    #[must_use]
+    pub const fn cohere() -> Self {
+        Self {
+            provider_name: "Cohere",
+            api_key_env: "COHERE_API_KEY",
+            base_url_env: "COHERE_BASE_URL",
+            default_base_url: DEFAULT_COHERE_BASE_URL,
+        }
+    }
+    #[must_use]
+    pub const fn lucidota_local() -> Self {
+        Self {
+            provider_name: "LUCIDOTA local",
+            api_key_env: "LUCIDOTA_LOCAL_API_KEY",
+            base_url_env: "LUCIDOTA_LOCAL_BASE_URL",
+            default_base_url: DEFAULT_LUCIDOTA_LOCAL_BASE_URL,
+        }
+    }
+    #[must_use]
     pub fn credential_env_vars(self) -> &'static [&'static str] {
         match self.provider_name {
             "xAI" => XAI_ENV_VARS,
             "OpenAI" => OPENAI_ENV_VARS,
+            "Groq" => GROQ_ENV_VARS,
+            "Cohere" => COHERE_ENV_VARS,
+            "LUCIDOTA local" => LOCAL_ENV_VARS,
             _ => &[],
         }
     }

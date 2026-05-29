@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/011_body_capture.sql

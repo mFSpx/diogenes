@@ -1,0 +1,20 @@
+{
+  "schema": "lucidota.dbos_river_wrapper.report.v2",
+  "generated_at": "2026-05-26T20:53:21.153561Z",
+  "action": "worker-once",
+  "mode": "execute",
+  "execute_requested": true,
+  "queue": "dbos.phase05_streaming_brain",
+  "job_kind": "gliner_zero_shot_extract",
+  "state_database_url": "postgresql:///<database>",
+  "storage_database_url": "postgresql:///<database>",
+  "action_result": {},
+  "db_writes_performed": false,
+  "learning_writes_performed": false,
+  "canonical_graph_writes_performed": false,
+  "temporal_claims_mutated_by_wrapper": false,
+  "blockers": [
+    "exception:UndefinedTable:relation \"lucidota_control.dbos_queue_job\" does not exist\nLINE 3:                 FROM lucidota_control.dbos_queue_job\n                             ^"
+  ],
+  "report_path": "05_OUTPUTS/dbos/dbos_river_wrapper_worker-once_20260526T205321153628Z.json"
+}

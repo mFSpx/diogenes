@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"EntityCandidateRegistry","type":"object","required":["entity_id","canonical_name","aliases","source_refs","confidence_bps","status"],"properties":{"status":{"enum":["CANDIDATE","REJECTED","ACCEPTED"]}}}

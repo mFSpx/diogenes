@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/097_conversation_command_status_transition.sql

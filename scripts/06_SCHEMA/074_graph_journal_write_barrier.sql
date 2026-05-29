@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/074_graph_journal_write_barrier.sql

@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/106_production_readiness.sql

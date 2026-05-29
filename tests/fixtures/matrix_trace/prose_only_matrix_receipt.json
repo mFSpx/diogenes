@@ -1,0 +1,30 @@
+{
+  "schema": "lucidota.dev_order.final_receipt.v1",
+  "policy_version": "2026-05-18.dev-order-matrix.v1",
+  "verdict": "PASS",
+  "matrix_trace": "T1 A-H all good, trust me.",
+  "commands_run": [
+    {
+      "command": "python3 scripts/run_dev_order_methodology_checks.py",
+      "rc": 0,
+      "result": "PASS"
+    }
+  ],
+  "files_changed": [
+    "06_SCHEMA/dev_order_matrix_policy.v1.json",
+    "scripts/dev_order_matrix_wrapper.py",
+    "scripts/matrix_trace_checker.py",
+    "scripts/dev_order_gate.py",
+    "scripts/run_dev_order_methodology_checks.py",
+    "tests/test_dev_order_matrix_wrapper.py",
+    "tests/test_matrix_trace_checker.py",
+    "tests/test_dev_order_gate.py"
+  ],
+  "receipts_written": [
+    "05_OUTPUTS/dev_order_matrix/dev_order_methodology_example.json"
+  ],
+  "canonical_graph_materialization": false,
+  "canonical_graph_writes": false,
+  "canonical_graph_writes_performed": false,
+  "blockers": []
+}

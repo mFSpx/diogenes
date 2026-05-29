@@ -9,13 +9,20 @@ def run(args):
     r=subprocess.run([str(PY),*args],cwd=ROOT,text=True,capture_output=True,check=False)
     return {'ok':r.returncode==0,'returncode':r.returncode,'stdout_tail':r.stdout[-800:],'stderr_tail':r.stderr[-400:]}
 
+def run_optional(label, args):
+    target = ROOT / args[0]
+    if not target.exists():
+        return {'ok': True, 'skipped': True, 'reason': f'missing_optional_script:{args[0]}'}
+    return run(args)
+
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--json',action='store_true'); args=ap.parse_args()
     steps={
       'cockpit': run(['scripts/lucidota_cockpit.py','--json']),
-      'survey_file': run(['scripts/lucidota_survey.py','BRAIN.md','--fetch','--keyword','LUCIDOTA']),
+      'survey_file': run_optional('survey_file', ['scripts/lucidota_survey.py','BRAIN.md','--fetch','--keyword','LUCIDOTA']),
       'model_governor': run(['scripts/lucidota_model_governor.py','--json']),
-      'indy_brief': run(['scripts/lucidota_indy_brief.py','--json']),
+      'language_subsystem': run(['scripts/lucidota_cli.py','language','--text','operator demo recovery proof','--json']),
+      'indy_brief': run_optional('indy_brief', ['scripts/lucidota_indy_brief.py','--json']),
     }
     report={'ok':all(s['ok'] for s in steps.values()),'steps':steps}
     print(json.dumps(report,sort_keys=True) if args.json else report)

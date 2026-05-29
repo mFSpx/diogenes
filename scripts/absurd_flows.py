@@ -19,7 +19,7 @@ import sys
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 try:  # Optional in tests; available in live venv.
     import psycopg  # type: ignore
@@ -100,8 +100,15 @@ class FlowRecord:
     db_reason: str = ""
 
 
-def discover_files(root: Path, *, max_files: int | None = None, start_after: str = "") -> list[Path]:
+def discover_files(
+    root: Path,
+    *,
+    max_files: int | None = None,
+    max_bytes: int | None = None,
+    start_after: str = "",
+) -> list[Path]:
     files: list[Path] = []
+    total_bytes = 0
     cursor = start_after
     marker = f"{root.name}/"
     if marker in cursor:
@@ -117,7 +124,11 @@ def discover_files(root: Path, *, max_files: int | None = None, start_after: str
         rel_path = path.relative_to(root).as_posix()
         if cursor and rel_path <= cursor:
             continue
+        size = path.stat().st_size
+        if max_bytes is not None and files and total_bytes + size > max_bytes:
+            break
         files.append(path)
+        total_bytes += size
         if max_files and len(files) >= max_files:
             break
     return files
@@ -126,6 +137,60 @@ def discover_files(root: Path, *, max_files: int | None = None, start_after: str
 def batch(items: list[Path], size: int) -> list[list[Path]]:
     size = max(1, int(size))
     return [items[i : i + size] for i in range(0, len(items), size)]
+
+
+def batch_by_bytes(
+    items: list[Path],
+    *,
+    max_bytes: int,
+    size_lookup: Callable[[Path], int] | None = None,
+) -> list[list[Path]]:
+    cap = max(1, int(max_bytes))
+    lookup = size_lookup or (lambda p: p.stat().st_size)
+    groups: list[list[Path]] = []
+    current: list[Path] = []
+    current_bytes = 0
+    for path in items:
+        size = int(lookup(path))
+        if current and current_bytes + size > cap:
+            groups.append(current)
+            current = []
+            current_bytes = 0
+        current.append(path)
+        current_bytes += size
+    if current:
+        groups.append(current)
+    return groups
+
+
+def load_inventory_paths(
+    inventory_jsonl: Path,
+    *,
+    max_bytes: int | None = None,
+    start_after: str = "",
+) -> list[Path]:
+    paths: list[Path] = []
+    if not inventory_jsonl.exists():
+        return paths
+    cursor = start_after.strip()
+    for line in inventory_jsonl.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except Exception:
+            continue
+        path = row.get("path")
+        if not path:
+            continue
+        rp = str(path)
+        if cursor and rp <= cursor:
+            continue
+        size = row.get("size_bytes")
+        if max_bytes is not None and isinstance(size, int) and size > max_bytes:
+            continue
+        paths.append(ROOT / rp)
+    return paths
 
 
 def cas_target(sha256: str) -> Path:
@@ -297,6 +362,8 @@ def process_files(
     root: Path,
     *,
     max_files: int | None = None,
+    max_bytes: int | None = None,
+    input_jsonl: Path | None = None,
     chunk_size: int = 64,
     execute: bool = False,
     database_url: str | None = None,
@@ -304,13 +371,20 @@ def process_files(
     start_after: str = "",
     stop_file: Path | None = None,
 ) -> dict[str, Any]:
-    files = discover_files(root, max_files=max_files, start_after=start_after)
+    if input_jsonl is not None:
+        files = load_inventory_paths(input_jsonl, max_bytes=max_bytes, start_after=start_after)
+    else:
+        files = discover_files(root, max_files=max_files, max_bytes=max_bytes, start_after=start_after)
     receipts: list[FlowRecord] = []
     deduped = 0
     skipped_db = 0
     processed = 0
     batch_size = max(1, int(chunk_size))
     batch_history: list[dict[str, Any]] = []
+    if max_bytes is not None:
+        groups = [files] if files else []
+    else:
+        groups = batch(files, batch_size)
     db_seen: set[str] = set()
     stopped = False
     stop_reason = ""
@@ -326,7 +400,7 @@ def process_files(
         conn.commit()
         db_seen = existing_sha256(conn, [sha256_file(p) for p in files[: min(len(files), 256)]]) if files else set()
     try:
-        for group in batch(files, batch_size):
+        for group in groups:
             if stop_file and Path(stop_file).exists():
                 stopped = True
                 stop_reason = f"stop_file_present:{rel(stop_file)}"
@@ -376,7 +450,15 @@ def process_files(
                     processed += 1
                 conn.commit()
             elapsed = (datetime.now(timezone.utc) - started).total_seconds()
-            batch_history.append({"batch_size": len(group), "seconds": round(elapsed, 4), "processed": processed, "deduped": deduped})
+            batch_history.append(
+                {
+                    "batch_size": len(group),
+                    "batch_bytes": sum(int(p.stat().st_size) for p in group),
+                    "seconds": round(elapsed, 4),
+                    "processed": processed,
+                    "deduped": deduped,
+                }
+            )
             if elapsed > 10 and batch_size > 1:
                 batch_size = max(1, batch_size // 2)
         payload = {
@@ -389,6 +471,7 @@ def process_files(
             "deduped_count": deduped,
             "db_skipped_count": skipped_db,
             "batch_size_final": batch_size,
+            "max_bytes": max_bytes,
             "batch_history": batch_history,
             "records": [asdict(r) for r in receipts],
             "stopped": stopped,
@@ -420,6 +503,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--json", action="store_true")
     p.add_argument("--chunk-size", type=int, default=64)
     p.add_argument("--max-files", type=int, default=None)
+    p.add_argument("--max-bytes", type=int, default=None)
+    p.add_argument("--input-jsonl", default=None)
     p.add_argument("--case-key", default=DEFAULT_CASE_KEY)
     p.add_argument("--start-after", default="")
     p.add_argument("--stop-file", default=str(OUT_DIR / "absurd_flows.stop"))
@@ -431,6 +516,8 @@ def main() -> int:
     payload = process_files(
         Path(args.root),
         max_files=args.max_files,
+        max_bytes=args.max_bytes,
+        input_jsonl=Path(args.input_jsonl) if args.input_jsonl else None,
         chunk_size=args.chunk_size,
         execute=bool(args.execute),
         database_url=args.database_url,

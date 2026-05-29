@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/010_wake_bus.sql

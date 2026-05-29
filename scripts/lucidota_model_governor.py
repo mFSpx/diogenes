@@ -11,11 +11,16 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-DB = os.environ.get("DBOS_SYSTEM_DATABASE_URL", "postgresql://mfspx@/lucidota_state")
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from core.runtime_dsns import resolve_state_dsn
+
+DB = resolve_state_dsn("postgresql://mfspx@/lucidota_state")
 SCHEMA = ROOT / "06_SCHEMA" / "002_model_runtime.sql"
 
 GOVERNOR_SQL = """

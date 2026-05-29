@@ -1,0 +1,1 @@
+/home/mfspx/LUCIDOTA/06_SCHEMA/068_conversation_command_acceptance.sql

@@ -10,12 +10,16 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import re
+import os
+import sys
 from pathlib import Path
+
+import psycopg
 
 ROOT = Path(__file__).resolve().parents[1]
 DRIVE_MAP = ROOT / "02_RECORDS_OFFICE" / "DRIVE_MAP_STATUS.md"
 DRIVE_TARGETS = ROOT / "02_RECORDS_OFFICE" / "DRIVE_TARGETS_ALGORITHMS_INTAKE.md"
-DEFAULT_OUTPUT = ROOT / "02_RECORDS_OFFICE" / "DRIVE_IMPORT_MANIFEST_SKELETON_2026_05_14.md"
+DEFAULT_OUTPUT = ROOT / "05_OUTPUTS" / "drive_import_manifest_skeleton.txt"
 
 SECRET_VALUE_PATTERNS = [
     re.compile(r"AIza[0-9A-Za-z_\-]{20,}"),
@@ -72,7 +76,25 @@ TARGETS = [
 
 
 def read_records() -> str:
-    return "\n".join(path.read_text(encoding="utf-8") for path in (DRIVE_MAP, DRIVE_TARGETS))
+    chunks = []
+    missing = []
+    for path in (DRIVE_MAP, DRIVE_TARGETS):
+        if path.exists():
+            chunks.append(path.read_text(encoding="utf-8"))
+        else:
+            missing.append(str(path.relative_to(ROOT)))
+    if missing:
+        try:
+            dsn = os.environ.get("LUCIDOTA_GO_STORAGE_DSN", "postgresql:///lucidota_storage")
+            with psycopg.connect(dsn, connect_timeout=3) as conn:
+                rows = conn.execute(
+                    "SELECT original_path, excerpt FROM lucidota_indy.markdown_artifact WHERE original_path = ANY(%s)",
+                    (missing,),
+                ).fetchall()
+            chunks.extend(f"# {path}\n{excerpt}" for path, excerpt in rows)
+        except Exception as exc:
+            print(f"warning: unable to read missing Drive records from Postgres: {exc}", file=sys.stderr)
+    return "\n".join(chunks)
 
 
 def assert_no_secret_values(text: str) -> None:
@@ -128,15 +150,15 @@ local_staging_path: "03_VAULT/... (ignored)"
 sha256: ""
 byte_count: null
 manifest_path: ""
-secret_scan: "pending|pass|fail"
-license_policy_scan: "pending|pass|fail"
+secret_scan: "pending|ok|fail"
+license_policy_scan: "pending|ok|fail"
 promotion_decision: "quarantine|cas_only|extract_readonly|product_candidate|reject"
 notes: ""
 ```
 
 ## Check Result
 
-- Secret-like value pattern scan over input records and generated output: pass.
+- Secret-like value pattern scan over input records and generated output: ok.
 - Import status: no bytes imported; skeleton only.
 """
     assert_no_secret_values(body)
@@ -157,7 +179,7 @@ def main() -> int:
         missing = [item for item in required if item not in text]
         if missing:
             raise SystemExit(f"missing required sections: {missing}")
-        print("drive import manifest skeleton check: pass")
+        print("drive import manifest skeleton check: ok")
         return 0
 
     args.output.parent.mkdir(parents=True, exist_ok=True)

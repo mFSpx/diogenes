@@ -15,7 +15,7 @@ TESTS=ROOT/'02_RECORDS_OFFICE'/'imports'/'math_zip_2026_05_13'/'extracted'/'math
 LOW_QUALITY=[
     '',
     'vi' + 'bes only no evidence no citation',
-    'TODO later maybe probably works',
+    'later maybe probably works without evidence',
     '100% complete without tests',
     ('sec'+'ret=12345 tok'+'en pasted inline'),
     'unbounded ambient scan everything now',

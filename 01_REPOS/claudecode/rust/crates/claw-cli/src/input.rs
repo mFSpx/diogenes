@@ -1,10 +1,19 @@
 use std::borrow::Cow;
-use std::io::{self, IsTerminal, Write};
+use std::io::{self, IsTerminal, Read, Write};
 
 use crossterm::cursor::{MoveToColumn, MoveUp};
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use crossterm::queue;
 use crossterm::terminal::{self, Clear, ClearType};
+
+use crate::prompt_dedup::PromptDedupTracker;
+
+pub const MAX_PROMPT_BYTES: usize = 8 * 1024 * 1024;
+
+const STRIPPED_PROMPT_PUNCTUATION: [char; 31] = [
+    '!', '?', ';', ':', ',', '.', '—', '-', '(', ')', '[', ']', '{', '}', '"', '\'', '/', '\\',
+    '|', '@', '#', '$', '%', '^', '&', '*', '+', '=', '~', '\u{200c}', '\u{200b}',
+];
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ReadOutcome {
@@ -245,6 +254,7 @@ pub struct LineEditor {
     yank_buffer: YankBuffer,
     vim_enabled: bool,
     completion_state: Option<CompletionState>,
+    dedup_tracker: PromptDedupTracker,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -264,6 +274,7 @@ impl LineEditor {
             yank_buffer: YankBuffer::default(),
             vim_enabled: false,
             completion_state: None,
+            dedup_tracker: PromptDedupTracker::default(),
         }
     }
 
@@ -300,7 +311,9 @@ impl LineEditor {
                 }
                 KeyAction::Submit(line) => {
                     session.finalize_render(&mut stdout, &self.prompt, self.vim_enabled)?;
-                    return Ok(ReadOutcome::Submit(line));
+                    return Ok(ReadOutcome::Submit(
+                        self.prepare_and_track_submission(&line)?,
+                    ));
                 }
                 KeyAction::Cancel => {
                     session.clear_render(&mut stdout)?;
@@ -361,8 +374,18 @@ impl LineEditor {
                 continue;
             }
 
-            return Ok(ReadOutcome::Submit(buffer));
+            return Ok(ReadOutcome::Submit(
+                self.prepare_and_track_submission(&buffer)?,
+            ));
         }
+    }
+
+    fn prepare_and_track_submission(&mut self, line: &str) -> io::Result<String> {
+        let prepared = prepare_prompt_submission(line)?;
+        self.dedup_tracker
+            .accept_now(&prepared)
+            .map_err(io::Error::other)?;
+        Ok(prepared)
     }
 
     fn handle_key_event(&mut self, session: &mut EditSession, key: KeyEvent) -> KeyAction {
@@ -789,6 +812,59 @@ impl LineEditor {
     }
 }
 
+pub fn validate_prompt_size(text: &str) -> io::Result<()> {
+    if text.len() > MAX_PROMPT_BYTES {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            format!(
+                "prompt byte length {} exceeds maximum {}",
+                text.len(),
+                MAX_PROMPT_BYTES
+            ),
+        ));
+    }
+    Ok(())
+}
+
+pub fn sanitize_prompt_for_envelope(text: &str) -> String {
+    text.chars()
+        .filter(|ch| !STRIPPED_PROMPT_PUNCTUATION.contains(ch))
+        .collect()
+}
+
+pub fn prepare_prompt_submission(text: &str) -> io::Result<String> {
+    validate_prompt_size(text)?;
+    Ok(sanitize_prompt_for_envelope(text))
+}
+
+pub fn secure_stream_gate(reader: &mut impl Read) -> io::Result<Vec<u8>> {
+    let mut allocation = Vec::with_capacity(4096);
+    let mut total_bytes = 0usize;
+    let mut chunk = [0u8; 4096];
+    loop {
+        let read_bytes = reader.read(&mut chunk)?;
+        if read_bytes == 0 {
+            break;
+        }
+        total_bytes = total_bytes.checked_add(read_bytes).ok_or_else(|| {
+            io::Error::new(io::ErrorKind::InvalidInput, "prompt byte counter overflow")
+        })?;
+        if total_bytes > MAX_PROMPT_BYTES {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                format!("input exceeds {MAX_PROMPT_BYTES} byte security buffer limit"),
+            ));
+        }
+        allocation.extend_from_slice(&chunk[..read_bytes]);
+    }
+    Ok(allocation)
+}
+
+pub fn secure_stream_gate_to_string(reader: &mut impl Read) -> io::Result<String> {
+    let bytes = secure_stream_gate(reader)?;
+    String::from_utf8(bytes).map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Submission {
     Submit,
@@ -976,9 +1052,12 @@ fn to_u16(value: usize) -> io::Result<u16> {
 #[cfg(test)]
 mod tests {
     use super::{
-        selection_bounds, slash_command_prefix, EditSession, EditorMode, KeyAction, LineEditor,
+        prepare_prompt_submission, sanitize_prompt_for_envelope, secure_stream_gate,
+        secure_stream_gate_to_string, selection_bounds, slash_command_prefix, validate_prompt_size,
+        EditSession, EditorMode, KeyAction, LineEditor, MAX_PROMPT_BYTES,
     };
     use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+    use std::io::Cursor;
 
     #[test]
     fn extracts_only_terminal_slash_command_prefixes() {
@@ -1191,5 +1270,103 @@ mod tests {
 
         // then
         assert!(matches!(action, KeyAction::Cancel));
+    }
+
+    #[test]
+    fn prompt_submission_strips_declared_punctuation_and_zero_width_marks() {
+        // given
+        let raw = "Run!?;:,.—-()[]{}\"'/\\\u{200c}\u{200b}|@#$%^&*+=~ Boat Work";
+
+        // when
+        let sanitized = sanitize_prompt_for_envelope(raw);
+
+        // then
+        assert_eq!(sanitized, "Run Boat Work");
+    }
+
+    #[test]
+    fn prompt_submission_allows_exact_maximum_byte_length() {
+        // given
+        let prompt = "a".repeat(MAX_PROMPT_BYTES);
+
+        // when / then
+        validate_prompt_size(&prompt).expect("exact 8 MiB prompt should be allowed");
+    }
+
+    #[test]
+    fn prompt_submission_rejects_above_maximum_byte_length() {
+        // given
+        let prompt = "a".repeat(MAX_PROMPT_BYTES + 1);
+
+        // when
+        let error = validate_prompt_size(&prompt).expect_err("oversized prompt must fail");
+
+        // then
+        assert_eq!(error.kind(), std::io::ErrorKind::InvalidInput);
+        assert!(error.to_string().contains("exceeds maximum"));
+    }
+
+    #[test]
+    fn prepare_prompt_submission_validates_size_before_returning_sanitized_text() {
+        // given
+        let valid = "Proof-of-life!".to_string();
+        let invalid = "x".repeat(MAX_PROMPT_BYTES + 1);
+
+        // when
+        let prepared = prepare_prompt_submission(&valid);
+        let rejected = prepare_prompt_submission(&invalid);
+
+        // then
+        assert_eq!(
+            prepared.expect("valid prompt should sanitize"),
+            "Proofoflife"
+        );
+        assert!(rejected.is_err());
+    }
+
+    #[test]
+    fn editor_rejects_duplicate_prepared_prompt_inside_window() {
+        // given
+        let mut editor = LineEditor::new("> ", vec![]);
+
+        // when
+        let first = editor.prepare_and_track_submission("repeat!");
+        let second = editor.prepare_and_track_submission("repeat");
+
+        // then
+        assert_eq!(first.expect("first prompt accepted"), "repeat");
+        let error = second.expect_err("duplicate prompt must fail");
+        assert_eq!(error.kind(), std::io::ErrorKind::Other);
+        assert!(error.to_string().contains("duplicate prompt"));
+    }
+
+    #[test]
+    fn secure_stream_gate_accepts_exact_8_mib_without_over_allocating() {
+        let bytes = vec![b'a'; MAX_PROMPT_BYTES];
+        let mut reader = Cursor::new(bytes);
+
+        let gated = secure_stream_gate(&mut reader).expect("exact 8 MiB accepted");
+
+        assert_eq!(gated.len(), MAX_PROMPT_BYTES);
+    }
+
+    #[test]
+    fn secure_stream_gate_rejects_above_8_mib() {
+        let bytes = vec![b'a'; MAX_PROMPT_BYTES + 1];
+        let mut reader = Cursor::new(bytes);
+
+        let error = secure_stream_gate(&mut reader).expect_err("above 8 MiB rejected");
+
+        assert_eq!(error.kind(), std::io::ErrorKind::InvalidInput);
+        assert!(error.to_string().contains("security buffer limit"));
+    }
+
+    #[test]
+    fn secure_stream_gate_to_string_rejects_invalid_utf8() {
+        let mut reader = Cursor::new(vec![0xff, 0xfe]);
+
+        let error = secure_stream_gate_to_string(&mut reader).expect_err("invalid utf8 rejected");
+
+        assert_eq!(error.kind(), std::io::ErrorKind::InvalidData);
     }
 }

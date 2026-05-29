@@ -28,6 +28,9 @@ pub enum ProviderKind {
     ClawApi,
     Xai,
     OpenAi,
+    Groq,
+    Cohere,
+    LucidotaLocal,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -39,6 +42,69 @@ pub struct ProviderMetadata {
 }
 
 const MODEL_REGISTRY: &[(&str, ProviderMetadata)] = &[
+    (
+        "luci",
+        ProviderMetadata {
+            provider: ProviderKind::LucidotaLocal,
+            auth_env: "LUCIDOTA_LOCAL_API_KEY",
+            base_url_env: "LUCIDOTA_LOCAL_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_LUCIDOTA_LOCAL_BASE_URL,
+        },
+    ),
+    (
+        "diogenes-go-local",
+        ProviderMetadata {
+            provider: ProviderKind::LucidotaLocal,
+            auth_env: "LUCIDOTA_LOCAL_API_KEY",
+            base_url_env: "LUCIDOTA_LOCAL_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_LUCIDOTA_LOCAL_BASE_URL,
+        },
+    ),
+    (
+        "deepseek-local",
+        ProviderMetadata {
+            provider: ProviderKind::LucidotaLocal,
+            auth_env: "LUCIDOTA_LOCAL_API_KEY",
+            base_url_env: "LUCIDOTA_LOCAL_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_LUCIDOTA_LOCAL_BASE_URL,
+        },
+    ),
+    (
+        "mamba7b-ram",
+        ProviderMetadata {
+            provider: ProviderKind::LucidotaLocal,
+            auth_env: "LUCIDOTA_LOCAL_API_KEY",
+            base_url_env: "LUCIDOTA_MAMBA_RAM_BASE_URL",
+            default_base_url: "http://127.0.0.1:8081/v1",
+        },
+    ),
+    (
+        "mamba7b-gpu",
+        ProviderMetadata {
+            provider: ProviderKind::LucidotaLocal,
+            auth_env: "LUCIDOTA_LOCAL_API_KEY",
+            base_url_env: "LUCIDOTA_MAMBA_GPU_BASE_URL",
+            default_base_url: "http://127.0.0.1:8083/v1",
+        },
+    ),
+    (
+        "groq",
+        ProviderMetadata {
+            provider: ProviderKind::Groq,
+            auth_env: "GROQ_API_KEY",
+            base_url_env: "GROQ_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_GROQ_BASE_URL,
+        },
+    ),
+    (
+        "cohere",
+        ProviderMetadata {
+            provider: ProviderKind::Cohere,
+            auth_env: "COHERE_API_KEY",
+            base_url_env: "COHERE_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_COHERE_BASE_URL,
+        },
+    ),
     (
         "opus",
         ProviderMetadata {
@@ -161,6 +227,15 @@ pub fn resolve_model_alias(model: &str) -> String {
                     _ => trimmed,
                 },
                 ProviderKind::OpenAi => trimmed,
+                ProviderKind::Groq => match *alias {
+                    "groq" => "llama-3.3-70b-versatile",
+                    _ => trimmed,
+                },
+                ProviderKind::Cohere => match *alias {
+                    "cohere" => "command-a-03-2025",
+                    _ => trimmed,
+                },
+                ProviderKind::LucidotaLocal => trimmed,
             })
         })
         .map_or_else(|| trimmed.to_string(), ToOwned::to_owned)
@@ -181,6 +256,30 @@ pub fn metadata_for_model(model: &str) -> Option<ProviderMetadata> {
             default_base_url: openai_compat::DEFAULT_XAI_BASE_URL,
         });
     }
+    if lower.starts_with("llama-") || lower.starts_with("mixtral") || lower.contains("groq") {
+        return Some(ProviderMetadata {
+            provider: ProviderKind::Groq,
+            auth_env: "GROQ_API_KEY",
+            base_url_env: "GROQ_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_GROQ_BASE_URL,
+        });
+    }
+    if lower.starts_with("command-") || lower.contains("cohere") {
+        return Some(ProviderMetadata {
+            provider: ProviderKind::Cohere,
+            auth_env: "COHERE_API_KEY",
+            base_url_env: "COHERE_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_COHERE_BASE_URL,
+        });
+    }
+    if lower.contains("local") || lower.starts_with("mamba7b-") || lower == "luci" {
+        return Some(ProviderMetadata {
+            provider: ProviderKind::LucidotaLocal,
+            auth_env: "LUCIDOTA_LOCAL_API_KEY",
+            base_url_env: "LUCIDOTA_LOCAL_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_LUCIDOTA_LOCAL_BASE_URL,
+        });
+    }
     None
 }
 
@@ -195,6 +294,12 @@ pub fn detect_provider_kind(model: &str) -> ProviderKind {
     if openai_compat::has_api_key("OPENAI_API_KEY") {
         return ProviderKind::OpenAi;
     }
+    if openai_compat::has_api_key("GROQ_API_KEY") {
+        return ProviderKind::Groq;
+    }
+    if openai_compat::has_api_key("COHERE_API_KEY") {
+        return ProviderKind::Cohere;
+    }
     if openai_compat::has_api_key("XAI_API_KEY") {
         return ProviderKind::Xai;
     }
@@ -204,10 +309,14 @@ pub fn detect_provider_kind(model: &str) -> ProviderKind {
 #[must_use]
 pub fn max_tokens_for_model(model: &str) -> u32 {
     let canonical = resolve_model_alias(model);
-    if canonical.contains("opus") {
+    if canonical.contains("local") || canonical.starts_with("mamba7b-") || canonical == "luci" {
+        2_048
+    } else if canonical.starts_with("llama-") || canonical.starts_with("command-") {
+        4_096
+    } else if canonical.contains("opus") {
         32_000
     } else {
-        64_000
+        8_192
     }
 }
 
@@ -234,6 +343,7 @@ mod tests {
     #[test]
     fn keeps_existing_max_token_heuristic() {
         assert_eq!(max_tokens_for_model("opus"), 32_000);
-        assert_eq!(max_tokens_for_model("grok-3"), 64_000);
+        assert_eq!(max_tokens_for_model("grok-3"), 8_192);
+        assert_eq!(max_tokens_for_model("luci"), 2_048);
     }
 }
