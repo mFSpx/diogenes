@@ -80,23 +80,22 @@ _LUCIDOTA_VENV="/home/mfspx/LUCIDOTA/.venv"
 if [[ "${VIRTUAL_ENV:-}" != "${_LUCIDOTA_VENV}" ]] && [[ -f "${_LUCIDOTA_VENV}/bin/activate" ]]; then
   source "${_LUCIDOTA_VENV}/bin/activate"
 fi
+# Always export explicit venv python path so subshells/agents can use it
+# without needing to source this file or activate the venv themselves.
+export PYTHON="/home/mfspx/LUCIDOTA/.venv/bin/python3"
+export LUCIDOTA_VENV_PYTHON="/home/mfspx/LUCIDOTA/.venv/bin/python3"
 unset _LUCIDOTA_VENV
 
-# Bitloops daemon health gate.
-# Starts daemon if not running; exports BITLOOPS_DAEMON_OK=1 on success.
-_BITLOOPS_BIN="${BITLOOPS_BIN:-/home/mfspx/.local/bin/bitloops}"
-if command -v "${_BITLOOPS_BIN}" >/dev/null 2>&1; then
-  _BL_STATUS="$("${_BITLOOPS_BIN}" status 2>/dev/null | grep -c 'running' || true)"
-  if [[ "${_BL_STATUS}" -eq 0 ]]; then
-    ACCESSIBLE=1 "${_BITLOOPS_BIN}" start --no-telemetry >/dev/null 2>&1 &
-    sleep 1
-    _BL_STATUS="$("${_BITLOOPS_BIN}" status 2>/dev/null | grep -c 'running' || true)"
-  fi
-  export BITLOOPS_DAEMON_OK=$([ "${_BL_STATUS}" -gt 0 ] && echo "1" || echo "0")
-else
-  export BITLOOPS_DAEMON_OK="0"
+# Secrets (Groq/Cerebras/etc.) -> environment. NEVER from /tmp; from the 0600
+# secrets file the operator controls. Sourced so any job under safe-ops has them.
+_LUCIDOTA_SECRETS="${LUCIDOTA_SECRET_ENV:-$HOME/.config/lucidota/secrets.env}"
+if [[ -f "$_LUCIDOTA_SECRETS" ]]; then
+  set -a; source "$_LUCIDOTA_SECRETS"; set +a
 fi
-unset _BITLOOPS_BIN _BL_STATUS
+unset _LUCIDOTA_SECRETS
+
+# Bitloops: DISABLED by operator order 2026-05-29. Do not start.
+export BITLOOPS_DAEMON_OK="0"
 
 # Provider lane URLs: local model servers and embedding services.
 export LUCIDOTA_LLAMA_URL="${LUCIDOTA_LLAMA_URL:-http://127.0.0.1:8080/v1}"

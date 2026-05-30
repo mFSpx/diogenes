@@ -26,6 +26,10 @@ def load_groq_env() -> None:
             if key not in {"GROQ_API_KEY", "GROQ_BASE_URL", "GROQ_MODEL", "GROQ_GOAL_MODEL"}:
                 continue
             os.environ.setdefault(key, val.strip().strip('"').strip("'"))
-    key_file = Path(os.environ.get("LUCIDOTA_GROQ_KEY_FILE", "/tmp/lucidota_groq_key"))
-    if key_file.exists():
-        os.environ["GROQ_API_KEY"] = key_file.read_text(encoding="utf-8").strip()
+    # SECURITY: never read the key from /tmp. Only an explicitly-configured key
+    # file is honored, and it must not override an already-loaded secret.
+    key_file_path = os.environ.get("LUCIDOTA_GROQ_KEY_FILE")
+    if key_file_path:
+        key_file = Path(key_file_path)
+        if key_file.exists():
+            os.environ.setdefault("GROQ_API_KEY", key_file.read_text(encoding="utf-8").strip())
