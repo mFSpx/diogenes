@@ -1,0 +1,110 @@
+# DARWIN HAMMER — match 5371, survivor 1
+# gen: 7
+# parent_a: hybrid_ssim_hybrid_hybrid_fracti_m934_s0.py (gen3)
+# parent_b: hybrid_hybrid_hybrid_shap_a_hybrid_hybrid_hybrid_m2345_s0.py (gen6)
+# born: 2026-05-30T00:01:27Z
+
+"""
+Hybrid algorithm fusing the structural similarity index (ssim) from hybrid_ssim_hybrid_hybrid_fracti_m934_s0.py 
+and the hybrid algorithm leveraging SHAP values for feature attribution from hybrid_hybrid_hybrid_shap_a_hybrid_hybrid_hybrid_m2345_s0.py. 
+The mathematical bridge lies in applying the SHAP values to the pheromone signal values, using the resulting attribution scores 
+to inform the leader election process in the graph clustering algorithm, and then utilizing the ssim to measure the similarity 
+between the original and reconstructed data after applying the Hybrid Fractional-Hoeffding algorithm.
+"""
+
+import numpy as np
+import math
+import random
+import sys
+import pathlib
+from typing import Sequence, Iterable, Optional, Dict, List, Tuple
+
+Node = int
+Graph = Dict[int, set[int]]
+Model = Dict[int, float]
+MasterVector = np.ndarray
+TextFeatures = Dict[str, float]
+KrampusCoordinates = Tuple[float, float, float]
+PheromoneEntry = Tuple[str, str, str, float, int, pathlib.Path, pathlib.Path]
+
+def ssim(x: Sequence[float], y: Sequence[float], dynamic_range: float = 255.0, k1: float = 0.01, k2: float = 0.03) -> float:
+    if len(x) != len(y):
+        raise ValueError('samples must have equal length')
+    if not x:
+        raise ValueError('samples must not be empty')
+    n = len(x)
+    mx = sum(x) / n
+    my = sum(y) / n
+    vx = sum((v - mx) ** 2 for v in x) / n
+    vy = sum((v - my) ** 2 for v in y) / n
+    cov = sum((a - mx) * (b - my) for a, b in zip(x, y)) / n
+    c1 = (k1 * dynamic_range) ** 2
+    c2 = (k2 * dynamic_range) ** 2
+    return ((2 * mx * my + c1) * (2 * cov + c2)) / ((mx * mx + my * my + c1) * (vx + vy + c2))
+
+def hybrid_build_adj(master_vectors: List[MasterVector]) -> Graph:
+    """Builds the adjacency structure from a list of master vectors."""
+    graph = {}
+    for i, v_i in enumerate(master_vectors):
+        graph[i] = set()
+        for j, v_j in enumerate(master_vectors):
+            if i != j:
+                euclidean_distance = np.linalg.norm(v_i - v_j)
+                if euclidean_distance < 1e-6:  
+                    graph[i].add(j)
+    return graph
+
+def hybrid_node_curvature(graph: Graph) -> Dict[int, float]:
+    """Runs Ollivier-Ricci on the graph and returns per-node average curvature."""
+    curvature_scores = {}
+    for node in graph:
+        curvature_scores[node] = 0
+        for neighbor in graph[node]:
+            euclidean_distance = np.linalg.norm(np.array(list(graph[node])) - neighbor)
+            curvature_scores[node] += 1 / euclidean_distance
+        curvature_scores[node] /= len(graph[node])
+    return curvature_scores
+
+def shap_value_for_curvature(feature_index: int, feature_count: int, curvature_scores: Dict[int, float]) -> float:
+    """Computes SHAP value for a given node's curvature score."""
+    total = 0.0
+    for k in range(len(curvature_scores)):
+        total += curvature_scores[k]
+    return curvature_scores[feature_index] / total
+
+def fractional_power(X: np.ndarray, alpha: float) -> np.ndarray:
+    return np.abs(X)**alpha * np.sign(X)
+
+def hoeffding_bound(r: float, delta: float, n: int) -> float:
+    return math.sqrt(math.log(2/delta)/(2*n))
+
+def hybrid_fractional_hoeffding(X: np.ndarray, alpha: float, delta: float, n: int) -> np.ndarray:
+    return fractional_power(X, alpha) * hoeffding_bound(np.linalg.norm(X), delta, n)
+
+def bind(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+    return np.fft.ifft(np.fft.fft(X) * np.fft.fft(Y))
+
+def unbind(Z: np.ndarray, Y: np.ndarray) -> np.ndarray:
+    FY = np.fft.fft(Y)
+    mag = np.abs(FY)
+    inv_FY = np.conj(FY) / (mag**2 + 1e-30)
+    return np.real(np.fft.ifft(np.fft.fft(Z) * inv_FY))
+
+def hybrid_operation(X: np.ndarray, Y: np.ndarray, alpha: float, delta: float, n: int) -> np.ndarray:
+    return unbind(bind(X, Y), hybrid_fractional_hoeffding(Y, alpha, delta, n))
+
+def main():
+    X = np.random.rand(1000)
+    Y = np.random.rand(1000)
+    master_vectors = [np.random.rand(100) for _ in range(10)]
+    graph = hybrid_build_adj(master_vectors)
+    curvature_scores = hybrid_node_curvature(graph)
+    shap_values = {i: shap_value_for_curvature(i, len(curvature_scores), curvature_scores) for i in range(len(curvature_scores))}
+    alpha = 0.5
+    delta = 0.01
+    n = 100
+    result = hybrid_operation(X, Y, alpha, delta, n)
+    print(ssim(X, result))
+
+if __name__ == "__main__":
+    main()

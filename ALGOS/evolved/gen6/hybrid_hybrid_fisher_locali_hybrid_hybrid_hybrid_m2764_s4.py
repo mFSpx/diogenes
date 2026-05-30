@@ -1,0 +1,114 @@
+# DARWIN HAMMER — match 2764, survivor 4
+# gen: 6
+# parent_a: hybrid_fisher_localization_hybrid_ternary_route_m40_s0.py (gen2)
+# parent_b: hybrid_hybrid_hybrid_hybrid_hybrid_hybrid_hybrid_m1892_s0.py (gen5)
+# born: 2026-05-29T23:45:45Z
+
+"""
+This module implements a hybrid algorithm that fuses the fisher_localization.py and hybrid_hybrid_hybrid_hybrid_hybrid_hybrid_hybrid_m1892_s0.py algorithms.
+The governing equations of the fisher_localization.py algorithm involve Fisher-information scoring for off-axis sensing,
+while the hybrid_hybrid_hybrid_hybrid_hybrid_hybrid_hybrid_m1892_s0.py algorithm utilizes Multivector operations and geometric algebra.
+The mathematical bridge between these two algorithms is found by applying the Fisher-information scoring to the Multivector components,
+specifically by calculating the Fisher score of the Multivector coefficients and using it to inform geometric operations.
+
+The Fisher score is used to weight the Multivector components, allowing for more accurate geometric computations.
+This hybrid approach enables the integration of sensing and geometric algebra, leading to more robust and informative results.
+"""
+
+import numpy as np
+import math
+import random
+import sys
+import pathlib
+
+def gaussian_beam(theta: float, center: float, width: float) -> float:
+    if width <= 0:
+        raise ValueError('width must be positive')
+    z = (theta - center) / width
+    return math.exp(-0.5 * z * z)
+
+def fisher_score(theta: float, center: float, width: float, eps: float = 1e-12) -> float:
+    intensity = max(gaussian_beam(theta, center, width), eps)
+    derivative = intensity * (-(theta - center) / (width * width))
+    return (derivative * derivative) / intensity
+
+class Multivector:
+    def __init__(self, components: dict, n: int):
+        self.components = {k: float(v) for k, v in components.items() if abs(v) > 1e-15}
+        self.n = int(n)
+
+    def grade(self, k: int) -> "Multivector":
+        return Multivector(
+            {blade: coef for blade, coef in self.components.items() if len(blade) == k},
+            self.n,
+        )
+
+    def scalar_part(self) -> float:
+        return self.components.get(frozenset(), 0.0)
+
+    def __repr__(self) -> str:
+        if not self.components:
+            return "Multivector(0)"
+        terms = []
+        for blade, coef in sorted(self.components.items()):
+            if blade:
+                label = "e" + "".join(str(i) for i in sorted(blade))
+            else:
+                label = "1"
+            terms.append(f"{coef:+.6g}*{label}")
+        return "Multivector(" + " ".join(terms) + ")"
+
+    def __add__(self, other: "Multivector") -> "Multivector":
+        result = dict(self.components)
+        for blade, coef in other.components.items():
+            result[blade] = result.get(blade, 0.0) + coef
+        return Multivector({k: v for k, v in result.items() if abs(v) > 1e-15}, self.n)
+
+    def __sub__(self, other: "Multivector") -> "Multivector":
+        neg = Multivector({k: -v for k, v in other.components.items()}, other.n)
+        return self.__add__(neg)
+
+    def __mul__(self, other: "Multivector") -> "Multivector":
+        result = dict(self.components)
+        for blade, coef in other.components.items():
+            for k, v in result.items():
+                if k == blade:
+                    result[k] += coef * v
+                else:
+                    result[k] += coef * other.grade(len(k)).scalar_part() * v
+        return Multivector({k: v for k, v in result.items() if abs(v) > 1e-15}, self.n)
+
+    def dot(self, other: "Multivector") -> float:
+        return sum(coef * other.grade(len(blade)).scalar_part() for blade, coef in self.components.items())
+
+def weighted_multivector(multivector: Multivector, center: float, width: float) -> Multivector:
+    weighted_components = {}
+    for blade, coef in multivector.components.items():
+        theta = coef
+        weighted_coef = fisher_score(theta, center, width) * coef
+        weighted_components[blade] = weighted_coef
+    return Multivector(weighted_components, multivector.n)
+
+def hybrid_distance(a: tuple[float, float], b: tuple[float, float], center: float, width: float) -> float:
+    multivector_a = Multivector({frozenset({0}): a[0], frozenset({1}): a[1]}, 2)
+    multivector_b = Multivector({frozenset({0}): b[0], frozenset({1}): b[1]}, 2)
+    weighted_multivector_a = weighted_multivector(multivector_a, center, width)
+    weighted_multivector_b = weighted_multivector(multivector_b, center, width)
+    return math.hypot(weighted_multivector_a.dot(weighted_multivector_b), 
+                      weighted_multivector_a.grade(1).scalar_part() - weighted_multivector_b.grade(1).scalar_part())
+
+def hybrid_nearest(point: tuple[float, float], seeds: list[tuple[float, float]], center: float, width: float) -> int:
+    distances = [hybrid_distance(point, seed, center, width) for seed in seeds]
+    return np.argmin(distances)
+
+if __name__ == "__main__":
+    multivector = Multivector({frozenset(): 1.0, frozenset({0}): 2.0, frozenset({1}): 3.0}, 2)
+    weighted_multivector = weighted_multivector(multivector, 0.0, 1.0)
+    print(weighted_multivector)
+
+    point = (1.0, 2.0)
+    seeds = [(0.0, 0.0), (3.0, 4.0)]
+    center = 0.0
+    width = 1.0
+    nearest_seed_index = hybrid_nearest(point, seeds, center, width)
+    print(nearest_seed_index)

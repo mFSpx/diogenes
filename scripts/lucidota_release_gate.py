@@ -55,7 +55,9 @@ def run_gate(extra: list[str] | None = None) -> dict[str, Any]:
         run([sys.executable, 'scripts/run_dev_order_methodology_checks.py']),
     ]
     blockers = [s['command'] for s in steps if s['returncode'] != 0]
-    return {'status': 'PASSED' if not blockers else 'FAILED', 'steps': steps, 'blockers': blockers, 'required_tests': tests, 'receipts_written': sorted({p for s in steps for p in s.get('report_paths', [])})}
+    combined_stdout = ''.join(s.get('stdout', '') for s in steps)
+    combined_stderr = ''.join(s.get('stderr', '') for s in steps)
+    return {'status': 'PASSED' if not blockers else 'FAILED', 'steps': steps, 'blockers': blockers, 'required_tests': tests, 'receipts_written': sorted({p for s in steps for p in s.get('report_paths', [])}), 'stdout': combined_stdout, 'stderr': combined_stderr}
 
 
 def main() -> int:

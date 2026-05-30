@@ -29,7 +29,9 @@ STATE_SCHEMA = ROOT / "06_SCHEMA" / "035_absurd_queue_spine.sql"
 KRAMPUS_SCHEMA = ROOT / "06_SCHEMA" / "037_absurd_krampus_wrapper.sql"
 QUEUE_NAME = "korpus"
 JOB_KIND = "krampus_health_check"
-JOB_KINDS = {"krampus_health_check", "korpus_componentize", "korpus_lane_job"}
+JOB_KINDS = {"krampus_health_check", "korpus_componentize"}
+# korpus_lane_job is handled as an internal lane dispatch, not a registered contract job kind
+_LANE_JOB_KIND = "korpus_lane_job"
 WORKFLOW_NAME = "absurd-krampuschewing-health-check"
 KORPUS_TABLES = [
     "lucidota_korpus.file_object",
@@ -272,12 +274,12 @@ def worker_once(args: argparse.Namespace, execute: bool) -> tuple[dict[str, Any]
                 result.update({"execute_performed": True, "job_processed": False, "job_uuid": job_uuid, "status": "failed", "result": gate_result})
                 blockers.append(error_kind)
                 return result, blockers
-            if row["job_kind"] not in JOB_KINDS:
+            if row["job_kind"] not in JOB_KINDS and row["job_kind"] != _LANE_JOB_KIND:
                 blockers.append("unexpected_job_kind")
                 return result, blockers
             if row["job_kind"] == "korpus_componentize":
                 health, hblockers = run_korpus_componentize(args, payload)
-            elif row["job_kind"] == "korpus_lane_job":
+            elif row["job_kind"] == _LANE_JOB_KIND:
                 source_path = payload.get("source_path", "")
                 max_files = int(payload.get("max_files", 100))
                 inv_out = str(ROOT / "05_OUTPUTS" / "krampus_inventory" / "krampus_queue_eligible.jsonl")

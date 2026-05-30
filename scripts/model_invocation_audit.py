@@ -153,7 +153,12 @@ def collect_invocations(paths: Iterable[Path] | None = None) -> list[dict[str, A
         audit_block_id, audit_block_signature = extract_audit_marker(data)
         audit_block_id = str(data.get("audit_block_id") or audit_block_id or "") or None
         audit_block_signature = str(data.get("audit_block_signature") or audit_block_signature or "") or None
-        audit_verdict_payload = parse_audit_json(raw_output)
+        # If raw_output is empty, check if the data dict carries audit_verdict_payload directly
+        direct_payload = data.get("audit_verdict_payload")
+        if not raw_output and isinstance(direct_payload, dict):
+            audit_verdict_payload = direct_payload
+        else:
+            audit_verdict_payload = parse_audit_json(raw_output) or (direct_payload if isinstance(direct_payload, dict) else None)
         rows.append({
             "schema": "lucidota.model_invocation_audit.row.v1",
             "receipt_path": rel(path),

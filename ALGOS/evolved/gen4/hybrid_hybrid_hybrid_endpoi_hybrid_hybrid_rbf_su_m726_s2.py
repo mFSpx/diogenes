@@ -1,0 +1,85 @@
+# DARWIN HAMMER — match 726, survivor 2
+# gen: 4
+# parent_a: hybrid_hybrid_endpoint_circ_hybrid_shannon_entro_m126_s0.py (gen2)
+# parent_b: hybrid_hybrid_rbf_surrogate_hybrid_hard_truth_ma_m93_s4.py (gen3)
+# born: 2026-05-29T23:30:41Z
+
+import numpy as np
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from math import exp, log2, gcd, sqrt
+from random import random
+from sys import exit
+from pathlib import Path
+from collections import Counter
+from typing import Any, Dict, Sequence
+
+@dataclass(frozen=True)
+class Morphology:
+    length: float
+    width: float
+    height: float
+    mass: float
+
+def sphericity_index(length: float, width: float, height: float) -> float:
+    if min(length, width, height) <= 0:
+        raise ValueError("dimensions must be positive")
+    return (length * width * height) ** (1.0 / 3.0) / max(length, width, height)
+
+def flatness_index(length: float, width: float, height: float) -> float:
+    if min(length, width, height) <= 0:
+        raise ValueError("dimensions must be positive")
+    return (length + width) / (2.0 * height)
+
+def righting_time_index(m: Morphology, b: float = 1.0 / 3.0, k: float = 0.35, neck_lever: float = 1.0) -> float:
+    if m.mass <= 0 or neck_lever <= 0:
+        raise ValueError("mass and neck_lever must be positive")
+    fi = flatness_index(m.length, m.width, m.height)
+    return (m.mass ** b) * exp(k * fi) / neck_lever
+
+def recovery_priority(m: Morphology, max_index: float = 10.0) -> float:
+    return max(0.0, min(1.0, righting_time_index(m) / max_index))
+
+def shannon_entropy(observations: list, is_distribution: bool = False) -> float:
+    xs = list(observations)
+    if not xs: return 0.0
+    if is_distribution:
+        probs=[float(x) for x in xs]
+        if any(p < 0 for p in probs) or abs(sum(probs)-1.0) > 1e-6:
+            raise ValueError("distribution must sum to 1")
+    else:
+        c=Counter(xs); total=sum(c.values()); probs=[v/total for v in c.values()]
+    return -sum(p*log2(p) for p in probs if p > 0)
+
+def rsa_encrypt(message: int, e: int, n: int) -> int:
+    if not 0 <= message < n: raise ValueError("message must be in [0, n)")
+    return pow(message, e, n)
+
+def gaussian(r: float, epsilon: float = 1.0) -> float:
+    return exp(-((epsilon * r) ** 2))
+
+def euclidean(a: Sequence[float], b: Sequence[float]) -> float:
+    if len(a) != len(b):
+        raise ValueError("vectors must be equal length")
+    return sqrt(sum((a_i - b_i) ** 2 for a_i, b_i in zip(a, b)))
+
+def rbf_surrogate(x: Sequence[float], centers: Sequence[Sequence[float]], weights: Sequence[float], epsilon: float = 1.0) -> float:
+    return sum(weights[i] * gaussian(euclidean(x, centers[i]), epsilon) for i in range(len(centers)))
+
+def hybrid_operation(m: Morphology, centers: Sequence[Sequence[float]], weights: Sequence[float], e: int, n: int) -> float:
+    rp = recovery_priority(m)
+    encrypted_rp = rsa_encrypt(int(rp * 100), e, n) / 100.0
+    surrogate_output = rbf_surrogate([rp], centers, weights)
+    return shannon_entropy([encrypted_rp, surrogate_output])
+
+def train_rbf_surrogate(observations: Sequence[float], centers: Sequence[Sequence[float]], epsilon: float = 1.0) -> Sequence[float]:
+    A = np.array([[gaussian(euclidean(x, centers[i]), epsilon) for i in range(len(centers))] for x in [[o] for o in observations]])
+    return np.linalg.lstsq(A, np.array(observations), rcond=None)[0]
+
+if __name__ == "__main__":
+    m = Morphology(1.0, 2.0, 3.0, 4.0)
+    centers = [[0.0, 0.0], [1.0, 1.0]]
+    weights = train_rbf_surrogate([0.5, 0.7], centers)
+    e = 3
+    n = 323
+    print(hybrid_operation(m, centers, weights, e, n))

@@ -18,6 +18,7 @@ pub const DEFAULT_XAI_BASE_URL: &str = "https://api.x.ai/v1";
 pub const DEFAULT_OPENAI_BASE_URL: &str = "https://api.openai.com/v1";
 pub const DEFAULT_GROQ_BASE_URL: &str = "https://api.groq.com/openai/v1";
 pub const DEFAULT_COHERE_BASE_URL: &str = "https://api.cohere.ai/compatibility/v1";
+pub const DEFAULT_CEREBRAS_BASE_URL: &str = "https://api.cerebras.ai/v1";
 pub const DEFAULT_LUCIDOTA_LOCAL_BASE_URL: &str = "http://127.0.0.1:8080/v1";
 const REQUEST_ID_HEADER: &str = "request-id";
 const ALT_REQUEST_ID_HEADER: &str = "x-request-id";
@@ -37,6 +38,7 @@ const XAI_ENV_VARS: &[&str] = &["XAI_API_KEY"];
 const OPENAI_ENV_VARS: &[&str] = &["OPENAI_API_KEY"];
 const GROQ_ENV_VARS: &[&str] = &["GROQ_API_KEY"];
 const COHERE_ENV_VARS: &[&str] = &["COHERE_API_KEY"];
+const CEREBRAS_ENV_VARS: &[&str] = &["CEREBRAS_API_KEY"];
 const LOCAL_ENV_VARS: &[&str] = &["LUCIDOTA_LOCAL_API_KEY"];
 
 impl OpenAiCompatConfig {
@@ -78,6 +80,15 @@ impl OpenAiCompatConfig {
         }
     }
     #[must_use]
+    pub const fn cerebras() -> Self {
+        Self {
+            provider_name: "Cerebras",
+            api_key_env: "CEREBRAS_API_KEY",
+            base_url_env: "CEREBRAS_BASE_URL",
+            default_base_url: DEFAULT_CEREBRAS_BASE_URL,
+        }
+    }
+    #[must_use]
     pub const fn lucidota_local() -> Self {
         Self {
             provider_name: "LUCIDOTA local",
@@ -93,6 +104,7 @@ impl OpenAiCompatConfig {
             "OpenAI" => OPENAI_ENV_VARS,
             "Groq" => GROQ_ENV_VARS,
             "Cohere" => COHERE_ENV_VARS,
+            "Cerebras" => CEREBRAS_ENV_VARS,
             "LUCIDOTA local" => LOCAL_ENV_VARS,
             _ => &[],
         }

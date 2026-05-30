@@ -1,0 +1,95 @@
+# DARWIN HAMMER — match 1621, survivor 1
+# gen: 5
+# parent_a: hybrid_rlct_grokking_hybrid_hybrid_hybrid_m727_s1.py (gen4)
+# parent_b: hybrid_hybrid_hard_truth_ma_hybrid_bayes_update__m123_s4.py (gen3)
+# born: 2026-05-29T23:37:52Z
+
+import numpy as np
+from collections import Counter
+from dataclasses import dataclass
+from typing import Any, Dict, List, Tuple
+import re
+from __future__ import annotations
+
+FUNCTION_CATS: Dict[str, set[str]] = {
+    "pronoun": set("i me my mine myself you your yours yourself he him his she her hers they them their theirs we us our ours".split()),
+    "article": set("a an the".split()),
+    "preposition": set("about above after against around as at before behind below between by during for from in into of off on onto over through to under with without".split()),
+    "auxiliary": set("am are be been being can could did do does had has have is may might must shall should was were will would".split()),
+    "conjunction": set("and but or nor so yet because although while if when where whereas unless until".split()),
+    "negation": set("no not never none neither cannot can't won't don't didn't isn't aren't was wasn't weren't".split()),
+    "quantifier": set("all any both each few many more most much none several some such".split()),
+    "adverb_common": set("very really just still already also even only then there here now often always sometimes".split()),
+}
+PUNCT = "!?;:,.—-()[]{}\"'`/\\|@#$%^&*+=~"
+
+def words(text: str) -> List[str]:
+    return re.findall(r"[a-z]+(?:'[a-z]+)?", (text or "").lower())
+
+def lsm_vector(text: str) -> Dict[str, float]:
+    word_counts = Counter(words(text))
+    total_words = sum(word_counts.values())
+    vector = {}
+    for cat, words in FUNCTION_CATS.items():
+        cat_count = sum(word_counts[word] for word in words)
+        vector[cat] = cat_count / total_words if total_words > 0 else 0
+    return vector
+
+def stylometry_vector(corpus: List[str]) -> np.ndarray:
+    vector = np.zeros(8)
+    total_words = 0
+    for text in corpus:
+        text_vector = lsm_vector(text)
+        vector[0] += text_vector["pronoun"]
+        vector[1] += text_vector["article"]
+        vector[2] += text_vector["preposition"]
+        vector[3] += text_vector["auxiliary"]
+        vector[4] += text_vector["conjunction"]
+        vector[5] += text_vector["negation"]
+        vector[6] += text_vector["quantifier"]
+        vector[7] += text_vector["adverb_common"]
+        total_words += len(words(text))
+    vector /= len(corpus) if corpus else 1
+    return vector
+
+@dataclass
+class WeightMatrix:
+    W: np.ndarray
+
+    def update(self, alpha: float, beta: float, dX: np.ndarray):
+        self.W -= alpha * self.W + beta * dX
+
+def estimate_rlct(W: np.ndarray, losses: np.ndarray) -> float:
+    singular_values = np.linalg.svdvals(W)
+    return np.min(singular_values) / (1 + np.mean(losses))
+
+def grokking_threshold(rlct: float, losses: np.ndarray) -> float:
+    return rlct * np.mean(losses) / (1 + np.std(losses))
+
+def olrivier_ricci_curvature(W: np.ndarray) -> float:
+    eigenvalues = np.linalg.eigvals(W @ W.T)
+    return np.mean(eigenvalues) / (1 + np.max(eigenvalues))
+
+def bayes_update(W: np.ndarray, alpha: float, beta: float) -> np.ndarray:
+    return W - alpha * W + beta * np.random.rand(*W.shape)
+
+def hybrid_rlct_grokking(corpus: List[str], alpha: float, beta: float):
+    X = stylometry_vector(corpus)
+    W = WeightMatrix(np.random.rand(8, 8))  
+    losses = np.random.rand(10)  
+
+    rlct = estimate_rlct(W.W, losses)
+    curvature = olrivier_ricci_curvature(W.W)
+    alpha_modulated = alpha * rlct * curvature
+    W.update(alpha_modulated, beta, np.random.rand(*W.W.shape))
+
+    grokking_thresh = grokking_threshold(rlct, losses)
+    W.W = bayes_update(W.W, alpha, beta)
+    return W.W, grokking_thresh
+
+if __name__ == "__main__":
+    corpus = ["This is a test.", "This test is only a test."]
+    W, grokking_thresh = hybrid_rlct_grokking(corpus, 0.1, 0.1)
+    print("Weight Matrix:")
+    print(W)
+    print("Grokking Threshold:", grokking_thresh)

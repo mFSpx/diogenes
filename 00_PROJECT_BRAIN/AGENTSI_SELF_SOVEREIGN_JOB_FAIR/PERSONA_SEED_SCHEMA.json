@@ -1,0 +1,15 @@
+{
+  "schema": "lucidota.agentsi.persona_seed.v0",
+  "required": [
+    "name",
+    "human_generated_origin_persona"
+  ],
+  "fields": {
+    "name": "agent display name",
+    "human_generated_origin_persona": "the only required human-generated seed",
+    "pronouns": "optional",
+    "interview_answers": "optional answers keyed by question number",
+    "hard_boundaries": "operator-specified boundaries",
+    "dream_jobs": "operator-specified booth preferences"
+  }
+}

@@ -1,0 +1,297 @@
+{
+  "external_sources_seed": [
+    {
+      "id": "rfc2119",
+      "url": "https://datatracker.ietf.org/doc/rfc2119/",
+      "use": "normative language discipline"
+    },
+    {
+      "id": "w3c_prov_o",
+      "url": "https://www.w3.org/TR/prov-o/",
+      "use": "provenance/entity-activity-agent modeling influence"
+    },
+    {
+      "id": "postgres_select_skip_locked",
+      "url": "https://www.postgresql.org/docs/current/sql-select.html",
+      "use": "queue-like SKIP LOCKED worker claims"
+    },
+    {
+      "id": "sepio",
+      "url": "https://ohsu.elsevierpure.com/en/publications/sepio-a-semantic-model-for-the-integration-and-analysis-of-scient/",
+      "use": "claims/evidence/provenance argument"
+    },
+    {
+      "id": "blueprint_first_model_second",
+      "url": "https://arxiv.org/abs/2508.02721",
+      "use": "workflow path outside hidden model control"
+    },
+    {
+      "id": "pocketflow",
+      "url": "https://github.com/The-Pocket/PocketFlow",
+      "use": "simplicity mirror"
+    }
+  ],
+  "generated_at": "2026-05-24T00:59:43.630339+00:00",
+  "purpose": "Track mandatory master-thesis-tier RFC subjects, evidence paths, and completion state.",
+  "schema": "lucidota.rfc_subject_registry.v1",
+  "status_values": [
+    "seeded",
+    "draft",
+    "reviewed",
+    "implemented",
+    "verified",
+    "externalized_seeded",
+    "operator_concept_seeded",
+    "active"
+  ],
+  "subjects": [
+    {
+      "id": "slop_laws",
+      "local_evidence": [
+        "00_PROJECT_BRAIN/ACTIVE_SPEC/01_IDENTITY_AND_CLAIM_STATE_LAW.md",
+        "00_PROJECT_BRAIN/BLUEPRINT_FIRST_MODEL_SECOND_PSEUDOLAW.md",
+        "scripts/slop_audit_law.py"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-010-SLOP-LAWS.md",
+      "status": "draft",
+      "title": "Slop Laws / anti-bullshit engineering"
+    },
+    {
+      "id": "main_spine",
+      "local_evidence": [
+        "00_PROJECT_BRAIN/ACTIVE_SPEC/02_EXECUTION_SPINE.md",
+        "06_SCHEMA/035_absurd_queue_spine.sql",
+        "scripts/spine_authority_checker.py",
+        "scripts/graph_promotion_gate.py"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-020-MAIN-SPINE.md",
+      "status": "draft",
+      "title": "Main Spine / graph-as-memory execution model"
+    },
+    {
+      "id": "full_etl_pipeline",
+      "local_evidence": [
+        "00_PROJECT_BRAIN/ACTIVE_SPEC/03_CUSTODY_ETL_PIPELINE.md",
+        "06_SCHEMA/023_etl_pipeline.sql",
+        "scripts/korpus_krampii.py",
+        "01_REPOS/lucidota_etl/README.md"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-030-FULL-ETL-PIPELINE.md",
+      "status": "draft",
+      "title": "Full ETL Pipeline / custody-first ingestion"
+    },
+    {
+      "id": "dev_library",
+      "local_evidence": [
+        "00_PROJECT_BRAIN/ACTIVE_SPEC/04_DEV_LIBRARY_REUSE_LAW.md",
+        "00_PROJECT_BRAIN/TICKLETRUNK.json",
+        "scripts/tickletrunk_scan.py",
+        "TOOLS/README.md"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-040-DEV-LIBRARY.md",
+      "status": "draft",
+      "title": "Dev Library / reusable parts without authority leakage"
+    },
+    {
+      "id": "diogenes_kernel",
+      "local_evidence": [
+        "00_PROJECT_BRAIN/ACTIVE_SPEC/05_COMPONENT_AUTHORITY_MAP.md",
+        "scripts/kernel_control_packet.py",
+        "scripts/spine_kernel_authorization.py",
+        "scripts/proof_kernel.py"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-050-DIOGENES-KERNEL.md",
+      "status": "draft",
+      "title": "Diogenes Kernel / command authority"
+    },
+    {
+      "id": "absurd_workflows",
+      "local_evidence": [
+        "06_SCHEMA/035_absurd_queue_spine.sql",
+        "06_SCHEMA/082_absurd_worker_contract_registry_enforcement.sql",
+        "scripts/absurd_queue_spine.py",
+        "scripts/absurd_consume_one.py"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-060-ABSURD-WORKFLOWS.md",
+      "status": "draft",
+      "title": "ABSURD Workflows / durable Postgres work"
+    },
+    {
+      "id": "krampus_korpus",
+      "local_evidence": [
+        "scripts/korpus_krampii.py",
+        "scripts/spine_krampus_worker.py",
+        "06_SCHEMA/019_korpus_krampii.sql",
+        "05_OUTPUTS/filesystem_organization"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-070-KRAMPUS-KORPUS.md",
+      "status": "draft",
+      "title": "Krampus Express / KORPUS port and externalization"
+    },
+    {
+      "id": "local_llm_fabric",
+      "local_evidence": [
+        "00_PROJECT_BRAIN/gpu_model_runtime_registry.json",
+        "04_RUNTIME/inference_os",
+        "scripts/lucidota_model_governor.py",
+        "pypeline/math/model_vram_scheduler.py"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-080-LOCAL-LLM-FABRIC.md",
+      "status": "draft",
+      "title": "Local RAM/VRAM/LLM fabric and sovereignty"
+    },
+    {
+      "id": "percyphon_ai",
+      "local_evidence": [
+        "ALGOS/percyphon.py",
+        "00_PROJECT_BRAIN/ACTIVE_SPEC/05_COMPONENT_AUTHORITY_MAP.md"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-090-PERCYPHONAI.md",
+      "status": "draft",
+      "title": "PercyphonAI"
+    },
+    {
+      "id": "artifact_templates",
+      "local_evidence": [
+        "scripts/template_contract.py",
+        "scripts/case_packet_compiler.py",
+        "scripts/export_bundle.py",
+        "05_OUTPUTS/templates"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-100-ARTIFACT-TEMPLATES.md",
+      "status": "draft",
+      "title": "Artifact generation templates"
+    },
+    {
+      "id": "input_multiplexing",
+      "local_evidence": [
+        "00_PROJECT_BRAIN/ACTIVE_SPEC/03_CUSTODY_ETL_PIPELINE.md",
+        "scripts/fast_slow_lane_gate.py",
+        "06_SCHEMA/020_korpus_derived_compute_queue.sql"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-110-INPUT-MULTIPLEXING.md",
+      "status": "draft",
+      "title": "Input multiplexing: hot lane / slow lane"
+    },
+    {
+      "id": "output_hyperplexing",
+      "local_evidence": [
+        "core/language_membrane.py",
+        "scripts/hypertimeline_engine.py",
+        "00_PROJECT_BRAIN/ACTIVE_SPEC/05_COMPONENT_AUTHORITY_MAP.md"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-120-OUTPUT-HYPERPLEXING.md",
+      "status": "draft",
+      "title": "Output hyperplexing / language sequencing"
+    },
+    {
+      "id": "indy_reads",
+      "local_evidence": [
+        "scripts/indy_reads.py",
+        "scripts/lucidota_indy_polycareer.py",
+        "BOOKS/.indy_reads/INDY_READS_MASTER_ORCHESTRATION.md"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-130-INDY-READS.md",
+      "status": "draft",
+      "title": "Indy_READs teammate model"
+    },
+    {
+      "id": "constant_learning",
+      "local_evidence": [
+        "scripts/absurd_river_worker.py",
+        "00_PROJECT_BRAIN/RUVECTOR_ABSURD_SONA_RIVERML_NOTES.md",
+        "06_SCHEMA/073_absurd_river_claim_packet_job.sql"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-140-CONSTANT-LEARNING.md",
+      "status": "draft",
+      "title": "Constant learning: River, Bytewax, LoRA, SONA/RuVector"
+    },
+    {
+      "id": "board_game_lab",
+      "local_evidence": [
+        "/home/mfspx/BOARD_GAMES/AHOY",
+        "00_PROJECT_BRAIN/ACTIVE_SPEC/05_COMPONENT_AUTHORITY_MAP.md"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-150-BOARD-GAME-LAB.md",
+      "status": "draft",
+      "title": "Board-game/simulation lab"
+    },
+    {
+      "id": "automation",
+      "local_evidence": [
+        "scripts/lucidota_ingest_watchdog.py",
+        "scripts/lucidota_start_indy_reads_watcher.sh",
+        "scripts/krampuschewing_watcher.sh"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-160-AUTOMATION.md",
+      "status": "draft",
+      "title": "Automation and scheduler/watchers"
+    },
+    {
+      "id": "active_ontology",
+      "local_evidence": [
+        "OFFICIAL_ONTOLOGY.json",
+        "BOOKS/GO_ACTIVE_TERMS.json",
+        "06_SCHEMA/016_go_graph_core.sql",
+        "scripts/operator_ontology_fidelity_guard.py"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-170-ACTIVE-ONTOLOGY.md",
+      "status": "draft",
+      "title": "Active ontology: GO-25 / OBJECT-EVENT-EDGE"
+    },
+    {
+      "id": "abba63",
+      "local_evidence": [
+        "00_PROJECT_BRAIN/ACTIVE_SPEC/01_IDENTITY_AND_CLAIM_STATE_LAW.md",
+        "ALGOS/decision_hygiene.py",
+        "ALGOS/regret_engine.py"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-180-ABBA63.md",
+      "status": "draft",
+      "title": "ABBA63 abductive-not-credulous heuristics"
+    },
+    {
+      "id": "self_sovereignty_osint",
+      "local_evidence": [
+        "00_PROJECT_BRAIN/ACTIVE_SPEC/01_IDENTITY_AND_CLAIM_STATE_LAW.md",
+        "00_PROJECT_BRAIN/ACTIVE_SPEC/05_COMPONENT_AUTHORITY_MAP.md",
+        "06_SCHEMA/018_investigation_artifact.sql"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-190-SELF-SOVEREIGNTY-OSINT.md",
+      "status": "draft",
+      "title": "Self-sovereignty / OSINT domain argument"
+    },
+    {
+      "id": "filesystem_law",
+      "local_evidence": [
+        "00_PROJECT_BRAIN/RFCS/RFC-000-MASTER-THESIS-PROGRAM.md",
+        "05_OUTPUTS/filesystem_organization",
+        "AGENTS.md"
+      ],
+      "requires_deep_audit": true,
+      "rfc_path": "00_PROJECT_BRAIN/RFCS/RFC-200-FILESYSTEM-LAW.md",
+      "status": "draft",
+      "title": "Filesystem organization and archive/promotion law"
+    }
+  ],
+  "updated_at": "2026-05-24T01:06:44.563106+00:00"
+}

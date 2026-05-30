@@ -256,12 +256,34 @@ def main():
     for w in workers:
         w.start()
     try:
-        for a in archives:
-            if stop(): break
-            process_archive(a, os.path.basename(a), 0)
-            write_progress()
+        if args.walk:
+            base = args.walk
+            for dp, dns, fns in os.walk(base):
+                if stop(): break
+                for fn in fns:
+                    if stop(): break
+                    p = os.path.join(dp, fn)
+                    try:
+                        st = os.stat(p, follow_symlinks=False)
+                    except OSError:
+                        continue
+                    if (st.st_mode & 0o170000) != 0o100000:  # regular files only
+                        continue
+                    relp = os.path.relpath(p, base)
+                    if os.path.splitext(fn)[1].lower() in ARCHIVE_EXT:
+                        process_archive(p, relp, 0)
+                    else:
+                        route_member(fn, st.st_size, (lambda p=p: open(p, 'rb')), os.path.dirname(relp) or base, 0)
+                write_progress()
             s = ctr.snap()
-            print(f"  archives={s['archives']} members={s['members']} text={s['text']} chunks={s['chunks']} slow={s['slow']} nested={s['nested']} errors={s['errors']}")
+            print(f"  walk done members={s['members']} text={s['text']} chunks={s['chunks']} slow={s['slow']} archives={s['archives']} errors={s['errors']}")
+        else:
+            for a in archives:
+                if stop(): break
+                process_archive(a, os.path.basename(a), 0)
+                write_progress()
+                s = ctr.snap()
+                print(f"  archives={s['archives']} members={s['members']} text={s['text']} chunks={s['chunks']} slow={s['slow']} nested={s['nested']} errors={s['errors']}")
     finally:
         for _ in workers:
             Q.put(None)

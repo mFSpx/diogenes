@@ -1,0 +1,130 @@
+# DARWIN HAMMER — match 4079, survivor 2
+# gen: 6
+# parent_a: hybrid_infotaxis_minhash_m63_s0.py (gen1)
+# parent_b: hybrid_hybrid_hybrid_hybrid_distributed_leader_e_m1525_s1.py (gen5)
+# born: 2026-05-29T23:53:36Z
+
+import math
+import hashlib
+import random
+import sys
+import pathlib
+import re
+from typing import Iterable, List, Dict, Tuple
+
+import numpy as np
+
+def entropy(probabilities: List[float], eps: float = 1e-12) -> float:
+    """Shannon entropy of a probability distribution."""
+    total = sum(probabilities)
+    if total <= 0:
+        raise ValueError('positive probability mass required')
+    return -sum((p / total) * math.log(max(p / total, eps)) for p in probabilities)
+
+
+def _hash(seed: int, token: str) -> int:
+    """Deterministic 64‑bit hash based on Blake2b."""
+    data = seed.to_bytes(4, 'big') + token.encode('utf-8', errors='ignore')
+    return int.from_bytes(hashlib.blake2b(data, digest_size=8).digest(), 'big')
+
+
+def signature(tokens: Iterable[str], k: int = 128) -> List[int]:
+    """MinHash signature of a token set."""
+    toks = {t for t in tokens if t}
+    if k <= 0:
+        raise ValueError('k must be positive')
+    if not toks:
+        return [2**64 - 1] * k
+    return [min(_hash(i, t) for t in toks) for i in range(k)]
+
+
+def similarity(sig_a: List[int], sig_b: List[int]) -> float:
+    """Jaccard‑like similarity between two MinHash signatures."""
+    if len(sig_a) != len(sig_b):
+        raise ValueError('signatures must have equal length')
+    if not sig_a:
+        raise ValueError('signatures must not be empty')
+    return sum(1 for a, b in zip(sig_a, sig_b) if a == b) / len(sig_a)
+
+
+def calculate_pheromone_probabilities(surface_key: str, limit: int, db_url: str) -> List[float]:
+    if limit <= 0:
+        raise ValueError('limit must be positive')
+    raw = np.random.dirichlet([1.0] * limit).tolist()
+    return raw
+
+
+def pheromone_minhash(probabilities: List[float], k: int = 128) -> List[int]:
+    tokens = [f"{p:.12g}" for p in probabilities]  
+    return signature(tokens, k)
+
+
+def similarity_matrix(signatures: List[List[int]]) -> np.ndarray:
+    n = len(signatures)
+    mat = np.zeros((n, n), dtype=float)
+    for i in range(n):
+        for j in range(i, n):
+            sim = similarity(signatures[i], signatures[j])
+            mat[i, j] = mat[j, i] = sim
+    return mat
+
+
+def leader_election(
+    node_distributions: Dict[str, List[float]],
+    k: int = 128,
+    alpha: float = 0.5,
+    beta: float = 0.5
+) -> Tuple[str, Dict[str, float]]:
+    if not node_distributions:
+        raise ValueError('no nodes provided')
+
+    node_ids = list(node_distributions.keys())
+    signatures = [pheromone_minhash(node_distributions[nid], k) for nid in node_ids]
+
+    sim_mat = similarity_matrix(signatures)
+
+    scores: Dict[str, float] = {}
+    for idx, nid in enumerate(node_ids):
+        avg_sim = (sim_mat[idx].sum() - 1.0) / (len(node_ids) - 1) if len(node_ids) > 1 else 1.0
+
+        ent = entropy(node_distributions[nid])
+        max_ent = math.log(len(node_distributions[nid])) if len(node_distributions[nid]) > 1 else 0.0
+        norm_ent = ent / max_ent if max_ent > 0 else 0.0
+
+        score = alpha * avg_sim + beta * (1 - norm_ent)
+        scores[nid] = score
+
+    leader = max(scores, key=scores.get)
+    return leader, scores
+
+
+def expected_entropy(p_hit: float, hit_state: List[float], miss_state: List[float]) -> float:
+    if not 0 <= p_hit <= 1:
+        raise ValueError('p_hit must be in [0,1]')
+    return p_hit * entropy(hit_state) + (1.0 - p_hit) * entropy(miss_state)
+
+
+if __name__ == "__main__":
+    random.seed(42)
+    np.random.seed(42)
+
+    nodes = {
+        "node_A": np.random.dirichlet([0.5, 0.5, 0.5, 0.5]).tolist(),
+        "node_B": np.random.dirichlet([1.0, 1.0, 1.0, 1.0]).tolist(),
+        "node_C": np.random.dirichlet([2.0, 2.0, 2.0, 2.0]).tolist(),
+    }
+
+    leader, scores = leader_election(nodes, k=64, alpha=0.4, beta=0.6)
+
+    print("Pheromone distributions:")
+    for nid, dist in nodes.items():
+        print(f"  {nid}: {['{:.3f}'.format(p) for p in dist]}")
+    print("\nLeader election scores:")
+    for nid, sc in scores.items():
+        print(f"  {nid}: {sc:.4f}")
+    print(f"\nElected leader: {leader}")
+
+    hit = [0.9, 0.05, 0.05]
+    miss = [0.3, 0.4, 0.3]
+    exp_ent = expected_entropy(0.7, hit, miss)
+    print(f"\nExpected entropy after observation: {exp_ent:.6f}")

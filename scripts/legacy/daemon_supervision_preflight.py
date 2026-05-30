@@ -11,6 +11,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -64,7 +65,7 @@ class LoopSpec:
 
 def py() -> str:
     venv = ROOT / ".venv/bin/python"
-    return str(venv) if venv.exists() else "python3"
+    return str(venv) if venv.exists() else sys.executable
 
 
 def timestamped_krampus_command() -> tuple[list[str], str, str, str]:
@@ -117,21 +118,21 @@ def loop_specs() -> list[LoopSpec]:
         LoopSpec(
             "absurd-worker",
             "scripts/unified_absurd_ingest_worker.py work",
-            ["python3", "scripts/unified_absurd_ingest_worker.py", "work"],
+            [py(), "scripts/unified_absurd_ingest_worker.py", "work"],
             "absurd_worker_supervised.log",
             env=base_env,
         ),
         LoopSpec(
             "bytewax-abductive-blender",
             "scripts/bytewax_abductive_blender.py loop",
-            ["python3", "scripts/bytewax_abductive_blender.py", "loop", "--limit", "400", "--idle-sleep", "2", "--activity-window-seconds", "2"],
+            [py(), "scripts/bytewax_abductive_blender.py", "loop", "--limit", "400", "--idle-sleep", "2", "--activity-window-seconds", "2"],
             "bytewax_abductive_blender_supervised.log",
             env={**base_env, "LUCIDOTA_DUCKDB_MEMORY_LIMIT": "1536MB"},
         ),
         LoopSpec(
             "abcd-sequence-runner",
             "scripts/updated_abcd_sequence_runner.py --execute --continue-on-failure --continuous",
-            ["python3", "scripts/updated_abcd_sequence_runner.py", "--execute", "--continue-on-failure", "--continuous", "--idle-sleep", "20"],
+            [py(), "scripts/updated_abcd_sequence_runner.py", "--execute", "--continue-on-failure", "--continuous", "--idle-sleep", "20"],
             "abcd_sequence_runner_supervised.log",
             env=base_env,
         ),

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""ABSURD worker #3 for krampus_ingest: stages extracted claims into graph_staging_candidates.
+"""ABSURD worker #3 for krampus_ingest: stages extracted claims into lucidota_go.staging_packet.
 
 Receives a job from queue_name='krampus_ingest' with job_kind='stage'. For each claim
-in payload['claims'], assigns a ternary score and attempts INSERT into
-lucidota_korpus.graph_staging_candidates. Falls back to 05_OUTPUTS/krampus_ingest/
-JSONL if the table is absent or wrong schema. Writes a per-job receipt and appends one
-row to the ingest_log TSV. Never writes canonical graph tables.
+in payload['claims'], maps to lucidota_go.staging_packet columns (source_id, parser_name,
+proposed_term, raw_anchor, claim, proposed_item, proposed_edges, status, confidence_bps).
+Falls back to 05_OUTPUTS/krampus_ingest/ JSONL only when the table is absent. Validates
+the worker contract at dequeue via absurd_worker_contracts.validate_worker_contract().
+Writes a per-job receipt and appends one row to the ingest_log TSV. Never writes
+canonical graph tables (graph_item, graph_edge, graph_journal).
 """
 from __future__ import annotations
 
@@ -14,6 +16,7 @@ import hashlib
 import json
 import os
 import socket
+import sys
 import time
 import uuid
 from datetime import datetime, timezone
@@ -24,6 +27,13 @@ import psycopg
 from psycopg.rows import dict_row
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(ROOT / "scripts"))
+try:
+    from absurd_worker_contracts import validate_worker_contract, record_worker_contract_rejection
+    _HAS_CONTRACT_HELPER = True
+except Exception:
+    _HAS_CONTRACT_HELPER = False
 OUT_BASE = ROOT / "05_OUTPUTS" / "krampus_ingest"
 QUEUE_NAME = "krampus_ingest"
 JOB_KIND = "stage"
@@ -166,11 +176,16 @@ def claim_confidence(claim: Any) -> float | None:
 
 
 # ---------------------------------------------------------------------------
-# Staging table probe + insert
+# Staging table target: lucidota_go.staging_packet
 # ---------------------------------------------------------------------------
 
-STAGING_TABLE = "lucidota_korpus.graph_staging_candidates"
-STAGING_COLUMNS = ("candidate_uuid", "source_job_id", "claim_text", "ternary_score", "evidence_ref", "staged_at")
+STAGING_TABLE = "lucidota_go.staging_packet"
+
+# Confidence_bps mapping from ternary: +1 -> 10, 0 -> 4, -1 -> 2
+# All values are in the allowed set {0,2,4,6,10,50,69,150}.
+_TERNARY_TO_BPS: dict[int, int] = {1: 10, 0: 4, -1: 2}
+# Default proposed_term for krampus claims when none is specified
+_DEFAULT_TERM = "CLAIM"
 
 
 def table_exists(conn, table: str) -> bool:
@@ -179,43 +194,49 @@ def table_exists(conn, table: str) -> bool:
         return first_value(cur.fetchone()) is not None
 
 
-def columns_present(conn, table: str, required: tuple[str, ...]) -> bool:
-    schema, tbl = table.split(".")
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            SELECT column_name FROM information_schema.columns
-            WHERE table_schema=%s AND table_name=%s
-            """,
-            (schema, tbl),
-        )
-        present = {row[0] for row in cur.fetchall()}
-    return all(col in present for col in required)
+def claim_proposed_term(claim: Any) -> str:
+    """Extract proposed_term from claim dict; default to CLAIM."""
+    if isinstance(claim, dict):
+        t = str(claim.get("proposed_term") or claim.get("term") or "").strip().upper()
+        if t:
+            return t
+    return _DEFAULT_TERM
 
 
 def try_stage_to_db(
     conn,
     *,
-    candidate_uuid: str,
-    source_job_id: str,
-    text: str,
-    score: int,
-    evidence_ref: str,
-    staged_at: str,
+    source_id: str,
+    raw_anchor: str,
+    claim_str: str,
+    proposed_term: str,
+    proposed_item: dict[str, Any],
+    confidence_bps: int,
 ) -> tuple[bool, str]:
-    """Attempt INSERT. Returns (ok, error_str)."""
+    """Attempt INSERT into lucidota_go.staging_packet. Returns (ok, error_str)."""
     try:
         with conn.cursor() as cur:
             cur.execute(
-                f"""
-                INSERT INTO {STAGING_TABLE}
-                  (candidate_uuid, source_job_id, claim_text, ternary_score, evidence_ref, staged_at)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                """
+                INSERT INTO lucidota_go.staging_packet
+                  (source_id, parser_name, proposed_term, raw_anchor, claim,
+                   proposed_item, proposed_edges, status, confidence_bps)
+                VALUES (%s, 'krampus_stage', %s, %s, %s,
+                        %s::jsonb, '[]'::jsonb, 'pending', %s)
                 ON CONFLICT DO NOTHING
+                RETURNING packet_uuid::text
                 """,
-                (candidate_uuid, source_job_id, text, score, evidence_ref, staged_at),
+                (
+                    source_id,
+                    proposed_term,
+                    raw_anchor[:200],
+                    claim_str[:500],
+                    json.dumps(proposed_item, sort_keys=True, default=str),
+                    confidence_bps,
+                ),
             )
-        return True, ""
+            row = cur.fetchone()
+        return True, str(first_value(row) or "conflict_skip")
     except Exception as exc:
         return False, str(exc)
 
@@ -334,27 +355,36 @@ def stage_claims(
     *,
     dry_run: bool,
 ) -> dict[str, Any]:
-    """Process all claims in payload and return a result summary."""
+    """Process all claims in payload and return a result summary.
+
+    Each claim is mapped to lucidota_go.staging_packet:
+      source_id     <- job_id (or payload['source_id'])
+      parser_name   <- 'krampus_stage' (hardcoded)
+      proposed_term <- claim['proposed_term'] or claim['term'] or 'CLAIM'
+      raw_anchor    <- claim text (truncated to 200)
+      claim         <- claim text (truncated to 500)
+      proposed_item <- jsonb envelope with full claim metadata
+      proposed_edges<- '[]' (krampus does not propose edges)
+      status        <- 'pending'
+      confidence_bps<- ternary_score +1->10, 0->4, -1->2
+    """
     claims = payload.get("claims") or []
     source_file = str(payload.get("source_file") or payload.get("file_path") or job_id)
+    # source_id for staging_packet: prefer explicit, fall back to job_id
+    source_id = str(payload.get("source_id") or job_id)
 
     # Probe staging table once
     db_available = False
-    schema_ok = False
     db_error = ""
     if not dry_run:
         try:
             db_available = table_exists(storage_conn, STAGING_TABLE)
-            if db_available:
-                schema_ok = columns_present(storage_conn, STAGING_TABLE, STAGING_COLUMNS)
         except Exception as exc:
             db_error = str(exc)
 
     staged_db: list[dict[str, Any]] = []
     fallback_records: list[dict[str, Any]] = []
     ternary: dict[str, int] = {"positive": 0, "neutral": 0, "negative": 0}
-
-    staged_at = now_iso()
 
     for claim in claims:
         text = claim_text(claim)
@@ -368,38 +398,56 @@ def stage_claims(
         else:
             ternary["neutral"] += 1
 
-        cand_id = str(uuid.uuid4())
+        conf_bps = _TERNARY_TO_BPS.get(score, 4)
+        pterm = claim_proposed_term(claim)
         ev_ref = f"krampus_ingest:{sha256_str(text)[:16]}"
 
-        rec = {
-            "candidate_uuid": cand_id,
-            "source_job_id": job_id,
+        # proposed_item envelope stores full metadata
+        proposed_item: dict[str, Any] = {
             "claim_text": text,
             "ternary_score": score,
             "evidence_ref": ev_ref,
-            "staged_at": staged_at,
+            "source_job_id": job_id,
+            "source_file": source_file,
+        }
+        if isinstance(claim, dict):
+            for k in ("confidence", "metadata", "tags", "origin"):
+                if k in claim:
+                    proposed_item[k] = claim[k]
+
+        rec = {
+            "source_id": source_id,
+            "parser_name": "krampus_stage",
+            "proposed_term": pterm,
+            "raw_anchor": text[:200],
+            "claim": text[:500],
+            "proposed_item": proposed_item,
+            "proposed_edges": [],
+            "status": "pending",
+            "confidence_bps": conf_bps,
+            "evidence_ref": ev_ref,
         }
 
         if dry_run:
             staged_db.append(rec)
             continue
 
-        use_db = db_available and schema_ok
-        if use_db:
-            ok, err = try_stage_to_db(
+        if db_available:
+            ok, err_or_uuid = try_stage_to_db(
                 storage_conn,
-                candidate_uuid=cand_id,
-                source_job_id=job_id,
-                text=text,
-                score=score,
-                evidence_ref=ev_ref,
-                staged_at=staged_at,
+                source_id=source_id,
+                raw_anchor=text,
+                claim_str=text,
+                proposed_term=pterm,
+                proposed_item=proposed_item,
+                confidence_bps=conf_bps,
             )
             if ok:
+                rec["packet_uuid"] = err_or_uuid
                 staged_db.append(rec)
             else:
                 db_available = False
-                db_error = err
+                db_error = err_or_uuid
                 fallback_records.append(rec)
         else:
             fallback_records.append(rec)
@@ -413,7 +461,7 @@ def stage_claims(
     elif fallback_records:
         jsonl_path = write_fallback_jsonl(fallback_records)
         fallback_jsonl_path = str(jsonl_path.relative_to(ROOT))
-        blocked_reason = db_error or ("table_missing" if not db_available else "schema_mismatch")
+        blocked_reason = db_error or "table_missing"
         write_blocked_receipt(job_id, fallback_records, blocked_reason)
         lane = "jsonl_fallback"
     else:
@@ -516,6 +564,25 @@ def worker_once(args: argparse.Namespace, execute: bool) -> tuple[dict[str, Any]
             payload = dict(row["payload"] or {})
             attempt_count = int(row["attempt_count"])
             max_attempts = int(row["max_attempts"])
+
+            # --- Contract validation at dequeue ---
+            if _HAS_CONTRACT_HELPER:
+                contract = validate_worker_contract(
+                    cur, queue_name=QUEUE_NAME, job_kind=JOB_KIND, worker_key=WORKER_KEY
+                )
+                if not contract.ok:
+                    gate_result, ek = record_worker_contract_rejection(
+                        cur,
+                        job_uuid=job_uuid,
+                        queue_name=QUEUE_NAME,
+                        payload=payload,
+                        contract=contract,
+                        event_source="krampus_stage_worker",
+                    )
+                    state_conn.commit()
+                    blockers.append(ek)
+                    result.update({"worker_contract_rejected": True, "error_kind": ek, "error_message": contract.error_message})
+                    return result, blockers
 
             # Claim it
             cur.execute(

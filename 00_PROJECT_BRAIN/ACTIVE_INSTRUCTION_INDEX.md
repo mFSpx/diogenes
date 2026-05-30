@@ -19,6 +19,10 @@
 ## workflow hygiene pseudolaw
 - `00_PROJECT_BRAIN/BLUEPRINT_FIRST_MODEL_SECOND_PSEUDOLAW.md`
 
+## project2501 admin and core contract
+- `00_PROJECT_BRAIN/PROJECT_2501_ADMIN_PROMPT.md`
+- `00_PROJECT_BRAIN/PROJECT_2501_CORE_CONTRACT.md`
+
 ## GOALS dev-mode law
 - `GOALS/AGENT_ORCHESTRATION_POLICY.md`
 
@@ -37,7 +41,7 @@
 - `scripts/run_instruction_hygiene.py`
 
 ## Archived / Historical Instruction Sources
-- Storage/archive manifest: `05_OUTPUTS/instruction_hygiene/instruction_archive_manifest_20260527T045852396891Z.json`
+- Storage/archive manifest: `05_OUTPUTS/instruction_hygiene/instruction_archive_manifest_20260529T230225770465Z.json`
 
 ## Manual Review Required
 - `00_PROJECT_BRAIN/ACTIVE_SPEC/03_CUSTODY_ETL_PIPELINE.md`
@@ -47,22 +51,21 @@
 - `00_PROJECT_BRAIN/ACTIVE_SPEC/08_BOARD_EFFECT_TOURNAMENT_LAW.md`
 - `00_PROJECT_BRAIN/AGENTSI_SELF_SOVEREIGN_JOB_FAIR/JOB_BOOTHS.json`
 - `00_PROJECT_BRAIN/AGENTSI_SELF_SOVEREIGN_JOB_FAIR/README.md`
-- `00_PROJECT_BRAIN/CODEX_PROMPTING_GUIDE_LUCIDOTA_POLICY.json`
 - `00_PROJECT_BRAIN/ETL_PIPELINE/DBOS_CONTRACT.md`
 - `00_PROJECT_BRAIN/ETL_PIPELINE/DB_MAPPING.md`
 - `00_PROJECT_BRAIN/ETL_PIPELINE/LIVE_INGEST_NOTES.md`
 - `00_PROJECT_BRAIN/ETL_PIPELINE/WORKER_POLICY.md`
+- `00_PROJECT_BRAIN/GONN_CANON.md`
 - `00_PROJECT_BRAIN/INDY_READS_POLYCAREER_WORKFLOW_WIZARD/ARCHITECTURE.md`
 - `00_PROJECT_BRAIN/INDY_READS_POLYCAREER_WORKFLOW_WIZARD/ROLE_MODES.json`
 - `00_PROJECT_BRAIN/INDY_READS_POLYCAREER_WORKFLOW_WIZARD/WORKFLOW_CONTRACT.md`
+- `00_PROJECT_BRAIN/INDY_SOUL.md`
+- `00_PROJECT_BRAIN/KANT69_ARCHITECTURE_CONVERGENCE_CANON.md`
 - `00_PROJECT_BRAIN/KNOWLEDGE_LIBRARY/BLUEPRINT_FIRST_MODEL_SECOND.md`
 - `00_PROJECT_BRAIN/KNOWLEDGE_LIBRARY/CYBERCRAFTER_DRF.md`
 - `00_PROJECT_BRAIN/KNOWLEDGE_LIBRARY/LLM_WORKFLOW_ROUTER_DOBY_BAXTER.md`
 - `00_PROJECT_BRAIN/KNOWLEDGE_LIBRARY/README.md`
 - `00_PROJECT_BRAIN/KNOWLEDGE_LIBRARY/SYDSEC_SYD.md`
-- `00_PROJECT_BRAIN/POSTGRES_AUDIT_CURRENT.md`
-- `00_PROJECT_BRAIN/PROJECT_2501_ADMIN_PROMPT.md`
-- `00_PROJECT_BRAIN/PROJECT_2501_CORE_CONTRACT.md`
 - `00_PROJECT_BRAIN/RFCS/GOAL_COMPLETION_AUDIT.md`
 - `00_PROJECT_BRAIN/RFCS/GOAL_REQUIREMENT_MATRIX.json`
 - `00_PROJECT_BRAIN/RFCS/README.md`
@@ -80,10 +83,29 @@
 - `00_PROJECT_BRAIN/RFCS/RFC-190-SELF-SOVEREIGNTY-OSINT.md`
 - `00_PROJECT_BRAIN/RFCS/RFC_SUBJECT_REGISTRY.json`
 - `00_PROJECT_BRAIN/RFCS/SOURCES.md`
-- `00_PROJECT_BRAIN/RUVECTOR_ABSURD_SONA_RIVERML_NOTES.md`
-- `00_PROJECT_BRAIN/claude_code_claw_runtime_registry.json`
-- `00_PROJECT_BRAIN/rust_port_candidacy_registry.json`
+- `00_PROJECT_BRAIN/organ_registry/50_ingestion.json`
+- `00_PROJECT_BRAIN/organ_registry/60_spencer_signal_bench.json`
+- `00_PROJECT_BRAIN/organ_registry/ORGAN_REGISTRY.md`
+- `04_RUNTIME/corpus_ingest/cursor.json`
+- `04_RUNTIME/goals/groq_locked_model_harness_orders_20260527T190938Z.json`
+- `04_RUNTIME/goals/rickshaw_component_payload_batch_004_20260527T232006Z.json`
+- `04_RUNTIME/goals/rickshaw_component_payload_batch_005_20260527T232510Z.json`
+- `04_RUNTIME/goals/rickshaw_component_payload_batch_006_20260527T232746Z.json`
+- `04_RUNTIME/goals/rickshaw_component_payload_batch_009_20260528T001108Z.json`
+- `04_RUNTIME/goals/rickshaw_component_payload_batch_012_20260528T002715Z.json`
 - `04_RUNTIME/lora_cartridges/indy_reads_book_e1ecc91ee15ff224/manifest.json`
+- `04_RUNTIME/models/smoldocling-256m-preview/README.md`
+- `04_RUNTIME/models/smoldocling-256m-preview/agent-browser/benchmarks/README.md`
+- `04_RUNTIME/models/smoldocling-256m-preview/agent-browser/evals/README.md`
+- `04_RUNTIME/models/smoldocling-256m-preview/cc-switch/docs/user-manual/en/README.md`
+- `04_RUNTIME/models/smoldocling-256m-preview/cc-switch/docs/user-manual/ja/README.md`
+- `04_RUNTIME/models/smoldocling-256m-preview/cc-switch/docs/user-manual/zh/README.md`
+- `04_RUNTIME/models/smoldocling-256m-preview/cc-switch/flatpak/README.md`
+- `04_RUNTIME/models/smoldocling-256m-preview/cerberus-keyrouter/README.md`
+- `04_RUNTIME/models/smoldocling-256m-preview/pathway/examples/projects/question-answering-rag/README.md`
+- `04_RUNTIME/models/smoldocling-256m-preview/pathway/examples/projects/twitter/services/frontend/package-lock.json`
+- `04_RUNTIME/models/smoldocling-256m-preview/pathway/external/differential-dataflow/dogsdogsdogs/README.md`
+- `04_RUNTIME/models/smoldocling-256m-preview/pathway/external/differential-dataflow/server/README.md`
 - `04_RUNTIME/observation_center/board_effect_doctrine_latest.json`
 - `04_RUNTIME/observation_center/dev_journey_decision_points_latest.json`
 - `04_RUNTIME/observation_center/hunch_postgres_ingest_latest.json`
@@ -99,24 +121,6 @@
 - `06_SCHEMA/023_etl_pipeline.sql`
 - `06_SCHEMA/029_darwinian_surfaces.sql`
 - `06_SCHEMA/031_graph_write_barrier_plan.sql`
+- `06_SCHEMA/032_bitloops_loop.sql`
 - `06_SCHEMA/034_graph_promotion_pipeline.sql`
 - `06_SCHEMA/036_absurd_chrono_wrapper.sql`
-- `06_SCHEMA/037_absurd_krampus_wrapper.sql`
-- `06_SCHEMA/039_absurd_real_work_loop.sql`
-- `06_SCHEMA/040_graph_write_barrier_enforcement.sql`
-- `06_SCHEMA/041_boring_beast_loop_contracts.sql`
-- `06_SCHEMA/043_absurd_remaining_worker_contracts.sql`
-- `06_SCHEMA/044_graph_promotion_policy_roles.sql`
-- `06_SCHEMA/049_absurd_intake_wrapper.sql`
-- `06_SCHEMA/050_document_claim_packet_bridge.sql`
-- `06_SCHEMA/052_graph_promotion_materialization.sql`
-- `06_SCHEMA/058_chrono_queue_event_bridge.sql`
-- `06_SCHEMA/059_graph_promotion_gate_runtime.sql`
-- `06_SCHEMA/061_absurd_queue_hardening_v2.sql`
-- `06_SCHEMA/064_queue_transition_law_v2.sql`
-- `06_SCHEMA/065_graph_materialization_helper_v2.sql`
-- `06_SCHEMA/067_chrono_queue_event_bridge_automation.sql`
-- `06_SCHEMA/068_conversation_command_acceptance.sql`
-- `06_SCHEMA/069_graph_promotion_approval_state_machine.sql`
-- `06_SCHEMA/073_absurd_river_claim_packet_job.sql`
-- `06_SCHEMA/074_graph_journal_write_barrier.sql`

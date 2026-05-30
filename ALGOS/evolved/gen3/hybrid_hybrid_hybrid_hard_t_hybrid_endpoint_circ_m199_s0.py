@@ -1,0 +1,145 @@
+# DARWIN HAMMER — match 199, survivor 0
+# gen: 3
+# parent_a: hybrid_hybrid_hard_truth_ma_rectified_flow_m91_s1.py (gen2)
+# parent_b: hybrid_endpoint_circuit_bre_serpentina_self_righ_m18_s4.py (gen1)
+# born: 2026-05-29T23:27:41Z
+
+# hybrid_ma_rectified_flow_m91_s1_b18_s4.py
+"""
+This module combines the mathematical structures of the 'hybrid_hard_truth_math_model_pool_m8_s0' and 'hybrid_endpoint_circuit_breaker_b18_s4' algorithms.
+The governing equations of 'hybrid_hard_truth_math_model_pool_m8_s0' involve vector operations for stylometry features and classification,
+while 'hybrid_endpoint_circuit_breaker_b18_s4' uses morphological features and righting time indexes to determine recovery priorities.
+The mathematical bridge between these structures lies in the optimization of model loading based on stylometry features and morphological characteristics,
+where the straight-line interpolant can be used to compute the optimal model loading path.
+"""
+
+import numpy as np
+import hashlib
+import re
+from collections import Counter
+from typing import Any
+import datetime as dt
+import random
+import sys
+import pathlib
+import math
+
+FUNCTION_CATS: dict[str, set[str]] = {
+    "pronoun": set("i me my mine myself you your yours yourself he him his she her hers they them their theirs we us our ours".split()),
+    "article": set("a an the".split()),
+    "preposition": set("about above after against around as at before behind below between by during for from in into of off on onto over through to under with without".split()),
+    "auxiliary": set("am are be been being can could did do does had has have is may might must shall should was were will would".split()),
+    "conjunction": set("and but or nor so yet because although while if when where whereas unless until".split()),
+    "negation": set("no not never none neither cannot can't won't don't didn't isn't aren't wasn't weren't".split()),
+    "quantifier": set("all any both each few many more most much none several some such".split()),
+    "adverb_common": set("very really just still already also even only then there here now often always sometimes".split()),
+}
+
+class ModelTier:
+    def __init__(self, name: str, ram_mb: int, tier: str):
+        self.name = name
+        self.ram_mb = ram_mb
+        self.tier = tier
+
+class ModelPool:
+    def __init__(self, ram_ceiling_mb: int = 6000):
+        self.ram_ceiling_mb = ram_ceiling_mb
+        self.loaded = {}
+
+    def is_loaded(self, name: str) -> bool:
+        return name in self.loaded
+
+    def _used(self) -> int:
+        return sum(m.ram_mb for m in self.loaded.values())
+
+    def load(self, model: ModelTier) -> None:
+        if model.tier == "high":
+            if self._used() + model.ram_mb <= self.ram_ceiling_mb:
+                self.loaded[model.name] = model
+            else:
+                raise MemoryError("Insufficient RAM to load high-tier model")
+        elif model.tier == "low":
+            self.loaded[model.name] = model
+
+    def unload(self, name: str) -> None:
+        if name in self.loaded:
+            del self.loaded[name]
+
+class Morphology:
+    def __init__(self, length: float, width: float, height: float, mass: float):
+        self.length = length
+        self.width = width
+        self.height = height
+        self.mass = mass
+
+def sphericity_index(length: float, width: float, height: float) -> float:
+    if min(length, width, height) <= 0:
+        raise ValueError("dimensions must be positive")
+    return (length * width * height) ** (1.0 / 3.0) / length
+
+def flatness_index(length: float, width: float, height: float) -> float:
+    if min(length, width, height) <= 0:
+        raise ValueError("dimensions must be positive")
+    return (length + width) / (2.0 * height)
+
+def righting_time_index(
+    m: Morphology, b: float = 1.0 / 3.0, k: float = 0.35, neck_lever: float = 1.0
+) -> float:
+    if m.mass <= 0 or neck_lever <= 0:
+        raise ValueError("mass and neck_lever must be positive")
+    fi = flatness_index(m.length, m.width, m.height)
+    return (m.mass ** b) * math.exp(k * fi) / neck_lever
+
+def recovery_priority(m: Morphology, max_index: float = 10.0) -> float:
+    return max(0.0, min(1.0, righting_time_index(m) / max_index))
+
+def hybrid_model_load(model: ModelTier, morphology: Morphology) -> float:
+    if model.tier == "high":
+        # Use stylometry features to determine optimal model loading path
+        # Integrate with morphological characteristics to adjust loading path
+        # Use straight-line interpolant to compute optimal loading path
+        # For simplicity, assume a linear relationship between stylometry features and morphological characteristics
+        stylometry_feature = np.random.rand()  # Simulate stylometry feature
+        morphological_characteristic = righting_time_index(morphology)
+        optimal_loading_path = stylometry_feature + morphological_characteristic
+        optimal_ram_usage = optimal_loading_path * model.ram_mb
+        return optimal_ram_usage
+    elif model.tier == "low":
+        # Use straight-line interpolant to compute optimal loading path
+        optimal_ram_usage = model.ram_mb
+        return optimal_ram_usage
+
+def hybrid_endpoint_recovery(endpoint: EngineEndpoint) -> float:
+    # Use morphological features to determine recovery priority
+    # Integrate with stylometry features to adjust recovery priority
+    # Use straight-line interpolant to compute recovery priority
+    # For simplicity, assume a linear relationship between morphological features and stylometry features
+    morphological_feature = righting_time_index(endpoint.morphology)
+    stylometry_feature = np.random.rand()  # Simulate stylometry feature
+    recovery_priority = morphological_feature + stylometry_feature
+    return recovery_priority
+
+def hybrid_engine_endpoint_pool(endpoints: Dict[str, EngineEndpoint], failure_threshold: int = 3) -> None:
+    # Use hybrid_model_load function to load models into pool
+    # Use hybrid_endpoint_recovery function to determine recovery priorities
+    for endpoint in endpoints.values():
+        model = ModelTier(endpoint.engine_id, endpoint.resource_class, "high")
+        optimal_ram_usage = hybrid_model_load(model, endpoint.morphology)
+        endpoint.capabilities.append(f"optimal_ram_usage={optimal_ram_usage}")
+
+if __name__ == "__main__":
+    endpoints = {
+        "cpu_fairyfuse_ternary": EngineEndpoint(
+            engine_id="cpu_fairyfuse_ternary",
+            channel="cpu_fairyfuse_ternary",
+            residency="cpu_fairyfuse_ternary",
+            runtime="cpu_fairyfuse_ternary",
+            resource_class=1000,
+            always_on=True,
+            endpoint="cpu_fairyfuse_ternary",
+            capabilities=["cpu_fairyfuse_ternary"],
+            morphology=Morphology(10.0, 5.0, 3.0, 20.0),
+            outbound_state="draft_only"
+        )
+    }
+    hybrid_engine_endpoint_pool(endpoints)

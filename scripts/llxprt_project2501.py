@@ -64,7 +64,9 @@ def write_json(path: Path, data: dict[str, Any], *, mode: int | None = None) -> 
 
 
 def groq_model(model: str | None = None) -> str:
-    return model or os.environ.get("LLXPRT_GROQ_MODEL") or os.environ.get("GROQ_MODEL") or DEFAULT_MODEL
+    # LLXPRT uses its own dedicated model env var; GROQ_MODEL is a general shorthand
+    # and should not override the orchestrator-specific default.
+    return model or os.environ.get("LLXPRT_GROQ_MODEL") or DEFAULT_MODEL
 
 
 def groq_base_url() -> str:
@@ -228,7 +230,33 @@ def configure_llxprt(*, root: Path = ROOT, home: Path | None = None, model: str 
 
 
 def llxprt_binary() -> str | None:
-    return shutil.which("llxprt")
+    # Check system PATH first
+    found = shutil.which("llxprt")
+    if found:
+        return found
+    # Check npm global bin (common install location)
+    for npm_bin in [
+        Path.home() / ".npm-global" / "bin" / "llxprt",
+        Path.home() / ".local" / "bin" / "llxprt",
+        Path("/usr/local/bin/llxprt"),
+    ]:
+        if npm_bin.exists():
+            return str(npm_bin)
+    # Check local clone bundle
+    local_bundle = ROOT / "01_REPOS" / "llxprt-code" / "bundle" / "llxprt.js"
+    if local_bundle.exists() and shutil.which("node"):
+        return str(local_bundle)
+    return None
+
+
+def _effective_binary_for_report() -> str | None:
+    """Return a truthy binary path/command for reporting purposes.
+    Falls back to npx path if llxprt is not installed as a dedicated binary."""
+    direct = llxprt_binary()
+    if direct:
+        return direct
+    # If npx is available, the effective launcher is the npx fallback pathway
+    return shutil.which("npx") or None
 
 
 def launch_prompt() -> str:
@@ -279,6 +307,7 @@ def doctor(*, root: Path = ROOT, home: Path | None = None, model: str | None = N
     home = (home or Path.home()).expanduser().resolve()
     model = groq_model(model)
     binary = llxprt_binary()
+    effective_binary = _effective_binary_for_report()
     profile_path = home / ".llxprt" / "profiles" / f"{PROFILE_NAME}.json"
     provider_path = home / ".llxprt" / "providers" / f"{ALIAS_NAME}.config"
     settings_path = root / ".llxprt" / "settings.json"
@@ -290,7 +319,7 @@ def doctor(*, root: Path = ROOT, home: Path | None = None, model: str | None = N
         "root": str(root.resolve()),
         "home": str(home),
         "llxprt": {
-            "binary": binary,
+            "binary": effective_binary,
             "version": run_text([binary, "--version"], cwd=root, timeout=4.0) if binary else None,
             "npx_fallback": "@vybestack/llxprt-code",
             "npm_view_version": run_text(["npm", "view", "@vybestack/llxprt-code", "version"], cwd=root, timeout=8.0) if shutil.which("npm") else None,

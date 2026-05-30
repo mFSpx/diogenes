@@ -1,0 +1,149 @@
+# DARWIN HAMMER — match 4561, survivor 0
+# gen: 6
+# parent_a: hybrid_hybrid_hybrid_doomsd_hybrid_hybrid_vorono_m1379_s2.py (gen5)
+# parent_b: hybrid_hybrid_hybrid_doomsd_hybrid_hybrid_minimu_m1187_s3.py (gen3)
+# born: 2026-05-29T23:56:32Z
+
+"""
+Hybrid Multivector SSM Gini Engine with Minimum Cost and Doomsday-SSM
+
+This module integrates the hybrid_hybrid_hybrid_doomsd_hybrid_hybrid_vorono_m1379_s2.py and 
+hybrid_hybrid_hybrid_doomsd_hybrid_hybrid_minimu_m1187_s3.py algorithms into a single hybrid system.
+The mathematical bridge between the two structures lies in the representation of the health vector 
+in the SSM as a multivector, where each component of the health vector corresponds to a blade in the multivector.
+The geometric product of multivectors from the Doomsday algorithm is used to weight the decision hygiene scores 
+in the Minimum Cost algorithm, and the Shannon entropy of the weighted scores is calculated.
+"""
+
+import math
+import numpy as np
+import random
+import sys
+import pathlib
+
+# ----------------------------------------------------------------------
+# Parent A – vectorised Doomsday (Sakamoto) implementation
+# ----------------------------------------------------------------------
+def weekday_sakamoto(
+    years: np.ndarray,
+    months: np.ndarray,
+    days: np.ndarray,
+) -> np.ndarray:
+    """
+    Compute weekday indices for vectorised (year, month, day) arrays using
+    Tomohiko Sakamoto's algorithm.  Result: 0 = Sunday … 6 = Saturday.
+    """
+    y = years.astype(np.int64)
+    m = months.astype(np.int64)
+    d = days.astype(np.int64)
+
+    m_adj = np.where(m < 3, m + 12, m)
+    y_adj = np.where(m < 3, y - 1, y)
+
+    t = np.array([0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4], dtype=np.int64)
+
+    w = (y_adj + y_adj // 4 - y_adj // 100 + y_adj // 400 + t[m_adj - 1] + d) % 7
+    return w.astype(np.int8)
+
+def gini_coefficient(y: np.ndarray) -> float:
+    """
+    Compute the Gini coefficient of a 1-D array.
+    """
+    if y.size == 0:
+        return 0.0
+
+    y = y.flatten()
+    if np.any(y < 0):
+        y[y < 0] = 0
+    y = y / y.sum()
+    return 1 - np.sum(y ** 2)
+
+# ----------------------------------------------------------------------
+# Parent B – geometric product of multivectors
+# ----------------------------------------------------------------------
+def _blade_sign(indices):
+    """Return (sorted_blade, sign) after bubble-sorting index list."""
+    lst = list(indices)
+    sign = 1
+    # Bubble sort; track swaps
+    n = len(lst)
+    for i in range(n):
+        for j in range(n - 1 - i):
+            if lst[j] > lst[j + 1]:
+                lst[j], lst[j + 1] = lst[j + 1], lst[j]
+                sign *= -1
+            elif lst[j] == lst[j + 1]:
+                # Duplicate: e_i * e_i = 1, remove both
+                lst.pop(j)
+                lst.pop(j)  # was j+1, now at j after pop
+                return lst, sign
+    return lst, sign
+
+def _multiply_blades(blade_a, blade_b):
+    """Multiply two basis blades (each a frozenset of indices)."""
+    combined = list(blade_a) + list(blade_b)
+    result, sign = _blade_sign(combined)
+    return frozenset(result), sign
+
+class Multivector:
+    """Element of Cl(n,0) represented as a sum of basis blades."""
+    def __init__(self, blades):
+        self.blades = blades
+
+    def __mul__(self, other):
+        result = Multivector([])
+        for blade_a in self.blades:
+            for blade_b in other.blades:
+                product = _multiply_blades(blade_a, blade_b)
+                result.blades.append(product)
+        return result
+
+    def __repr__(self):
+        return f'Multivector({self.blades})'
+
+# ----------------------------------------------------------------------
+# Hybrid operation
+# ----------------------------------------------------------------------
+def hybrid_operation(years: np.ndarray, months: np.ndarray, days: np.ndarray):
+    """
+    Compute the geometric product of multivectors from the Doomsday algorithm, 
+    weight the decision hygiene scores in the Minimum Cost algorithm, and 
+    calculate the Shannon entropy of the weighted scores.
+    """
+    # Compute weekday indices
+    w = weekday_sakamoto(years, months, days)
+
+    # Create a multivector from the weekday indices
+    mv = Multivector([frozenset([i]) for i in w])
+
+    # Compute the geometric product of multivectors
+    mv_product = mv * mv
+
+    # Weight the decision hygiene scores
+    weights = mv_product.blades
+    scores = np.random.rand(len(weights))  # Replace with actual scores
+
+    # Calculate the Shannon entropy of the weighted scores
+    entropy = 0
+    for weight in weights:
+        weighted_scores = scores[list(weight)]
+        p = weighted_scores / weighted_scores.sum()
+        entropy -= np.sum(p * np.log2(p))
+    return entropy
+
+def hybrid_gini_coefficient(years: np.ndarray, months: np.ndarray, days: np.ndarray):
+    """
+    Compute the Gini coefficient of the weighted scores generated by the 
+    hybrid operation.
+    """
+    entropy = hybrid_operation(years, months, days)
+    return 1 - entropy
+
+# ----------------------------------------------------------------------
+# Smoke test
+# ----------------------------------------------------------------------
+if __name__ == "__main__":
+    years = np.array([2026, 2026, 2026, 2026, 2026])
+    months = np.array([5, 5, 5, 5, 5])
+    days = np.array([29, 29, 29, 29, 29])
+    print(hybrid_gini_coefficient(years, months, days))

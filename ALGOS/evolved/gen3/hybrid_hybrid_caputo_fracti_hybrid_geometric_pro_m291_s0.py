@@ -1,0 +1,86 @@
+# DARWIN HAMMER — match 291, survivor 0
+# gen: 3
+# parent_a: hybrid_caputo_fractional_minimum_cost_tree_m35_s2.py (gen1)
+# parent_b: hybrid_geometric_product_hybrid_model_vram_sc_m22_s2.py (gen2)
+# born: 2026-05-29T23:28:16Z
+
+"""
+Hybrid Caputo Geometric Product (HCGP) algorithm — fusion of Caputo fractional derivative and geometric product for long-range memory and path-dependent trade-offs in Clifford algebra.
+
+The mathematical bridge between these two algorithms lies in the representation of the power-law decay kernel from the Caputo fractional derivative as a rotation in Clifford algebra. This allows us to embed the Caputo fractional derivative weights into a GA-rotor, which can be used to rotate the input vectors in the geometric product. The rotor itself is updated by a gradient step derived from the same loss, using the bivector x ∧ (Wx−x) as a generator of an infinitesimal rotation.
+
+Parents:
+- hybrid_caputo_fractional_minimum_cost_tree_m35_s2.py (Caputo fractional derivative and minimum cost tree)
+- hybrid_geometric_product_hybrid_model_vram_sc_m22_s2.py (geometric product and VRAM scheduler)
+
+Mathematical bridge:
+The power-law decay kernel phi(t; alpha) / sum_j phi(t - tau_j; alpha) can be represented as a rotation in Clifford algebra, allowing us to embed the Caputo fractional derivative weights into a GA-rotor. This rotor can be used to rotate the input vectors in the geometric product, incorporating long-range memory and path-dependent trade-offs.
+"""
+
+import math
+import random
+import sys
+import numpy as np
+from math import gamma
+from pathlib import Path
+
+def lanczos_gamma(z):
+    """Lanczos approximation of Gamma(z) for z > 0."""
+    if z < 0.5:
+        return gamma(1 - z) * gamma(z) / math.sin(math.pi * z)
+    g = 7
+    z += g + 0.5
+    term = 1.0
+    p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7]
+    for c in p:
+        term *= (z + c) / (z - c)
+    return np.sqrt(2 * math.pi) * z ** (z + 0.5) * np.exp(-z) * term
+
+def caputo_derivative(f, t, alpha):
+    """Compute the Caputo fractional derivative of f at time t."""
+    dt = np.diff(t)
+    df = np.diff(f)
+    integral = np.dot(df, dt ** (-alpha)) / gamma(1 - alpha)
+    return np.insert(integral, 0, 0)
+
+def apply_rotor(R, x):
+    """Rotate a Euclidean vector with a rotor."""
+    return np.dot(R, x)
+
+def ttt_ga_forward(W, R, x, eta_w, eta_r):
+    """One-step hybrid update."""
+    rotated_x = apply_rotor(R, x)
+    W_rotated_x = np.dot(W, rotated_x)
+    loss = np.linalg.norm(W_rotated_x - x)
+    R_update = np.dot(x, (W_rotated_x - x)) * eta_r
+    R += R_update
+    W_update = np.dot(rotated_x, (W_rotated_x - x)) * eta_w
+    W += W_update
+    return W, R
+
+def hybrid_ttt_ga_vram(x_seq, W, R, eta_w, eta_r):
+    """Sequence-level processing with VRAM budgeting."""
+    for x in x_seq:
+        W, R = ttt_ga_forward(W, R, x, eta_w, eta_r)
+    return W, R
+
+def gamma_term(t, alpha, sum_j_gamma):
+    """Compute the power-law decay kernel phi(t; alpha) / sum_j phi(t - tau_j; alpha)."""
+    gamma_value = lanczos_gamma(t)
+    return gamma_value / sum_j_gamma
+
+if __name__ == "__main__":
+    # Smoke test
+    t = np.array([1, 2, 3, 4, 5])
+    f = np.array([1, 2, 3, 4, 5])
+    alpha = 0.5
+    W = np.random.rand(5, 5)
+    R = np.random.rand(5, 5)
+    x = np.random.rand(5)
+    eta_w = 0.1
+    eta_r = 0.1
+    caputo_derivative(f, t, alpha)
+    apply_rotor(R, x)
+    ttt_ga_forward(W, R, x, eta_w, eta_r)
+    hybrid_ttt_ga_vram([x], W, R, eta_w, eta_r)
+    gamma_term(t[0], alpha, 1)

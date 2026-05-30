@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Abductive DB OS megagate."""
 from __future__ import annotations
-import argparse, json, subprocess
+import argparse, json, subprocess, sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -45,13 +45,13 @@ def child_verdict(name: str, returncode: int, output: str) -> str:
     return verdict
 def command_plan(mode: str) -> list[list[str]]:
     return [
-        ["python3","scripts/abductive_db_os_ledger.py","board","--json"],
-        ["python3","scripts/model_audit_db_adapter.py","--json"],
-        ["python3","scripts/bytewax_db_os_stream_audit.py","--json"],
-        ["python3","scripts/krampuschewing_db_os_adapter.py","--json"],
-        ["python3","scripts/indy_reads_db_os_brief.py","--board","latest","--json"],
-        ["python3","scripts/abductive_next_move_engine.py","--board","latest","--json"],
-        ["python3","scripts/abductive_db_os_health_check.py","--"+mode],
+        [sys.executable,"scripts/abductive_db_os_ledger.py","board","--json"],
+        [sys.executable,"scripts/model_audit_db_adapter.py","--json"],
+        [sys.executable,"scripts/bytewax_db_os_stream_audit.py","--json"],
+        [sys.executable,"scripts/krampuschewing_db_os_adapter.py","--json"],
+        [sys.executable,"scripts/indy_reads_db_os_brief.py","--board","latest","--json"],
+        [sys.executable,"scripts/abductive_next_move_engine.py","--board","latest","--json"],
+        [sys.executable,"scripts/abductive_db_os_health_check.py","--"+mode],
     ]
 def operator_next_smallest_safe_work(verdict: str, checks: list[dict[str, Any]]) -> str:
     model_degraded=any(c.get("name")=="model_audit_db_adapter" and c.get("verdict") in {"FAIL","BLOCKED","DEGRADED"} for c in checks)

@@ -30,6 +30,7 @@ pub enum ProviderKind {
     OpenAi,
     Groq,
     Cohere,
+    Cerebras,
     LucidotaLocal,
 }
 
@@ -94,6 +95,24 @@ const MODEL_REGISTRY: &[(&str, ProviderMetadata)] = &[
             auth_env: "GROQ_API_KEY",
             base_url_env: "GROQ_BASE_URL",
             default_base_url: openai_compat::DEFAULT_GROQ_BASE_URL,
+        },
+    ),
+    (
+        "cerebras",
+        ProviderMetadata {
+            provider: ProviderKind::Cerebras,
+            auth_env: "CEREBRAS_API_KEY",
+            base_url_env: "CEREBRAS_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_CEREBRAS_BASE_URL,
+        },
+    ),
+    (
+        "gpt-oss-120b",
+        ProviderMetadata {
+            provider: ProviderKind::Cerebras,
+            auth_env: "CEREBRAS_API_KEY",
+            base_url_env: "CEREBRAS_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_CEREBRAS_BASE_URL,
         },
     ),
     (
@@ -231,6 +250,10 @@ pub fn resolve_model_alias(model: &str) -> String {
                     "groq" => "llama-3.3-70b-versatile",
                     _ => trimmed,
                 },
+                ProviderKind::Cerebras => match *alias {
+                    "cerebras" => "gpt-oss-120b",
+                    _ => trimmed,
+                },
                 ProviderKind::Cohere => match *alias {
                     "cohere" => "command-a-03-2025",
                     _ => trimmed,
@@ -272,6 +295,14 @@ pub fn metadata_for_model(model: &str) -> Option<ProviderMetadata> {
             default_base_url: openai_compat::DEFAULT_COHERE_BASE_URL,
         });
     }
+    if lower.contains("cerebras") || lower == "gpt-oss-120b" {
+        return Some(ProviderMetadata {
+            provider: ProviderKind::Cerebras,
+            auth_env: "CEREBRAS_API_KEY",
+            base_url_env: "CEREBRAS_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_CEREBRAS_BASE_URL,
+        });
+    }
     if lower.contains("local") || lower.starts_with("mamba7b-") || lower == "luci" {
         return Some(ProviderMetadata {
             provider: ProviderKind::LucidotaLocal,
@@ -299,6 +330,9 @@ pub fn detect_provider_kind(model: &str) -> ProviderKind {
     }
     if openai_compat::has_api_key("COHERE_API_KEY") {
         return ProviderKind::Cohere;
+    }
+    if openai_compat::has_api_key("CEREBRAS_API_KEY") {
+        return ProviderKind::Cerebras;
     }
     if openai_compat::has_api_key("XAI_API_KEY") {
         return ProviderKind::Xai;

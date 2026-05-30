@@ -20,6 +20,7 @@ import re
 import shutil
 import socket
 import subprocess
+import sys
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -133,7 +134,7 @@ def python_bin(args: argparse.Namespace) -> str:
     venv_py = ROOT / ".venv" / "bin" / "python"
     if venv_py.exists():
         return str(venv_py)
-    return shutil.which("python3") or "python3"
+    return shutil.which("python3") or sys.executable
 
 
 def workflow_for(job_kind: str) -> str:

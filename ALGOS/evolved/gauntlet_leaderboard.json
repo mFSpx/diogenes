@@ -1,0 +1,36 @@
+{
+  "total_evaluated": 638,
+  "survivors": 2,
+  "survival_rate": "0.3%",
+  "top_10": [
+    {
+      "score": 6,
+      "novelty": 7,
+      "correctness": 8,
+      "fusion": 6,
+      "utility": 8,
+      "verdict": "This code is a decent but not groundbreaking fusion of two algorithms, with some interesting mathematical ideas but also some implementation issues.",
+      "bright_spot": "The use of the Lanczos approximation for the Gamma function is a nice touch",
+      "is_survivor": true,
+      "file": "/home/mfspx/LUCIDOTA/ALGOS/evolved/gen1/hybrid_caputo_fractional_minimum_cost_tree_m35_s7.py",
+      "gen": 1,
+      "name": "hybrid_caputo_fractional_minimum_cost_tree_m35_s7.py",
+      "evaluated_at": "2026-05-30T00:05:35.014987+00:00"
+    },
+    {
+      "score": 6,
+      "novelty": 4,
+      "correctness": 8,
+      "fusion": 6,
+      "utility": 7,
+      "verdict": "This code is a decent but unremarkable combination of two existing algorithms.",
+      "bright_spot": "The use of the Hoeffding bound to determine the significance of the Gini gain gap is a nice touch.",
+      "is_survivor": true,
+      "file": "/home/mfspx/LUCIDOTA/ALGOS/evolved/gen1/hybrid_hoeffding_tree_gini_coefficient_m13_s6.py",
+      "gen": 1,
+      "name": "hybrid_hoeffding_tree_gini_coefficient_m13_s6.py",
+      "evaluated_at": "2026-05-30T00:05:37.170924+00:00"
+    }
+  ],
+  "generated_at": "2026-05-30T00:07:28.425237+00:00"
+}

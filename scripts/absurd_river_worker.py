@@ -16,6 +16,7 @@ import argparse
 import hashlib
 import json
 import os
+import sys
 import warnings; warnings.filterwarnings("ignore", category=UserWarning, module="transformers")
 import shutil
 import socket
@@ -144,7 +145,7 @@ def python_bin(args: argparse.Namespace) -> str:
     venv_py = ROOT / ".venv" / "bin" / "python"
     if venv_py.exists():
         return str(venv_py)
-    return shutil.which("python3") or "python3"
+    return shutil.which("python3") or sys.executable
 
 
 def workflow_for(job_kind: str) -> str:

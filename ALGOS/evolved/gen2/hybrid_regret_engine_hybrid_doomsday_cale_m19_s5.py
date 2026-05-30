@@ -1,0 +1,104 @@
+# DARWIN HAMMER — match 19, survivor 5
+# gen: 2
+# parent_a: regret_engine.py (gen0)
+# parent_b: hybrid_doomsday_calendar_gini_coefficient_m49_s0.py (gen1)
+# born: 2026-05-29T23:25:18Z
+
+from __future__ import annotations
+import math
+import numpy as np
+import random
+import sys
+import pathlib
+
+"""This module fuses the regret-weighted strategy algorithm (regret_engine.py) 
+    and the doomsday calendar algorithm with Gini coefficient calculation (hybrid_doomsday_calendar_gini_coefficient_m49_s0.py).
+    
+    The mathematical bridge lies in applying the Gini coefficient to a set of time-series data 
+    (e.g., sequence of weekdays over a given period) and using the regret-weighted strategy 
+    to rank actions based on their expected value, cost, and risk. By treating the weekdays 
+    as values in a distribution, we can use the Gini coefficient to quantify the unevenness 
+    of the weekday distribution. This unevenness is then used to inform the regret-weighted 
+    strategy. Specifically, we calculate the Gini coefficient for a set of weekdays and 
+    use this value as a modifier to the expected value of each action in the regret-weighted 
+    strategy.
+"""
+
+@dataclass(frozen=True)
+class MathAction:
+    id: str; expected_value: float; cost: float = 0.0; risk: float = 0.0
+
+@dataclass(frozen=True)
+class MathCounterfactual:
+    action_id: str; outcome_value: float; probability: float = 1.0
+
+def compute_regret_weighted_strategy(actions: list[MathAction], counterfactuals: list[MathCounterfactual]) -> dict[str, float]:
+    if not actions: return {}
+    cf = {c.action_id: c.outcome_value * c.probability for c in counterfactuals}
+    vals = {a.id: a.expected_value - a.cost - a.risk + cf.get(a.id, 0.0) for a in actions}
+    best = max(vals.values())
+    w = {k: math.exp(v - best) for k, v in vals.items()}
+    total = sum(w.values()) or 1.0
+    return {k: v / total for k, v in w.items()}
+
+def rank_actions_by_ev(actions: list[MathAction]) -> list[MathAction]:
+    return sorted(actions, key=lambda a: (-(a.expected_value - a.cost - a.risk), a.id))
+
+def doomsday(year: int, month: int, day: int) -> int:
+    return (dt.date(year, month, day).weekday() + 1) % 7
+
+def gini_coefficient(values: np.ndarray) -> float:
+    xs = np.sort(values)
+    if xs.size == 0 or np.sum(xs) == 0: return 0.0
+    if xs[0] < 0: raise ValueError("values must be non-negative")
+    n = xs.size
+    return np.sum((2 * np.arange(n) - n + 1) * xs) / (n * np.sum(xs))
+
+def weekday_distribution(year: int, month: int, num_days: int) -> np.ndarray:
+    weekdays = [doomsday(year, month, day) for day in range(1, num_days + 1)]
+    weekday_counts = np.zeros(7)
+    for weekday in weekdays:
+        weekday_counts[weekday] += 1
+    return weekday_counts
+
+def gini_weekday(year: int, month: int, num_days: int) -> float:
+    weekday_counts = weekday_distribution(year, month, num_days)
+    return gini_coefficient(weekday_counts)
+
+def simulate_random_weekdays(num_days: int) -> np.ndarray:
+    random_weekdays = np.random.randint(0, 7, num_days)
+    weekday_counts = np.zeros(7)
+    for weekday in random_weekdays:
+        weekday_counts[weekday] += 1
+    return weekday_counts
+
+def gini_random_weekdays(num_days: int) -> float:
+    random_weekday_counts = simulate_random_weekdays(num_days)
+    return gini_coefficient(random_weekday_counts)
+
+def hybrid_gini_regret(year: int, month: int, num_days: int, actions: list[MathAction]) -> dict[str, float]:
+    weekday_counts = weekday_distribution(year, month, num_days)
+    gini = gini_coefficient(weekday_counts)
+    vals = {a.id: a.expected_value - a.cost - a.risk + gini for a in actions}
+    best = max(vals.values())
+    w = {k: math.exp(v - best) for k, v in vals.items()}
+    total = sum(w.values()) or 1.0
+    return {k: v / total for k, v in w.items()}
+
+def hybrid_regret_gini(year: int, month: int, num_days: int, actions: list[MathAction]) -> dict[str, float]:
+    gini = gini_weekday(year, month, num_days)
+    vals = {a.id: a.expected_value - a.cost - a.risk + gini for a in actions}
+    best = max(vals.values())
+    w = {k: math.exp(v - best) for k, v in vals.items()}
+    total = sum(w.values()) or 1.0
+    return {k: v / total for k, v in w.items()}
+
+if __name__ == "__main__":
+    year = 2022
+    month = 6
+    num_days = 30
+    actions = [MathAction(id="action1", expected_value=10.5, cost=5, risk=2),
+               MathAction(id="action2", expected_value=20.5, cost=3, risk=4),
+               MathAction(id="action3", expected_value=8.5, cost=4, risk=1)]
+    print(hybrid_gini_regret(year, month, num_days, actions))
+    print(hybrid_regret_gini(year, month, num_days, actions))

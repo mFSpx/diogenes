@@ -59,9 +59,9 @@ def groq_entities(text):
     out = []
     for e in (arr if isinstance(arr, list) else []):
         if isinstance(e, dict) and e.get("term") and e.get("label"):
-            term = str(e["term"]).upper()[:32]
-            if term in VALID_TERMS:
-                out.append({"term": term, "label": str(e["label"])[:200]})
+            raw = str(e["term"]).upper()[:32]
+            term = TERM_MAP.get(raw, 'ENTITY')   # map generic NER -> valid 75-ontology base term
+            out.append({"term": term, "label": str(e["label"])[:200]})
     return out[:6]
 
 def main():

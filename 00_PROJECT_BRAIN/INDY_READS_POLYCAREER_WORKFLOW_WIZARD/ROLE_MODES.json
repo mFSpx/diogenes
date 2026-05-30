@@ -1,0 +1,187 @@
+{
+  "schema": "lucidota.indy_reads.polycareer_role_modes.v0",
+  "project": "INDY_READs Polycareer Workflow Wizard",
+  "north_star": "boring custody, weird insight, ruthless routing, beautiful reports",
+  "safety_boundary": "lawful, authorized investigation/research/support only; no illegal surveillance, impersonation, unauthorized access, harassment, or operational harm",
+  "modes": [
+    {
+      "id": "INTAKE_CLERK",
+      "mission": "Receive chaotic drops and turn them into stable inventory.",
+      "inputs": [
+        "files",
+        "directories",
+        "archives",
+        "messages",
+        "URLs",
+        "notes"
+      ],
+      "outputs": [
+        "intake manifest",
+        "classification",
+        "custody record",
+        "routing hints"
+      ],
+      "must_do": [
+        "preserve before interpretation",
+        "hash when possible",
+        "detect duplicates",
+        "never crash on malformed input"
+      ]
+    },
+    {
+      "id": "EVIDENCE_VAULT",
+      "mission": "Maintain evidence/custody discipline across raw, extracted, and derived material.",
+      "outputs": [
+        "CAS references",
+        "source reliability notes",
+        "chain-of-custody ledger",
+        "deferred/quarantine list"
+      ]
+    },
+    {
+      "id": "OSINT_ANALYST",
+      "mission": "Open-source investigation with verification, source grading, timelines, and gaps.",
+      "outputs": [
+        "collection plan",
+        "verified facts",
+        "source matrix",
+        "timeline",
+        "pivot queue"
+      ]
+    },
+    {
+      "id": "FRAUD_EXAMINER",
+      "mission": "Organize allegations, transactions, actors, documents, interviews, and findings without declaring guilt.",
+      "outputs": [
+        "fraud incident log",
+        "evidence table",
+        "interview plan",
+        "findings memo"
+      ]
+    },
+    {
+      "id": "LEGAL_CLERK",
+      "mission": "Case-file support: intake, discovery-like review, exhibit organization, deadlines, authorities, and issue lists.",
+      "outputs": [
+        "case chronology",
+        "document index",
+        "issue list",
+        "authorities list",
+        "draft clerk memo"
+      ]
+    },
+    {
+      "id": "NEWS_EDITOR",
+      "mission": "Turn evidence into publishable, fact-checked, risk-aware narrative products.",
+      "outputs": [
+        "story memo",
+        "fact-check table",
+        "right-of-reply list",
+        "corrections log",
+        "publication risk notes"
+      ]
+    },
+    {
+      "id": "RESEARCH_LIBRARIAN",
+      "mission": "Systematic research workflows with inclusion/exclusion criteria and reproducibility notes.",
+      "outputs": [
+        "research question",
+        "screening log",
+        "evidence synthesis",
+        "limitations",
+        "bibliography"
+      ]
+    },
+    {
+      "id": "EXEC_ASSISTANT",
+      "mission": "Calendar/inbox/task routing, meeting prep, follow-up tracking, and briefing.",
+      "outputs": [
+        "daily brief",
+        "follow-up queue",
+        "meeting packet",
+        "deadline alerts"
+      ]
+    },
+    {
+      "id": "MAILROOM_TECH",
+      "mission": "Scan/OCR/index/routing mentality for all incoming material.",
+      "outputs": [
+        "routing slip",
+        "OCR status",
+        "metadata extraction",
+        "owner queue"
+      ]
+    },
+    {
+      "id": "MARKET_ANALYST",
+      "mission": "Analyze markets, competitors, customers, narratives, and strategic positioning.",
+      "outputs": [
+        "market map",
+        "competitor matrix",
+        "TAM/SAM/SOM notes",
+        "positioning memo"
+      ]
+    },
+    {
+      "id": "SALES_STRATEGIST",
+      "mission": "B2B opportunity qualification and stakeholder/action mapping.",
+      "outputs": [
+        "account map",
+        "MEDDICC/MEDDPICC fields",
+        "pain map",
+        "next-best action"
+      ]
+    },
+    {
+      "id": "ACTIVIST_ORGANIZER",
+      "mission": "Power mapping, target analysis, coalition map, message/tactic ladder, and safety-aware escalation.",
+      "outputs": [
+        "power map",
+        "stakeholder grid",
+        "campaign ladder",
+        "message tests"
+      ]
+    },
+    {
+      "id": "RISK_ANALYST",
+      "mission": "Protective/risk management: threats, vulnerabilities, mitigations, triggers, and accountability.",
+      "outputs": [
+        "risk register",
+        "mitigation plan",
+        "trigger list",
+        "after-action review"
+      ]
+    },
+    {
+      "id": "POET_EDITOR",
+      "mission": "Voice, compression, resonance, framing, and memorable language while preserving evidence boundaries.",
+      "outputs": [
+        "headline variants",
+        "voice pass",
+        "narrative spine",
+        "rhetorical risk notes"
+      ]
+    },
+    {
+      "id": "GLOW_HUNTER",
+      "mission": "Find anomalous people, methods, and organizations whose workflows outperform institutions and irritate status quo actors.",
+      "outputs": [
+        "glow profile",
+        "method extraction",
+        "backlash map",
+        "teachability score",
+        "ethical survivability score"
+      ]
+    }
+  ],
+  "glow_score_dimensions": [
+    "anomalous output quality",
+    "unusual method",
+    "repeatability",
+    "receipts/evidence trail",
+    "productive backlash",
+    "teachability",
+    "ethical survivability",
+    "one-person force usefulness"
+  ]
+}

@@ -1,0 +1,66 @@
+# DARWIN HAMMER — match 3659, survivor 2
+# gen: 7
+# parent_a: hybrid_hybrid_hybrid_hybrid_hybrid_hybrid_hybrid_m1449_s3.py (gen6)
+# parent_b: hybrid_hybrid_hybrid_model__hybrid_hard_truth_ma_m23_s3.py (gen3)
+# born: 2026-05-29T23:51:10Z
+
+import numpy as np
+from dataclasses import dataclass
+from typing import List, Tuple
+from pathlib import Path
+import math
+import random
+import sys
+
+FUNCTION_CATS: dict[str, set[str]] = {
+    "pronoun": set("i me my mine myself you your yours yourself he him his she her hers they them their theirs we us our ours".split()),
+    "article": set("a an the".split()),
+    "preposition": set("about above after against around as at before behind below between by during for from in into of off on onto over through to under with without".split()),
+    "auxiliary": set("am are be been being can could did do does had has have is may might must shall should was were will would".split()),
+}
+
+def shannon_entropy(counts: List[int]) -> float:
+    """Shannon entropy of a histogram of counts."""
+    total = sum(counts)
+    if total == 0:
+        return 0.0
+    entropy = 0.0
+    for c in counts:
+        if c > 0:
+            p = c / total
+            entropy -= p * math.log2(p)
+    return entropy
+
+def stylometry_features(text: str) -> List[int]:
+    """Extract stylometry features from text."""
+    vocab = set(text.split())
+    cnt = {w: text.count(w) for w in vocab}
+    total = sum(cnt.values())
+    return [cnt[w] / total for w in vocab]
+
+def ttt_linear_dynamics(W: np.ndarray, X: np.ndarray, alpha: float, beta: float, gamma: float) -> np.ndarray:
+    """TTT-Linear dynamics with weight matrix updates and regularization."""
+    dWdt = -alpha * W + beta * np.dot(X, X.T) - gamma * np.linalg.norm(W) * W
+    return W + dWdt
+
+def hybrid_fusion(text: str, counts: List[int], W: np.ndarray, alpha: float, beta: float, gamma: float) -> Tuple[float, np.ndarray]:
+    """Hybrid fusion of Shannon entropy and TTT-Linear dynamics."""
+    entropy = shannon_entropy(counts)
+    features = stylometry_features(text)
+    X = np.array(features)
+    W = ttt_linear_dynamics(W, X, alpha, beta, gamma)
+    health_score = entropy * np.linalg.norm(W) / (1 + np.linalg.norm(W))
+    return health_score, W
+
+def smoke_test():
+    text = "This is a test sentence."
+    counts = [1, 2, 3, 4, 5]
+    W = np.random.rand(10, 10)
+    alpha = 0.1
+    beta = 0.2
+    gamma = 0.01
+    health_score, W = hybrid_fusion(text, counts, W, alpha, beta, gamma)
+    print(f"Health score: {health_score}")
+
+if __name__ == "__main__":
+    smoke_test()

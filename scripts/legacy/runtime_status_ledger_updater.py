@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -70,7 +71,7 @@ def main() -> int:
         upsert_software(data, "Execution record writer", {"status": "executed", "executed": "yes", "progress": max(75, int(next((e.get('progress',0) for e in data.get('software',[]) if e.get('name')=='Execution record writer'), 0))), "evidence": evidence, "next_action": "Adopt for all worker receipts.", "blockers": "worker_adoption_pending"})
         data["updated_at"] = now()
         STATUS.write_text(json.dumps(data, indent=2, sort_keys=False), encoding="utf-8")
-        subprocess.run(["python3", "scripts/lucidota_status_ledger.py", "--render-html"], cwd=ROOT, check=False)
+        subprocess.run([sys.executable, "scripts/lucidota_status_ledger.py", "--render-html"], cwd=ROOT, check=False)
         report["files_written"] = ["05_OUTPUTS/status_ledger.json", "00_PROJECT_BRAIN/STATUS_LEDGER.md"]
     out = write_report("execute" if args.execute else "dry_run", report)
     print(f"STATUS_FACTS_EVIDENCE={rel(out)}")

@@ -1,0 +1,25 @@
+{
+  "rounds": [
+    {
+      "round": 1,
+      "matches": 394,
+      "survivors": 824,
+      "pool_size": 788
+    },
+    {
+      "round": 2,
+      "matches": 806,
+      "survivors": 1475,
+      "pool_size": 1612
+    },
+    {
+      "round": 3,
+      "matches": 1543,
+      "survivors": 3259,
+      "pool_size": 3087
+    }
+  ],
+  "total_survivors": 5558,
+  "total_matches": 2743,
+  "started": "2026-05-29T23:26:08Z"
+}

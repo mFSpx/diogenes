@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ABSURD abductive megagate."""
 from __future__ import annotations
-import argparse, json, subprocess
+import argparse, json, subprocess, sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -43,13 +43,13 @@ def write_json(path: Path, payload: dict[str, Any]): path.parent.mkdir(parents=T
 def main() -> int:
     ap=argparse.ArgumentParser(); ap.add_argument("--fast", action="store_true"); ap.add_argument("--daily", action="store_true"); args=ap.parse_args(); mode="daily" if args.daily else "fast"
     started=now(); commands=[
-        ["python3","scripts/absurd_abductive_ledger.py","board","--json"],
-        ["python3","scripts/model_audit_absurd_adapter.py","--json"],
-        ["python3","scripts/bytewax_absurd_stream_audit.py","--json"],
-        ["python3","scripts/krampuschewing_absurd_adapter.py","--json"],
-        ["python3","scripts/indy_reads_absurd_brief.py","--board","latest","--json"],
-        ["python3","scripts/absurd_next_move_engine.py","--board","latest","--json"],
-        ["python3","scripts/absurd_health_check.py","--"+mode],
+        [sys.executable,"scripts/absurd_abductive_ledger.py","board","--json"],
+        [sys.executable,"scripts/model_audit_absurd_adapter.py","--json"],
+        [sys.executable,"scripts/bytewax_absurd_stream_audit.py","--json"],
+        [sys.executable,"scripts/krampuschewing_absurd_adapter.py","--json"],
+        [sys.executable,"scripts/indy_reads_absurd_brief.py","--board","latest","--json"],
+        [sys.executable,"scripts/absurd_next_move_engine.py","--board","latest","--json"],
+        [sys.executable,"scripts/absurd_health_check.py","--"+mode],
     ]
     results=[]; checks=[]; receipts=[]; hard=[]
     for cmd in commands:

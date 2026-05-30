@@ -18,6 +18,9 @@ start_server() {
 }
 
 LLAMA="$ROOT/01_REPOS/llama.cpp/build-cuda/bin/llama-server"
+# build-cuda llama-server dynamically links libcudart.so.12 even for CPU (-ngl 0) lanes;
+# without this the RAM/CPU lanes (mamba_ram, deepseek) die on load. Root-cause fix.
+export LD_LIBRARY_PATH="$ROOT/01_REPOS/llama.cpp/build-cuda/bin:/usr/local/lib/ollama/cuda_v12:${LD_LIBRARY_PATH:-}"
 start_server deepseek 8080 "$ROOT/04_RUNTIME/inference_os/deepseek_q4.pid" "$ROOT/04_RUNTIME/inference_os/deepseek_q4_llama_server.log" \
   "$ROOT/scripts/lucidota_start_deepseek_llama.sh"
 start_server mamba7b_ram 8081 "$ROOT/04_RUNTIME/inference_os/mamba7b_ternary.pid" "$ROOT/04_RUNTIME/inference_os/mamba7b_ternary_cpu_llama_server.log" \

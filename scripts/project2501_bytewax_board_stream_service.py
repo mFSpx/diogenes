@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -41,7 +42,7 @@ After=default.target
 Type=simple
 WorkingDirectory={ROOT}
 Environment=PROJECT2501_BOARD_STREAM_INTERVAL={interval}
-ExecStart=/usr/bin/bash -lc 'while true; do python3 scripts/project2501_bytewax_board_stream.py once --execute --live-cursor --limit {limit} --json; sleep "${{PROJECT2501_BOARD_STREAM_INTERVAL:-{interval}}}"; done'
+ExecStart=/usr/bin/bash -lc 'while true; do {sys.executable} scripts/project2501_bytewax_board_stream.py once --execute --live-cursor --limit {limit} --json; sleep "${{PROJECT2501_BOARD_STREAM_INTERVAL:-{interval}}}"; done'
 Restart=always
 RestartSec=5s
 

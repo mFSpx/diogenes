@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -159,7 +160,7 @@ def record(args: argparse.Namespace) -> int:
                     )
             conn.commit()
         subprocess.run([
-            "python3", "scripts/lucidota_status_ledger.py",
+            sys.executable, "scripts/lucidota_status_ledger.py",
             "--set", "Chrono-Ledger daemon/service",
             "--status", "verified" if active and enabled and facts["ranking_violations"] == 0 else "blocked",
             "--progress", "100" if active and enabled and facts["ranking_violations"] == 0 else "80",

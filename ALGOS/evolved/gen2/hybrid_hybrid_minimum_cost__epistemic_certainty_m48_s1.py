@@ -1,0 +1,115 @@
+# DARWIN HAMMER — match 48, survivor 1
+# gen: 2
+# parent_a: hybrid_minimum_cost_tree_bayes_update_m6_s0.py (gen1)
+# parent_b: epistemic_certainty.py (gen0)
+# born: 2026-05-29T23:23:58Z
+
+"""
+This module represents a hybrid algorithm, combining the principles of minimum-cost tree scoring 
+from hybrid_minimum_cost_tree_bayes_update_m6_s0.py and epistemic certainty computation from epistemic_certainty.py.
+The mathematical bridge between these two systems is established by incorporating the epistemic certainty 
+flags into the edge weights of the minimum-cost tree, allowing the tree to adapt and re-weight its edges 
+based on both physical distances and epistemic certainty.
+"""
+
+import math
+import numpy as np
+import random
+import sys
+import pathlib
+
+Point = tuple[float, float]
+Edge = tuple[str, str]
+
+EPISTEMIC_FLAGS: tuple[str, ...] = ("FACT", "PROBABLE", "POSSIBLE", "BULLSHIT", "SURE_MAYBE")
+
+def length(a: Point, b: Point) -> float:
+    """Calculate the Euclidean distance between two points."""
+    return math.hypot(a[0] - b[0], a[1] - b[1])
+
+def bayes_marginal(prior: float, likelihood: float, false_positive: float) -> float:
+    """Compute the marginal probability for Bayesian update."""
+    if not all(0 <= x <= 1 for x in (prior, likelihood, false_positive)):
+        raise ValueError("probabilities must be in [0,1]")
+    return likelihood * prior + false_positive * (1.0 - prior)
+
+def bayes_update(prior: float, likelihood: float, marginal: float) -> float:
+    """Perform Bayesian update on the prior probability."""
+    if marginal <= 0:
+        raise ValueError("P(E) must be > 0")
+    return prior * likelihood / marginal
+
+def certainty(label: str, *, confidence_bps: int, authority_class: str, rationale: str, evidence_refs: tuple[str, ...] = ()):
+    """Create an epistemic certainty flag."""
+    if label not in EPISTEMIC_FLAGS:
+        raise ValueError(f"unknown epistemic flag: {label!r}")
+    if not 0 <= int(confidence_bps) <= 10000:
+        raise ValueError("confidence_bps must be 0..10000")
+    return {
+        "label": label,
+        "confidence_bps": int(confidence_bps),
+        "authority_class": authority_class,
+        "rationale": rationale,
+        "evidence_refs": evidence_refs,
+    }
+
+def hybrid_tree_cost(nodes: dict[str, Point], edges: list[Edge], root: str, 
+                     prior_probabilities: dict[str, float], likelihoods: dict[Edge, float], 
+                     false_positives: dict[Edge, float], certainty_flags: dict[Edge, dict], path_weight: float = 0.2) -> float:
+    """Calculate the cost of the tree incorporating Bayesian update in edge weights and epistemic certainty flags."""
+    adj: dict[str, list[str]] = {n: [] for n in nodes}
+    material = 0.0
+    bayes_weights = {}
+    for a, b in edges:
+        adj[a].append(b); adj[b].append(a)
+        marginal = bayes_marginal(prior_probabilities[a], likelihoods[(a, b)], false_positives[(a, b)])
+        updated_weight = bayes_update(prior_probabilities[a], likelihoods[(a, b)], marginal)
+        bayes_weights[(a, b)] = updated_weight
+        material += length(nodes[a], nodes[b]) * updated_weight * (certainty_flags[(a, b)]["confidence_bps"] / 10000)
+    dist = {root: 0.0}
+    stack = [root]
+    while stack:
+        a = stack.pop()
+        for b in adj[a]:
+            if b not in dist:
+                dist[b] = dist[a] + length(nodes[a], nodes[b]) * bayes_weights.get((a, b), 1.0) * (certainty_flags.get((a, b), {"confidence_bps": 10000})["confidence_bps"] / 10000)
+                stack.append(b)
+    return material + path_weight * sum(dist.values())
+
+def generate_random_tree(num_nodes: int, num_edges: int) -> (dict[str, Point], list[Edge], str):
+    """Generate a random tree structure for testing."""
+    nodes = {f"node_{i}": (random.uniform(0, 10), random.uniform(0, 10)) for i in range(num_nodes)}
+    edges = []
+    for _ in range(num_edges):
+        a, b = random.sample(list(nodes.keys()), 2)
+        edges.append((a, b))
+    root = random.choice(list(nodes.keys()))
+    return nodes, edges, root
+
+def test_hybrid_tree() -> None:
+    """Smoke test for the hybrid tree cost function."""
+    nodes, edges, root = generate_random_tree(10, 15)
+    prior_probabilities = {node: random.uniform(0, 1) for node in nodes}
+    likelihoods = {(a, b): random.uniform(0, 1) for a, b in edges}
+    false_positives = {(a, b): random.uniform(0, 1) for a, b in edges}
+    certainty_flags = {(a, b): certainty("FACT", confidence_bps=10000, authority_class="test", rationale="test") for a, b in edges}
+    cost = hybrid_tree_cost(nodes, edges, root, prior_probabilities, likelihoods, false_positives, certainty_flags)
+    print(f"Hybrid tree cost: {cost}")
+
+def calculate_epistemic_certainty(nodes: dict[str, Point], edges: list[Edge], certainty_flags: dict[Edge, dict]) -> float:
+    """Calculate the average epistemic certainty of the tree."""
+    total_certainty = 0.0
+    for a, b in edges:
+        total_certainty += certainty_flags[(a, b)]["confidence_bps"]
+    return total_certainty / len(edges)
+
+def test_epistemic_certainty() -> None:
+    """Smoke test for the epistemic certainty calculation."""
+    nodes, edges, _ = generate_random_tree(10, 15)
+    certainty_flags = {(a, b): certainty("FACT", confidence_bps=10000, authority_class="test", rationale="test") for a, b in edges}
+    avg_certainty = calculate_epistemic_certainty(nodes, edges, certainty_flags)
+    print(f"Average epistemic certainty: {avg_certainty}")
+
+if __name__ == "__main__":
+    test_hybrid_tree()
+    test_epistemic_certainty()

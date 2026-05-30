@@ -114,9 +114,9 @@
     "model_invocation_audit": {
       "canonical_graph_writes_performed": false,
       "invocation_count": 0,
-      "markdown": "/tmp/pytest-of-mfspx/pytest-361/test_partial_tail_block_waits_0/model_invocation_audit_20260527T032006912394Z.md",
+      "markdown": "/tmp/claude-1000/pytest-of-mfspx/pytest-45/test_partial_tail_block_waits_0/model_invocation_audit_20260529T230242197590Z.md",
       "missing_dedicated_model_audit_blocks": 1,
-      "source_receipt": "/tmp/pytest-of-mfspx/pytest-361/test_partial_tail_block_waits_0/model_invocation_audit_20260527T032006912394Z.json",
+      "source_receipt": "/tmp/claude-1000/pytest-of-mfspx/pytest-45/test_partial_tail_block_waits_0/model_invocation_audit_20260529T230242197590Z.json",
       "status": "FAIL",
       "verdict": "FAIL"
     },
@@ -306,15 +306,15 @@
     "working_reality": {
       "canonical_graph_writes_performed": false,
       "execute_performed": false,
-      "generated_at": "2026-05-28T08:24:42.061306Z",
-      "receipt_path": "05_OUTPUTS/working_reality/working_reality_record_20260528T082442061286Z.json",
+      "generated_at": "2026-05-29T23:01:58.865946Z",
+      "receipt_path": "05_OUTPUTS/working_reality/working_reality_record_20260529T230158865894Z.json",
       "record": {
         "canonical_graph_writes_performed": false,
         "contradiction_refs": [],
         "evidence": [
           "receipt://05_OUTPUTS/example.json"
         ],
-        "generated_at": "2026-05-28T08:24:42.061270Z",
+        "generated_at": "2026-05-29T23:01:58.865853Z",
         "hypothesis": "Ontology is map, not territory.",
         "layers": {
           "evidence": {
