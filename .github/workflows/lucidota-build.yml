@@ -1,0 +1,377 @@
+name: LUCIDOTA CI/CD Build Pipeline
+
+on:
+  push:
+    branches: [main, diogenes/main]
+    paths-ignore:
+      - 'KRAMPUSCHEWING/**'
+      - '05_OUTPUTS/**'
+      - '04_RUNTIME/**'
+      - 'BOOKS/**'
+      - '**.md'
+      - '**.txt'
+  pull_request:
+    branches: [main, diogenes/main]
+    paths-ignore:
+      - 'KRAMPUSCHEWING/**'
+      - '05_OUTPUTS/**'
+      - '04_RUNTIME/**'
+      - 'BOOKS/**'
+      - '**.md'
+      - '**.txt'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Build target'
+        required: false
+        default: 'all'
+      force-full:
+        description: 'Force full build (including CUDA)'
+        required: false
+        default: 'false'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ===========================================================================
+  # Build Matrix Configuration
+  # ===========================================================================
+  build-config:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          # Define build matrix based on event and inputs
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.force-full }}" = "true" ]; then
+            MATRIX='{"include":[{"os":"ubuntu-latest","python":"3.12","target":"full"}]}'
+          elif [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            MATRIX='{"include":[{"os":"ubuntu-latest","python":"3.12","target":"full"}]}'
+          else
+            MATRIX='{"include":[{"os":"ubuntu-latest","python":"3.12","target":"core"}]}'
+          fi
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+  # ===========================================================================
+  # Python Environment and Core Build
+  # ===========================================================================
+  build-core:
+    needs: build-config
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJSON(needs.build-config.outputs.matrix) }}
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: mfspx
+          POSTGRES_DB: lucidota_state
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: 'pip'
+          cache-dependency-path: 'requirements-runtime.txt'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            ccache \
+            git \
+            curl \
+            jq \
+            sqlite3 \
+            ca-certificates
+
+      - name: Create virtual environment
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip setuptools wheel
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('requirements-runtime.txt') }}
+          restore-keys: |
+            pip-
+
+      - name: Install dependencies
+        run: |
+          .venv/bin/pip install -r requirements-runtime.txt
+          .venv/bin/pip install pytest pytest-cov pytest-xdist
+          .venv/bin/pip install -e 01_REPOS/doggystyle
+
+      - name: Install DBOS kernel dependencies
+        run: |
+          cd 01_REPOS/doggystyle
+          python -m venv .venv
+          .venv/bin/pip install -e .[test]
+
+      - name: Run Python tests
+        env:
+          DBOS_SYSTEM_DATABASE_URL: postgresql://mfspx@localhost/lucidota_state
+        run: |
+          .venv/bin/python -m pytest tests/ -x -v --tb=short -n auto --timeout=60 \
+            --ignore=tests/poison_drop \
+            --ignore=tests/test_abductive \
+            --ignore=tests/test_absurd \
+            --ignore=tests/test_bytewax \
+            --ignore=tests/test_hop \
+            -k "not test_full_system_soak_audit and not test_resource_governor"
+
+      - name: Run smoke tests
+        env:
+          DBOS_SYSTEM_DATABASE_URL: postgresql://mfspx@localhost/lucidota_state
+        run: |
+          .venv/bin/python scripts/lucidota_runtime_smoke.py
+          .venv/bin/python scripts/lucidota_kernel_api_smoke.py
+          .venv/bin/python scripts/lucidota_model_artifact_readiness.py
+          .venv/bin/python scripts/lucidota_dbos_smoke.py
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            test-results/
+            .pytest_cache/
+          retention-days: 7
+
+  # ===========================================================================
+  # CUDA Build (Separate job for GPU requirements)
+  # ===========================================================================
+  build-cuda:
+    needs: [build-config, build-core]
+    if: ${{ contains(needs.build-config.outputs.matrix, 'full') }}
+    runs-on: [self-hosted, linux, GPU]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install CUDA dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            ccache \
+            nvidia-cuda-toolkit
+
+      - name: Build llama.cpp with CUDA
+        run: |
+          LLAMA_CPP=01_REPOS/prismml_llama.cpp
+          BUILD_DIR=$LLAMA_CPP/build-cuda
+          mkdir -p $BUILD_DIR
+          cd $LLAMA_CPP
+          cmake -S . -B $BUILD_DIR -G Ninja \
+            -DGGML_CUDA=ON \
+            -DGGML_CUDA_FORCE_MMQ=ON \
+            -DCMAKE_CUDA_ARCHITECTURES=75 \
+            -DGGML_CCACHE=ON \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build $BUILD_DIR --target llama-server llama-cli -j$(nproc)
+          $BUILD_DIR/bin/llama-server --version
+
+      - name: Upload CUDA build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cuda-build
+          path: 01_REPOS/prismml_llama.cpp/build-cuda/
+          retention-days: 7
+
+  # ===========================================================================
+  # Rust Build (CLAW)
+  # ===========================================================================
+  build-rust:
+    needs: [build-config, build-core]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: rustfmt, clippy
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry/
+            ~/.cargo/git/
+            target/
+          key: rust-${{ hashFiles('01_REPOS/claudecode/rust/Cargo.toml') }}
+          restore-keys: rust-
+
+      - name: Build CLAW
+        run: |
+          cd 01_REPOS/claudecode/rust
+          cargo build --release -p claw-cli
+          cargo test --workspace
+
+      - name: Upload Rust build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-build
+          path: 01_REPOS/claudecode/rust/target/release/
+          retention-days: 7
+
+  # ===========================================================================
+  # Docker Build (Phantom)
+  # ===========================================================================
+  build-docker:
+    needs: [build-config, build-core]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build Phantom Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: phantom
+          file: phantom/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            lucidota/phantom:latest
+            lucidota/phantom:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ===========================================================================
+  # Full System Integration Test
+  # ===========================================================================
+  integration-test:
+    needs: [build-core, build-cuda, build-rust, build-docker]
+    if: ${{ github.event_name != 'pull_request' || github.base_ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: mfspx
+          POSTGRES_DB: lucidota_state
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install -r requirements-runtime.txt pytest
+
+      - name: Run Diogenes check (subset)
+        env:
+          DBOS_SYSTEM_DATABASE_URL: postgresql://mfspx@localhost/lucidota_state
+        run: |
+          # Run a subset of the full check_diogenes.sh for CI
+          .venv/bin/python scripts/lucidota_runtime_smoke.py
+          .venv/bin/python scripts/lucidota_kernel_api_smoke.py
+          .venv/bin/python scripts/lucidota_dbos_smoke.py
+          .venv/bin/python scripts/lucidota_model_governor_smoke.py
+
+  # ===========================================================================
+  # Deployment
+  # ===========================================================================
+  deploy:
+    needs: [integration-test]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to production
+        run: |
+          echo "Deployment would happen here"
+          # Add actual deployment commands
+          # e.g., kubectl apply, docker stack deploy, etc.
+
+  # ===========================================================================
+  # Documentation and Reports
+  # ===========================================================================
+  docs:
+    needs: build-core
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate build report
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install -r requirements-runtime.txt
+          .venv/bin/python build_automation/build_report.py
+
+      - name: Upload build report
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-report
+          path: build_automation/report.md
+          retention-days: 30
