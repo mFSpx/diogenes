@@ -43,7 +43,14 @@ TMP.mkdir(parents=True, exist_ok=True)
 
 TEXT_EXT = {'.md', '.markdown', '.txt', '.text', '.json', '.jsonl', '.ndjson', '.csv', '.tsv',
             '.yaml', '.yml', '.html', '.htm', '.xml', '.log', '.rst', '.tex', '.srt', '.vtt',
-            '.ini', '.cfg', '.toml', '.py', '.js', '.ts', '.rs', '.c', '.h', '.cpp', '.go', '.sh'}
+            '.ini', '.cfg', '.toml', '.py', '.js', '.ts', '.rs', '.c', '.h', '.cpp', '.go', '.sh',
+            # email + office text exports
+            '.eml', '.mbox', '.msg', '.vcf', '.ics',
+            # data formats
+            '.sql', '.r', '.rb', '.lua', '.swift', '.kt', '.scala', '.java',
+            # docs
+            '.adoc', '.org', '.wiki', '.nfo', '.me',
+            }
 ARCHIVE_EXT = {'.zip', '.tar', '.gz', '.tgz', '.bz2', '.tbz', '.xz', '.txz', '.7z', '.rar', '.zst'}
 IMAGE_EXT = {'.png', '.jpg', '.jpeg', '.gif', '.tiff', '.tif', '.bmp', '.webp'}
 # fast = text embedded locally; ocr = images transcribed via GROQ (cloud offload) then embedded.

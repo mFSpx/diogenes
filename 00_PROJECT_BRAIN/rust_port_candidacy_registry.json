@@ -1,0 +1,75 @@
+{
+  "_meta": {
+    "schema_version": "1",
+    "law": "Stable Python lanes MUST be registered here as Rust-port candidates (CLAUDE.md doctrine). Do not delete entries — superseded entries get status=superseded.",
+    "last_updated": "2026-05-29"
+  },
+  "candidates": [
+    {
+      "script": "scripts/corpus_groq_extractor.py",
+      "priority": "p0",
+      "reason": "hot path: every corpus_chunk write goes through embed_text (BGE HTTP round-robin) + write_chunk (psycopg). ThreadPoolExecutor + threading.Lock already signal the pressure. OOM risk is managed by Python advisory env caps — Rust would own the ceiling natively. Highest throughput leverage.",
+      "rust_target": "lucidota_etl crate / corpus_ingest module",
+      "blocking": [
+        "DB connection pool (psycopg -> sqlx)",
+        "BGE batch HTTP client (reqwest + async round-robin)",
+        "CAS streaming reader (cap enforced in type system, not env var)",
+        "pgvector write (sqlx + pgvector-rust)"
+      ],
+      "status": "registered_candidate"
+    },
+    {
+      "script": "scripts/absurd_queue_spine.py",
+      "priority": "p0",
+      "reason": "safety-critical custody layer: FOR UPDATE SKIP LOCKED dequeue, worker-contract gating, dead-letter writes. The queue spine is the authority boundary between operator intent and all downstream workers. Python GIL + startup latency add unnecessary jitter to every job cycle. Belongs in Rust alongside the rest of the custody/authority stack.",
+      "rust_target": "lucidota_etl crate / absurd_queue module (or standalone absurd-spine binary)",
+      "blocking": [
+        "psycopg -> sqlx async",
+        "absurd_worker_contracts.py gate logic -> Rust enum match",
+        "dead-letter + event schema mirroring in sqlx types",
+        "FOR UPDATE SKIP LOCKED idiom in sqlx"
+      ],
+      "status": "registered_candidate"
+    },
+    {
+      "script": "scripts/lucidota_guvna.py",
+      "priority": "p1",
+      "reason": "30s daemon loop reading /proc/pressure/{cpu,memory,io} + /proc/meminfo + nvidia-smi, deciding pressure rung, writing runtime_status_fact + governor_action to DB, actuating BGE fleet. Stable API (rung ladder is locked). A daemon this close to kernel telemetry and fleet actuation should be Rust: no GC pauses on the decision loop, direct /proc reads, typed rung enum.",
+      "rust_target": "lucidota_etl crate / governor module (or standalone guvna binary)",
+      "blocking": [
+        "psycopg2 -> sqlx (state DB writes)",
+        "/proc/pressure parser -> Rust (trivial)",
+        "nvidia-smi subprocess -> nvml-rs or raw sysfs",
+        "fleet actuation (shell script call -> Command::new)"
+      ],
+      "status": "registered_candidate"
+    },
+    {
+      "script": "scripts/corpus_embed_fill.py",
+      "priority": "p1",
+      "reason": "batch-fill hot path for NULL embeddings: reads corpus_chunk rows in batches, fans out to BGE fleet via HTTP, execute_batch UPDATE back to storage DB. 28x speedup already proven at batch=32 vs single. Threading lock + random endpoint selection are load-bearing. Rust async (tokio + reqwest) would remove GIL contention on the HTTP fan-out and give typed batch control.",
+      "rust_target": "lucidota_etl crate / corpus_embed_fill module",
+      "blocking": [
+        "psycopg2 -> sqlx (storage DB)",
+        "reqwest async batch HTTP to BGE fleet",
+        "pgvector UPDATE (sqlx + pgvector-rust)",
+        "batch sizing + backpressure in async stream"
+      ],
+      "status": "registered_candidate"
+    },
+    {
+      "script": "scripts/krampus_archive_crush.py",
+      "priority": "p2",
+      "reason": "streaming recursive archive ingest (~76GB corpus: zips, tars, nested). Bounded producer->Queue->worker pipeline keeps memory flat in Python, but the streaming + hashing + chunking + embed fan-out chain is exactly the Rust sweet spot: zero-copy streaming, typed archive enum (zip/tar/gz/7z), native backpressure via tokio channels. Episodic (not continuous) so p2 vs p0/p1 above.",
+      "rust_target": "lucidota_etl crate / krampus_ingest module",
+      "blocking": [
+        "zip/tar/gz streaming (zip-rs, tar-rs, flate2)",
+        "reqwest async BGE embed calls",
+        "psycopg -> sqlx corpus_chunk sink",
+        "slow-lane JSONL writer (std::fs + serde_json)",
+        "recursive archive depth guard (type-safe depth counter)"
+      ],
+      "status": "registered_candidate"
+    }
+  ]
+}

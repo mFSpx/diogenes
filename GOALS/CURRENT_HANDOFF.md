@@ -2,41 +2,50 @@
 
 "Save This Prompt, Pass on this Handoff:"
 
-- Mode: **OPUS_ARCHITECT_ORCHESTRATOR**. Opus plans/orders/audits receipts; **Groq (unlimited) + Cerebras ($10) + local models + scripts = the hands.** Claude budget is SCARCE (~$134 cap, heavily spent this session) → do NOT spawn large Claude/Sonnet agent fan-outs; route bulk to Groq/Cerebras.
-- Generated: `2026-05-29` (crash-recovery + DIOGENES completion session).
+- Mode: **SONNET_BUILD**. Sonnet designs + builds; Groq = bulk hands; Opus = emergency only.
+- Generated: `2026-05-30` (wave-2 complete + wave-3 major progress).
 
-## LIVE NOW (running autonomously, box-safe)
-- **Archive text crush** → `lucidota_korpus.corpus_chunk` (the 76GB KRAMPUSCHEWING bulk; recursive, streaming, capped). `scripts/krampus_archive_crush.py --root KRAMPUSCHEWING` under `scripts/lucidota_capped_run.sh`.
-- **corpus→graph drain loop** (Groq hands) → `lucidota_go.staging_packet` hypothesis field. `scripts/corpus_to_graph_loop.sh` (calls `scripts/corpus_to_graph.py`).
-- **BGE embed fleet** = 4 servers :8101-8104, `--ubatch 1024` (lean; 2048 was a RAM hog). `scripts/lucidota_bge_fleet.sh`.
-- **RAM watchdog** (suspend-on-pressure, never-cull) `scripts/lucidota_ram_watchdog.sh`. Box held ~2-3G avail throughout; never OOM'd.
+## WAVE-2 COMPLETE (all receipted)
+- **WO-5 ✓** `percyphon_village` = 5000 rows × 128 slots. Seeder extended with synthetic seed generator.
+- **WO-6 ✓** MISTLETOE: `ALGOS/mistletoe_graph.py` PageRank/centrality, read-only.
+- **WO-7 ✓** Cerebras patch: `openai_compat.rs` provider wired (`gpt-oss-120b` alias).
+- **WO-8 ✓** `krampus_stage_worker`: repointed to `lucidota_go.staging_packet`.
 
-## RECEIPTS (live DB facts, not prose)
-- `corpus_chunk` ~1372 rows and climbing. `staging_packet` corpus candidates (parser_name='corpus_to_graph') climbing from 0.
-- **Ingest→graph break CLOSED**: `scripts/corpus_to_graph.py` proven (staging_packet 130→142 in receipt run). Receipt: `05_OUTPUTS/corpus_to_graph_receipt.json`. Graph ontology validation is LIVE (off-ontology terms flagged `needs_repair`).
-- OOM root cause + guardrail: `scripts/lucidota_capped_run.sh` (hard cgroup MemoryMax, no sudo) — proven kills a runaway job in-cgroup without touching the box. Secrets moved OUT of /tmp → `~/.config/lucidota/secrets.env` (0600); `groq_env.py` no longer reads /tmp.
+## WAVE-3 COMPLETE THIS SESSION
+- **Schemas ✓** 045/046/050/094 applied. 094 had bad `authority_class` type → patched to text+CHECK.
+- **governor_action table ✓** `lucidota_control.governor_action` in lucidota_state.
+- **Governor daemon ✓** `lucidota_guvna.py` Phase-1: daemon loop (30s), DB logging, rung→ABSURD advisory via `runtime_status_fact`. Running. Log: `04_RUNTIME/guvna_daemon.log`.
+- **Write-barrier triggers ✓** `graph_item_write_barrier_tg` (blocks approved-status without command_envelope_uuid) + `graph_edge_write_barrier_tg` (blocks NULL operator_uuid). Tested + live.
+- **LTC ✓** `ALGOS/ltc.py` — Liquid Time-Constant Networks, Euler sub-stepping, feature_hash, evidence_intensity. LUCIDOTA role: temporal evidence stream processor.
+- **JEPA/diffusion_forcing roles ✓** LUCIDOTA role declarations added to both docstrings.
+- **Koopman signal refined ✓** `scripts/diffusion_pack_wire.py` v2 — primary signal is 5-D governor PSI telemetry (cpu/mem/io/mem_avail/fleet), not count-rate. Falls back to count-rate if governor series too short.
+- **ORNAMENT revival ✓** 75 packs copied to `BOOKS/ontology_packs/ornament/`. Loader: `scripts/ornament_pack_loader.py` — 766 staging candidates upserted (signals→ENTITY/GRIP/SNARE, clusters→EVENT, hypotheses→CLAIM).
+- **DIOGENES chat ✓** `scripts/diogenes_chat.py` — SANTA port: Groq HTTP, LUCIDOTA manifest (live DB facts), 04_RUNTIME/diogenes_sessions/ log. Tested with Groq.
 
-## CORRECTED INTEL (decomposition workflow, live-DB verified — OPUS_BRIEFING §8/§17 STALE)
-- ABSURD spine, graph promotion gate, `staging_packet`(130), `term_registry`(**75**, target hit), chrono `temporal_claim` = **ALL APPLIED**. "92 unapplied / 45 terms / 18,627 staged" is a **phantom** — do not redo.
-- Real narrow gaps: `graph_staging_candidates` (phantom table — the break), `governor_action` table MISSING, NO write-barrier triggers attached, schemas **045/046/050/094** genuinely unapplied, `corpus_chunk` was a dead-end (now bridged), `claw` starts neither model stack nor governor.
+## LIVE NOW (running autonomously)
+- **Archive text crush** → `lucidota_korpus.corpus_chunk` (3216+, growing).
+- **corpus→graph drain loop** → `lucidota_go.staging_packet` (10519+, growing).
+- **BGE embed fleet** = 4 servers :8101-8104.
+- **RAM watchdog** (suspend-on-pressure, never-cull). RAM avail ~2950MB.
+- **Governor daemon** 30s interval, rung=1 (IO/CPU pressure from crushes), advisory=3 workers.
 
-## CANON DOCS written this session
-- `00_PROJECT_BRAIN/DIOGENES_OPERATIONAL_SPEC.md` (operator north-star), `00_PROJECT_BRAIN/DIOGENES_MASTER_ROADMAP.md` (8-subsystem grounded roadmap + %-ready + stubs register).
+## DB RECEIPTS (live)
+```sql
+-- Quick resume check:
+psql lucidota_storage -Atc "SELECT count(*) FROM lucidota_korpus.corpus_chunk; SELECT count(*) FROM lucidota_go.staging_packet; SELECT count(*) FROM lucidota_go.percyphon_village;"
+psql lucidota_state -Atc "SELECT fact_key,fact_value FROM lucidota_control.runtime_status_fact WHERE subsystem='governor';"
+```
 
-## WORK ORDERS (for hands — Groq/Cerebras/local; Opus audits receipts)
-- **WO-1** Fix `scripts/krampus_stage_worker.py`: repoint `lucidota_korpus.graph_staging_candidates` → `lucidota_go.staging_packet` (same target the bridge uses); add `validate_worker_contract()` at dequeue (3 krampus workers skip it). Receipt: watcher-fed file → staging_packet row.
-- **WO-2** Term-mapping (deterministic alias map, Groq/local): Groq generic terms (PERSON/ORG/DATE/...) → the 75 `term_registry` terms so candidates land `pending` not `needs_repair`. Receipt: corpus staging_packet rows status=pending ≥ X%.
-- **WO-3** 100% disk: wire the `--walk` branch in `krampus_archive_crush.py` (arg added, handler TODO) + run on loose corpus dirs (`luci/`, `Documents/`, `Downloads/`, `Pictures/`). Receipt: corpus_chunk covers loose files.
-- **WO-4** Governor Phase-0 `scripts/lucidota_guvna.py` (reuse capped_run/bge_fleet/watchdog/river_governor; PSI+cgroup+NVML read → never-cull ladder → fleet-width/MemoryHigh actuators). Receipt: start 6-fleet+chat-stack, governor drains fleet 6→2, `memory.events.oom_kill==0`.
-- **WO-5** `claw`/rig.rs: wire Groq/Cohere/Cerebras/Claude + local endpoints via rig.rs; claw starts model stack + governor. Receipt: claw round-trips each provider + governor live.
-- **WO-6** `governor_action` table + write-barrier triggers on canonical tables + apply schemas 045/046/050/094.
-- **WO-7** Percyphon: fix `ALGOS/percyphon.py` truncation FIRST; build 5000×128 generative village table + signal-derived relevance + comms/identity/proxy/burn filter.
-- **WO-8** Capability suite revival per `OPUS_BRIEFING.md` §14: ORNAMENT/DRE/SNOWBALL/MISTLETOE/SANTA + 22 doc-gen templates + chrono/hypertimeline fill + claims-require-evidence enforcement.
-- **WO-9** Adversarial audit suites + daily schedules; audit all scripts + schemas (reuse `groq_hammer_audit`, `slop_audit_law.py`, `lucidota_status_ledger.py`). No stubs/gaps live.
+## REMAINING WAVE-3 (continue here)
+- **(a) claw/rig FULL integration**: Rust `cargo build --release` — WAIT for crushes to complete (check with `pgrep -fa "krampus_archive"`). When quiet: `cargo build --release` from `01_REPOS/claudecode/rust/`. Governor + Groq/Cerebras/local provider wiring into claw startup.
+- **(c) Percyphon comms filter**: identity/VPN/proxy/burn detection — operator co-design needed before building.
+- **(f) Promote→Materialize**: operator-confirmed path through graph_promotion_gate — needs operator.
+- **(g) Adversarial audit suites + daily schedules**: run `python3 scripts/slop_audit_law.py --paths scripts/`, wire `groq_hammer_audit` for daily script regression, schedule via `lucidota_control.workflow_schedule`.
 
 ## RESUME COMMAND
 ```
-Read 00_PROJECT_BRAIN/DIOGENES_MASTER_ROADMAP.md + DIOGENES_OPERATIONAL_SPEC.md + this handoff.
-Verify live: psql lucidota_storage -Atc "SELECT (SELECT count(*) FROM lucidota_korpus.corpus_chunk), (SELECT count(*) FROM lucidota_go.staging_packet WHERE parser_name='corpus_to_graph');"
-Check crush/bridge/watchdog logs in 04_RUNTIME/. Then execute WO-1..WO-9 via Groq/Cerebras/local hands; Opus audits receipts. Budget: spare Claude.
+Read 00_PROJECT_BRAIN/SONNET_HANDOFF.md and GOALS/CURRENT_HANDOFF.md.
+Verify live: pgrep -fa "[k]rampus_archive_crush"; psql lucidota_storage -Atc "SELECT count(*) FROM lucidota_korpus.corpus_chunk; SELECT count(*) FROM lucidota_go.staging_packet;"
+If crushes done → cargo build --release from 01_REPOS/claudecode/rust/.
+If crushes still running → continue with (g) adversarial audit + daily schedule wiring.
 ```

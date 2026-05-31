@@ -13,13 +13,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import psycopg2
 from dataclasses import asdict, dataclass
 from typing import Any, Sequence
 
-
-# ---------------------------------------------------------------------------
-# Primitives
-# ---------------------------------------------------------------------------
+try:
+    import xxhash
+except ImportError:
+    xxhash = None
 
 _PERSONAS = ["ledger", "runner", "witness", "archivist", "carrier", "scribe"]
 _FIXED_SLOT_COUNT = 28       # identity mask (mirrors CKDOG1 soul positions)
@@ -32,7 +33,9 @@ def _sha256_hex(data: str) -> str:
 
 
 def _xxhash128_int(data: str) -> int:
-    """128-bit deterministic hash via sha256 first 16 bytes (zero-dep fallback)."""
+    """128-bit deterministic hash via xxhash128 (or sha256 fallback)."""
+    if xxhash:
+        return xxhash.xxh128(data).intdigest()
     raw = hashlib.sha256(data.encode("utf-8", errors="ignore")).digest()
     return int.from_bytes(raw[:16], "big")
 
@@ -58,9 +61,52 @@ def _ternary_state(seed: str, idx: int, base_offset: int) -> int:
     return max(-1, min(1, raw))
 
 
-# ---------------------------------------------------------------------------
-# Data structures
-# ---------------------------------------------------------------------------
+def relevance_confidence_bps(seed: str) -> int:
+    """Deterministic relevance confidence in basis points (0-10000)."""
+    h = _sha256_hex(f"relevance:{seed}")
+    return int(h[:4], 16) % 10001
+
+
+def concept_expansion(seed: str, n: int = 8) -> list[str]:
+    """Generates n semantically adjacent seed strings by hashing variants."""
+    return [f"{seed}:expand:{i}" for i in range(n)]
+
+
+def village_curator(village_seeds: list[str], top_k: int = 5000) -> list[str]:
+    """Ranks seeds by relevance_confidence_bps descending, returns top_k."""
+    ranked_seeds = sorted(village_seeds, key=relevance_confidence_bps, reverse=True)
+    return ranked_seeds[:top_k]
+
+
+def scaffold_log_entry(scaffold: dict, dsn: str) -> dict:
+    """Inserts into lucidota_go.percyphon_scaffold_log."""
+    conn = psycopg2.connect(dsn)
+    cur = conn.cursor()
+    source_id = scaffold['uuid']
+    parser_name = 'percyphon_generator'
+    proposed_term = 'ENTITY'
+    claim = scaffold['name']
+    proposed_item = json.dumps(scaffold)
+    confidence_bps = scaffold['relevance_confidence_bps']
+    # snap confidence_bps to nearest value in the canonical BPS set
+    _BPS_SET = [0, 2, 4, 6, 10, 50, 69, 150]
+    confidence_bps = min(_BPS_SET, key=lambda x: abs(x - confidence_bps))
+    status = 'pending'
+    cur.execute("""
+        INSERT INTO lucidota_go.percyphon_scaffold_log (source_id, parser_name, proposed_term, claim, proposed_item, confidence_bps, status)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (source_id) DO NOTHING
+        RETURNING *
+    """, (source_id, parser_name, proposed_term, claim, proposed_item, confidence_bps, status))
+    row = cur.fetchone()
+    conn.commit()
+    cur.close()
+    conn.close()
+    if row:
+        return dict(row)
+    else:
+        return None
+
 
 @dataclass(frozen=True)
 class ProceduralSlot:
@@ -83,113 +129,32 @@ class ProceduralSlot:
             "coord_128": self.coord_128,
         }
 
-
-# ---------------------------------------------------------------------------
-# Core generator
-# ---------------------------------------------------------------------------
-
-def procedural_entity_generator(
-    villagers: Sequence[str] | None = None,
-    *,
-    psyche_wrath_velocity: float = 0.0,
-    psyche_forensic_shield_ratio: float = 0.0,
-    fluid_slots: int = 100,
-) -> dict[str, Any]:
-    """Generate a deterministic 128-slot Percyphon scaffold from a Villager seed slice.
-
-    Slots 1-28:   fixed identity mask.
-    Slots 29-128: procedural verbosity expansion (fluid_slots capped at 100).
-    """
-    villagers = list(villagers or [])
-    seed = "|".join(villagers[:5000]) or "lucidota-villager-baseline"
-
-    # Scalar ternary base offset from psyche dials
-    if psyche_wrath_velocity > psyche_forensic_shield_ratio:
-        base_offset = 1
-    elif psyche_forensic_shield_ratio > psyche_wrath_velocity:
-        base_offset = -1
-    else:
-        base_offset = 0
-
-    fluid_slots = max(0, min(int(fluid_slots), _PROCEDURAL_SLOT_COUNT))
-
-    slots: list[ProceduralSlot] = []
-
-    # Fixed identity slots (1-28)
-    for idx in range(1, _FIXED_SLOT_COUNT + 1):
-        name, alias, persona = _slot_name(seed, idx)
-        slot = ProceduralSlot(
-            slot_index=idx,
-            name=name,
-            alias=alias,
-            persona=persona,
-            uuid=_uuid_from_sha256(f"{seed}:{idx}"),
-            ternary_offset=_ternary_state(seed, idx, base_offset),
-            coord_128=_xxhash128_int(f"{seed}:coord:{idx}"),
-        )
-        slots.append(slot)
-
-    # Procedural verbosity expansion slots (29-128)
-    for local_idx in range(fluid_slots):
-        idx = _FIXED_SLOT_COUNT + 1 + local_idx  # 29..128
-        villager_ref = (
-            villagers[local_idx % len(villagers)]
-            if villagers
-            else f"baseline-{local_idx:04d}"
-        )
-        name, alias, persona = _slot_name(f"{seed}:{villager_ref}", idx)
-        slot = ProceduralSlot(
-            slot_index=idx,
-            name=name,
-            alias=alias,
-            persona=persona,
-            uuid=_uuid_from_sha256(f"{seed}:fluid:{idx}:{villager_ref}"),
-            ternary_offset=_ternary_state(seed, idx, base_offset),
-            coord_128=_xxhash128_int(f"{seed}:coord:{idx}:{villager_ref}"),
-        )
-        slots.append(slot)
-
+def procedural_entity_generator(villagers, psyche_wrath_velocity=0.0, psyche_forensic_shield_ratio=0.0, fluid_slots=100) -> dict:
+    seed = "|".join(str(v) for v in (villagers or [])[:5000]) or "lucidota-villager-baseline"
+    slots = []
+    for slot_index in range(1, 30):
+        name, alias, persona = _slot_name(seed, slot_index)
+        ternary = _ternary_state(seed, slot_index, int(psyche_wrath_velocity*100))
+        coord = _xxhash128_int(f"{seed}:coord:{slot_index}")
+        uuid = _uuid_from_sha256(f"{seed}:fixed:{slot_index}")
+        slots.append(ProceduralSlot(slot_index, name, alias, persona, uuid, ternary, coord).as_dict())
+    for idx in range(fluid_slots):
+        villager_ref = villagers[idx % len(villagers)] if villagers else seed
+        slot_index = 29 + idx
+        name, alias, persona = _slot_name(f"{seed}:{villager_ref}", slot_index)
+        ternary = _ternary_state(seed, slot_index, int(psyche_forensic_shield_ratio*100))
+        coord = _xxhash128_int(f"{seed}:fluid:{idx}:{villager_ref}")
+        uuid = _uuid_from_sha256(f"{seed}:fluid:{slot_index}:{villager_ref}")
+        slots.append(ProceduralSlot(slot_index, name, alias, persona, uuid, ternary, coord).as_dict())
     return {
-        "schema": "lucidota.percyphon.procedural_entity_generator.v2",
+        "seed": seed,
+        "slots": slots,
         "source_count": min(5000, len(villagers) or 5000),
-        "fixed_slot_count": _FIXED_SLOT_COUNT,
-        "fluid_slot_count": fluid_slots,
-        "total_slot_count": len(slots),
-        "psyche_wrath_velocity": float(psyche_wrath_velocity),
-        "psyche_forensic_shield_ratio": float(psyche_forensic_shield_ratio),
-        "base_ternary_offset": base_offset,
-        "slots": [s.as_dict() for s in slots],
-        "zero_vram": True,
-        "authority": "procedural_scaffold_candidate_not_truth",
-        "note": (
-            "Slots 1-28 fixed identity mask (CKDOG1 mirror). "
-            "Slots 29-128 procedural verbosity expansion. "
-            "xxHash128-compatible 128-bit coordinates via sha256[:16]. "
-            "Per-slot ternary modulation from psyche dials + hash spread."
-        ),
+        "uuid": _uuid_from_sha256(seed),
+        "name": slots[0]["name"],
+        "relevance_confidence_bps": relevance_confidence_bps(seed),
+        "authority": "procedural_scaffold_candidate_not_truth"
     }
 
-
-# ---------------------------------------------------------------------------
-# Convenience: single-villager scaffold (for DB upsert path)
-# ---------------------------------------------------------------------------
-
-def villager_scaffold(seed: str) -> dict[str, Any]:
-    """Generate a single-seed scaffold for upsert into percyphon_village."""
-    return procedural_entity_generator([seed])
-
-
-if __name__ == "__main__":
-    result = procedural_entity_generator(
-        ["claim-alpha", "claim-beta", "ontology-term-x"],
-        psyche_wrath_velocity=0.8,
-        psyche_forensic_shield_ratio=0.3,
-    )
-    print(json.dumps({
-        "schema": result["schema"],
-        "total_slot_count": result["total_slot_count"],
-        "base_ternary_offset": result["base_ternary_offset"],
-        "slot_0": result["slots"][0],
-        "slot_27": result["slots"][27],
-        "slot_28": result["slots"][28],
-    }, indent=2))
+def villager_scaffold(seed: str) -> dict:
+    return procedural_entity_generator([seed], fluid_slots=100)

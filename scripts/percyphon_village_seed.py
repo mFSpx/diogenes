@@ -107,6 +107,39 @@ assert len(_SAMPLE_SEEDS) == 50, f"Expected 50 seeds, got {len(_SAMPLE_SEEDS)}"
 
 
 # ---------------------------------------------------------------------------
+# Synthetic seed expansion to fill 5000-row target
+# Deterministic: no randomness, all SHA-256 derived namespaces
+# ---------------------------------------------------------------------------
+
+_SYNTHETIC_NAMESPACES = [
+    "entity", "event", "edge", "claim", "evidence", "witness",
+    "regulator", "adversary", "mask", "grip", "snare", "void",
+    "archivist", "runner", "carrier", "scribe", "ledger",
+    "corpus", "routing", "gate", "absurd", "staging",
+]
+
+
+def _synthetic_seeds(target_total: int = 5000) -> list[str]:
+    """Generate deterministic synthetic seeds to reach target_total.
+    Anchors come first; synthetic slots fill the remainder."""
+    seeds = list(_SAMPLE_SEEDS)
+    needed = target_total - len(seeds)
+    if needed <= 0:
+        return seeds
+    per_ns = needed // len(_SYNTHETIC_NAMESPACES) + 1
+    idx = 0
+    for ns in _SYNTHETIC_NAMESPACES:
+        for i in range(per_ns):
+            if len(seeds) >= target_total:
+                break
+            seeds.append(f"synthetic:{ns}:{idx:05d}")
+            idx += 1
+        if len(seeds) >= target_total:
+            break
+    return seeds[:target_total]
+
+
+# ---------------------------------------------------------------------------
 # Scaffold → DB row
 # ---------------------------------------------------------------------------
 
@@ -188,8 +221,8 @@ def upsert_villagers(seeds: list[str], dsn: str, dry_run: bool = False) -> int:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Seed percyphon_village table")
-    parser.add_argument("--count", type=int, default=50,
-                        help="Number of sample seeds to upsert (max 50, default 50)")
+    parser.add_argument("--count", type=int, default=5000,
+                        help="Total villager rows to seed (default 5000)")
     parser.add_argument("--dry-run", action="store_true",
                         help="Print first row; do not write to DB")
     parser.add_argument("--dsn", default=os.environ.get(
@@ -197,8 +230,7 @@ def main() -> None:
                         help="Storage DSN")
     args = parser.parse_args()
 
-    count = min(args.count, len(_SAMPLE_SEEDS))
-    seeds = _SAMPLE_SEEDS[:count]
+    seeds = _synthetic_seeds(args.count)
     n = upsert_villagers(seeds, args.dsn, dry_run=args.dry_run)
     print(f"[receipt] percyphon_village upsert={n} dry_run={args.dry_run}")
 

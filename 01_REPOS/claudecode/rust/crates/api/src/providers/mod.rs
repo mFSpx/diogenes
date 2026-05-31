@@ -31,6 +31,7 @@ pub enum ProviderKind {
     Groq,
     Cohere,
     Cerebras,
+    Mistral,
     LucidotaLocal,
 }
 
@@ -223,6 +224,52 @@ const MODEL_REGISTRY: &[(&str, ProviderMetadata)] = &[
             default_base_url: openai_compat::DEFAULT_XAI_BASE_URL,
         },
     ),
+    // ── LUCIDOTA Mistral La Plateforme ─────────────────────────────────────
+    (
+        "mistral",
+        ProviderMetadata {
+            provider: ProviderKind::Mistral,
+            auth_env: "MISTRAL_API_KEY",
+            base_url_env: "MISTRAL_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_MISTRAL_BASE_URL,
+        },
+    ),
+    (
+        "codestral",
+        ProviderMetadata {
+            provider: ProviderKind::Mistral,
+            auth_env: "MISTRAL_API_KEY",
+            base_url_env: "MISTRAL_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_MISTRAL_BASE_URL,
+        },
+    ),
+    (
+        "codestral-2508",
+        ProviderMetadata {
+            provider: ProviderKind::Mistral,
+            auth_env: "MISTRAL_API_KEY",
+            base_url_env: "MISTRAL_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_MISTRAL_BASE_URL,
+        },
+    ),
+    (
+        "ministral-3b",
+        ProviderMetadata {
+            provider: ProviderKind::Mistral,
+            auth_env: "MISTRAL_API_KEY",
+            base_url_env: "MISTRAL_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_MISTRAL_BASE_URL,
+        },
+    ),
+    (
+        "mistral-small",
+        ProviderMetadata {
+            provider: ProviderKind::Mistral,
+            auth_env: "MISTRAL_API_KEY",
+            base_url_env: "MISTRAL_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_MISTRAL_BASE_URL,
+        },
+    ),
 ];
 
 #[must_use]
@@ -256,6 +303,12 @@ pub fn resolve_model_alias(model: &str) -> String {
                 },
                 ProviderKind::Cohere => match *alias {
                     "cohere" => "command-a-03-2025",
+                    _ => trimmed,
+                },
+                ProviderKind::Mistral => match *alias {
+                    "mistral" | "codestral" => "codestral-2508",
+                    "ministral-3b" => "ministral-3b-2512",
+                    "mistral-small" => "mistral-small-2506",
                     _ => trimmed,
                 },
                 ProviderKind::LucidotaLocal => trimmed,
@@ -311,6 +364,14 @@ pub fn metadata_for_model(model: &str) -> Option<ProviderMetadata> {
             default_base_url: openai_compat::DEFAULT_LUCIDOTA_LOCAL_BASE_URL,
         });
     }
+    if lower.starts_with("mistral") || lower.starts_with("codestral") || lower.starts_with("ministral") {
+        return Some(ProviderMetadata {
+            provider: ProviderKind::Mistral,
+            auth_env: "MISTRAL_API_KEY",
+            base_url_env: "MISTRAL_BASE_URL",
+            default_base_url: openai_compat::DEFAULT_MISTRAL_BASE_URL,
+        });
+    }
     None
 }
 
@@ -336,6 +397,9 @@ pub fn detect_provider_kind(model: &str) -> ProviderKind {
     }
     if openai_compat::has_api_key("XAI_API_KEY") {
         return ProviderKind::Xai;
+    }
+    if openai_compat::has_api_key("MISTRAL_API_KEY") {
+        return ProviderKind::Mistral;
     }
     ProviderKind::ClawApi
 }

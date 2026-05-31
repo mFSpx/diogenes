@@ -20,6 +20,7 @@ pub const DEFAULT_GROQ_BASE_URL: &str = "https://api.groq.com/openai/v1";
 pub const DEFAULT_COHERE_BASE_URL: &str = "https://api.cohere.ai/compatibility/v1";
 pub const DEFAULT_CEREBRAS_BASE_URL: &str = "https://api.cerebras.ai/v1";
 pub const DEFAULT_LUCIDOTA_LOCAL_BASE_URL: &str = "http://127.0.0.1:8080/v1";
+pub const DEFAULT_MISTRAL_BASE_URL: &str = "https://api.mistral.ai/v1";
 const REQUEST_ID_HEADER: &str = "request-id";
 const ALT_REQUEST_ID_HEADER: &str = "x-request-id";
 const DEFAULT_INITIAL_BACKOFF: Duration = Duration::from_millis(200);
@@ -40,6 +41,7 @@ const GROQ_ENV_VARS: &[&str] = &["GROQ_API_KEY"];
 const COHERE_ENV_VARS: &[&str] = &["COHERE_API_KEY"];
 const CEREBRAS_ENV_VARS: &[&str] = &["CEREBRAS_API_KEY"];
 const LOCAL_ENV_VARS: &[&str] = &["LUCIDOTA_LOCAL_API_KEY"];
+const MISTRAL_ENV_VARS: &[&str] = &["MISTRAL_API_KEY"];
 
 impl OpenAiCompatConfig {
     #[must_use]
@@ -89,6 +91,15 @@ impl OpenAiCompatConfig {
         }
     }
     #[must_use]
+    pub const fn mistral() -> Self {
+        Self {
+            provider_name: "Mistral",
+            api_key_env: "MISTRAL_API_KEY",
+            base_url_env: "MISTRAL_BASE_URL",
+            default_base_url: DEFAULT_MISTRAL_BASE_URL,
+        }
+    }
+    #[must_use]
     pub const fn lucidota_local() -> Self {
         Self {
             provider_name: "LUCIDOTA local",
@@ -105,6 +116,7 @@ impl OpenAiCompatConfig {
             "Groq" => GROQ_ENV_VARS,
             "Cohere" => COHERE_ENV_VARS,
             "Cerebras" => CEREBRAS_ENV_VARS,
+            "Mistral" => MISTRAL_ENV_VARS,
             "LUCIDOTA local" => LOCAL_ENV_VARS,
             _ => &[],
         }

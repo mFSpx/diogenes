@@ -181,7 +181,10 @@ def chunk_text(text):
         chunks.append(chunk)
     return chunks
 
+_SKIP_EMBED = os.environ.get('LUCIDOTA_SKIP_EMBED', '').strip() in ('1', 'true', 'yes')
+
 def embed_text(chunk):
+    """Embed a single chunk. Raises RuntimeError on failure."""
     import random
     last = None
     for _ in range(4):
@@ -191,7 +194,6 @@ def embed_text(chunk):
                               headers={'User-Agent': 'groq-python/0.28.0'}, timeout=60)
             if r.status_code == 200:
                 return r.json()['data'][0]['embedding']
-            # "input too large to process" / transient server error -> shrink + retry elsewhere
             if r.status_code in (400, 413, 500) and len(chunk) > 400:
                 chunk = chunk[: max(400, len(chunk) // 2)]
                 last = f'{r.status_code}->shrink {len(chunk)}'
@@ -201,15 +203,50 @@ def embed_text(chunk):
             last = type(e).__name__
     raise RuntimeError(f'embed failed after retries: {last}')
 
+def embed_batch(chunks):
+    """Embed a list of chunks in one HTTP call (batch mode). Returns list of embeddings."""
+    import random
+    if not chunks:
+        return []
+    url = random.choice(EMBED_ENDPOINTS)
+    try:
+        r = requests.post(url, json={'model': 'bge-m3', 'input': chunks},
+                          headers={'User-Agent': 'groq-python/0.28.0'}, timeout=120)
+        if r.status_code == 200:
+            data = r.json()['data']
+            # Sort by index to preserve order
+            return [d['embedding'] for d in sorted(data, key=lambda x: x.get('index', 0))]
+    except Exception:
+        pass
+    # Fallback: embed one by one
+    return [embed_text(c) for c in chunks]
+
 def write_chunk(sha256, chunk_index, chunk, source_path, mime):
+    """Write one chunk to corpus_chunk. If LUCIDOTA_SKIP_EMBED=1, stores NULL embedding."""
     if not hasattr(_tls, 'db'):
         _tls.db = connect_db()
     cur = _tls.db.cursor()
     chunk_uuid = str(uuid5(NAMESPACE_URL, sha256 + source_path + str(chunk_index)))
-    embedding = embed_text(chunk)
-    cur.execute('INSERT INTO lucidota_korpus.corpus_chunk (chunk_uuid, file_uuid, sha256, source_path, mime, chunk_index, content, go25, embedding, embedding_model, extractor) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (sha256, chunk_index) DO NOTHING', (chunk_uuid, None, sha256, source_path, mime, chunk_index, chunk, '{}', '['+','.join(repr(float(x)) for x in embedding)+']', 'bge-m3', 'groq:llama-4-scout'))
+    if _SKIP_EMBED:
+        embedding_val = None
+        embedding_model = None
+        cur.execute(
+            'INSERT INTO lucidota_korpus.corpus_chunk '
+            '(chunk_uuid, file_uuid, sha256, source_path, mime, chunk_index, content, go25, embedding, embedding_model, extractor) '
+            'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (sha256, chunk_index) DO NOTHING',
+            (chunk_uuid, None, sha256, source_path, mime, chunk_index, chunk, '{}',
+             None, 'skip', 'krampus_skip_embed'))
+        counter.update(chunks=1)
+    else:
+        embedding = embed_text(chunk)
+        cur.execute(
+            'INSERT INTO lucidota_korpus.corpus_chunk '
+            '(chunk_uuid, file_uuid, sha256, source_path, mime, chunk_index, content, go25, embedding, embedding_model, extractor) '
+            'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (sha256, chunk_index) DO NOTHING',
+            (chunk_uuid, None, sha256, source_path, mime, chunk_index, chunk, '{}',
+             '['+','.join(repr(float(x)) for x in embedding)+']', 'bge-m3', 'groq:llama-4-scout'))
+        counter.update(chunks=1, embeds=1)
     _tls.db.commit()
-    counter.update(chunks=1, embeds=1)
 
 def process_file(file_uuid, sha256, cas_uri, mime, file_kind):
     try:

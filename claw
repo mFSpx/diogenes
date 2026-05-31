@@ -31,6 +31,19 @@ export OPENAI_API_KEY="${OPENAI_API_KEY:-${GROQ_API_KEY:-}}"
 export OPENAI_BASE_URL="${OPENAI_BASE_URL:-$GROQ_BASE_URL}"
 export COHERE_BASE_URL="${COHERE_BASE_URL:-https://api.cohere.ai/compatibility/v1}"
 export CLAW_TOKEN_EFFICIENCY_MODE="${CLAW_TOKEN_EFFICIENCY_MODE:-local_first_cloud_optional}"
+export MISTRAL_API_KEY="${MISTRAL_API_KEY:-}"
+export MISTRAL_BASE_URL="${MISTRAL_BASE_URL:-https://api.mistral.ai/v1}"
+export CEREBRAS_API_KEY="${CEREBRAS_API_KEY:-}"
+
+# Governor rung advisory — warn at rung3 (severe memory pressure)
+if command -v psql >/dev/null 2>&1; then
+  _RUNG=$(psql lucidota_state -Atc "SELECT fact_value FROM lucidota_control.runtime_status_fact WHERE subsystem='governor' AND fact_key='governor_rung' LIMIT 1;" 2>/dev/null | tr -d '"')
+  if [[ "$_RUNG" == "3" ]]; then
+    echo "[claw] WARNING: governor rung=3 — severe memory pressure. BGE fleet should already be shrinking." >&2
+  fi
+  unset _RUNG
+fi
+
 MODEL="${CLAW_MODEL:-groq}"
 ARGS=(--model "$MODEL" --permission-mode danger-full-access --dangerously-skip-permissions)
 exec "$ROOT/01_REPOS/claudecode/rust/target/release/claw" "${ARGS[@]}" "$@"

@@ -32,6 +32,26 @@ The key insight is that at planning time, known past tokens are passed at t=0
 (clean) while unknown future tokens are passed at t=T (pure noise), giving the
 denoiser a causally correct conditioning signal without masking or autoregressive
 rollout overhead.
+
+LUCIDOTA role — claim-evidence planning under uncertainty:
+  The GO-25 claim pipeline maps directly to Diffusion Forcing:
+  - operator_confirmed_finding / canonical_doctrine → clean tokens (t=0): known facts.
+  - model_computed_finding / staging candidates → noisy tokens (t=high): uncertain claims.
+  - graph_promotion_gate → the denoising process: iteratively reducing noise level
+    as evidence accumulates and authority class rises.
+
+  Concrete use:
+  1. Hypothesis generation: given a sequence of confirmed claims (t=0) about an
+     entity, sample_causal_t_seq to assign lower noise to near-future inferences
+     and higher noise to far-future hypotheses. The loss surface guides which
+     next claims are plausible given the clean prefix.
+  2. Gap detection: a high diffusion_forcing_loss over a confirmed claim sequence
+     indicates inconsistency — some "clean" tokens don't fit the denoiser's model
+     of the sequence, flagging a potential contradiction.
+  3. Integration point: scripts/diffusion_claim_wire.py (planned) reads confirmed
+     claims from lucidota_go.staging_packet (status='operator_confirmed') and
+     computes diffusion_forcing_loss as a consistency score, writing receipt to
+     05_OUTPUTS/runtime/diffusion_health_<ts>.json.
 """
 from __future__ import annotations
 

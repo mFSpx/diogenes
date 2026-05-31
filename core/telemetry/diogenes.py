@@ -45,6 +45,7 @@ class HardwareTelemetry:
     power: dict[str, Any]
     thermal: dict[str, Any]
     pcie: dict[str, Any]
+    window_title: str | None = None
     source: str = "diogenes"
 
     def as_dict(self) -> dict[str, Any]:
@@ -87,6 +88,19 @@ def _parse_pressure_file(path: str | Path) -> dict[str, float]:
             except Exception:
                 continue
     return out
+
+
+def _active_window_title() -> str | None:
+    if not shutil.which("xdotool"):
+        return None
+    try:
+        result = subprocess.run(
+            ["xdotool", "getactivewindow", "getwindowname"],
+            text=True, capture_output=True, timeout=1, check=False,
+        )
+        return result.stdout.strip() or None
+    except Exception:
+        return None
 
 
 def _gpu_query() -> dict[str, Any]:
@@ -228,6 +242,7 @@ def sample_hardware_telemetry() -> dict[str, Any]:
         integrated_gpu=_integrated_gpu_state(),
         power=_power_state(),
         thermal=_thermal_state(),
+        window_title=_active_window_title(),
         pcie={
             "bandwidth_utilization_proxy": (
                 round(

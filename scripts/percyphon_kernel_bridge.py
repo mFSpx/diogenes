@@ -62,10 +62,10 @@ def build_bridge(
 ) -> dict[str, Any]:
     scaffold = procedural_entity_generator(villagers or [source, normalized_intent], fluid_slots=fluid_slots)
     percyphon = {
-        "schema": scaffold["schema"],
-        "zero_vram": scaffold["zero_vram"],
-        "slot_count": scaffold["slot_count"],
-        "fluid_slot_count": scaffold["fluid_slot_count"],
+        "schema": "lucidota.percyphon.scaffold.v1",
+        "zero_vram": True,
+        "slot_count": len(scaffold["slots"]),
+        "fluid_slot_count": sum(1 for s in scaffold["slots"] if s["slot_index"] >= 29),
         "slot": scaffold["slots"][0],
         "authority": "procedural_scaffold_candidate_not_truth",
     }

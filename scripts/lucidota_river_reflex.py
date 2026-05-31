@@ -1,15 +1,31 @@
 #!/usr/bin/env python3
 """River incremental online-learning tick over new workflow events only."""
 from __future__ import annotations
-import argparse, json, os
+import argparse, json, os, pickle
 from collections import defaultdict
 from pathlib import Path
 import psycopg
 from river import compose, linear_model, preprocessing
 ROOT=Path(__file__).resolve().parents[1]
 DB=os.environ.get("DBOS_SYSTEM_DATABASE_URL") or os.environ.get("ABSURD_SYSTEM_DATABASE_URL") or "postgresql:///lucidota_state"
+STORAGE_DB=os.environ.get("LUCIDOTA_GO_STORAGE_DSN","postgresql:///lucidota_storage")
 SCHEMA=ROOT/"06_SCHEMA"/"004_learning_reflex.sql"
 CURSOR="river_reflex_live"
+MODEL_KEY="bytewax_reflex_lr"
+
+def _load_model(default):
+    try:
+        with psycopg.connect(STORAGE_DB) as c:
+            row=c.execute("SELECT payload FROM lucidota_korpus.river_model_blob WHERE model_key=%s",(MODEL_KEY,)).fetchone()
+            if row: return pickle.loads(bytes(row[0]))
+    except Exception: pass
+    return default
+
+def _save_model(model,n):
+    try:
+        with psycopg.connect(STORAGE_DB) as c:
+            c.execute("INSERT INTO lucidota_korpus.river_model_blob(model_key,model_kind,payload,sample_count) VALUES(%s,%s,%s,%s) ON CONFLICT(model_key) DO UPDATE SET payload=EXCLUDED.payload,sample_count=EXCLUDED.sample_count,updated_at=now()",(MODEL_KEY,"river_pipeline_lr",pickle.dumps(model),n)); c.commit()
+    except Exception: pass
 
 def ensure(conn): conn.execute(SCHEMA.read_text(encoding="utf-8")); conn.commit()
 def load_new(conn,limit:int):
@@ -33,7 +49,7 @@ def update_cursor(conn,events):
 
 def main()->int:
     ap=argparse.ArgumentParser(); ap.add_argument("--db-url",default=DB); ap.add_argument("--limit",type=int,default=5000); ap.add_argument("--json",action="store_true"); args=ap.parse_args()
-    model=compose.Pipeline(preprocessing.OneHotEncoder(),linear_model.LogisticRegression()); grouped=defaultdict(lambda:{"n":0,"ok":0,"bad":0,"pred":None})
+    model=_load_model(compose.Pipeline(preprocessing.OneHotEncoder(),linear_model.LogisticRegression())); grouped=defaultdict(lambda:{"n":0,"ok":0,"bad":0,"pred":None})
     with psycopg.connect(args.db_url) as conn:
         ensure(conn); events=load_new(conn,args.limit)
         for e in events:
@@ -43,5 +59,6 @@ def main()->int:
         update_cursor(conn,events)
         conn.execute("INSERT INTO lucidota_learning.river_run(status,events_seen,examples_trained,detail) VALUES ('succeeded',%s,%s,%s::jsonb)",(len(events),len(events),json.dumps({"cursor":CURSOR,"groups_updated":len(grouped),"semantics":"new_events_since_cursor_not_replay_window"})))
         conn.commit()
+    _save_model(model,len(events))
     report={"ok":True,"cursor":CURSOR,"new_events_seen":len(events),"new_examples_trained":len(events),"groups_updated":len(grouped),"semantics":"new_events_since_cursor_not_replay_window"}; print(json.dumps(report,sort_keys=True) if args.json else report); return 0
 if __name__=="__main__": raise SystemExit(main())

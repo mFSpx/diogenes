@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 """
-lucidota_guvna.py — WO-2 Governor Phase-0
+lucidota_guvna.py — Governor Phase-1 daemon
 Reads live kernel telemetry and decides pressure-rung action.
 
 Rungs (NEVER-CULL ladder):
   rung0  — nominal, no action
-  rung1  — high pressure: lower new-work concurrency (emit advisory)
+  rung1  — high pressure: lower new-work concurrency (emit advisory + DB fact)
   rung2  — critical pressure: raise MemoryHigh threshold (emit advisory)
   rung3  — severe pressure: shrink BGE fleet via lucidota_bge_fleet.sh COUNT
 
 --dry-run mode: decides + logs, NEVER actuates.
---once: single-shot (no daemon loop).
+--once: single-shot (original phase-0 compat).
+Daemon mode (default): loops every --interval seconds, logs to governor_action table.
 
 Receipt written to: 05_OUTPUTS/runtime/guvna_decision_<ts>.json
+DB log: lucidota_control.governor_action (lucidota_state)
+Rung fact: lucidota_control.runtime_status_fact governor_rung (lucidota_state)
 """
 import argparse
 import json
@@ -20,8 +23,17 @@ import os
 import re
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+try:
+    import psycopg2
+    _HAS_PG = True
+except ImportError:
+    _HAS_PG = False
+
+_STATE_DSN = os.environ.get("LUCIDOTA_GO_STATE_DSN", "postgresql:///lucidota_state")
 
 ROOT = Path(os.environ.get("LUCIDOTA_HOME", "/home/mfspx/LUCIDOTA"))
 OUTPUT_DIR = ROOT / "05_OUTPUTS" / "runtime"
@@ -205,6 +217,48 @@ def actuate_rung3(fleet_width: int, dry_run: bool) -> dict:
         return {"action": "fleet_shrink_error", "error": str(e)}
 
 
+def _db_log(decision: dict, receipt_path: str, dry_run: bool) -> None:
+    """Write decision to governor_action table and update runtime_status_fact governor_rung."""
+    if not _HAS_PG:
+        return
+    d = decision["decision"]
+    t = decision["telemetry"]
+    action_key = decision["action"].get("action", "none")
+    try:
+        conn = psycopg2.connect(_STATE_DSN)
+        with conn, conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO lucidota_control.governor_action
+                  (rung, rung_description, action_key, action_detail, dry_run, telemetry_snapshot, receipt_path)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (
+                d["rung"], d["rung_description"], action_key,
+                json.dumps(decision["action"]),
+                dry_run, json.dumps(t), receipt_path,
+            ))
+            # Update runtime_status_fact so workers can see current rung cheaply
+            cur.execute("""
+                INSERT INTO lucidota_control.runtime_status_fact
+                  (subsystem, fact_key, fact_value, derived_at)
+                VALUES ('governor', 'governor_rung', %s::jsonb, now())
+                ON CONFLICT (subsystem, fact_key) DO UPDATE SET
+                  fact_value = EXCLUDED.fact_value, derived_at = now()
+            """, (json.dumps(d["rung"]),))
+            # Rung-1+: write ABSURD concurrency advisory
+            if d["rung"] >= 1 and not dry_run:
+                recommended = max(1, 4 - d["rung"])
+                cur.execute("""
+                    INSERT INTO lucidota_control.runtime_status_fact
+                      (subsystem, fact_key, fact_value, derived_at)
+                    VALUES ('governor', 'absurd_recommended_max_workers', %s::jsonb, now())
+                    ON CONFLICT (subsystem, fact_key) DO UPDATE SET
+                      fact_value = EXCLUDED.fact_value, derived_at = now()
+                """, (json.dumps(recommended),))
+        conn.close()
+    except Exception as e:
+        print(f"[guvna] DB log failed: {e}", file=sys.stderr)
+
+
 def run_once(dry_run: bool) -> dict:
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
@@ -253,29 +307,9 @@ def run_once(dry_run: bool) -> dict:
     return decision, ts
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="LUCIDOTA Governor Phase-0: read telemetry, decide pressure rung, optionally actuate."
-    )
-    parser.add_argument("--once", action="store_true", default=False,
-                        help="Single-shot run (no daemon loop).")
-    parser.add_argument("--dry-run", action="store_true", default=False,
-                        help="Decide and log only; never actuate.")
-    args = parser.parse_args()
-
-    if not args.once:
-        parser.error("Only --once mode implemented in Phase-0. Pass --once.")
-
-    decision, ts = run_once(dry_run=args.dry_run)
-
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = OUTPUT_DIR / f"guvna_decision_{ts}.json"
-    out_path.write_text(json.dumps(decision, indent=2))
-
-    # Human-readable summary to stdout
+def _print_decision(decision: dict, out_path: Path, mode: str) -> None:
     d = decision["decision"]
     t = decision["telemetry"]
-    mode = "DRY-RUN" if args.dry_run else "LIVE"
     print(f"[guvna {mode}] rung={d['rung']} — {d['rung_description']}")
     print(f"  cpu_psi_some_avg10 : {t['cpu_psi'].get('some_avg10', 'N/A'):.2f}%")
     print(f"  mem_psi_some_avg10 : {t['mem_psi'].get('some_avg10', 'N/A'):.2f}%")
@@ -285,7 +319,50 @@ def main():
     print(f"  bge_fleet_width    : {t['bge_fleet_width']}")
     print(f"  reasons            : {', '.join(d['reasons'])}")
     print(f"  action             : {decision['action']}")
-    print(f"  receipt            : {out_path}")
+    print(f"  receipt            : {out_path}", flush=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="LUCIDOTA Governor Phase-1: daemon that reads telemetry, decides pressure rung, logs to DB."
+    )
+    parser.add_argument("--once", action="store_true", default=False,
+                        help="Single-shot run (no daemon loop).")
+    parser.add_argument("--dry-run", action="store_true", default=False,
+                        help="Decide and log only; never actuate.")
+    parser.add_argument("--interval", type=int, default=30,
+                        help="Daemon loop interval in seconds (default 30).")
+    args = parser.parse_args()
+
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    mode = "DRY-RUN" if args.dry_run else "LIVE"
+
+    if args.once:
+        decision, ts = run_once(dry_run=args.dry_run)
+        out_path = OUTPUT_DIR / f"guvna_decision_{ts}.json"
+        out_path.write_text(json.dumps(decision, indent=2))
+        _db_log(decision, str(out_path), args.dry_run)
+        _print_decision(decision, out_path, mode)
+        return 0
+
+    # Daemon loop
+    print(f"[guvna] daemon started, interval={args.interval}s, mode={mode}", flush=True)
+    tick = 0
+    while True:
+        try:
+            decision, ts = run_once(dry_run=args.dry_run)
+            out_path = OUTPUT_DIR / f"guvna_decision_{ts}.json"
+            out_path.write_text(json.dumps(decision, indent=2))
+            _db_log(decision, str(out_path), args.dry_run)
+            d = decision["decision"]
+            if d["rung"] > 0 or tick % 10 == 0:
+                _print_decision(decision, out_path, mode)
+            else:
+                print(f"[guvna {mode}] tick={tick} rung=0 avail={decision['telemetry']['mem_avail_mb']}MB", flush=True)
+        except Exception as e:
+            print(f"[guvna] tick error: {e}", file=sys.stderr, flush=True)
+        tick += 1
+        time.sleep(args.interval)
 
     return 0
 

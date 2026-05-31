@@ -2,7 +2,9 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/scripts/lucidota_safe_ops_env.sh"
-export CUDA_VISIBLE_DEVICES=""
+# GPU controlled by caller; default expose device 0 for VRAM offload
+: "${CUDA_VISIBLE_DEVICES:=0}"
+export CUDA_VISIBLE_DEVICES
 HOST="${LUCIDOTA_BONSAI_HOST:-127.0.0.1}"
 PORT="${LUCIDOTA_BONSAI_PORT:-8082}"
 CTX="${LUCIDOTA_BONSAI_CTX:-1024}"

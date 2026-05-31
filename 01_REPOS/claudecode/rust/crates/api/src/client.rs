@@ -26,6 +26,7 @@ pub enum ProviderClient {
     Groq(OpenAiCompatClient),
     Cohere(OpenAiCompatClient),
     Cerebras(OpenAiCompatClient),
+    Mistral(OpenAiCompatClient),
     LucidotaLocal(OpenAiCompatClient),
 }
 
@@ -59,6 +60,9 @@ impl ProviderClient {
             ProviderKind::Cerebras => Ok(Self::Cerebras(OpenAiCompatClient::from_env(
                 OpenAiCompatConfig::cerebras(),
             )?)),
+            ProviderKind::Mistral => Ok(Self::Mistral(OpenAiCompatClient::from_env(
+                OpenAiCompatConfig::mistral(),
+            )?)),
             ProviderKind::LucidotaLocal => Ok(Self::LucidotaLocal(
                 OpenAiCompatClient::new(
                     std::env::var("LUCIDOTA_LOCAL_API_KEY").unwrap_or_else(|_| "local".to_string()),
@@ -78,6 +82,7 @@ impl ProviderClient {
             Self::Groq(_) => ProviderKind::Groq,
             Self::Cohere(_) => ProviderKind::Cohere,
             Self::Cerebras(_) => ProviderKind::Cerebras,
+            Self::Mistral(_) => ProviderKind::Mistral,
             Self::LucidotaLocal(_) => ProviderKind::LucidotaLocal,
         }
     }
@@ -93,6 +98,7 @@ impl ProviderClient {
             | Self::Groq(client)
             | Self::Cohere(client)
             | Self::Cerebras(client)
+            | Self::Mistral(client)
             | Self::LucidotaLocal(client) => send_via_provider(client, request).await,
         }
     }
@@ -110,6 +116,7 @@ impl ProviderClient {
             | Self::Groq(client)
             | Self::Cohere(client)
             | Self::Cerebras(client)
+            | Self::Mistral(client)
             | Self::LucidotaLocal(client) => stream_via_provider(client, request)
                 .await
                 .map(MessageStream::OpenAiCompat),

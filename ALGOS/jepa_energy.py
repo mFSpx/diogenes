@@ -39,6 +39,21 @@ Collapse trap:
   A degenerate encoder s_theta(x) = constant for all x achieves E = 0 trivially.
   This is representation collapse.  VICReg regularization (Bardes et al. 2022)
   penalizes low variance and off-diagonal covariance to keep representations spread.
+
+LUCIDOTA role — evidence representation health monitor:
+  1. Embedding audit: run JEPA energy over a batch of corpus_chunk embeddings
+     (from lucidota_korpus.corpus_chunk.embedding JSONB). High energy = good
+     representation (predictions are wrong → model is uncertain → learning).
+     Near-zero energy across all pairs = COLLAPSE ALERT — BGE fleet or the
+     embedding pipeline is returning degenerate representations.
+  2. Staging candidate scoring: given a proposed_term embedding (from staging_packet)
+     and a context window of recent staging candidates, JEPA energy scores how
+     "surprising" the candidate is relative to the context. High energy = novel
+     claim worth closer inspection. Low energy = redundant / already staged.
+  3. Integration point: scripts/jepa_evidence_wire.py (planned) queries
+     lucidota_korpus.corpus_chunk for recent embeddings, runs vicreg_loss /
+     energy_single to detect collapse and score novelty, writes receipt to
+     05_OUTPUTS/runtime/jepa_health_<ts>.json.
 """
 from __future__ import annotations
 
