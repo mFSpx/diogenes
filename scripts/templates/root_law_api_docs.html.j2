@@ -116,5 +116,27 @@
     {% endif %}
   </section>
 
+  <section>
+    <h2>Broad Audit Register</h2>
+    {% if broad_audit.sources %}
+      <div class="grid">
+        <div class="card"><strong>Sources</strong><br/>{{ broad_audit.source_count }}</div>
+        <div class="card"><strong>Combined Hash</strong><br/><code>{{ broad_audit.combined_hash }}</code></div>
+        <div class="card"><strong>Schema</strong><br/><code>{{ broad_audit.schema }}</code></div>
+      </div>
+      {% for source in broad_audit.sources %}
+        <article class="card">
+          <strong>{{ source.name }}</strong>
+          <div>source: <code>{{ source.source_path }}</code></div>
+          <div>chars: {{ source.chars }}</div>
+          <div>excerpt hash: <code>{{ source.excerpt_hash }}</code></div>
+          <pre>{{ source.excerpt }}</pre>
+        </article>
+      {% endfor %}
+    {% else %}
+      <div class="ok">No broad audit sources captured.</div>
+    {% endif %}
+  </section>
+
 </body>
 </html>

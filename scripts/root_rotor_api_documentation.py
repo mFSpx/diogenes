@@ -28,6 +28,8 @@ DEFAULT_MANUAL_IDS = ["SYSTEM_ARCH", "RUNTIME_GOVERNOR", "AVIONICS", "FLIGHT_MAN
 ENDPOINT_PARENT = "4.0.0"
 ENDPOINT_MANUAL = "FLIGHT_MAN"
 ENDPOINT_NODE_START = 9000
+ROADMAP_PATH = ROOT / "00_PROJECT_BRAIN" / "DIOGENES_MASTER_ROADMAP.md"
+SYSTEM_MAP_PATH = ROOT / "00_PROJECT_BRAIN" / "SYSTEM_MAP_FULL.md"
 
 
 def now() -> str:
@@ -36,6 +38,19 @@ def now() -> str:
 
 def read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def extract_section_excerpt(text: str, start_marker: str, end_markers: tuple[str, ...]) -> str:
+    start = text.find(start_marker)
+    if start < 0:
+        return ""
+    tail = text[start:]
+    end = len(tail)
+    for marker in end_markers:
+        idx = tail.find(marker)
+        if idx >= 0:
+            end = min(end, idx)
+    return tail[:end].strip()
 
 
 def sorted_nodes(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -128,7 +143,51 @@ def render_api_payload(manuals: dict[str, list[dict[str, Any]]], routes: list[di
         "manuals": manual_payloads,
         "api_routes": route_payloads,
         "contradictions": contradictions,
-        "payload_hash": short_hash({"manuals": manual_payloads, "api_routes": route_payloads, "contradictions": contradictions}),
+        "broad_audit": read_broad_audit_sources(),
+        "payload_hash": short_hash({"manuals": manual_payloads, "api_routes": route_payloads, "contradictions": contradictions, "broad_audit": read_broad_audit_sources()}),
+    }
+
+
+def read_broad_audit_sources() -> dict[str, Any]:
+    sections: list[dict[str, Any]] = []
+    if ROADMAP_PATH.exists():
+        roadmap_text = ROADMAP_PATH.read_text(encoding="utf-8")
+        roadmap_excerpt = extract_section_excerpt(
+            roadmap_text,
+            "## 6. STUBS / GAPS REGISTER",
+            ("\n## 7.", "\n## 8.", "\n## 9."),
+        )
+        sections.append(
+            {
+                "name": "roadmap_gaps_register",
+                "source_path": str(ROADMAP_PATH.relative_to(ROOT)),
+                "excerpt": roadmap_excerpt,
+                "excerpt_hash": short_hash(roadmap_excerpt),
+                "chars": len(roadmap_excerpt),
+            }
+        )
+    if SYSTEM_MAP_PATH.exists():
+        system_map_text = SYSTEM_MAP_PATH.read_text(encoding="utf-8")
+        system_map_excerpt = extract_section_excerpt(
+            system_map_text,
+            "## CORRECTIONS",
+            ("\n## FULL SYSTEM MAP", "\n## INFERENCE FLEET", "\n## HARDWARE"),
+        )
+        sections.append(
+            {
+                "name": "system_map_corrections",
+                "source_path": str(SYSTEM_MAP_PATH.relative_to(ROOT)),
+                "excerpt": system_map_excerpt,
+                "excerpt_hash": short_hash(system_map_excerpt),
+                "chars": len(system_map_excerpt),
+            }
+        )
+    return {
+        "schema": "lucidota.root_law_broad_audit.v1",
+        "generated_at": now(),
+        "sources": sections,
+        "source_count": len(sections),
+        "combined_hash": short_hash(sections),
     }
 
 
@@ -143,6 +202,7 @@ def render_html(template_text: str, payload: dict[str, Any]) -> str:
         "payload_hash": payload.get("payload_hash", ""),
         "audit_surfaces": surfaces,
         "gap_atlas": contradictions.get("gap_atlas", []),
+        "broad_audit": payload.get("broad_audit", {}),
         "blockers": contradictions.get("blockers", []),
         "warnings": contradictions.get("warnings", []),
         "coverage_ratio": contradictions.get("coverage_ratio", 0),
@@ -349,6 +409,20 @@ def run(
                     f"  - draft={item['draft_nodes']} verified={item['verified_nodes']} "
                     f"payloads={item['model_payload_count']} total={item['total_nodes']}"
                 )
+    broad_audit = payload.get("broad_audit", {})
+    sources = broad_audit.get("sources", []) if isinstance(broad_audit, dict) else []
+    if sources:
+        lines.append("\n## Broad Audit Register")
+        lines.append(f"- source_count={broad_audit.get('source_count', 0)} combined_hash={broad_audit.get('combined_hash', '')}")
+        for source in sources:
+            lines.append(f"\n### {source['name']}")
+            lines.append(f"- source: {source['source_path']}")
+            lines.append(f"- chars: {source['chars']}")
+            lines.append(f"- excerpt_hash: {source['excerpt_hash']}")
+            excerpt = source.get("excerpt", "").strip()
+            if excerpt:
+                lines.append("")
+                lines.append(excerpt)
     markdown_path.write_text("\n".join(lines), encoding="utf-8")
 
     gap_atlas_path = output_dir / "root_law_gap_atlas.json"
@@ -363,6 +437,7 @@ def run(
         "coverage_ratio": payload["contradictions"].get("coverage_ratio", 0),
         "gap_atlas": payload["contradictions"].get("gap_atlas", []),
         "surfaces": payload["contradictions"].get("surfaces", {}),
+        "broad_audit": payload.get("broad_audit", {}),
     }
     gap_atlas_path.write_text(json.dumps(gap_atlas_payload, indent=2, sort_keys=False), encoding="utf-8")
 
@@ -377,6 +452,7 @@ def run(
         "markdown_path": str(markdown_path),
         "gap_atlas_path": str(gap_atlas_path),
         "contradictions": contradictions,
+        "broad_audit": payload.get("broad_audit", {}),
         "sync_routes": sync_routes,
         "sync_routes_result": sync_result,
         "status": "PASS" if not sync_result.get("errors") else "PARTIAL",

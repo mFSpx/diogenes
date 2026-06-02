@@ -3385,3 +3385,79 @@ Technical Summary Review and Dev Notes: 8082 is back on its feet; the model-biso
 - Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_postgrest_control.py`
 
 Technical Summary Review and Dev Notes: IronClaw now has a named contract hook instead of just vibes. The phone lines stay gated, the watcher stays alive, and the swamp cat gets receipts.
+
+---
+
+## Step 8/8 — Bind IronClaw as the operator-facing Indy_READs shell with gated external hooks
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Root-Rotor Porges Protocol V2
+- Generated: `2026-06-02T15:53:13Z`
+- Current step: 8/8
+- Status: in_progress
+- Objective: Consolidate repository canon into versioned PostgreSQL coordinates exposed through PostgREST-style endpoints and compiled on demand into agent/person-readable technical manuals.
+- Completed: Added the IronClaw runtime-binding section to the Indy_READs workflow contract, then committed and pushed the runtime/docs alignment changes to GitHub. IronClaw may route prompts into Indy_READs 24/7, Groq is the default cloud fallback, local lanes stay first-choice, and email/Signal hooks remain operator-gated with receipts.
+- Next action: Continue the Root-Rotor docs/API verification loop or start the remaining audit cleanup if a fresh objective slice is opened.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_postgrest_control.py`
+
+Technical Summary Review and Dev Notes: GitHub push is live now. IronClaw got the contract tag, the watcher stays on, and the swamp ledger has a fresh receipt.
+
+---
+
+## Step 8/8 — Verify live DB route-node receipts for the root-law endpoint catalog
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Root-Rotor Porges Protocol V2
+- Generated: `2026-06-02T15:54:11Z`
+- Current step: 8/8
+- Status: in_progress
+- Objective: Consolidate repository canon into versioned PostgreSQL coordinates exposed through PostgREST-style endpoints and compiled on demand into agent/person-readable technical manuals.
+- Completed: Confirmed the live Postgres route mapping: each api_bible_route_catalog route_id has a corresponding FLIGHT_MAN bible_nodes receipt via source_refs (manuals, nodes, root_law_docs, route_catalog, subtree). This gives direct DB evidence that the API endpoint sub-parts are mapped, versioned, and retrievable.
+- Next action: Continue toward contradiction/gap closure or open a narrower follow-up slice if the remaining audit needs deeper codebase coverage.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_postgrest_control.py`
+
+Technical Summary Review and Dev Notes: The route catalog now has its paper trail in the DB. Each endpoint leaves a node footprint, which is the sort of boring the swamp likes best.
+
+---
+
+## Step 8/8 — Verify rendered HTML and latest receipt for the root-law docs spine
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Root-Rotor Porges Protocol V2
+- Generated: `2026-06-02T15:54:39Z`
+- Current step: 8/8
+- Status: in_progress
+- Objective: Consolidate repository canon into versioned PostgreSQL coordinates exposed through PostgREST-style endpoints and compiled on demand into agent/person-readable technical manuals.
+- Completed: Confirmed that root_law_api_docs.html contains the Manual Coverage, API Endpoints, Manual Nodes, Contradiction/Gaps, and Gap Atlas sections, and that the latest receipt reports PASS with route_count=5 and no sync errors. The rendered artifact and JSON receipt agree with the DB-backed route mapping.
+- Next action: Keep pushing toward contradiction/gap closure for the broader codebase/manual map, or open a narrower sub-audit if needed.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_postgrest_control.py`
+
+Technical Summary Review and Dev Notes: The paper and the stone match: the HTML sheet and the DB receipt both say the route spine is in place. The swamp ledger likes when the story and the bones agree.
+
+---
+
+## Step 8/8 — Broader audit register now surfaced in docs
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Root-Rotor Porges Protocol V2
+- Generated: `2026-06-02T15:59:24Z`
+- Current step: 8/8
+- Status: in_progress
+- Objective: Consolidate repository canon into versioned PostgreSQL coordinates exposed through PostgREST-style endpoints and compiled on demand into agent/person-readable technical manuals.
+- Completed: Extended the Root-Law generator to include the roadmap gap register and system-map corrections as a Broad Audit Register in HTML, markdown, JSON receipts, and the gap atlas payload. Verified with py_compile, root_rotor_api_documentation tests, live generator run, and DB-backed route sync.
+- Next action: Continue toward broader contradiction/gap closure for the rest of the codebase/design-codebase map, then commit and push the updated docs spine.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_postgrest_control.py`
+
+Technical Summary Review and Dev Notes: The swamp ledger is happier when the road map and the bones share the same excerpt hashes. Broad audit sources are now visible to the docs spine.

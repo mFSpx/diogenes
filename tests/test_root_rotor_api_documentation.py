@@ -90,6 +90,28 @@ def test_root_rotor_api_docs_can_render_html_from_db_payload(tmp_path) -> None:
                 },
             },
         },
+        "broad_audit": {
+            "schema": "lucidota.root_law_broad_audit.v1",
+            "generated_at": "2026-06-02T00:00:00Z",
+            "source_count": 2,
+            "combined_hash": "bada55",
+            "sources": [
+                {
+                    "name": "roadmap_gaps_register",
+                    "source_path": "00_PROJECT_BRAIN/DIOGENES_MASTER_ROADMAP.md",
+                    "excerpt": "## 6. STUBS / GAPS REGISTER",
+                    "excerpt_hash": "road1",
+                    "chars": 28,
+                },
+                {
+                    "name": "system_map_corrections",
+                    "source_path": "00_PROJECT_BRAIN/SYSTEM_MAP_FULL.md",
+                    "excerpt": "## CORRECTIONS",
+                    "excerpt_hash": "sys1",
+                    "chars": 14,
+                },
+            ],
+        },
         "payload_hash": "deadbeef",
     }
     template_text = """
@@ -112,6 +134,9 @@ def test_root_rotor_api_docs_can_render_html_from_db_payload(tmp_path) -> None:
     {% for item in gap_atlas %}
       <section>{{ item.name }} {{ item.blockers }}</section>
     {% endfor %}
+    {% for source in broad_audit.sources %}
+      <aside>{{ source.name }} {{ source.excerpt_hash }}</aside>
+    {% endfor %}
     """
     html = doc.render_html(template_text, payload)
     assert "2026-06-02T00:00:00Z" in html
@@ -122,6 +147,8 @@ def test_root_rotor_api_docs_can_render_html_from_db_payload(tmp_path) -> None:
     assert "gap_x" in html
     assert "sidecar 0.25" in html
     assert "red_team 1" in html
+    assert "roadmap_gaps_register" in html
+    assert "system_map_corrections" in html
 
 
 def test_root_rotor_api_docs_runs_and_writes_artifacts(tmp_path, monkeypatch) -> None:
@@ -176,13 +203,39 @@ def test_root_rotor_api_docs_runs_and_writes_artifacts(tmp_path, monkeypatch) ->
                 "surfaces": {},
             }
 
+        @staticmethod
+        def read_broad_audit_sources():
+            return {
+                "schema": "lucidota.root_law_broad_audit.v1",
+                "generated_at": "2026-06-02T00:00:00Z",
+                "source_count": 2,
+                "combined_hash": "c0ffee",
+                "sources": [
+                    {
+                        "name": "roadmap_gaps_register",
+                        "source_path": "00_PROJECT_BRAIN/DIOGENES_MASTER_ROADMAP.md",
+                        "excerpt": "## 6. STUBS / GAPS REGISTER",
+                        "excerpt_hash": "road1",
+                        "chars": 28,
+                    },
+                    {
+                        "name": "system_map_corrections",
+                        "source_path": "00_PROJECT_BRAIN/SYSTEM_MAP_FULL.md",
+                        "excerpt": "## CORRECTIONS",
+                        "excerpt_hash": "sys1",
+                        "chars": 14,
+                    },
+                ],
+            }
+
     monkeypatch.setattr(doc, "fetch_manual_nodes", fake_fetch_manual_nodes)
     monkeypatch.setattr(doc, "fetch_route_catalog", fake_fetch_routes)
     monkeypatch.setattr(doc, "read_default_contradictions", Dummy.read_default_contradictions)
+    monkeypatch.setattr(doc, "read_broad_audit_sources", Dummy.read_broad_audit_sources)
     monkeypatch.setattr(doc, "sync_routes_to_bible_nodes", lambda *_, **__: {"upserted": 0, "updated": 0, "errors": []})
 
     template = tmp_path / "tpl.html"
-    template.write_text("<html><body>{% for m in manuals %}{{ m.content_hash }}{% for node in m.nodes %}{{ node.node_id }}{% endfor %}{% endfor %}{% for r in api_routes %}{{ r.content_hash }}{% endfor %}{% for item in gap_atlas %}{{ item.name }}{% endfor %}</body></html>", encoding="utf-8")
+    template.write_text("<html><body>{% for m in manuals %}{{ m.content_hash }}{% for node in m.nodes %}{{ node.node_id }}{% endfor %}{% endfor %}{% for r in api_routes %}{{ r.content_hash }}{% endfor %}{% for item in gap_atlas %}{{ item.name }}{% endfor %}{% for source in broad_audit.sources %}{{ source.name }}{% endfor %}</body></html>", encoding="utf-8")
     result = doc.run(
         dsn="postgresql:///ignore",
         manual_ids=["FLIGHT_MAN"],
@@ -205,9 +258,12 @@ def test_root_rotor_api_docs_runs_and_writes_artifacts(tmp_path, monkeypatch) ->
     assert atlas["schema"] == "lucidota.root_rotor.gap_atlas.v1"
     assert atlas["gap_atlas"][0]["name"] == "sidecar"
     assert atlas["gap_atlas"][1]["name"] == "red_team"
+    assert atlas["broad_audit"]["source_count"] == 2
     md_text = Path(result["markdown_path"]).read_text(encoding="utf-8")
     assert "## Gap Atlas" in md_text
     assert "sidecar: blockers=1 warnings=1 coverage=0.25" in md_text
+    assert "## Broad Audit Register" in md_text
+    assert "roadmap_gaps_register" in md_text
 
 
 class FakeCursor:
