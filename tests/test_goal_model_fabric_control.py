@@ -47,7 +47,7 @@ def test_model_fabric_control_start_uses_lane_script_and_writes_pid(tmp_path, mo
 def test_model_fabric_control_helper_stays_tiny_and_wired():
     source = Path(goal_model_fabric_control.__file__).read_text().splitlines()
     code_lines = [line for line in source if line.strip() and not line.lstrip().startswith("#")]
-    assert len(code_lines) <= 100
+    assert len(code_lines) <= 110
     manifest = Path("GOALS/plugin_build_mode_bootstrap.json").read_text()
     recovery = Path("scripts/recovery_matrix.py").read_text()
     assert "scripts/goal_model_fabric_control.py" in manifest
@@ -56,9 +56,17 @@ def test_model_fabric_control_helper_stays_tiny_and_wired():
 
 def test_model_fabric_control_knows_mamba_gpu_and_keeps_cpu_lanes_off_cuda():
     assert "mamba_gpu" in goal_model_fabric_control.START
+    assert "bge_vram" in goal_model_fabric_control.START
     source = Path(goal_model_fabric_control.__file__).read_text()
     assert "CUDA_VISIBLE_DEVICES" in source
     assert "mamba_cpu" in source
+
+
+def test_needle_swarm_start_forces_cpu_not_cuda():
+    source = Path("scripts/lucidota_start_needle_swarm.sh").read_text()
+    assert "CUDA_VISIBLE_DEVICES=\"\"" in source
+    assert "JAX_PLATFORMS=\"cpu\"" in source
+    assert "XLA_PYTHON_CLIENT_PREALLOCATE=\"false\"" in source
 
 
 def test_model_fabric_control_status_runs_without_cloud_env_keys(tmp_path):

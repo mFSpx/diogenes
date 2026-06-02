@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Root-Law Canonical Technical Bible</title>
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 2rem; max-width: 1200px; }
+    h1, h2, h3 { margin-bottom: 0.25rem; }
+    section { margin-bottom: 2rem; }
+    .muted { color: #555; }
+    code, pre { background: #f7f7f7; padding: .1rem .35rem; }
+    pre { padding: .75rem; overflow: auto; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .5rem; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: .75rem; }
+    ul { margin-top: .25rem; }
+    .bad { color: #8b1b1b; }
+    .ok { color: #0a6b1a; }
+  </style>
+</head>
+<body>
+  <h1>Root-Law Technical Bible</h1>
+  <p class="muted">Generated {{ generated_at }} from PostgreSQL canonical coordinates.</p>
+
+  <section>
+    <h2>Manual Coverage</h2>
+    <div class="grid">
+      <div class="card"><strong>Manuals</strong><br/>{{ manuals|length }}</div>
+      <div class="card"><strong>API Routes</strong><br/>{{ api_routes|length }}</div>
+      <div class="card"><strong>Contradiction Blocks</strong><br/>{{ contradictions.blockers|length }}</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>API Endpoints</h2>
+    {% for route in api_routes %}
+      <article>
+        <h3>[{{ route.method }}] {{ route.path_pattern }}</h3>
+        <p>{{ route.description }}</p>
+        <p><strong>Route ID:</strong> {{ route.route_id }}</p>
+        <p><strong>Target:</strong> <code>{{ route.target or 'n/a' }}</code></p>
+        <pre>{{ route.sample_request }}</pre>
+        <pre>{{ route.sample_response }}</pre>
+      </article>
+    {% endfor %}
+  </section>
+
+  <section>
+    <h2>Manual Nodes</h2>
+    {% for manual in manuals %}
+      <h3>{{ manual.manual_id }} ({{ manual.nodes|length }} nodes)</h3>
+      {% for node in manual.nodes %}
+        <article>
+          <h4>{{ node.node_id }} · {{ node.title }}</h4>
+          <p class="muted">state {{ node.status }} · version v{{ node.version }} · kind {{ node.node_kind }}</p>
+          <p><strong>Source refs:</strong> {{ node.source_refs|join(', ') }}</p>
+          <p>{{ node.payload[:400] }}</p>
+        </article>
+      {% endfor %}
+    {% endfor %}
+  </section>
+
+  <section>
+    <h2>Contradiction/Gaps</h2>
+    {% if contradictions.blockers %}
+      <div class="bad">Blockers: {{ contradictions.blockers|join(', ') }}</div>
+    {% else %}
+      <div class="ok">No blockers captured.</div>
+    {% endif %}
+    {% if contradictions.warnings %}
+      <p>Warnings: {{ contradictions.warnings|join(', ') }}</p>
+    {% endif %}
+    <div class="card">
+      <strong>Coverage Ratio:</strong> {{ contradictions.coverage_ratio|default('n/a') }}
+    </div>
+  </section>
+
+</body>
+</html>

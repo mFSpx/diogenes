@@ -85,4 +85,14 @@ VALUES
     ('orchestration', 'deepseek', 5, 'ok', 0.5000, 1.0000, NULL, NULL, FALSE, 0),
     ('orchestration', 'bonsai_ternary', 5, 'ok', 0.5000, 1.0000, NULL, NULL, FALSE, 0),
     ('orchestration', 'bge_embed', 5, 'ok', 0.5000, 1.0000, NULL, NULL, FALSE, 0),
-    ('orchestration', 'local_llama', 5, 'ok', 0.5000, 1.0000, NULL, NULL, FALSE, 0);
+    ('orchestration', 'local_llama', 5, 'ok', 0.5000, 1.0000, NULL, NULL, FALSE, 0)
+ON CONFLICT (workload_type, provider) DO UPDATE
+    SET priority = EXCLUDED.priority,
+        health = EXCLUDED.health,
+        success_rate = EXCLUDED.success_rate,
+        bandit_weight = EXCLUDED.bandit_weight,
+        latency_p50_ms = EXCLUDED.latency_p50_ms,
+        cost_per_1k_tokens = EXCLUDED.cost_per_1k_tokens,
+        always_hot = EXCLUDED.always_hot,
+        vram_mb_required = EXCLUDED.vram_mb_required,
+        last_updated = now();

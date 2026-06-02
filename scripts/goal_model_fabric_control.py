@@ -8,6 +8,7 @@ ROOT=Path(__file__).resolve().parents[1]; OUT=ROOT/'05_OUTPUTS/goals'
 LANES={
  'deepseek':('04_RUNTIME/inference_os/deepseek_q4.pid',8080),
  'mamba_cpu':('04_RUNTIME/inference_os/mamba7b_ternary.pid',8081),
+ 'bge_vram':('04_RUNTIME/inference_os/bge_fleet_8101.pid',8101),
  'bonsai':('04_RUNTIME/inference_os/bonsai4b_ternary.pid',8082),
  'mamba_gpu':('04_RUNTIME/inference_os/mamba7b_gpu.pid',8083),
  'needle_0':('04_RUNTIME/needle_swarm/needle-0.pid',8090),
@@ -16,8 +17,9 @@ LANES={
  'needle_3':('04_RUNTIME/needle_swarm/needle-3.pid',8093),
  'needle_4':('04_RUNTIME/needle_swarm/needle-4.pid',8094),
  'needle_5':('04_RUNTIME/needle_swarm/needle-5.pid',8095)}
-GROUPS={'all':list(LANES),'heavy':['deepseek','mamba_cpu','bonsai'],'needles':[f'needle_{i}' for i in range(6)],'optional':['mamba_gpu']}
+GROUPS={'all':list(LANES),'heavy':['deepseek','mamba_cpu','bonsai'],'needles':[f'needle_{i}' for i in range(6)],'optional':['mamba_gpu'],'embedding':['bge_vram']}
 START={'deepseek':('scripts/lucidota_start_deepseek_llama.sh','04_RUNTIME/inference_os/deepseek_q4_llama_server.log'),
+ 'bge_vram':('scripts/lucidota_bge_fleet.sh','04_RUNTIME/inference_os/bge_fleet_8101.log'),
  'mamba_cpu':('scripts/lucidota_start_mamba_llama.sh','04_RUNTIME/inference_os/mamba7b_ternary_cpu_llama_server.log'),
  'bonsai':('scripts/lucidota_start_bonsai_ternary_llama.sh','04_RUNTIME/inference_os/bonsai4b_ternary_cpu_llama_server.log'),
  'mamba_gpu':('scripts/lucidota_start_mamba_gpu_partial.sh','04_RUNTIME/inference_os/mamba7b_gpu_llama_server.log')}

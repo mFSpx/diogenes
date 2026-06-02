@@ -13,3 +13,24 @@ def test_operator_command_becomes_case_pipeline_job_graph(tmp_path):
     assert result['route']['route_plan']['status']=='ROUTED'
     assert result['job_count']==6
     assert (tmp_path/'cases'/'operator-case'/'absurd'/'jobs_state.json').exists()
+
+
+def test_operator_command_writes_receipt_and_returns_path(tmp_path):
+    src = tmp_path / 'drop'
+    src.mkdir()
+    (src / 'note.md').write_text('Alice saw Evidence.')
+
+    result = route_operator_command(
+        'create case from folder and build packet',
+        case_id='operator-case',
+        source_folder=str(src),
+        base_dir=tmp_path / 'cases',
+        ledger_path=tmp_path / 'ledger.jsonl',
+        event_log=tmp_path / 'events.jsonl',
+        receipt_dir=tmp_path / 'receipts',
+    )
+
+    assert result['status'] == 'PASSED'
+    assert result['receipt_path'].endswith('.json')
+    assert (tmp_path / result['receipt_path']).exists()
+    assert result['visible_response']['summary'].startswith('Indy_READs:')

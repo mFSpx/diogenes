@@ -192,22 +192,36 @@ def caputo_derivative_discrete(
     values: List[float],
     alpha: float,
     dt: float = 1.0,
+    window_size: int | None = None,
 ) -> List[float]:
-    """Discrete Caputo derivative of a 1‑D signal using the left‑endpoint
-    trapezoidal rule.  Returns a list of the same length where the first
-    element is defined as zero (no history).
+    """Discrete Caputo derivative of a 1‑D signal using a bounded history.
+
+    By default this uses the full available history. When ``window_size`` is
+    provided, only the most recent ``window_size`` increments contribute to the
+    derivative. That keeps the routine usable for graph / timeline analysis
+    where the Caputo kernel is a heuristic and exact infinite memory would be
+    too slow.
+
+    Returns a list of the same length where the first element is defined as
+    zero (no history).
     """
     n = len(values)
     if n == 0:
         return []
     if not (0.0 < alpha <= 1.0):
         raise ValueError("alpha must be in (0, 1].")
+    if window_size is not None and window_size < 1:
+        raise ValueError("window_size must be None or a positive integer.")
     gamma_val = gamma_lanczos(1.0 - alpha)
     deriv = [0.0]  # D^α f(0) = 0 by convention
+    eps = 1e-12
     for i in range(1, n):
         accum = 0.0
-        for j in range(i):
-            coeff = ( (i - j) ** (-alpha) - (i - j - 1) ** (-alpha) )
+        start = 0 if window_size is None else max(0, i - window_size)
+        for j in range(start, i):
+            delta_1 = max(float(i - j), eps)
+            delta_0 = max(float(i - j - 1), eps)
+            coeff = (delta_1 ** (-alpha) - delta_0 ** (-alpha))
             accum += coeff * (values[j + 1] - values[j])
         deriv.append( accum / (gamma_val * dt ** alpha) )
     return deriv

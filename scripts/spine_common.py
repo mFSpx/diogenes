@@ -33,9 +33,12 @@ def append_jsonl(path: str|Path, row: dict[str,Any]) -> Path:
     with p.open('a', encoding='utf-8') as f: f.write(json.dumps(row, sort_keys=True, default=str)+'\n')
     return p
 
-def receipt(component: str, payload: dict[str,Any], *, root: str|Path='05_OUTPUTS/test_runs') -> Path:
+def receipt(component: str, payload: dict[str,Any], *, root: str|Path='05_OUTPUTS/test_runs', emit: bool = True) -> Path:
     p=ROOT/root/f'{component}_{stamp()}.json'
-    payload.setdefault('generated_at', now()); payload['receipt_path']=rel(p); write_json(p,payload); print(f'RECEIPT_PATH={rel(p)}'); return p
+    payload.setdefault('generated_at', now()); payload['receipt_path']=rel(p); write_json(p,payload)
+    if emit:
+        print(f'RECEIPT_PATH={rel(p)}')
+    return p
 
 def source_hash(path: str|Path) -> str:
     return sha256_bytes(Path(path).read_bytes())

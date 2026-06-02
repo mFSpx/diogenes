@@ -69,6 +69,7 @@ def build_parser() -> argparse.ArgumentParser:
     groq.add_argument("--prompt", required=True, help="Prompt text, or @path.")
     groq.add_argument("--system", default="", help="Optional system message text, or @path.")
     groq.add_argument("--model", default="llama-3.1-8b-instant")
+    groq.add_argument("--run-id")
     groq.add_argument("--max-tokens", type=int)
     groq.add_argument("--temperature", type=float)
     groq.add_argument("--execute", action="store_true")
@@ -96,7 +97,8 @@ def main() -> int:
         result = validate_model_config(config)
         if args.json:
             print(json.dumps(result, sort_keys=True))
-        print("MODEL_CONFIG=PASS" if result.get("ok") else "MODEL_CONFIG=FAIL")
+        else:
+            print("MODEL_CONFIG=PASS" if result.get("ok") else "MODEL_CONFIG=FAIL")
         return 0 if result.get("ok") else 4
     if args.cmd == "cohere-chat":
         cmd = [
@@ -119,7 +121,12 @@ def main() -> int:
             cmd.append("--no-log-prompts")
         if args.json:
             cmd.append("--json")
-        return subprocess.run(cmd, cwd=ROOT).returncode
+        proc = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True)
+        if proc.stdout:
+            sys.stdout.write(proc.stdout)
+        if proc.stderr:
+            sys.stderr.write(proc.stderr)
+        return proc.returncode
     if args.cmd == "groq-chat":
         cmd = [
             sys.executable,
@@ -131,6 +138,8 @@ def main() -> int:
             "--model",
             args.model,
         ]
+        if args.run_id:
+            cmd += ["--run-id", args.run_id]
         if args.max_tokens is not None:
             cmd += ["--max-tokens", str(args.max_tokens)]
         if args.temperature is not None:
@@ -141,7 +150,12 @@ def main() -> int:
             cmd.append("--no-log-prompts")
         if args.json:
             cmd.append("--json")
-        return subprocess.run(cmd, cwd=ROOT).returncode
+        proc = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True)
+        if proc.stdout:
+            sys.stdout.write(proc.stdout)
+        if proc.stderr:
+            sys.stderr.write(proc.stderr)
+        return proc.returncode
     if args.cmd == "local-chat":
         cmd = [
             sys.executable,
@@ -167,14 +181,20 @@ def main() -> int:
             cmd.append("--no-log-prompts")
         if args.json:
             cmd.append("--json")
-        return subprocess.run(cmd, cwd=ROOT).returncode
+        proc = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True)
+        if proc.stdout:
+            sys.stdout.write(proc.stdout)
+        if proc.stderr:
+            sys.stderr.write(proc.stderr)
+        return proc.returncode
     config = load_config(args)
     result = run_stub_model(config, args.prompt)
     if args.json:
         print(json.dumps(result, sort_keys=True))
-    if result.get("receipt_path"):
-        print("RECEIPT_PATH=" + str(result["receipt_path"]))
-    print("MODEL_RUNNER_STUB=" + str(result.get("status", "UNKNOWN")))
+    else:
+        if result.get("receipt_path"):
+            print("RECEIPT_PATH=" + str(result["receipt_path"]))
+        print("MODEL_RUNNER_STUB=" + str(result.get("status", "UNKNOWN")))
     return 0 if result.get("status") == "PASSED" else 4
 
 

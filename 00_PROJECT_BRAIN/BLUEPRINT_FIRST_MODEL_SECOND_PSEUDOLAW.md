@@ -27,6 +27,7 @@ Authority class: always-readable guidance for LUCIDOTA/CLAW work; use it before 
    - Use stochastic output only behind contracts that can be validated.
    - Never have an LLM do work that a deterministic workflow, parser, hash check, schema, router, or explicit state machine can do exactly and faster.
    - This is not model-zero doctrine: use LLMs for bounded ambiguity, messy language extraction, synthesis, adversarial ideation, drafting, and code generation when deterministic machinery is not the right tool.
+   - Archive/container handling is deterministic filesystem/database workflow: enumerate pending containers, open the next bounded archive, recurse into nested containers, route files by extension/schema, preserve originals, and receipt the run. No LLM monitors or controls archive opening/staging. Models belong at bounded OCR, transcription, extraction/entity/ontology, and embedding nodes only.
 
 3. Execution blueprints are first-class artifacts.
    - If the system says it can do a workflow, there should be a small runnable blueprint or queue worker that makes the path explicit.

@@ -43,6 +43,14 @@ def save_state(state: dict[str, Any]) -> None:
     tmp.replace(STATE_PATH)
 
 
+def state_key(path: Path) -> str:
+    """Stable key for a watched book regardless of cwd/path-typing quirks."""
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def iter_books(root: Path) -> list[Path]:
     if not root.exists():
         return []
@@ -59,7 +67,7 @@ def iter_books(root: Path) -> list[Path]:
 
 def fingerprint(path: Path) -> dict[str, int | str]:
     st = path.stat()
-    return {"size": st.st_size, "mtime_ns": st.st_mtime_ns, "path": str(path.relative_to(ROOT))}
+    return {"size": st.st_size, "mtime_ns": st.st_mtime_ns, "path": state_key(path)}
 
 
 def ensure_state_schema() -> None:
@@ -100,7 +108,12 @@ def run_ingest(book: Path, max_tokens: int, append_lora_jsonl: bool) -> dict[str
         cmd.append("--append-lora-jsonl")
     proc = subprocess.run(cmd, cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if proc.returncode != 0:
-        return {"ok": False, "book": str(book.relative_to(ROOT)), "stderr": proc.stderr[-2000:], "stdout": proc.stdout[-2000:]}
+        return {
+            "ok": False,
+            "book": state_key(book),
+            "stderr": proc.stderr[-2000:],
+            "stdout": proc.stdout[-2000:],
+        }
     return json.loads(proc.stdout)
 
 
@@ -108,19 +121,20 @@ def process_once(root: Path, max_tokens: int, append_lora_jsonl: bool) -> dict[s
     state = load_state()
     files = state.setdefault("files", {})
     changed: list[Path] = []
+    root = root.resolve()
     for book in iter_books(root):
         fp = fingerprint(book)
-        key = fp["path"]
+        key = state_key(book)
         if files.get(key) != fp:
             changed.append(book)
     results: list[dict[str, Any]] = []
     for book in changed:
-        run_id = str(book.relative_to(ROOT))
+        run_id = state_key(book)
         workflow_event(run_id, "detected", "queued", {"book": run_id, "watcher": "mamba-1.4b-listener"})
         result = run_ingest(book, max_tokens, append_lora_jsonl)
         results.append(result)
         if result.get("ok"):
-            files[str(book.relative_to(ROOT))] = fingerprint(book)
+            files[state_key(book)] = fingerprint(book)
             workflow_event(run_id, "embedded", "succeeded", {"book": run_id, "result": result})
         else:
             workflow_event(run_id, "embedded", "failed", {"book": run_id, "result": result})
@@ -140,14 +154,29 @@ def main() -> int:
     args = ap.parse_args()
     if args.max_tokens > 500:
         raise SystemExit("--max-tokens must be <= 500")
+    books_root = args.books_root.expanduser()
+    if not books_root.is_absolute():
+        books_root = (ROOT / books_root).resolve()
+
     if args.once:
-        result = process_once(args.books_root, args.max_tokens, args.append_lora_jsonl)
+        result = process_once(books_root, args.max_tokens, args.append_lora_jsonl)
         print(json.dumps(result, indent=2, sort_keys=True) if args.json else result)
         return 0 if result["ok"] else 1
 
-    print(json.dumps({"ok": True, "watching": str(args.books_root), "interval": args.interval, "persona": "INDY_READs", "manager": "mamba-watch-loop"}), flush=True)
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "watching": str(books_root),
+                "interval": args.interval,
+                "persona": "INDY_READs",
+                "manager": "mamba-watch-loop",
+            }
+        ),
+        flush=True,
+    )
     while True:
-        process_once(args.books_root, args.max_tokens, args.append_lora_jsonl)
+        process_once(books_root, args.max_tokens, args.append_lora_jsonl)
         time.sleep(args.interval)
 
 

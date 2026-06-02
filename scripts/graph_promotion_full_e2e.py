@@ -47,13 +47,14 @@ def runc(cmd: list[str]) -> dict:
     return out
 
 
-def write(payload: dict) -> None:
+def write(payload: dict, *, emit: bool = True) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     p = OUT / f"graph_promotion_full_e2e_{stamp()}.json"
     payload.setdefault("generated_at", now())
     payload["report_path"] = rel(p)
     p.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    print("REPORT_PATH=" + rel(p))
+    if emit:
+        print("REPORT_PATH=" + rel(p))
 
 
 def insert_materialization_command(
@@ -135,6 +136,7 @@ def main() -> int:
         description="Operator-confirmed graph promotion E2E. Writes to canonical graph."
     )
     ap.add_argument("--execute", action="store_true")
+    ap.add_argument("--json", action="store_true")
     ap.add_argument("--label", default="Full E2E graph promotion proof")
     ap.add_argument("--evidence-ref", default="05_OUTPUTS/work_loops/real_code_loop_ledger.jsonl")
     ap.add_argument("--artifact-ref", default="scripts/graph_promotion_full_e2e.py")
@@ -143,15 +145,21 @@ def main() -> int:
     a = ap.parse_args()
 
     if not a.execute:
-        write({"action": "graph_promotion_full_e2e", "execute_performed": False,
-               "blockers": ["execute_required"], "status": "FAIL"})
+        payload = {"action": "graph_promotion_full_e2e", "execute_performed": False,
+               "blockers": ["execute_required"], "status": "FAIL"}
+        write(payload, emit=not a.json)
+        if a.json:
+            print(json.dumps(payload, sort_keys=True, default=str))
         return 2
 
     for dep in ("scripts/graph_materialization_helper.py",
                 "scripts/graph_materialization_receipt_query.py"):
         if not (ROOT / dep).exists():
-            write({"action": "graph_promotion_full_e2e", "execute_performed": False,
-                   "blockers": [f"missing_dep:{dep}"], "status": "FAIL"})
+            payload = {"action": "graph_promotion_full_e2e", "execute_performed": False,
+                   "blockers": [f"missing_dep:{dep}"], "status": "FAIL"}
+            write(payload, emit=not a.json)
+            if a.json:
+                print(json.dumps(payload, sort_keys=True, default=str))
             return 2
 
     blockers: list[str] = []
@@ -168,7 +176,8 @@ def main() -> int:
             rationale=a.rationale,
         )
         steps.append({"step": "insert_command_envelope", "rc": 0, "command_uuid": cmd_uuid})
-        print(f"COMMAND_UUID={cmd_uuid}")
+        if not a.json:
+            print(f"COMMAND_UUID={cmd_uuid}")
     except Exception as e:
         blockers.append(f"command_insert_failed:{e}")
         steps.append({"step": "insert_command_envelope", "rc": 1, "error": str(e)})
@@ -214,8 +223,11 @@ def main() -> int:
         "blockers": blockers,
         "status": "PASS" if not blockers else "FAIL",
     }
-    write(payload)
-    print("GRAPH_PROMOTION_FULL_E2E=" + payload["status"])
+    write(payload, emit=not a.json)
+    if a.json:
+        print(json.dumps(payload, sort_keys=True, default=str))
+    else:
+        print("GRAPH_PROMOTION_FULL_E2E=" + payload["status"])
     return 0 if not blockers else 4
 
 

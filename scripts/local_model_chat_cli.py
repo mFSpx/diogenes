@@ -211,10 +211,11 @@ def main() -> int:
     )
     if args.json:
         print(json.dumps(receipt, sort_keys=True))
-    if receipt.get("text"):
-        print(receipt["text"])
-    print("RECEIPT_PATH=" + receipt["report_path"])
-    print("LOCAL_MODEL_CHAT=" + receipt["status"])
+    else:
+        if receipt.get("text"):
+            print(receipt["text"])
+        print("RECEIPT_PATH=" + receipt["report_path"])
+        print("LOCAL_MODEL_CHAT=" + receipt["status"])
     return 0 if receipt["status"] == "PASS" else 4
 
 

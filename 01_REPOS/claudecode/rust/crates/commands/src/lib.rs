@@ -138,7 +138,7 @@ const SLASH_COMMAND_SPECS: &[SlashCommandSpec] = &[
     SlashCommandSpec {
         name: "config",
         aliases: &[],
-        summary: "Inspect Claw config files or merged sections",
+        summary: "Inspect LUCI config files or merged sections",
         argument_hint: Some("[env|hooks|model|plugins]"),
         resume_supported: true,
         category: SlashCommandCategory::Workspace,
@@ -146,7 +146,7 @@ const SLASH_COMMAND_SPECS: &[SlashCommandSpec] = &[
     SlashCommandSpec {
         name: "memory",
         aliases: &[],
-        summary: "Inspect loaded Claw instruction memory files",
+        summary: "Inspect loaded LUCI instruction memory files",
         argument_hint: None,
         resume_supported: true,
         category: SlashCommandCategory::Workspace,
@@ -282,7 +282,7 @@ const SLASH_COMMAND_SPECS: &[SlashCommandSpec] = &[
     SlashCommandSpec {
         name: "plugin",
         aliases: &["plugins", "marketplace"],
-        summary: "Manage Claw Code plugins",
+        summary: "Manage LUCI plugins",
         argument_hint: Some(
             "[list|install <path>|enable <name>|disable <name>|uninstall <id>|update <id>]",
         ),
@@ -502,7 +502,7 @@ pub fn render_slash_command_help() -> String {
     let mut lines = vec![
         "Slash commands".to_string(),
         "  Tab completes commands inside the REPL.".to_string(),
-        "  [resume] = also available via claw --resume SESSION.json".to_string(),
+        "  [resume] = also available via luci --resume SESSION.json".to_string(),
     ];
 
     for category in [
@@ -642,19 +642,23 @@ pub struct PluginsCommandResult {
 enum DefinitionSource {
     ProjectCodex,
     ProjectClaw,
+    ProjectClaude,
     UserCodexHome,
     UserCodex,
     UserClaw,
+    UserClaude,
 }
 
 impl DefinitionSource {
     fn label(self) -> &'static str {
         match self {
             Self::ProjectCodex => "Project (.codex)",
-            Self::ProjectClaw => "Project (.claw)",
+            Self::ProjectClaw => "Project config",
+            Self::ProjectClaude => "Project (.claude)",
             Self::UserCodexHome => "User ($CODEX_HOME)",
             Self::UserCodex => "User (~/.codex)",
-            Self::UserClaw => "User (~/.claw)",
+            Self::UserClaw => "User config",
+            Self::UserClaude => "User (~/.claude)",
         }
     }
 }
@@ -1333,6 +1337,12 @@ fn discover_skill_roots(cwd: &Path) -> Vec<SkillRoot> {
         );
         push_unique_skill_root(
             &mut roots,
+            DefinitionSource::ProjectClaude,
+            ancestor.join(".claude").join("skills"),
+            SkillOrigin::SkillsDir,
+        );
+        push_unique_skill_root(
+            &mut roots,
             DefinitionSource::ProjectCodex,
             ancestor.join(".codex").join("commands"),
             SkillOrigin::LegacyCommandsDir,
@@ -1341,6 +1351,12 @@ fn discover_skill_roots(cwd: &Path) -> Vec<SkillRoot> {
             &mut roots,
             DefinitionSource::ProjectClaw,
             ancestor.join(".claw").join("commands"),
+            SkillOrigin::LegacyCommandsDir,
+        );
+        push_unique_skill_root(
+            &mut roots,
+            DefinitionSource::ProjectClaude,
+            ancestor.join(".claude").join("commands"),
             SkillOrigin::LegacyCommandsDir,
         );
     }
@@ -1385,6 +1401,18 @@ fn discover_skill_roots(cwd: &Path) -> Vec<SkillRoot> {
             &mut roots,
             DefinitionSource::UserClaw,
             home.join(".claw").join("commands"),
+            SkillOrigin::LegacyCommandsDir,
+        );
+        push_unique_skill_root(
+            &mut roots,
+            DefinitionSource::UserClaude,
+            home.join(".claude").join("skills"),
+            SkillOrigin::SkillsDir,
+        );
+        push_unique_skill_root(
+            &mut roots,
+            DefinitionSource::UserClaude,
+            home.join(".claude").join("commands"),
             SkillOrigin::LegacyCommandsDir,
         );
     }
@@ -1624,9 +1652,11 @@ fn render_agents_report(agents: &[AgentSummary]) -> String {
     for source in [
         DefinitionSource::ProjectCodex,
         DefinitionSource::ProjectClaw,
+        DefinitionSource::ProjectClaude,
         DefinitionSource::UserCodexHome,
         DefinitionSource::UserCodex,
         DefinitionSource::UserClaw,
+        DefinitionSource::UserClaude,
     ] {
         let group = agents
             .iter()
@@ -1682,9 +1712,11 @@ fn render_skills_report(skills: &[SkillSummary]) -> String {
     for source in [
         DefinitionSource::ProjectCodex,
         DefinitionSource::ProjectClaw,
+        DefinitionSource::ProjectClaude,
         DefinitionSource::UserCodexHome,
         DefinitionSource::UserCodex,
         DefinitionSource::UserClaw,
+        DefinitionSource::UserClaude,
     ] {
         let group = skills
             .iter()
@@ -1723,8 +1755,8 @@ fn render_agents_usage(unexpected: Option<&str>) -> String {
     let mut lines = vec![
         "Agents".to_string(),
         "  Usage            /agents".to_string(),
-        "  Direct CLI       claw agents".to_string(),
-        "  Sources          .codex/agents, .claw/agents, $CODEX_HOME/agents".to_string(),
+        "  Direct CLI       luci agents".to_string(),
+        "  Sources          .codex/agents, project config agents, $CODEX_HOME/agents".to_string(),
     ];
     if let Some(args) = unexpected {
         lines.push(format!("  Unexpected       {args}"));
@@ -1736,8 +1768,8 @@ fn render_skills_usage(unexpected: Option<&str>) -> String {
     let mut lines = vec![
         "Skills".to_string(),
         "  Usage            /skills".to_string(),
-        "  Direct CLI       claw skills".to_string(),
-        "  Sources          .codex/skills, .claw/skills, legacy /commands".to_string(),
+        "  Direct CLI       luci skills".to_string(),
+        "  Sources          .codex/skills, project config skills, legacy /commands".to_string(),
     ];
     if let Some(args) = unexpected {
         lines.push(format!("  Unexpected       {args}"));
@@ -2123,7 +2155,7 @@ mod tests {
     #[test]
     fn renders_help_from_shared_specs() {
         let help = render_slash_command_help();
-        assert!(help.contains("available via claw --resume SESSION.json"));
+        assert!(help.contains("available via luci --resume SESSION.json"));
         assert!(help.contains("Core flow"));
         assert!(help.contains("Workspace & memory"));
         assert!(help.contains("Sessions & output"));
@@ -2373,11 +2405,17 @@ mod tests {
     fn lists_skills_from_project_and_user_roots() {
         let workspace = temp_dir("skills-workspace");
         let project_skills = workspace.join(".codex").join("skills");
+        let project_claude_skills = workspace.join(".claude").join("skills");
         let project_commands = workspace.join(".claw").join("commands");
         let user_home = temp_dir("skills-home");
         let user_skills = user_home.join(".codex").join("skills");
 
         write_skill(&project_skills, "plan", "Project planning guidance");
+        write_skill(
+            &project_claude_skills,
+            "vibes-delegate",
+            "Vibes delegation guidance",
+        );
         write_legacy_command(&project_commands, "deploy", "Legacy deployment guidance");
         write_skill(&user_skills, "plan", "User planning guidance");
         write_skill(&user_skills, "help", "Help guidance");
@@ -2394,6 +2432,11 @@ mod tests {
                 origin: SkillOrigin::LegacyCommandsDir,
             },
             SkillRoot {
+                source: DefinitionSource::ProjectClaude,
+                path: project_claude_skills,
+                origin: SkillOrigin::SkillsDir,
+            },
+            SkillRoot {
                 source: DefinitionSource::UserCodex,
                 path: user_skills,
                 origin: SkillOrigin::SkillsDir,
@@ -2403,11 +2446,13 @@ mod tests {
             render_skills_report(&load_skills_from_roots(&roots).expect("skill roots should load"));
 
         assert!(report.contains("Skills"));
-        assert!(report.contains("3 available skills"));
+        assert!(report.contains("4 available skills"));
         assert!(report.contains("Project (.codex):"));
         assert!(report.contains("plan · Project planning guidance"));
-        assert!(report.contains("Project (.claw):"));
+        assert!(report.contains("Project config:"));
         assert!(report.contains("deploy · Legacy deployment guidance · legacy /commands"));
+        assert!(report.contains("Project (.claude):"));
+        assert!(report.contains("vibes-delegate · Vibes delegation guidance"));
         assert!(report.contains("User (~/.codex):"));
         assert!(report.contains("(shadowed by Project (.codex)) plan · User planning guidance"));
         assert!(report.contains("help · Help guidance"));
@@ -2423,7 +2468,7 @@ mod tests {
         let agents_help =
             super::handle_agents_slash_command(Some("help"), &cwd).expect("agents help");
         assert!(agents_help.contains("Usage            /agents"));
-        assert!(agents_help.contains("Direct CLI       claw agents"));
+        assert!(agents_help.contains("Direct CLI       luci agents"));
 
         let agents_unexpected =
             super::handle_agents_slash_command(Some("show planner"), &cwd).expect("agents usage");

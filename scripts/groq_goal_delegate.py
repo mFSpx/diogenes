@@ -31,6 +31,17 @@ RULES: local-first; no VRAM; no secrets; no completion claims without proof; kee
 Return JSON only: {{"summary":"","findings":[],"commands_to_run":[],"safe_patch_plan":[],"blockers":[],"next_small_step":""}}"""
 def write(r):
  OUT.mkdir(parents=True,exist_ok=True); p=OUT/f'groq_goal_delegate_{stamp()}.json'; r['report_path']=rel(p); p.write_text(json.dumps(r,indent=2,sort_keys=True)+'\n'); return p
+def model_runner_result(stdout):
+ sub=next((l.split('=',1)[1] for l in stdout.splitlines() if l.startswith('RECEIPT_PATH=')),None); data={}
+ if not sub:
+  for line in reversed([l.strip() for l in stdout.splitlines() if l.strip()]):
+   if line.startswith('{'):
+    try:data=json.loads(line); break
+    except Exception: pass
+  sub=((data.get('visible_response') or {}).get('receipt_path') or data.get('receipt_path') or data.get('report_path')) if data else None
+ if sub and (ROOT/sub).exists():
+  sd=json.loads((ROOT/sub).read_text()); data={**data,**sd}
+ return sub,data
 def main()->int:
  ap=argparse.ArgumentParser(); ap.add_argument('--task',required=True); ap.add_argument('--file',action='append',default=[]); ap.add_argument('--kind',choices=['audit','plan','review','code-slice'],default='audit'); ap.add_argument('--model',default=os.environ.get('GROQ_GOAL_MODEL','llama-3.1-8b-instant')); ap.add_argument('--max-tokens',type=int,default=512); ap.add_argument('--execute',action='store_true'); ap.add_argument('--json',action='store_true'); a=ap.parse_args()
  body=prompt(read_text(a.task),a.file,a.kind); blockers=[]
@@ -44,12 +55,11 @@ def main()->int:
   prompt_path=rel(pp)
   cmd=[sys.executable,'scripts/model_runner_cli.py','groq-chat','--prompt','@'+rel(pp),'--system','Return valid compact JSON only.','--model',a.model,'--max-tokens',str(a.max_tokens),'--temperature','0','--json','--execute']
   pr=subprocess.run(cmd,cwd=ROOT,text=True,capture_output=True,timeout=120)
-  sub=next((l.split('=',1)[1] for l in pr.stdout.splitlines() if l.startswith('RECEIPT_PATH=')),None)
+  sub,sd=model_runner_result(pr.stdout)
   if pr.returncode: blockers.append('groq_delegate_call_failed')
-  if sub and (ROOT/sub).exists():
-   sd=json.loads((ROOT/sub).read_text()); usage=sd.get('usage'); text=sd.get('text','')
-   for b in sd.get('blockers',[]) or []:
-    if b not in blockers: blockers.append(b)
+  usage=sd.get('usage'); text=sd.get('text','')
+  for b in sd.get('blockers',[]) or []:
+   if b not in blockers: blockers.append(b)
  r={'schema':'lucidota.goals.groq_delegate.v1','generated_at':now(),'provider':'groq','model':a.model,'kind':a.kind,'task_chars':len(read_text(a.task)),'files':a.file,'prompt_path':prompt_path,'prompt_sha256':sha_text(body),'api_key_env_used':'GROQ_API_KEY' if os.environ.get('GROQ_API_KEY') else None,'api_key_redacted':bool(os.environ.get('GROQ_API_KEY')),'execute_performed':bool(a.execute and not blockers),'model_calls_performed':bool(a.execute and not blockers),'subreceipt_path':sub,'usage':usage,'text':text,'blockers':blockers}
  p=write(r); print('REPORT_PATH='+rel(p)); print('GROQ_GOAL_DELEGATE='+('PASS' if not blockers else 'BLOCKED'))
  if a.json: print(json.dumps(r,sort_keys=True))

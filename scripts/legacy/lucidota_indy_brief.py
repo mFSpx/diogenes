@@ -156,6 +156,7 @@ def corpus_summary() -> dict:
                 "artifact_sha256": corpus["artifact_sha256"],
                 "source_scope": corpus["source_scope"],
                 "labels": corpus["labels"],
+                "distilled": corpus.get("distilled", {}),
             }
     except Exception as exc:
         build_error = str(exc)[:160]

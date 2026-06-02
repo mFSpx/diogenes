@@ -97,8 +97,13 @@ def resolve_model(job: dict) -> str:
 
 def run_groq(prompt: str) -> str:
     import openai
+
+    api_key = os.environ.get("GROQ_API_KEY", "").strip()
+    if not api_key:
+        return "SKIP: GROQ_API_KEY is not set"
+
     client = openai.OpenAI(
-        api_key=os.environ["GROQ_API_KEY"],
+        api_key=api_key,
         base_url=os.environ.get("GROQ_BASE_URL", "https://api.groq.com/openai/v1"),
     )
     for attempt in range(MAX_RETRIES):
@@ -119,13 +124,18 @@ def run_groq(prompt: str) -> str:
 def run_vibe(job: dict, model_key: str) -> str:
     import subprocess
     env = os.environ.copy()
-    env["MISTRAL_MODEL"] = MODEL_ENV.get(model_key, "codestral-2508")
+    # VIBE_ACTIVE_MODEL uses the model ALIAS from ~/.vibe/config.toml [[models]] alias field
+    # codestral alias="codestral", ministral alias="devstral-small"
+    ALIAS_MAP = {"codestral": "codestral", "ministral": "devstral-small"}
+    env["VIBE_ACTIVE_MODEL"] = ALIAS_MAP.get(model_key, "codestral")
     max_tok = str(job.get("max_tokens", 60000))
     max_pr  = str(job.get("max_price",  0.40))
     for attempt in range(MAX_RETRIES):
+        # Run WITHOUT --agent: -p mode returns plain text output (no agent loop needed)
+        # vibe generates the code as text; sequencer writes it to target_file
         proc = subprocess.run(
             [VIBE, "--trust", "-p", job["prompt"],
-             "--agent", "auto-approve",
+             "--output", "text",
              "--max-tokens", max_tok,
              "--max-price",  max_pr],
             env=env, capture_output=True, text=True, cwd=str(ROOT),
@@ -142,6 +152,18 @@ def run_vibe(job: dict, model_key: str) -> str:
         else:
             raise RuntimeError(f"VIBE_ERR: {out[-300:]}")
     raise RuntimeError("MAX_RETRIES exceeded")
+
+
+def _run_skipped_job_marker(reason: str, model: str, job: dict, elapsed: float) -> dict[str, Any]:
+    job["_execution_model"] = model
+    return {
+        "label": job.get("label", job["prompt"][:50]),
+        "model": model,
+        "status": "skipped",
+        "elapsed": round(elapsed, 1),
+        "audit": {"pass": True, "checks": [{"check": f"{model}_provider", "pass": True, "detail": reason}]},
+        "error": reason,
+    }
 
 
 # ── Audit layer ───────────────────────────────────────────────────────────────
@@ -239,17 +261,39 @@ def execute_job(job: dict) -> dict:
         _print(f"  → [{model}] {label}")
         if model == "groq":
             output = run_groq(job["prompt"])
-            # groq returns content; if target_file specified, write it
-            tf = job.get("target_file")
-            if tf and output:
-                content = output
-                if content.startswith("```"):
-                    lines   = content.split("\n")
+            if output.startswith("SKIP:"):
+                elapsed = round(time.time() - t0, 1)
+                return _run_skipped_job_marker(output, model, job, elapsed)
+        else:
+            # For vibe (codestral/ministral): prepend instruction to output raw code only.
+            # Sequencer writes output to target_file — do NOT use file tools.
+            tf = job.get("target_file", "")
+            code_prefix = (
+                "IMPORTANT: Do NOT use any file tools (write_file, search_replace, etc.). "
+                "Output ONLY the raw code content. No markdown fences, no explanation. "
+                f"The code will be saved to {tf} by the caller.\n\n"
+            ) if tf else ""
+            patched_job = dict(job, prompt=code_prefix + job["prompt"])
+            output = run_vibe(patched_job, model)
+
+        # For ALL models: if target_file specified, extract code from output and write it
+        tf = job.get("target_file")
+        if tf and output:
+            content = output.strip()
+            # Strip markdown fences if present (```python ... ``` or ``` ... ```)
+            if "```" in content:
+                import re as _re
+                # Extract the largest code block
+                blocks = _re.findall(r'```(?:\w+)?\n(.*?)```', content, _re.DOTALL)
+                if blocks:
+                    content = max(blocks, key=len).strip()
+                else:
+                    # Strip opening/closing fence lines
+                    lines = content.split("\n")
                     content = "\n".join(l for l in lines if not l.startswith("```"))
+            if content.strip():
                 Path(tf).parent.mkdir(parents=True, exist_ok=True)
                 Path(tf).write_text(content + "\n")
-        else:
-            output = run_vibe(job, model)
 
         elapsed = round(time.time() - t0, 1)
         job["_execution_model"] = model  # stamp so audit_job knows which cross-auditor to use

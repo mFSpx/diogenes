@@ -1,0 +1,1 @@
+OH; AND PLEASE: ORCHESTRATE AND DESIGN WITH GPT 5.5 ; ALL AGENTS TO BE 5.3 spark; or 5.4 mini... AND PLEASE; USE AS MUCH /vibes  -delegate, VIbes, GROQ as possible PLEASE; like way more than codex <3 KK thanks (and also get that into the manual ;P) YOU ASK ME QUESTIONS IF YOU HAVE ANYTHING... LACKING IN a half hur of work (730 AM <- You can take a break and ask me 60 questions)

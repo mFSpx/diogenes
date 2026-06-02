@@ -229,10 +229,11 @@ def main() -> int:
     path = write_receipt(payload)
     if args.json:
         print(json.dumps(payload, sort_keys=True))
-    if payload.get("text"):
-        print(payload["text"])
-    print("RECEIPT_PATH=" + rel(path))
-    print("COHERE_CHAT=" + payload["status"])
+    else:
+        if payload.get("text"):
+            print(payload["text"])
+        print("RECEIPT_PATH=" + rel(path))
+        print("COHERE_CHAT=" + payload["status"])
     return 0 if payload["status"] == "PASS" else 4
 
 

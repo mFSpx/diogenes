@@ -129,3 +129,24 @@ Mamba handles state and structure. VRAM slot handles the heavy task.
 GLiNER extracts without generation. Groq overflows when needed.
 
 Indy emerges from the routing policy, not from any one model's weights.
+
+---
+
+## VIBES / CODESTRAL (external code-work lane)
+
+- Binary: `.venv/bin/vibe`
+- Account/key: `MISTRAL_API_KEY` from `~/.config/lucidota/secrets.env`
+- Normal non-interactive call:
+  `source scripts/lucidota_safe_ops_env.sh && .venv/bin/vibe -p "<bounded task>" --agent auto-approve --trust --workdir /home/mfspx/LUCIDOTA`
+- Operator budget note, 2026-06-01: treat one Vibes session as **200k total
+  tokens** with an approximately **32k active context window**. Slice prompts
+  into exact file ownership + acceptance checks; do not hand it the whole swamp.
+  This budget note is **Mistral/Vibes only**.
+- Role: external code generation/refactor/review lane. It can draft or modify
+  bounded code, but `./claw`/Indy still own routing, verification, receipts, and
+  final authority.
+
+Groq is a separate OpenAI-compatible API-key lane (`GROQ_API_KEY` +
+`GROQ_BASE_URL`), not a Vibes session and not subject to the Vibes token/window
+budget above. Use Groq for fast bulk inference and overflow; do not route Groq
+through `vibe`.

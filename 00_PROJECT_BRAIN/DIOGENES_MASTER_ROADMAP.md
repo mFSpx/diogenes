@@ -1,7 +1,7 @@
 All load-bearing claims confirmed against the live DB. Key facts now verified:
 - ABSURD spine, promotion packets, staging_packet, term_registry=75, temporal_claim table all **applied** (briefing's "92 unapplied / 45 terms" is stale).
 - The break is real: `graph_staging_candidates` exists in no schema; `event_envelope`=0 rows, `script_registry`=0 rows, `temporal_claim`=0 rows (built-but-unfed).
-- `governor_action` table = **missing** (null). Write-barrier triggers on canonical tables = **none attached**. The 4 genuine unapplied schemas (045/046/050/094) confirmed absent. `corpus_chunk`=1185 (a growing dead-end library). `claw` does not start the model stack or any governor.
+- `governor_action` table = **missing** (null). Write-barrier triggers on canonical tables = **none attached**. The 4 core schemas (045/046/050/094) were the real gap and are now applied; the remaining issue is live wiring, not missing DDL. `corpus_chunk`=1185 (a growing dead-end library). `claw` now starts the resident model stack admission check and front-door runtime.
 
 I have everything needed. Producing the master roadmap.
 
@@ -10,7 +10,7 @@ I have everything needed. Producing the master roadmap.
 # DIOGENES MASTER ROADMAP — Co-Design Draft for Operator Approval
 *Chief architect synthesis of 8 grounded sub-plans + live-DB verification (read-only, 2026-05-29). Embed crush + Groq OCR in flight — every action below is schema-apply / file-edit / deterministic-test only, no heavy jobs, no model loads.*
 
-**Trust correction (load-bearing):** OPUS_BRIEFING §8/§17 are STALE. Live DB: state=143 tables/15 schemas, storage=154 tables/14 schemas. ABSURD spine, graph promotion, chrono ledger (`lucidota_korpus.temporal_claim`), `staging_packet`=130, `term_registry`=75 are **all applied**. The "92 unapplied / 18,627 staged / 45 terms" backlog is a **phantom** — do not redo applied work. The real gaps are narrow and listed below.
+**Trust correction (load-bearing):** OPUS_BRIEFING §8/§17 are STALE. Live DB: state=143 tables/15 schemas, storage=154 tables/14 schemas. ABSURD spine, graph promotion, chrono ledger (`lucidota_korpus.temporal_claim`), `staging_packet`=130, `term_registry`=75, and the core document/catchme/foundry schemas (045/046/050/094) are **all applied**. The "92 unapplied / 18,627 staged / 45 terms" backlog is a **phantom** — do not redo applied work. The real gaps are now live wiring and operator surface polish, not missing DDL.
 
 ---
 
@@ -125,13 +125,13 @@ P0 schema-reconcile┘                                                          
 
 1. **Run the schema-reconciliation auditor (build + run).** Write `scripts/schema_apply_state_audit.py` (read_only, just `to_regclass`/`pg_proc`/`pg_trigger` probes). **Receipt:** `05_OUTPUTS/schema_audit/schema_apply_state_<ts>.json` showing exactly 4 genuine gaps. Kills the phantom-backlog narrative permanently.
 
-2. **Apply the 4 real schemas + attach the write-barrier.** `psql ON_ERROR_STOP=1` apply 045, 046, 050, 094, then 040+074. **Receipt:** re-run auditor → 0 unapplied; `pg_trigger` query returns the 3 `enforce_graph_promotion_path` triggers on `graph_item/edge/journal` (verified absent now). Schema-apply only — no workers run.
+2. **Apply the 4 real schemas + attach the write-barrier.** `psql ON_ERROR_STOP=1` apply 045, 046, 050, 094, then 040+074. **Receipt:** re-run auditor → 0 unapplied; `pg_trigger` query returns the 3 `enforce_graph_promotion_path` triggers on `graph_item/edge/journal` (verified absent now). Schema-apply only — no workers run. *(Core 045/046/050/094 are now applied in live DB; remaining work is the write-barrier / live wiring.)*
 
 3. **Fix THE BREAK (one-file edit).** Repoint `krampus_stage_worker.py:172` `STAGING_TABLE` from phantom `lucidota_korpus.graph_staging_candidates` → `lucidota_go.staging_packet`; align columns. **Receipt:** `scripts/krampus_stage_worker.py --once` produces `staged.json` with `lane='db'` (not `jsonl_fallback`) — proves the central break is closed. Single small file, no crush impact.
 
 4. **Build the stage→packet wire + run one packet end-to-end.** Have stage enqueue a `graph_promotion` job; let the already-live `absurd_graph_promotion_worker`→`graph_promotion_gate.py` create the packet. **Receipt:** `psql ... -Atc "SELECT count(*) FROM lucidota_go.graph_promotion_packet"` increases from **5**, new row carries the ingest `evidence_ref`. This is the OUROBOROS proof — one corpus item becomes a graph candidate without bypassing the gate.
 
-5. **Correct the stale doctrine docs (commit the truth).** Edit OPUS_BRIEFING §8/§17 (92→4 unapplied, 45→75 terms, ABSURD/promotion/chrono APPLIED), fix the two false Percyphon-doctrine claims (cite `ast.parse` + `git show HEAD`), repoint `schema_audit_20260529.md` to the new live receipt. **Receipt:** committed diff; no future agent chases a phantom backlog.
+5. **Correct the stale doctrine docs (commit the truth).** Edit OPUS_BRIEFING §8/§17 (92→4 unapplied, 45→75 terms, ABSURD/promotion/chrono APPLIED), fix the two false Percyphon-doctrine claims (cite `ast.parse` + `git show HEAD`), repoint `schema_audit_20260529.md` to the new live receipt. **Receipt:** committed diff; no future agent chases a phantom backlog. *(Core 045/046/050/094 are now live; keep this section focused on the remaining wiring gaps.)*
 
 *Deferred to P1+ (NOT this session, respects crush): governor daemon, Cerebras Rust lane, corpus_chunk backfill, any materialize, anything that loads a model or runs the BGE fleet + chat simultaneously.*
 
@@ -190,14 +190,14 @@ DIOGENES is operational per spec when **all** are true with a fresh receipt or l
 |---|---|---|---|
 | 22 | No real PDF/docx/xlsx/audio/video parser in route_extract (regex/Groq-vision only); archives not recursively unpacked there; 7z/rar/zst declared but unimplemented in archive_crush; slow-lane JSONL has no consumer | etl-ingest | CHIMNEY emitters + Rust intake Phase-2 (P5) |
 | 23 | `lucidota-intake` Rust Phase-2 Postgres writer unbuilt (Cargo.toml has no sqlx) | claw/rust | Build Phase-2 (P5) |
-| 24 | 4 genuine unapplied schemas: 045, 046, 050, 094 (verified null) | hygiene | Apply (P0) |
+| 24 | 4 genuine unapplied schemas: 045, 046, 050, 094 (now applied live) | hygiene | Keep the wire between ingest/front and promotion live |
 | 25 | Two parallel routers (`language_router.py` receipt-only vs `project2501_board_move.py` DB-persisting) unmerged; treelite `.tl` artifact unwired (inline tree used) | ux-router | Merge/delegate + wire `.tl` (P2/P4) |
 | 26 | `hypertimeline_engine.py` = 11-line wrapper importing from Script_Corpses; FairyFuse native ternary = `STUB_BACKEND_NOT_WIRED`; `ternary_lens_router.py` = `STUB_BACKEND_NOT_WIRED`; GLiNER not in live router path; `persona_stamp.md` 64-byte stub | capability/output/percyphon | Promote core / expand stamp (P4/P5) |
 | 27 | pytest only in `.venv` (system python3 has none) — CLAUDE.md commands silently fail | hygiene | venv guard in release gate (P6) |
 | 28 | Mutation-class declarations missing on most of 446 scripts; 5 dead + 9 stub scripts unarchived | hygiene | Automated check + archive (P6) |
 | 29 | `treelite_gate` falls open (score=0.5/slow) on any failure — masks dead router, no alarm | etl-ingest | Add alarm (P2) |
 
-**DOC ERRORS (not code — correct in P0):** OPUS_BRIEFING §8/§17 stale (92→4 unapplied, 45→75 terms, spine/promotion/chrono actually APPLIED); `percyphon_doctrine_20260529.md` two FALSE claims (source "truncated" — it parses clean at HEAD; `route_decision.percyphon` field — no such column); `schema_audit_20260529.md` stale. Percyphon `ALGOS/percyphon.py` is intact (correct OPUS_BRIEFING §23/§15).
+**DOC ERRORS (not code — correct in P0):** OPUS_BRIEFING §8/§17 stale (92→4 unapplied, 45→75 terms, spine/promotion/chrono actually APPLIED); `percyphon_doctrine_20260529.md` two FALSE claims (source "truncated" — it parses clean at HEAD; `route_decision.percyphon` field — no such column); `schema_audit_20260529.md` stale. Percyphon `ALGOS/percyphon.py` is intact (correct OPUS_BRIEFING §23/§15). *(Live DB now also has 045/046/050/094 applied; this note is historical, not current backlog.)*
 
 ---
 

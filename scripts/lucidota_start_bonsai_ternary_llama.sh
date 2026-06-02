@@ -2,8 +2,13 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/scripts/lucidota_safe_ops_env.sh"
-# GPU controlled by caller; default expose device 0 for VRAM offload
-: "${CUDA_VISIBLE_DEVICES:=0}"
+# CPU-only lane for strict fabric. Keep the override available for explicit local
+# experiments, but default to no CUDA device.
+export CUDA_VISIBLE_DEVICES=""
+: "${LUCIDOTA_BONSAI_CUDA_VISIBLE_DEVICES:=}"
+if [[ -n "${LUCIDOTA_BONSAI_CUDA_VISIBLE_DEVICES}" ]]; then
+  export CUDA_VISIBLE_DEVICES="${LUCIDOTA_BONSAI_CUDA_VISIBLE_DEVICES}"
+fi
 export CUDA_VISIBLE_DEVICES
 HOST="${LUCIDOTA_BONSAI_HOST:-127.0.0.1}"
 PORT="${LUCIDOTA_BONSAI_PORT:-8082}"

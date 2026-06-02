@@ -147,8 +147,12 @@ def procedural_entity_generator(villagers, psyche_wrath_velocity=0.0, psyche_for
         uuid = _uuid_from_sha256(f"{seed}:fluid:{slot_index}:{villager_ref}")
         slots.append(ProceduralSlot(slot_index, name, alias, persona, uuid, ternary, coord).as_dict())
     return {
+        "schema": "lucidota.percyphon.scaffold.v1",
+        "zero_vram": True,
         "seed": seed,
         "slots": slots,
+        "slot_count": len(slots),
+        "fluid_slot_count": sum(1 for slot in slots if slot["slot_index"] >= 29),
         "source_count": min(5000, len(villagers) or 5000),
         "uuid": _uuid_from_sha256(seed),
         "name": slots[0]["name"],

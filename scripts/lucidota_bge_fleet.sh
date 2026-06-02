@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # BGE-M3 embedding FLEET — GPU mode: 1 server, --parallel COUNT slots (one copy of weights in VRAM).
-#                           CPU mode: N servers with mmap'd shared weights in RAM.
+#                           CPU mode: 1 safe fallback server by default.
 #
-# GPU mode (NGL > 0, default):
-#   One llama-server process owns the model weights once in VRAM (~620 MiB), serves
+# GPU mode (NGL > 0, explicit only on this box):
+#   One llama-server process owns the model weights once in VRAM (~456 MiB), serves
 #   COUNT parallel embedding slots via continuous batching. --cache-ram 0 kills the
 #   8192 MiB/instance default prompt-cache that previously OOM'd the box.
 #
 # CPU mode (NGL = 0, set LUCIDOTA_BGE_NGL=0):
-#   N separate servers, weights mmap'd → all N share ONE physical RAM copy (~606 MiB).
-#   Per-server compute buffer is private. --no-mmap breaks sharing; never pass it.
+#   One separate server by default, weights mmap'd. Extra CPU servers are only
+#   started when explicitly requested. --no-mmap breaks sharing; never pass it.
 #
 # Usage:  scripts/lucidota_bge_fleet.sh [COUNT]
 #         scripts/lucidota_bge_fleet.sh stop
@@ -30,7 +30,6 @@ if [[ "${1:-}" == "stop" ]]; then
   exit 0
 fi
 
-COUNT="${1:-${LUCIDOTA_BGE_FLEET_COUNT:-16}}"
 GGUF="${ROOT}/04_RUNTIME/models/bge-m3-q8_0.gguf"
 SERVER="${ROOT}/01_REPOS/llama.cpp/build-cuda/bin/llama-server"
 LIB="${ROOT}/01_REPOS/llama.cpp/build-cuda/bin"
@@ -40,16 +39,63 @@ UBATCH="${LUCIDOTA_BGE_FLEET_UBATCH:-2048}"
 THREADS="${LUCIDOTA_BGE_FLEET_THREADS:-2}"
 NGL="${LUCIDOTA_BGE_NGL:-0}"
 
+if [[ -n "${1:-}" ]]; then
+  COUNT="$1"
+elif [[ -n "${LUCIDOTA_BGE_FLEET_COUNT:-}" ]]; then
+  COUNT="$LUCIDOTA_BGE_FLEET_COUNT"
+elif (( NGL > 0 )); then
+  COUNT=16
+else
+  COUNT=1
+fi
+
 [[ -f "$GGUF" ]] || { echo "ERROR: missing $GGUF" >&2; exit 1; }
 [[ -x "$SERVER" ]] || { echo "ERROR: missing llama-server $SERVER" >&2; exit 1; }
 export LD_LIBRARY_PATH="$LIB:/usr/local/lib/ollama/cuda_v12:${LD_LIBRARY_PATH:-}"
+
+restart_if_mode_mismatch() {
+  local expected_ngl="$1"
+  local label="$2"
+  local port="$3"
+  local pidf="$4"
+
+  if ! curl -fsS --max-time 1 "http://127.0.0.1:${port}/health" >/dev/null 2>&1; then
+    return 1
+  fi
+
+  local pid=""
+  [[ -s "$pidf" ]] && pid="$(cat "$pidf" 2>/dev/null || true)"
+  if [[ -n "$pid" && -r "/proc/$pid/cmdline" ]]; then
+    local cmdline
+    cmdline="$(tr '\0' ' ' < "/proc/$pid/cmdline")"
+    if [[ "$cmdline" == *" -ngl ${expected_ngl} "* || "$cmdline" == *" -ngl ${expected_ngl}" ]]; then
+      return 0
+    fi
+    echo "bge:${port} healthy but not ${label} (-ngl ${expected_ngl}); restarting pid $pid"
+    kill "$pid" 2>/dev/null || true
+    rm -f "$pidf"
+    for ((wait=0; wait<10; wait++)); do
+      sleep 0.2
+      if ! kill -0 "$pid" 2>/dev/null; then
+        break
+      fi
+    done
+    return 1
+  fi
+
+  echo "bge:${port} healthy but pidfile missing/stale; leaving it alone" >&2
+  return 0
+}
 
 if (( NGL > 0 )); then
   # ── GPU MODE ─────────────────────────────────────────────────────────────
   # LUCIDOTA_BGE_GPU_INSTANCES separate servers, each with SLOTS_PER parallel slots.
   # Each process loads its own model copy in VRAM (~456 MiB each).
   # 4 instances × 8 slots = 32 total concurrent slots, ~1840 MiB VRAM.
-  GPU_INSTANCES="${LUCIDOTA_BGE_GPU_INSTANCES:-1}"
+  if [[ "${LUCIDOTA_BGE_GPU_INSTANCES:-1}" != "1" ]]; then
+    echo "WARNING: LUCIDOTA_BGE_GPU_INSTANCES=${LUCIDOTA_BGE_GPU_INSTANCES} ignored; GPU mode uses one llama-server with COUNT parallel slots" >&2
+  fi
+  GPU_INSTANCES=1
   SLOTS_PER=$(( COUNT / GPU_INSTANCES ))
   (( SLOTS_PER < 1 )) && SLOTS_PER=1
   CTX_PER=$(( SLOTS_PER * 2048 ))   # each slot gets full 2048 ctx
@@ -61,7 +107,7 @@ if (( NGL > 0 )); then
     pidf="$RUN/bge_fleet_${port}.pid"
     log="$RUN/bge_fleet_${port}.log"
 
-    if curl -fsS --max-time 1 "http://127.0.0.1:${port}/health" >/dev/null 2>&1; then
+    if restart_if_mode_mismatch "$NGL" "gpu" "$port" "$pidf"; then
       echo "bge:${port} (gpu inst=$inst slots=${SLOTS_PER}) already online"; continue
     fi
 
@@ -107,7 +153,7 @@ else
     urls+=("http://127.0.0.1:${port}")
     pidf="$RUN/bge_fleet_${port}.pid"
     log="$RUN/bge_fleet_${port}.log"
-    if curl -fsS --max-time 1 "http://127.0.0.1:${port}/health" >/dev/null 2>&1; then
+    if restart_if_mode_mismatch 0 "cpu" "$port" "$pidf"; then
       echo "bge:${port} already online"; continue
     fi
     setsid env OMP_NUM_THREADS="$THREADS" "$SERVER" \

@@ -41,9 +41,10 @@
 - `scripts/run_instruction_hygiene.py`
 
 ## Archived / Historical Instruction Sources
-- Storage/archive manifest: `05_OUTPUTS/instruction_hygiene/instruction_archive_manifest_20260529T230225770465Z.json`
+- Storage/archive manifest: `05_OUTPUTS/instruction_hygiene/instruction_archive_manifest_20260601T062811746595Z.json`
 
 ## Manual Review Required
+- `.github/workflows/lucidota-build.yml`
 - `00_PROJECT_BRAIN/ACTIVE_SPEC/03_CUSTODY_ETL_PIPELINE.md`
 - `00_PROJECT_BRAIN/ACTIVE_SPEC/05_COMPONENT_AUTHORITY_MAP.md`
 - `00_PROJECT_BRAIN/ACTIVE_SPEC/06_BARE_STEEL_DOCTRINE.md`
@@ -51,6 +52,7 @@
 - `00_PROJECT_BRAIN/ACTIVE_SPEC/08_BOARD_EFFECT_TOURNAMENT_LAW.md`
 - `00_PROJECT_BRAIN/AGENTSI_SELF_SOVEREIGN_JOB_FAIR/JOB_BOOTHS.json`
 - `00_PROJECT_BRAIN/AGENTSI_SELF_SOVEREIGN_JOB_FAIR/README.md`
+- `00_PROJECT_BRAIN/DOLTHUB_PROMPTFLOW_40_SHORTLIST.md`
 - `00_PROJECT_BRAIN/ETL_PIPELINE/DBOS_CONTRACT.md`
 - `00_PROJECT_BRAIN/ETL_PIPELINE/DB_MAPPING.md`
 - `00_PROJECT_BRAIN/ETL_PIPELINE/LIVE_INGEST_NOTES.md`
@@ -66,6 +68,7 @@
 - `00_PROJECT_BRAIN/KNOWLEDGE_LIBRARY/LLM_WORKFLOW_ROUTER_DOBY_BAXTER.md`
 - `00_PROJECT_BRAIN/KNOWLEDGE_LIBRARY/README.md`
 - `00_PROJECT_BRAIN/KNOWLEDGE_LIBRARY/SYDSEC_SYD.md`
+- `00_PROJECT_BRAIN/PHANTOM_INTEGRATION_DESIGN.md`
 - `00_PROJECT_BRAIN/RFCS/GOAL_COMPLETION_AUDIT.md`
 - `00_PROJECT_BRAIN/RFCS/GOAL_REQUIREMENT_MATRIX.json`
 - `00_PROJECT_BRAIN/RFCS/README.md`
@@ -83,10 +86,12 @@
 - `00_PROJECT_BRAIN/RFCS/RFC-190-SELF-SOVEREIGNTY-OSINT.md`
 - `00_PROJECT_BRAIN/RFCS/RFC_SUBJECT_REGISTRY.json`
 - `00_PROJECT_BRAIN/RFCS/SOURCES.md`
+- `00_PROJECT_BRAIN/SONNET_HANDOFF.md`
+- `00_PROJECT_BRAIN/SYSTEM_MAP_FULL.md`
 - `00_PROJECT_BRAIN/organ_registry/50_ingestion.json`
 - `00_PROJECT_BRAIN/organ_registry/60_spencer_signal_bench.json`
 - `00_PROJECT_BRAIN/organ_registry/ORGAN_REGISTRY.md`
-- `04_RUNTIME/corpus_ingest/cursor.json`
+- `00_PROJECT_BRAIN/rust_port_candidacy_registry.json`
 - `04_RUNTIME/goals/groq_locked_model_harness_orders_20260527T190938Z.json`
 - `04_RUNTIME/goals/rickshaw_component_payload_batch_004_20260527T232006Z.json`
 - `04_RUNTIME/goals/rickshaw_component_payload_batch_005_20260527T232510Z.json`
@@ -111,6 +116,7 @@
 - `04_RUNTIME/observation_center/hunch_postgres_ingest_latest.json`
 - `04_RUNTIME/observation_center/model_invocation_audit_latest.json`
 - `04_RUNTIME/observation_center/project2501_model_workshare_latest.json`
+- `04_RUNTIME/promptflow_smoke_flow/.promptflow/flow.detail.json`
 - `06_SCHEMA/008_hop_pivot.sql`
 - `06_SCHEMA/014_indy_runtime.sql`
 - `06_SCHEMA/016_go_graph_core.sql`
@@ -118,9 +124,3 @@
 - `06_SCHEMA/018_investigation_artifact.sql`
 - `06_SCHEMA/020_chat_dump_timeline.sql`
 - `06_SCHEMA/020_korpus_derived_compute_queue.sql`
-- `06_SCHEMA/023_etl_pipeline.sql`
-- `06_SCHEMA/029_darwinian_surfaces.sql`
-- `06_SCHEMA/031_graph_write_barrier_plan.sql`
-- `06_SCHEMA/032_bitloops_loop.sql`
-- `06_SCHEMA/034_graph_promotion_pipeline.sql`
-- `06_SCHEMA/036_absurd_chrono_wrapper.sql`

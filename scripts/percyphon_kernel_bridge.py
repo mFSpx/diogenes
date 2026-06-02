@@ -61,12 +61,16 @@ def build_bridge(
     receipt_dir: Path = OUT,
 ) -> dict[str, Any]:
     scaffold = procedural_entity_generator(villagers or [source, normalized_intent], fluid_slots=fluid_slots)
+    slot0 = dict(scaffold["slots"][0])
+    # Control packets use zero-based slot numbering; raw Percyphon scaffolds keep
+    # their legacy one-based identity slots for compatibility with older receipts.
+    slot0["slot_index"] = 0
     percyphon = {
         "schema": "lucidota.percyphon.scaffold.v1",
         "zero_vram": True,
         "slot_count": len(scaffold["slots"]),
         "fluid_slot_count": sum(1 for s in scaffold["slots"] if s["slot_index"] >= 29),
-        "slot": scaffold["slots"][0],
+        "slot": slot0,
         "authority": "procedural_scaffold_candidate_not_truth",
     }
     receipt: dict[str, Any] = {

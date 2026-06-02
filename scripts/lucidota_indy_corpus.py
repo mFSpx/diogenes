@@ -16,12 +16,13 @@ from typing import Iterable
 ROOT = Path(__file__).resolve().parents[1]
 PROJECT_BRAIN = ROOT / "00_PROJECT_BRAIN"
 SOURCE_FILES = [
-    PROJECT_BRAIN / "INDY_READS_RUNTIME_CONTRACT.md",
-    PROJECT_BRAIN / "THEPLAN.md",
-    PROJECT_BRAIN / "BUILD_PLAN_AUDIT.md",
-    PROJECT_BRAIN / "STATUS.md",
-    PROJECT_BRAIN / "DECISIONS.md",
-    PROJECT_BRAIN / "GLOSSARY.md",
+    PROJECT_BRAIN / "INDY_SOUL.md",
+    PROJECT_BRAIN / "INDY_MODEL_STACK.md",
+    PROJECT_BRAIN / "DIOGENES_OPERATIONAL_SPEC.md",
+    PROJECT_BRAIN / "ACTIVE_SPEC" / "05_COMPONENT_AUTHORITY_MAP.md",
+    PROJECT_BRAIN / "RFCS" / "RFC-130-INDY-READS.md",
+    PROJECT_BRAIN / "INDY_READS_POLYCAREER_WORKFLOW_WIZARD" / "WORKFLOW_CONTRACT.md",
+    PROJECT_BRAIN / "INDY_READS_POLYCAREER_WORKFLOW_WIZARD" / "ARCHITECTURE.md",
 ]
 
 
@@ -60,7 +61,7 @@ def heading_section(path: Path, heading: str) -> str:
 def matching_block(path: Path, pattern: str, lookahead: str = r"\n### |\Z") -> str:
     text = read(path)
     m = re.search(pattern + r"(?P<body>.*?)" + lookahead, text, re.S | re.I | re.M)
-    return m.group("body").strip() if m else ""
+    return (m.group("body") or "").strip() if m else ""
 
 
 def bullets(text: str) -> list[str]:
@@ -90,44 +91,37 @@ def quote_units(path: Path, section_name: str, label: str, limit: int = 10) -> l
 
 
 def build_corpus() -> dict:
-    contract = PROJECT_BRAIN / "INDY_READS_RUNTIME_CONTRACT.md"
-    plan = PROJECT_BRAIN / "THEPLAN.md"
-    audit = PROJECT_BRAIN / "BUILD_PLAN_AUDIT.md"
-    status = PROJECT_BRAIN / "STATUS.md"
-    decisions = PROJECT_BRAIN / "DECISIONS.md"
-    glossary = PROJECT_BRAIN / "GLOSSARY.md"
+    soul = PROJECT_BRAIN / "INDY_SOUL.md"
+    stack = PROJECT_BRAIN / "INDY_MODEL_STACK.md"
+    ops = PROJECT_BRAIN / "DIOGENES_OPERATIONAL_SPEC.md"
+    authority = PROJECT_BRAIN / "ACTIVE_SPEC" / "05_COMPONENT_AUTHORITY_MAP.md"
+    rfc = PROJECT_BRAIN / "RFCS" / "RFC-130-INDY-READS.md"
+    contract = PROJECT_BRAIN / "INDY_READS_POLYCAREER_WORKFLOW_WIZARD" / "WORKFLOW_CONTRACT.md"
+    architecture = PROJECT_BRAIN / "INDY_READS_POLYCAREER_WORKFLOW_WIZARD" / "ARCHITECTURE.md"
 
     units: list[dict] = []
-    units += quote_units(contract, "Identity", "identity", 8)
-    units += quote_units(contract, "Prime Directives", "directive", 12)
-    units += quote_units(contract, "Answer Contract", "answer_contract", 10)
-    units += quote_units(contract, "Memory Routines", "routine", 12)
-    units += quote_units(contract, "Failure Mode", "failure_mode", 4)
-    units += quote_units(plan, "Phase 006: Indy_Reads Assistant Layer", "phase_006", 12)
-    units += quote_units(plan, "Research / Iteration Method", "method", 12)
-    units += quote_units(status, "Current State", "status_current", 12)
-    units += quote_units(status, "Next Verification", "status_next", 12)
-    units += quote_units(decisions, "Current Decisions", "decision", 12)
-    units += quote_units(glossary, "Indy_Reads", "glossary", 8)
-
-    audit_body = matching_block(
-        audit,
-        r"^###\s+011\s+Indy_Reads\s*/\s*Persona\s*/\s*Assistant Layer[^\n]*\n",
-    )
-    for line in audit_body.splitlines():
-        m = re.match(r"^- \[(?P<mark>[ xX])\]\s*(?P<item>.+)$", line.strip())
-        if not m:
-            continue
-        status_label = "done" if m.group("mark").lower() == "x" else "open"
-        units.append(
-            {
-                "label": f"audit_{status_label}",
-                "text": re.sub(r"\s+", " ", m.group("item")).strip(),
-                "source": "00_PROJECT_BRAIN/BUILD_PLAN_AUDIT.md#011-indy-reads-persona-assistant-layer",
-            }
-        )
-        if len([u for u in units if u["label"].startswith("audit_")]) >= 24:
-            break
+    units += quote_units(soul, "WHO SHE IS", "identity", 12)
+    units += quote_units(soul, "THE MANDATE", "mandate", 12)
+    units += quote_units(soul, "OPERATING DOCTRINE (non-negotiable)", "doctrine", 16)
+    units += quote_units(soul, "WRITE PATHS (hard gates)", "write_gate", 10)
+    units += quote_units(soul, "THE 7 RESOLUTIONS (locked 2026-05-28)", "resolution", 12)
+    units += quote_units(soul, "15 POLYCAREER ROLE MODES", "role_mode", 20)
+    units += quote_units(stack, "THE POINT", "model_stack", 10)
+    units += quote_units(stack, "VIBES / CODESTRAL (external code-work lane)", "external_lane", 10)
+    units += quote_units(ops, "0. Roles & operating law", "ops_role", 8)
+    units += quote_units(ops, "3. UX — conversational, deterministic routing (no mandatory slash commands)", "ux_route", 10)
+    units += quote_units(ops, "4. OUTPUT multiplexer — better than any AI chat", "output_hyperplex", 8)
+    units += quote_units(authority, "6. Indy_READs", "authority", 8)
+    units += quote_units(authority, "8. Language Membrane / Multiplexing / Hyperplexing", "language_membrane", 8)
+    units += quote_units(rfc, "3. Indy Contract", "rfc_contract", 12)
+    units += quote_units(rfc, "5. Whole-System Interaction", "rfc_interaction", 10)
+    units += quote_units(rfc, "8. Falsifiers", "rfc_falsifier", 10)
+    units += quote_units(contract, "Non-negotiables", "workflow_contract", 12)
+    units += quote_units(contract, "Default product format", "product_format", 12)
+    units += quote_units(contract, "Glow Watch hook contract", "glow_watch", 8)
+    units += quote_units(architecture, "Existing Indy_READs footprint found in this repo", "polycareer_foundation", 12)
+    units += quote_units(architecture, "Transferable moves for Indy", "transferable_move", 12)
+    units += quote_units(architecture, "Should Indy learn this?", "learning_rule", 8)
 
     # Keep it small and deterministic: de-duplicate exact text while preserving order.
     deduped: list[dict] = []

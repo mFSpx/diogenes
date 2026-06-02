@@ -27,7 +27,7 @@
     "body_capture_captures": "error:connection is bad: connection to server on socket \"/var/run/postgresql/.s.PGSQL.",
     "bytewax_hints": "error:connection is bad: connection to server on socket \"/var/run/postgresql/.s.PGSQL.",
     "cas_artifacts": "error:connection is bad: connection to server on socket \"/var/run/postgresql/.s.PGSQL.",
-    "dev_journey_decision_points": 600,
+    "dev_journey_decision_points": 16,
     "drive_manifest_targets": 33,
     "hunch_hypertimeline_known_total": 91,
     "hunch_hypertimeline_open": 24,
@@ -71,8 +71,8 @@
     },
     "dev_journey_decision_points": {
       "canonical_graph_writes_performed": false,
-      "decision_point_count": 600,
-      "source_receipt": "05_OUTPUTS/dev_journey_decision_points/dev_journey_decision_points_receipt_20260527T021326165553Z.json",
+      "decision_point_count": 16,
+      "source_receipt": "05_OUTPUTS/dev_journey_decision_points/dev_journey_decision_points_receipt_20260602T071142002012Z.json",
       "tree_training_performed": true
     },
     "hunch_hypertimeline": {

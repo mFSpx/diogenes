@@ -15,7 +15,10 @@ def report(stdout: str) -> dict:
 
 
 def clean_env() -> dict[str, str]:
-    return {k: v for k, v in os.environ.items() if k != "GROQ_API_KEY"}
+    env = {k: v for k, v in os.environ.items() if k not in {"GROQ_API_KEY", "LUCIDOTA_GROQ_KEY_FILE"}}
+    env["LUCIDOTA_SECRET_ENV"] = "/tmp/lucidota-test-missing-secrets.env"
+    env["GROQ_LOAD_DOTENV"] = "0"
+    return env
 
 
 def test_groq_catalog_dry_run_is_redacted_and_local_first():
@@ -72,6 +75,40 @@ def test_groq_delegate_execute_surfaces_subreceipt_blockers(monkeypatch, capsys)
     r = report(capsys.readouterr().out)
     assert "groq_http_error:401" in r["blockers"]
     assert r["prompt_path"].startswith("04_RUNTIME/goals/groq_delegate_")
+
+
+def test_groq_delegate_execute_parses_json_model_runner_receipt(monkeypatch, capsys):
+    import scripts.groq_goal_delegate as delegate
+
+    sub = ROOT / "05_OUTPUTS" / "model_invocations" / "fake_groq_json_success.json"
+    sub.parent.mkdir(parents=True, exist_ok=True)
+    sub.write_text(json.dumps({"blockers": [], "usage": {"total_tokens": 12}, "text": "{\"summary\":\"ok\"}"}))
+    stdout = json.dumps(
+        {
+            "status": "PASS",
+            "report_path": "05_OUTPUTS/model_invocations/fake_groq_json_success.json",
+            "visible_response": {"receipt_path": "05_OUTPUTS/model_invocations/fake_groq_json_success.json"},
+            "usage": {"total_tokens": 12},
+            "text": "{\"summary\":\"ok\"}",
+            "blockers": [],
+        }
+    )
+
+    class P:
+        returncode = 0
+        stderr = ""
+
+    P.stdout = stdout
+
+    monkeypatch.setenv("GROQ_API_KEY", "redacted-test-key")
+    monkeypatch.setattr(subprocess, "run", lambda *args, **kwargs: P())
+    monkeypatch.setattr(sys, "argv", [sys.executable, "--task", "audit one file", "--execute", "--json"])
+
+    assert delegate.main() == 0
+    r = report(capsys.readouterr().out)
+    assert r["subreceipt_path"] == "05_OUTPUTS/model_invocations/fake_groq_json_success.json"
+    assert r["usage"] == {"total_tokens": 12}
+    assert r["text"] == "{\"summary\":\"ok\"}"
 
 
 def test_groq_delegate_is_allowlisted_for_absurd_external_command():

@@ -239,9 +239,9 @@ def embed_file(chunks_jsonl: Path, out_jsonl: Path, *, prefer_groq: bool = True)
         result = embed_text(text, source_path=str(chunk.get("source_path") or ""), chunk_id=str(chunk.get("chunk_id") or chunk.get("id") or ""), prefer_groq=prefer_groq)
         rows_out.append(result.row)
         status = result.row.get("status")
-        if status == "EMBEDDED" and row.get("provider") == "groq":
+        if status == "EMBEDDED" and result.row.get("provider") == "groq":
             stats["embedded_groq"] += 1
-        elif status == "EMBEDDED" and row.get("provider") == "local":
+        elif status == "EMBEDDED" and result.row.get("provider") == "local":
             stats["embedded_local"] += 1
         elif status == "BLOCKED":
             stats["blocked"] += 1

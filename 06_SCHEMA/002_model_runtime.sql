@@ -174,6 +174,18 @@ INSERT INTO lucidota_runtime.model_candidate (
         1800,
         'accepted',
         'Resident Indy_Reads heavy-hitter/adaptor host target; local GGUF downloaded for llama.cpp demo serving.'
+    ),
+    (
+        'nvidia-locateanything-3b',
+        'other',
+        'https://huggingface.co/nvidia/LocateAnything-3B',
+        NULL,
+        'nvidia-license non-commercial research/development',
+        3000000000,
+        'N/A',
+        NULL,
+        'watch',
+        'Machine-vision/local grounding candidate (object detection, visual grounding, OCR localization). not image generation by design. Non-resident by default; optional local trial path pending tooling and hardware fit.'
     )
 ON CONFLICT (model_id) DO UPDATE SET
     role = EXCLUDED.role,

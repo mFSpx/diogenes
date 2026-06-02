@@ -1,0 +1,253 @@
+{
+  "adapter_registry": {
+    "cohere": {
+      "dry_run_cmd": "python3 scripts/model_runner_cli.py cohere-chat --prompt ping --max-tokens 8 --json",
+      "endpoint": "https://api.cohere.com/v2/chat",
+      "env_key_names": [
+        "COHERE_API_KEY",
+        "CO_API_KEY"
+      ],
+      "execute_cmd": "python3 scripts/model_runner_cli.py cohere-chat --prompt @PROMPT --max-tokens 256 --json --execute",
+      "expected_receipt_glob": "05_OUTPUTS/model_invocations/cohere_chat_*.json",
+      "provider_type": "cloud",
+      "safety_limits": [
+        "dry_run_default",
+        "secret_values_forbidden"
+      ],
+      "stop_or_rollback_cmd": "none"
+    },
+    "groq": {
+      "dry_run_cmd": "python3 scripts/model_runner_cli.py groq-chat --prompt ping --max-tokens 8 --json",
+      "endpoint": "https://api.groq.com/openai/v1/chat/completions",
+      "env_key_names": [
+        "GROQ_API_KEY"
+      ],
+      "execute_cmd": "python3 scripts/model_runner_cli.py groq-chat --prompt @PROMPT --max-tokens 256 --json --execute",
+      "expected_receipt_glob": "05_OUTPUTS/model_invocations/groq_chat_*.json",
+      "model_catalog_cmd": "python3 scripts/groq_model_catalog.py --execute --json",
+      "orchestrated_delegate_cmd": "python3 scripts/groq_goal_delegate.py --task @PROMPT --kind audit --model llama-3.1-8b-instant --max-tokens 512 --execute --json",
+      "provider_type": "cloud",
+      "recommended_models": {
+        "cheap_reasoning_escalation": "openai/gpt-oss-20b",
+        "default_cheap_worker": "llama-3.1-8b-instant",
+        "guard_only": "meta-llama/llama-prompt-guard-2-22m",
+        "larger_fast_multimodal": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "strong_reasoning_escalation": "openai/gpt-oss-120b"
+      },
+      "safety_limits": [
+        "dry_run_default",
+        "secret_values_forbidden"
+      ],
+      "selection_rule": "Use llama-3.1-8b-instant for default GOALS cloud slices; escalate only for bounded review/reasoning. Never make core LUCIDOTA depend on Groq.",
+      "stop_or_rollback_cmd": "none"
+    },
+    "llama_cpp_heavy": {
+      "dry_run_cmd": "python3 scripts/goal_model_fabric_control.py status --json && bash -lc \"source scripts/lucidota_safe_ops_env.sh; python3 scripts/lucidota_strict_model_stack_admission.py --json\"",
+      "endpoint": "OpenAI-compatible llama.cpp servers on 8080-8083 when explicitly launched",
+      "env_key_names": [],
+      "execute_cmd": "python3 scripts/goal_model_fabric_control.py start --target mamba_cpu --target bonsai --wait 45 --json  # add --target deepseek only when GPU lane is explicitly desired",
+      "expected_invocation_receipt_glob": "05_OUTPUTS/model_invocations/local_model_chat_{deepseek,mamba_cpu,bonsai,mamba_gpu}_execute_*.json",
+      "expected_receipt_glob": "05_OUTPUTS/goals/goal_model_fabric_control_*.json",
+      "invoke_cmd": "python3 scripts/model_runner_cli.py local-chat --lane mamba_gpu --prompt @PROMPT --max-tokens 64 --json --execute  # lane can be deepseek|mamba_cpu|bonsai|mamba_gpu",
+      "provider_type": "local",
+      "safety_limits": [
+        "explicit_start",
+        "vram_guard",
+        "no_auto_heavy_daemon",
+        "start_one_or_two_lanes_first",
+        "status_after_start"
+      ],
+      "stop_or_rollback_cmd": "python3 scripts/goal_model_fabric_control.py stop --target heavy"
+    },
+    "needle_swarm_6x": {
+      "dry_run_cmd": "python3 scripts/goal_model_fabric_control.py status --json",
+      "endpoint": "http://127.0.0.1:8090-8095/health",
+      "env_key_names": [],
+      "execute_cmd": "scripts/lucidota_start_needle_swarm.sh",
+      "expected_invocation_receipt_glob": "05_OUTPUTS/model_invocations/local_model_chat_needle_*_execute_*.json",
+      "expected_receipt_glob": "05_OUTPUTS/goals/goal_model_fabric_control_*.json",
+      "invoke_cmd": "python3 scripts/model_runner_cli.py local-chat --lane needle_0 --prompt @PROMPT --max-tokens 64 --json --execute  # lane can be needle_0..needle_5",
+      "provider_type": "local",
+      "safety_limits": [
+        "cpu_only",
+        "explicit_start"
+      ],
+      "stop_or_rollback_cmd": "python3 scripts/goal_model_fabric_control.py stop --target needles"
+    },
+    "llxprt_code": {
+      "upstream_repo": "https://github.com/vybestack/llxprt-code",
+      "dry_run_cmd": "cd 01_REPOS/llxprt-code && npx @vybestack/llxprt-code --version",
+      "endpoint": "local CLI npm package/binary for terminal coding",
+      "env_key_names": [],
+      "execute_cmd": "cd 01_REPOS/llxprt-code && npx @vybestack/llxprt-code --profile-load local -- \"@TASK\"",
+      "expected_receipt_glob": "05_OUTPUTS/goals/agent_llxprt_code_*.json",
+      "provider_type": "agent_cli",
+      "safety_limits": [
+        "no_implicit_install",
+        "no_secret_write",
+        "single_prompt",
+        "evidence_receipt_required"
+      ],
+      "stop_or_rollback_cmd": "none"
+    }
+  },
+  "agent_packet_exporter": {
+    "command": "python3 scripts/goal_agent_packet.py --target <codex|claude|opencode|aider|continue|llxprt-code|generic> --task \"<coding slice>\" --file <owned-path> --complexity <simple|standard|integration|architecture> --json",
+    "receipt": "05_OUTPUTS/goals/goal_agent_packet_*.json",
+    "role": "one compact coding-only prompt/adapter packet any CLI agent can consume"
+  },
+  "cloud_lanes": [
+    {
+      "adapter": "scripts/groq_chat_cli.py",
+      "default_mode": "dry_run",
+      "env": "GROQ_API_KEY",
+      "name": "groq"
+    },
+    {
+      "adapter": "scripts/cohere_chat_cli.py",
+      "default_mode": "dry_run",
+      "env": "COHERE_API_KEY or CO_API_KEY",
+      "name": "cohere"
+    }
+  ],
+  "code_budget": {
+    "background_daemon": false,
+    "goal_handoff_py_max_code_lines": 100,
+    "secret_values_allowed": false
+  },
+  "dev_mode_audit": "GOALS/DEV_MODE_FEATURE_AUDIT.json",
+  "dev_mode_integration": "GOALS/DEV_MODE_INTEGRATION.json",
+  "dev_mode_subsystems": "GOALS/DEV_MODE_SUBSYSTEMS.json",
+  "dev_supply_control": {
+    "canonical_graph_writes_performed": false,
+    "command": "python3 scripts/goal_dev_control.py --away-minutes <minutes> --text '<intent>'",
+    "model_calls_performed": false,
+    "receipt": "05_OUTPUTS/goals/goal_dev_control_*.json",
+    "uses_existing_algorithms": [
+      "ALGOS.decision_hygiene",
+      "ALGOS.bandit_router"
+    ]
+  },
+  "latest_runtime_receipts": {
+    "agent_packet_current": "05_OUTPUTS/goals/goal_agent_packet_20260526T041217Z.json",
+    "cohere_dry_run": "05_OUTPUTS/model_invocations/cohere_chat_dry_run_20260526T014323033120Z.json",
+    "cohere_dry_run_current": "05_OUTPUTS/model_invocations/cohere_chat_dry_run_20260526T041235732275Z.json",
+    "cohere_execute_current": "05_OUTPUTS/model_invocations/cohere_chat_execute_20260526T042747124164Z.json",
+    "completion_audit": "05_OUTPUTS/goals/goal3_completion_audit_20260526T042942Z.json",
+    "dev_supply_control": "05_OUTPUTS/goals/goal_dev_control_20260526T015103Z.json",
+    "dev_supply_control_current": "05_OUTPUTS/goals/goal_dev_control_20260526T041239Z.json",
+    "goal_swarm_dispatch_current": "05_OUTPUTS/goals/goal_swarm_dispatch_20260526T053001Z.json",
+    "groq_delegate_direct": "05_OUTPUTS/goals/groq_goal_delegate_20260526T061521Z.json",
+    "groq_delegate_swarm_plan": "05_OUTPUTS/goals/groq_goal_delegate_20260526T061540Z.json",
+    "groq_delegate_swarm_redteam": "05_OUTPUTS/goals/groq_goal_delegate_20260526T061541Z.json",
+    "groq_dry_run": "05_OUTPUTS/model_invocations/groq_chat_dry_run_20260526T014322934899Z.json",
+    "groq_dry_run_current": "05_OUTPUTS/model_invocations/groq_chat_dry_run_20260526T041235623248Z.json",
+    "groq_execute_current": "05_OUTPUTS/model_invocations/groq_chat_execute_20260526T042742211026Z.json",
+    "groq_execute_current_blocked": "05_OUTPUTS/model_invocations/groq_chat_execute_20260526T191923949590Z.json",
+    "groq_model_catalog_current_blocked": "05_OUTPUTS/model_invocations/groq_model_catalog_20260526T191821498646Z.json",
+    "groq_model_catalog_live": "05_OUTPUTS/model_invocations/groq_model_catalog_20260526T061555606365Z.json",
+    "groq_swarm_worker_latest": "05_OUTPUTS/absurd/absurd_queue_spine_worker-once_20260526T061541458859Z.json",
+    "local_bonsai_execute_current": "05_OUTPUTS/model_invocations/local_model_chat_bonsai_execute_20260526T191738743883Z.json",
+    "local_deepseek_execute_current": "05_OUTPUTS/model_invocations/local_model_chat_deepseek_execute_20260526T191641067444Z.json",
+    "local_generation_current": "05_OUTPUTS/goals/goal3_current_local_generation_smoke_20260526T042643Z.json",
+    "local_generation_smoke": "05_OUTPUTS/goals/goal3_local_generation_smoke_20260526T015559Z.json",
+    "local_mamba_cpu_execute_current": "05_OUTPUTS/model_invocations/local_model_chat_mamba_cpu_execute_20260526T191655393582Z.json",
+    "local_mamba_gpu_execute_current": "05_OUTPUTS/model_invocations/local_model_chat_mamba_gpu_execute_20260526T191746663431Z.json",
+    "local_needle_execute_current_glob": "05_OUTPUTS/model_invocations/local_model_chat_needle_*_execute_20260526T191*.json",
+    "mamba_gpu_generation_current": "05_OUTPUTS/goals/goal3_mamba_gpu_generation_smoke_20260526T042837Z.json",
+    "model_fabric_live": "05_OUTPUTS/goals/goal3_model_fabric_live_20260526T015103Z.json",
+    "model_fabric_status_after_local_probes": "05_OUTPUTS/goals/goal_model_fabric_control_20260526T192322Z.json",
+    "model_fabric_status_current": "05_OUTPUTS/goals/goal_model_fabric_control_20260526T042920Z.json",
+    "needle_swarm": "05_OUTPUTS/goals/goal3_needle_swarm_health_20260526T014422Z.json",
+    "percyphon_cli_ingress_current": "05_OUTPUTS/diogenes/percyphon_kernel_bridge_20260526T192509683896Z.json",
+    "post_proof_status": "05_OUTPUTS/goals/goal_model_fabric_control_20260526T020159Z.json",
+    "post_proof_trim": "05_OUTPUTS/goals/goal_model_fabric_control_20260526T020156Z.json",
+    "prove_it_audit": "05_OUTPUTS/goals/goal3_prove_it_audit_20260526T020119Z.json",
+    "slop_audit_final": "05_OUTPUTS/slop_audit/slop_audit_law_20260526T020052090027Z.json",
+    "strict_admission": "05_OUTPUTS/model_runtime/strict_model_stack_admission_20260526T014322843048Z.json",
+    "strict_admission_current": "05_OUTPUTS/model_runtime/strict_model_stack_admission_20260526T015911594484Z.json",
+    "subsystems_check": "05_OUTPUTS/goals/dev_mode_subsystems_check_20260526T015912Z.json",
+    "swarm_usage_ledger_current": "05_OUTPUTS/goals/swarm_usage_ledger_20260526T192035307489Z.json",
+    "vram_enforcement": "05_OUTPUTS/model_runtime/vram_enforcement_20260526T060544Z.json"
+  },
+  "lifecycle": [
+    {
+      "command": "python3 scripts/lucidota_strict_model_stack_admission.py --json",
+      "receipt": "05_OUTPUTS/model_runtime/strict_model_stack_admission_*.json",
+      "step": "admission_check"
+    },
+    {
+      "command": "python3 scripts/goal_agent_packet.py --task \"<coding slice>\" --complexity simple --json",
+      "rule": "Pick cheapest capable lane: Needle/local stub for repeat/simple, Groq/Cohere dry-run for cloud adapter proof, and llama_cpp_heavy for Mamba/Bonsai/DeepSeek after admission and explicit start intent.",
+      "step": "select_lane"
+    },
+    {
+      "commands": [
+        "python3 scripts/model_runner_cli.py groq-chat --prompt 'ping' --max-tokens 8 --json",
+        "python3 scripts/model_runner_cli.py cohere-chat --prompt 'ping' --max-tokens 8 --json"
+      ],
+      "execute_requires_env": [
+        "GROQ_API_KEY",
+        "COHERE_API_KEY or CO_API_KEY"
+      ],
+      "step": "provider_ping"
+    },
+    {
+      "commands": [
+        "python3 scripts/groq_model_catalog.py --execute --json",
+        "python3 scripts/groq_goal_delegate.py --task \"<bounded audit/code slice>\" --kind audit --model llama-3.1-8b-instant --max-tokens 512 --execute --json"
+      ],
+      "rule": "Groq is optional cloud capacity. Every call must produce a redacted model_invocation receipt plus a GOALS delegate receipt.",
+      "step": "groq_catalog_and_delegate"
+    },
+    {
+      "rule": "Every live execution must emit a receipt under 05_OUTPUTS before GOALS claims the lane works.",
+      "step": "receipt_write"
+    }
+  ],
+  "local_lanes": [
+    {
+      "name": "needle_swarm_6x",
+      "ports": "8090-8095",
+      "risk": "low",
+      "start": "scripts/lucidota_start_needle_swarm.sh"
+    },
+    {
+      "name": "mamba7b_ram",
+      "port": 8081,
+      "risk": "medium_cpu_ram",
+      "start": "scripts/lucidota_start_mamba_llama.sh"
+    },
+    {
+      "name": "bonsai4b_ram",
+      "port": 8082,
+      "risk": "medium_cpu_ram",
+      "start": "scripts/lucidota_start_bonsai_ternary_llama.sh"
+    },
+    {
+      "name": "deepseek_r1_qwen_1p5b_gpu",
+      "port": 8080,
+      "risk": "vram",
+      "start": "scripts/lucidota_start_deepseek_llama.sh"
+    }
+  ],
+  "mode": "codex_first_byo_llm",
+  "model_fabric_control": {
+    "default_policy": "status-only; stop is explicit and targets pidfiles from existing launchers",
+    "receipt": "05_OUTPUTS/goals/goal_model_fabric_control_*.json",
+    "status": "python3 scripts/goal_model_fabric_control.py status",
+    "stop_all": "python3 scripts/goal_model_fabric_control.py stop --target all",
+    "stop_optional": "python3 scripts/goal_model_fabric_control.py stop --target optional"
+  },
+  "model_fabric_start_control": {
+    "command": "python3 scripts/goal_model_fabric_control.py start --target <needles|mamba_cpu|bonsai|deepseek> --wait <seconds> --json",
+    "receipt": "05_OUTPUTS/goals/goal_model_fabric_control_*.json",
+    "rule": "explicit start only; status receipt after start; no resident GOALS daemon"
+  },
+  "purpose": "Map GOALS external plugin build mode onto existing LUCIDOTA scripts, registries, and receipt gates without creating a resident service.",
+  "reuse_policy": {
+    "decision": "reuse LiteLLM/OpenCode/Aider/Continue/llxprt-code/llama.cpp when they fit; GOALS stays the tiny handoff/adapter contract layer.",
+    "foss_audit": "GOALS/FOSS_REUSE_AUDIT.md"
+  },
+  "schema": "lucidota.goals.plugin_build_mode_bootstrap.v1"
+}

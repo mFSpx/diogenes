@@ -92,7 +92,7 @@ fn render_cli_error(problem: &str) -> String {
         };
         lines.push(format!("{label}{line}"));
     }
-    lines.push("  Help             claw --help".to_string());
+    lines.push("  Help             luci --help".to_string());
     lines.join("\n")
 }
 
@@ -107,6 +107,13 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         }
         CliAction::ModelGovernor { args } => {
             run_lucidota_script("lucidota_model_governor.py", "model-governor", &args)?
+        }
+        CliAction::ModelAdmission { args } => {
+            run_lucidota_script(
+                "lucidota_strict_model_stack_admission.py",
+                "model-admission",
+                &args,
+            )?
         }
         CliAction::ModelRunner { args } => {
             run_lucidota_script("model_runner_cli.py", "model-runner", &args)?
@@ -138,8 +145,42 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         CliAction::LaneGate { args } => {
             run_lucidota_script("fast_slow_lane_gate.py", "lane-gate", &args)?
         }
+        CliAction::ClawMoa { args } => {
+            run_lucidota_script("claw_moa_router.py", "claw-moa", &args)?
+        }
+        CliAction::ClawMoaWorker { args } => {
+            run_lucidota_script("claw_moa_chain_worker.py", "claw-moa-worker", &args)?
+        }
+        CliAction::Delegate { args } => {
+            run_lucidota_script("luci_delegate_slice.py", "delegate", &args)?
+        }
+        CliAction::OperatorRoute { args } => {
+            run_lucidota_script("operator_command_router.py", "operator-route", &args)?
+        }
+        CliAction::Graph { args } => {
+            run_lucidota_graph(&args)?
+        }
+        CliAction::Provider { args } => {
+            run_lucidota_script("model_runner_cli.py", "provider", &args)?
+        }
+        CliAction::Model { args } => {
+            run_lucidota_model(&args)?
+        }
+        CliAction::Ingest { args } => run_lucidota_ingest(&args)?,
+        CliAction::Attempt { args } => {
+            run_lucidota_script("luci_operator.py", "attempt", &args)?
+        }
+        CliAction::Learn { args } => {
+            run_lucidota_script("luci_learning_slice.py", "learn", &args)?
+        }
+        CliAction::Source { args } => {
+            run_lucidota_script("luci_source_slice.py", "source", &args)?
+        }
         CliAction::Cockpit { args } => {
             run_lucidota_script("lucidota_cockpit.py", "cockpit", &args)?
+        }
+        CliAction::PromptFlow { args } => {
+            run_lucidota_script("promptflow_eval_runner.py", "promptflow", &args)?
         }
         CliAction::LucidotaSurvey { args } => run_lucidota_survey(&args)?,
         CliAction::DiogenesSmoke { args } => run_diogenes_smoke(&args)?,
@@ -183,6 +224,9 @@ enum CliAction {
     ModelGovernor {
         args: Vec<String>,
     },
+    ModelAdmission {
+        args: Vec<String>,
+    },
     ModelRunner {
         args: Vec<String>,
     },
@@ -213,7 +257,43 @@ enum CliAction {
     LaneGate {
         args: Vec<String>,
     },
+    ClawMoa {
+        args: Vec<String>,
+    },
+    ClawMoaWorker {
+        args: Vec<String>,
+    },
+    Delegate {
+        args: Vec<String>,
+    },
+    OperatorRoute {
+        args: Vec<String>,
+    },
+    Graph {
+        args: Vec<String>,
+    },
+    Provider {
+        args: Vec<String>,
+    },
+    Model {
+        args: Vec<String>,
+    },
+    Ingest {
+        args: Vec<String>,
+    },
+    Attempt {
+        args: Vec<String>,
+    },
+    Learn {
+        args: Vec<String>,
+    },
+    Source {
+        args: Vec<String>,
+    },
     Cockpit {
+        args: Vec<String>,
+    },
+    PromptFlow {
         args: Vec<String>,
     },
     LucidotaSurvey {
@@ -391,7 +471,7 @@ fn parse_args(args: &[String]) -> Result<CliAction, String> {
     match rest[0].as_str() {
         "dump-manifests" => Ok(CliAction::DumpManifests),
         "bootstrap-plan" => Ok(CliAction::BootstrapPlan),
-        "lucidota-status" => Ok(CliAction::LucidotaStatus),
+        "status" | "lucidota-status" => Ok(CliAction::LucidotaStatus),
         "indy-brief" | "indies" => Ok(CliAction::IndyBrief {
             args: rest[1..].to_vec(),
         }),
@@ -411,6 +491,9 @@ fn parse_args(args: &[String]) -> Result<CliAction, String> {
             Ok(CliAction::IndyBrief { args })
         }
         "model-governor" | "governor" => Ok(CliAction::ModelGovernor {
+            args: rest[1..].to_vec(),
+        }),
+        "model-admission" | "admission" => Ok(CliAction::ModelAdmission {
             args: rest[1..].to_vec(),
         }),
         "model-runner" => Ok(CliAction::ModelRunner {
@@ -463,9 +546,44 @@ fn parse_args(args: &[String]) -> Result<CliAction, String> {
         "lane-gate" | "fast-slow-gate" | "neuroplastic-gate" => Ok(CliAction::LaneGate {
             args: rest[1..].to_vec(),
         }),
+        "operate" | "moa" | "hyperplex" | "claw-moa" => Ok(CliAction::ClawMoa {
+            args: rest[1..].to_vec(),
+        }),
+        "ingest" | "ingestion" => Ok(CliAction::Ingest {
+            args: rest[1..].to_vec(),
+        }),
+        "attempt" | "attempt-engine" => Ok(CliAction::Attempt {
+            args: rest[1..].to_vec(),
+        }),
+        "learn" | "improve" | "learning" => Ok(CliAction::Learn {
+            args: rest[1..].to_vec(),
+        }),
+        "source" | "current-source" | "current-world" => Ok(CliAction::Source {
+            args: rest[1..].to_vec(),
+        }),
+        "moa-worker" | "chain-worker" | "claw-moa-worker" => Ok(CliAction::ClawMoaWorker {
+            args: rest[1..].to_vec(),
+        }),
+        "delegate" | "vibes-delegate" | "provider-delegate" => Ok(CliAction::Delegate {
+            args: rest[1..].to_vec(),
+        }),
+        "operator-route" | "case-route" => Ok(CliAction::OperatorRoute {
+            args: rest[1..].to_vec(),
+        }),
+        "graph" => Ok(CliAction::Graph {
+            args: rest[1..].to_vec(),
+        }),
+        "provider" | "provider-chat" => Ok(CliAction::Provider {
+            args: rest[1..].to_vec(),
+        }),
+        "model" => Ok(CliAction::Model {
+            args: rest[1..].to_vec(),
+        }),
         "cockpit" | "lucidota-cockpit" => Ok(CliAction::Cockpit {
             args: rest[1..].to_vec(),
         }),
+        "flow" | "promptflow" => parse_promptflow_cli_action(&rest[1..]),
+        "luci" => parse_luci_cli_action(&rest[1..]),
         "lucidota-survey" | "survey" => Ok(CliAction::LucidotaSurvey {
             args: rest[1..].to_vec(),
         }),
@@ -556,6 +674,183 @@ fn parse_diogenes_smoke_args(args: &[String]) -> Result<DiogenesSmokeArgs, Strin
         index += 2;
     }
     Ok(parsed)
+}
+
+fn parse_promptflow_cli_action(args: &[String]) -> Result<CliAction, String> {
+    if args.first().map(String::as_str) != Some("run") {
+        return Err("flow supports: run <flow-dir> [--batch-data DATA] --run-id ID".to_string());
+    }
+    let runner_args = normalize_promptflow_run_args(&args[1..])?;
+    Ok(CliAction::PromptFlow { args: runner_args })
+}
+
+fn parse_luci_cli_action(args: &[String]) -> Result<CliAction, String> {
+    if args.get(0).map(String::as_str) == Some("flow")
+        && args.get(1).map(String::as_str) == Some("batch")
+    {
+        let runner_args = normalize_luci_flow_batch_args(&args[2..])?;
+        return Ok(CliAction::PromptFlow { args: runner_args });
+    }
+    if args.first().map(String::as_str) == Some("delegate") {
+        return Ok(CliAction::Delegate {
+            args: args[1..].to_vec(),
+        });
+    }
+    if args.first().map(String::as_str) == Some("model") {
+        return Ok(CliAction::Model {
+            args: args[1..].to_vec(),
+        });
+    }
+    if args.first().map(String::as_str) == Some("operator-route")
+        || args.first().map(String::as_str) == Some("case-route")
+    {
+        return Ok(CliAction::OperatorRoute {
+            args: args[1..].to_vec(),
+        });
+    }
+    if args.first().map(String::as_str) == Some("graph") {
+        return Ok(CliAction::Graph {
+            args: args[1..].to_vec(),
+        });
+    }
+    if args.first().map(String::as_str) == Some("provider")
+        || args.first().map(String::as_str) == Some("provider-chat")
+    {
+        return Ok(CliAction::Provider {
+            args: args[1..].to_vec(),
+        });
+    }
+    if args.first().map(String::as_str) == Some("model-admission") {
+        return Ok(CliAction::ModelAdmission {
+            args: args[1..].to_vec(),
+        });
+    }
+    Err("luci supports: flow batch --dag FLOW --eval DATA --run-id ID; model-admission [--run-diogenes-gate]; operator-route --raw-command TEXT --case-id ID --source-folder PATH; graph <promote|materialize|edge>; provider <groq-chat|cohere-chat|local-chat> ...".to_string())
+}
+
+fn normalize_promptflow_run_args(args: &[String]) -> Result<Vec<String>, String> {
+    let mut out = Vec::new();
+    let mut flow_seen = false;
+    let mut index = 0;
+    while index < args.len() {
+        match args[index].as_str() {
+            "--flow" => {
+                let value = args
+                    .get(index + 1)
+                    .ok_or_else(|| "missing value for --flow".to_string())?;
+                out.extend(["--flow".to_string(), value.clone()]);
+                flow_seen = true;
+                index += 2;
+            }
+            flag if flag.starts_with("--flow=") => {
+                out.extend(["--flow".to_string(), flag[7..].to_string()]);
+                flow_seen = true;
+                index += 1;
+            }
+            "--batch-data" | "--data" => {
+                let value = args
+                    .get(index + 1)
+                    .ok_or_else(|| format!("missing value for {}", args[index]))?;
+                out.extend(["--data".to_string(), value.clone()]);
+                index += 2;
+            }
+            flag if flag.starts_with("--batch-data=") => {
+                out.extend(["--data".to_string(), flag[13..].to_string()]);
+                index += 1;
+            }
+            flag if flag.starts_with("--data=") => {
+                out.extend(["--data".to_string(), flag[7..].to_string()]);
+                index += 1;
+            }
+            "--run-id" | "--output-dir" => {
+                let value = args
+                    .get(index + 1)
+                    .ok_or_else(|| format!("missing value for {}", args[index]))?;
+                out.extend([args[index].clone(), value.clone()]);
+                index += 2;
+            }
+            flag if flag.starts_with("--run-id=") => {
+                out.extend(["--run-id".to_string(), flag[9..].to_string()]);
+                index += 1;
+            }
+            flag if flag.starts_with("--output-dir=") => {
+                out.extend(["--output-dir".to_string(), flag[13..].to_string()]);
+                index += 1;
+            }
+            value if !value.starts_with('-') && !flow_seen => {
+                out.extend(["--flow".to_string(), value.to_string()]);
+                flow_seen = true;
+                index += 1;
+            }
+            other => {
+                out.push(other.to_string());
+                index += 1;
+            }
+        }
+    }
+    if !flow_seen {
+        return Err("flow run requires a flow directory/path".to_string());
+    }
+    Ok(out)
+}
+
+fn normalize_luci_flow_batch_args(args: &[String]) -> Result<Vec<String>, String> {
+    let mut out = Vec::new();
+    let mut index = 0;
+    while index < args.len() {
+        match args[index].as_str() {
+            "--dag" | "--flow" => {
+                let value = args
+                    .get(index + 1)
+                    .ok_or_else(|| format!("missing value for {}", args[index]))?;
+                out.extend(["--flow".to_string(), value.clone()]);
+                index += 2;
+            }
+            flag if flag.starts_with("--dag=") => {
+                out.extend(["--flow".to_string(), flag[6..].to_string()]);
+                index += 1;
+            }
+            flag if flag.starts_with("--flow=") => {
+                out.extend(["--flow".to_string(), flag[7..].to_string()]);
+                index += 1;
+            }
+            "--eval" | "--data" => {
+                let value = args
+                    .get(index + 1)
+                    .ok_or_else(|| format!("missing value for {}", args[index]))?;
+                out.extend(["--data".to_string(), value.clone()]);
+                index += 2;
+            }
+            flag if flag.starts_with("--eval=") => {
+                out.extend(["--data".to_string(), flag[7..].to_string()]);
+                index += 1;
+            }
+            flag if flag.starts_with("--data=") => {
+                out.extend(["--data".to_string(), flag[7..].to_string()]);
+                index += 1;
+            }
+            "--run-id" | "--output-dir" => {
+                let value = args
+                    .get(index + 1)
+                    .ok_or_else(|| format!("missing value for {}", args[index]))?;
+                out.extend([args[index].clone(), value.clone()]);
+                index += 2;
+            }
+            flag if flag.starts_with("--run-id=") => {
+                out.extend(["--run-id".to_string(), flag[9..].to_string()]);
+                index += 1;
+            }
+            flag if flag.starts_with("--output-dir=") => {
+                out.extend(["--output-dir".to_string(), flag[13..].to_string()]);
+                index += 1;
+            }
+            other => {
+                out.push(other.to_string());
+                index += 1;
+            }
+        }
+    }
+    Ok(out)
 }
 
 fn run_diogenes_smoke(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
@@ -702,9 +997,9 @@ fn format_direct_slash_command_error(command: &str, is_unknown: bool) -> String 
     if is_unknown {
         append_slash_command_suggestions(&mut lines, trimmed);
     } else {
-        lines.push("  Try              Start `claw` to use interactive slash commands".to_string());
+        lines.push("  Try              Start `luci` to use interactive slash commands".to_string());
         lines.push(
-            "  Tip              Resume-safe commands also work with `claw --resume SESSION.json ...`"
+            "  Tip              Resume-safe commands also work with `luci --resume SESSION.json ...`"
                 .to_string(),
         );
     }
@@ -837,6 +1132,15 @@ fn run_lucidota_script(
     command_name: &str,
     args: &[String],
 ) -> Result<(), Box<dyn std::error::Error>> {
+    run_lucidota_script_with_env(script_name, command_name, args, &[])
+}
+
+fn run_lucidota_script_with_env(
+    script_name: &str,
+    command_name: &str,
+    args: &[String],
+    extra_env: &[(&str, &str)],
+) -> Result<(), Box<dyn std::error::Error>> {
     let home = env::var("LUCIDOTA_HOME")
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("/home/mfspx/LUCIDOTA"));
@@ -853,6 +1157,7 @@ fn run_lucidota_script(
     let status = Command::new(python)
         .arg(script)
         .args(args)
+        .envs(extra_env.iter().copied())
         .current_dir(home)
         .status()?;
     if !status.success() {
@@ -865,12 +1170,139 @@ fn run_lucidota_survey(args: &[String]) -> Result<(), Box<dyn std::error::Error>
     run_lucidota_script("lucidota_survey.py", "lucidota-survey", args)
 }
 
+fn run_lucidota_graph(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    let (script, command_name, forwarded): (&str, &str, &[String]) = match args.first().map(String::as_str) {
+        None => {
+            return Err(
+                "luci graph supports: promote [--execute] [--label TEXT] [--evidence-ref PATH] [--artifact-ref PATH] [--authority-class CLASS] [--rationale TEXT]; materialize [--execute] [--command-envelope-uuid UUID] [--candidate-payload-json JSON] [--evidence-ref PATH]; edge [--execute] [--command-envelope-uuid UUID] [--evidence-ref PATH] [--source-uuid UUID] [--target-uuid UUID] [--edge-type TYPE]"
+                    .to_string()
+                    .into(),
+            )
+        }
+        Some("promote" | "full-e2e" | "e2e") => ("graph_promotion_full_e2e.py", "graph promote", &args[1..]),
+        Some("materialize" | "packet") => ("graph_promotion_materialize.py", "graph materialize", &args[1..]),
+        Some("edge") => ("graph_edge_materialize.py", "graph edge", &args[1..]),
+        Some(other) => {
+            return Err(format!("unknown luci graph mode: {other} (supported: promote, materialize, edge)").into())
+        }
+    };
+    if script == "graph_promotion_materialize.py" {
+        let mut materialize_args = Vec::with_capacity(args.len());
+        if args.iter().any(|arg| arg == "--json") {
+            materialize_args.push("--json".to_string());
+        }
+        materialize_args.push("materialize".to_string());
+        materialize_args.extend(args[1..].iter().filter(|arg| arg.as_str() != "--json").cloned());
+        return run_lucidota_script_with_env(
+            script,
+            command_name,
+            &materialize_args,
+            &[("LUCIDOTA_GRAPH_MATERIALIZATION_HELPER", "scripts/graph_materialization_helper.py")],
+        );
+    }
+    if matches!(args.first().map(String::as_str), Some("materialize" | "packet" | "edge")) {
+        run_lucidota_script_with_env(
+            script,
+            command_name,
+            forwarded,
+            &[("LUCIDOTA_GRAPH_MATERIALIZATION_HELPER", "scripts/graph_materialization_helper.py")],
+        )
+    } else {
+        run_lucidota_script(script, command_name, forwarded)
+    }
+}
+
+fn run_lucidota_model(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    let (script, command_name, forwarded): (&str, &str, &[String]) = match args.first().map(String::as_str) {
+        None => {
+            return Err(
+                "luci model supports: governor, admission, provider <groq-chat|cohere-chat|local-chat>, runner <validate|stub>"
+                    .to_string()
+                    .into(),
+            )
+        }
+        Some("governor" | "model-governor") => (
+            "lucidota_model_governor.py",
+            "model governor",
+            &args[1..],
+        ),
+        Some("admission" | "model-admission") => (
+            "lucidota_strict_model_stack_admission.py",
+            "model admission",
+            &args[1..],
+        ),
+        Some("provider") => {
+            let Some(provider_cmd) = args.get(1) else {
+                return Err(
+                    "luci model provider requires a provider subcommand: groq-chat, cohere-chat, or local-chat"
+                        .to_string()
+                        .into(),
+                );
+            };
+            return run_lucidota_script("model_runner_cli.py", provider_cmd, &args[1..]);
+        }
+        Some("runner" | "model-runner") => {
+            return run_lucidota_script("model_runner_cli.py", "model-runner", &args[1..]);
+        }
+        Some(other) => {
+            return Err(format!(
+                "unknown luci model mode: {other} (supported: governor, admission, provider, runner)"
+            )
+            .into())
+        }
+    };
+    run_lucidota_script(script, command_name, forwarded)
+}
+
+fn run_lucidota_ingest(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    let (script, command_name, forwarded): (&str, &str, &[String]) = match args.first().map(String::as_str) {
+        None => ("lucidota_markdown_ingest_archive.py", "ingest markdown", args),
+        Some("markdown") => (
+            "lucidota_markdown_ingest_archive.py",
+            "ingest markdown",
+            &args[1..],
+        ),
+        Some("archive" | "archives" | "zip") => (
+            "lucidota_krampus_archive_member_ingest.py",
+            "ingest archive",
+            &args[1..],
+        ),
+        Some("krampus" | "pdf") => (
+            "lucidota_krampus_pdf_ingest.py",
+            "ingest krampus",
+            &args[1..],
+        ),
+        Some("indy" | "library") => (
+            "lucidota_indy_library_ingest.py",
+            "ingest indy",
+            &args[1..],
+        ),
+        Some("watchdog") => (
+            "lucidota_ingest_watchdog.py",
+            "ingest watchdog",
+            &args[1..],
+        ),
+        Some("status" | "completion" | "done") => (
+            "luci_ingestion_status.py",
+            "ingest status",
+            &args[1..],
+        ),
+        Some(other) => {
+            return Err(format!(
+                "unknown ingest mode: {other} (supported: markdown, archive, krampus, pdf, indy, library, watchdog, status)"
+            )
+            .into())
+        }
+    };
+    run_lucidota_script(script, command_name, forwarded)
+}
+
 fn render_lucidota_status_report() -> String {
     let rows = [
         (
             "OVERALL PRODUCT",
             90,
-            "verified demo path; model artifacts still red",
+            "verified front door + delegate + PromptFlow receipts; resident model admission live",
         ),
         ("000-007 Green Slice", 100, "verified harness slice"),
         ("000 Project Brain", 92, "governance/docs green slice"),
@@ -879,11 +1311,19 @@ fn render_lucidota_status_report() -> String {
             100,
             "current KernelService API smoke green",
         ),
-        ("002 Clawd Interface", 76, "CLI/status/survey/cockpit wired"),
-        ("003 Postgres Office", 92, "AGE + CAS edges green"),
-        ("004 Vault / CAS", 72, "CAS index + GC + graph"),
         (
-            "005 DBOS Plane",
+            "002 LUCI Interface",
+            84,
+            "one-shot, REPL, attempt, source, delegate, operator-route, graph, provider, model, and flow rails wired",
+        ),
+        (
+            "003 Postgres Office",
+            94,
+            "AGE + CAS + graph edge/journal live; document/catchme/foundry core migrations live",
+        ),
+        ("004 Vault / CAS", 72, "CAS index + GC + graph item/edge live"),
+        (
+            "005 ABSURD Plane",
             100,
             "signoff/dispatch/replay/watchers green",
         ),
@@ -897,15 +1337,19 @@ fn render_lucidota_status_report() -> String {
         ("009 Drive Imports", 72, "nuclei mapped; bytes pending"),
         (
             "010 Model Runtime",
-            70,
-            "registry/governor only; no weights",
+            82,
+            "resident lanes live on 8080/8081/8082/8101",
         ),
         (
             "010 Model Artifacts",
-            20,
-            "no usable local LLM weights verified",
+            68,
+            "local GGUF inventory, BGE lane, and startup receipts verified; LocateAnything optional",
         ),
-        ("011 INDY_READS", 65, "brief + queues + auth"),
+        (
+            "011 INDY_READS",
+            76,
+            "live co-operator voice, brief, queues, and auth now visible",
+        ),
         ("012 Big Board UI", 100, "cockpit/big board green"),
         ("013 Redaction/Auth", 82, "scanner + private vault"),
         ("014 Verification", 100, "full harness green"),
@@ -959,7 +1403,7 @@ fn run_login() -> Result<(), Box<dyn std::error::Error>> {
         OAuthAuthorizationRequest::from_config(oauth, redirect_uri.clone(), state.clone(), &pkce)
             .build_url();
 
-    println!("Starting Claw OAuth login...");
+    println!("Starting LUCI OAuth login...");
     println!("Listening for callback on {redirect_uri}");
     if let Err(error) = open_browser(&authorize_url) {
         eprintln!("warning: failed to open browser automatically: {error}");
@@ -994,13 +1438,13 @@ fn run_login() -> Result<(), Box<dyn std::error::Error>> {
         expires_at: token_set.expires_at,
         scopes: token_set.scopes,
     })?;
-    println!("Claw OAuth login complete.");
+    println!("LUCI OAuth login complete.");
     Ok(())
 }
 
 fn run_logout() -> Result<(), Box<dyn std::error::Error>> {
     clear_oauth_credentials()?;
-    println!("Claw OAuth credentials cleared.");
+    println!("LUCI OAuth credentials cleared.");
     Ok(())
 }
 
@@ -1045,9 +1489,9 @@ fn wait_for_oauth_callback(
     let callback = parse_oauth_callback_request_target(target)
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))?;
     let body = if callback.error.is_some() {
-        "Claw OAuth login failed. You can close this window."
+        "LUCI OAuth login failed. You can close this window."
     } else {
-        "Claw OAuth login succeeded. You can close this window."
+        "LUCI OAuth login succeeded. You can close this window."
     };
     let response = format!(
         "HTTP/1.1 200 OK\r\ncontent-type: text/plain; charset=utf-8\r\ncontent-length: {}\r\nconnection: close\r\n\r\n{}",
@@ -1567,9 +2011,9 @@ impl LiveCli {
             format!(
                 "{} {}",
                 if color {
-                    "\x1b[1;38;5;45m🦞 Claw Code\x1b[0m"
+                    "\x1b[1;38;5;45m🦞 Indy_READs\x1b[0m"
                 } else {
-                    "Claw Code"
+                    "Indy_READs"
                 },
                 if color {
                     "\x1b[2m· ready\x1b[0m"
@@ -2950,7 +3394,7 @@ fn render_version_report() -> String {
     let git_sha = GIT_SHA.unwrap_or("unknown");
     let target = BUILD_TARGET.unwrap_or("unknown");
     format!(
-        "Claw Code\n  Version          {VERSION}\n  Git SHA          {git_sha}\n  Target           {target}\n  Build date       {DEFAULT_DATE}\n\nSupport\n  Help             claw --help\n  REPL             /help"
+        "LUCI\n  Version          {VERSION}\n  Git SHA          {git_sha}\n  Target           {target}\n  Build date       {DEFAULT_DATE}\n\nSupport\n  Help             luci --help\n  REPL             /help"
     )
 }
 
@@ -3885,7 +4329,7 @@ impl ApiClient for DefaultRuntimeClient {
 }
 
 fn final_assistant_text(summary: &runtime::TurnSummary) -> String {
-    summary
+    let text = summary
         .assistant_messages
         .last()
         .map(|message| {
@@ -3899,7 +4343,19 @@ fn final_assistant_text(summary: &runtime::TurnSummary) -> String {
                 .collect::<Vec<_>>()
                 .join("")
         })
-        .unwrap_or_default()
+        .unwrap_or_default();
+    indy_reads_visible_text(&text)
+}
+
+fn indy_reads_visible_text(text: &str) -> String {
+    let trimmed = text.trim();
+    if trimmed.is_empty() {
+        "Indy_READs:".to_string()
+    } else if trimmed.starts_with("Indy_READs:") {
+        trimmed.to_string()
+    } else {
+        format!("Indy_READs: {trimmed}")
+    }
 }
 
 fn collect_tool_uses(summary: &runtime::TurnSummary) -> Vec<serde_json::Value> {
@@ -4632,7 +5088,7 @@ fn convert_messages(messages: &[ConversationMessage]) -> Vec<InputMessage> {
 }
 
 fn print_help_to(out: &mut impl Write) -> io::Result<()> {
-    writeln!(out, "Claw Code CLI v{VERSION}")?;
+    writeln!(out, "LUCI CLI v{VERSION}")?;
     writeln!(
         out,
         "  Interactive coding assistant for the current workspace."
@@ -4641,19 +5097,19 @@ fn print_help_to(out: &mut impl Write) -> io::Result<()> {
     writeln!(out, "Quick start")?;
     writeln!(
         out,
-        "  claw                                  Start the interactive REPL"
+        "  luci                                  Start the interactive REPL"
     )?;
     writeln!(
         out,
-        "  claw \"summarize this repo\"            Run one prompt and exit"
+        "  luci \"summarize this repo\"            Run one prompt and exit"
     )?;
     writeln!(
         out,
-        "  claw prompt \"explain src/main.rs\"     Explicit one-shot prompt"
+        "  luci prompt \"explain src/main.rs\"     Explicit one-shot prompt"
     )?;
     writeln!(
         out,
-        "  claw --resume SESSION.json /status    Inspect a saved session"
+        "  luci --resume SESSION.json /status    Inspect a saved session"
     )?;
     writeln!(out)?;
     writeln!(out, "Interactive essentials")?;
@@ -4689,104 +5145,180 @@ fn print_help_to(out: &mut impl Write) -> io::Result<()> {
     writeln!(out, "Commands")?;
     writeln!(
         out,
-        "  claw dump-manifests                   Read upstream TS sources and print extracted counts"
+        "  luci dump-manifests                   Read upstream TS sources and print extracted counts"
     )?;
     writeln!(
         out,
-        "  claw bootstrap-plan                   Print the bootstrap phase skeleton"
+        "  luci bootstrap-plan                   Print the bootstrap phase skeleton"
     )?;
     writeln!(
         out,
-        "  claw lucidota-status                  Print LUCIDOTA build status bars"
+        "  luci status                            Print LUCIDOTA build status bars"
     )?;
     writeln!(
         out,
-        "  claw indy-brief                       Print Indy_Reads local runtime brief"
+        "  luci lucidota-status                  Print LUCIDOTA build status bars"
     )?;
     writeln!(
         out,
-        "  claw indy-queue [--limit N]            List Indy_Reads quiet side queue"
+        "  luci indy-brief                       Print Indy_Reads local runtime brief"
     )?;
     writeln!(
         out,
-        "  claw indy-reminder <title>             Queue a quiet Indy_Reads reminder"
+        "  luci indy-queue [--limit N]            List Indy_Reads quiet side queue"
     )?;
     writeln!(
         out,
-        "  claw model-governor                   Check resident model VRAM/loadout decision"
+        "  luci indy-reminder <title>             Queue a quiet Indy_Reads reminder"
     )?;
     writeln!(
         out,
-        "  claw model-runner <validate|stub>      Validate local model config or write STUB receipt"
+        "  luci model-governor                   Check resident model VRAM/loadout decision"
     )?;
     writeln!(
         out,
-        "  claw cohere-chat --prompt TEXT          Call Cohere Chat through LUCIDOTA receipt bridge"
+        "  luci model-admission [--run-diogenes-gate] Run strict local model admission and write a receipt"
     )?;
     writeln!(
         out,
-        "  claw groq-chat --prompt TEXT            Call Groq Chat through LUCIDOTA receipt bridge"
+        "  luci model-runner <validate|stub>      Validate local model config or write STUB receipt"
     )?;
     writeln!(
         out,
-        "  claw rete-route --text TEXT            Route one packet through deterministic RETE/bandit gate"
+        "  luci cohere-chat --prompt TEXT          Call Cohere Chat through LUCIDOTA receipt bridge"
     )?;
     writeln!(
         out,
-        "  claw work-order <pipeline|next-actions> Import work orders with receipts"
+        "  luci groq-chat --prompt TEXT            Call Groq Chat through LUCIDOTA receipt bridge"
     )?;
     writeln!(
         out,
-        "  claw template-render                    Render deterministic template and receipt"
+        "  luci rete-route --text TEXT            Route one packet through deterministic RETE/bandit gate"
     )?;
     writeln!(
         out,
-        "  claw slop-audit                         Audit Blueprint-First/PocketFlow hygiene"
+        "  luci work-order <pipeline|next-actions> Import work orders with receipts"
     )?;
     writeln!(
         out,
-        "  claw knowledge [--query TERM]           Validate/query learned knowledge library"
+        "  luci template-render                    Render deterministic template and receipt"
     )?;
     writeln!(
         out,
-        "  claw ncnn-probe                         Probe ncnn edge-runtime candidate"
+        "  luci slop-audit                         Audit Blueprint-First/PocketFlow hygiene"
     )?;
     writeln!(
         out,
-        "  claw lane-gate route --text TEXT         Route/cache fastlane-slowlane metadata packets"
+        "  luci knowledge [--query TERM]           Validate/query learned knowledge library"
     )?;
     writeln!(
         out,
-        "  claw cockpit                          Print one-screen LUCIDOTA cockpit"
+        "  luci ncnn-probe                         Probe ncnn edge-runtime candidate"
     )?;
     writeln!(
         out,
-        "  claw lucidota-survey <target>          Survey URL/file into local CAS + Postgres"
+        "  luci lane-gate route --text TEXT         Route/cache fastlane-slowlane metadata packets"
     )?;
     writeln!(
         out,
-        "  claw diogenes-smoke                   Run the CKDOG1 gRPC baby-smoke bridge"
+        "  luci operate --text TEXT [--run-id ID]   Route operator input through LUCI MOA/hyperplex lanes"
     )?;
     writeln!(
         out,
-        "  claw agents                           List configured agents"
+        "  luci attempt --text TEXT [--run-id ID]   Route operator input through deterministic attempt engine"
     )?;
     writeln!(
         out,
-        "  claw skills                           List installed skills"
-    )?;
-    writeln!(out, "  claw system-prompt [--cwd PATH] [--date YYYY-MM-DD]")?;
-    writeln!(
-        out,
-        "  claw login                            Start the OAuth login flow"
+        "  luci learn --text TEXT [--run-id ID] [--artifact PATH] [--candidate-kind KIND]  Route operator learning prompts through the reusable improvement loop"
     )?;
     writeln!(
         out,
-        "  claw logout                           Clear saved OAuth credentials"
+        "  luci operator-route --raw-command TEXT    Route operator commands through reusable case pipeline adapters"
     )?;
     writeln!(
         out,
-        "  claw init                             Scaffold CLAW.md + local files"
+        "  luci graph <promote|materialize|edge>    Route graph promotion/materialization helpers through the binary"
+    )?;
+    writeln!(
+        out,
+        "  luci source --text TEXT                  Route current-world source reading through live adapters"
+    )?;
+    writeln!(
+        out,
+        "  luci model <governor|admission|provider|runner>  Route model stack/admin/provider lanes"
+    )?;
+    writeln!(
+        out,
+        "  luci provider <groq-chat|cohere-chat|local-chat>  Route provider/API-key lanes through the model runner"
+    )?;
+    writeln!(
+        out,
+        "  luci delegate --kind K --text TEXT       Fan out to Groq/Vibes delegate lanes with receipts"
+    )?;
+    writeln!(
+        out,
+        "  luci moa-worker --absurd-dir DIR         Execute queued LUCI MOA chain nodes"
+    )?;
+    writeln!(
+        out,
+        "  luci ingest status [--json]              Report repo-wide ingestion completion contract"
+    )?;
+    writeln!(
+        out,
+        "  luci ingest markdown [--execute] [--json] Ingest legacy Markdown breadcrumbs"
+    )?;
+    writeln!(
+        out,
+        "  luci ingest archive [--max-members N] [--json] Open KRAMPUS archives recursively"
+    )?;
+    writeln!(
+        out,
+        "  luci flow run <flow-dir> --batch-data DATA --run-id ID"
+    )?;
+    writeln!(
+        out,
+        "                                        Run PromptFlow eval batch via LUCIDOTA receipt bridge"
+    )?;
+    writeln!(
+        out,
+        "  luci flow batch --dag FLOW --eval DATA --run-id ID"
+    )?;
+    writeln!(
+        out,
+        "                                        Alias for PromptFlow batch lane"
+    )?;
+    writeln!(
+        out,
+        "  luci cockpit                          Print one-screen LUCIDOTA cockpit"
+    )?;
+    writeln!(
+        out,
+        "  luci lucidota-survey <target>          Survey URL/file into local CAS + Postgres"
+    )?;
+    writeln!(
+        out,
+        "  luci diogenes-smoke                   Run the CKDOG1 gRPC baby-smoke bridge"
+    )?;
+    writeln!(
+        out,
+        "  luci agents                           List configured agents"
+    )?;
+    writeln!(
+        out,
+        "  luci skills                           List installed skills"
+    )?;
+    writeln!(out, "  luci system-prompt [--cwd PATH] [--date YYYY-MM-DD]")?;
+    writeln!(
+        out,
+        "  luci login                            Start the OAuth login flow"
+    )?;
+    writeln!(
+        out,
+        "  luci logout                           Clear saved OAuth credentials"
+    )?;
+    writeln!(
+        out,
+        "  luci init                             Scaffold CLAW.md + local files"
     )?;
     writeln!(out)?;
     writeln!(out, "Flags")?;
@@ -4828,23 +5360,23 @@ fn print_help_to(out: &mut impl Write) -> io::Result<()> {
         .join(", ");
     writeln!(out, "Resume-safe commands: {resume_commands}")?;
     writeln!(out, "Examples")?;
-    writeln!(out, "  claw --model opus \"summarize this repo\"")?;
+    writeln!(out, "  luci --model opus \"summarize this repo\"")?;
     writeln!(
         out,
-        "  claw --output-format json prompt \"explain src/main.rs\""
+        "  luci --output-format json prompt \"explain src/main.rs\""
     )?;
     writeln!(
         out,
-        "  claw --allowedTools read,glob \"summarize Cargo.toml\""
+        "  luci --allowedTools read,glob \"summarize Cargo.toml\""
     )?;
     writeln!(
         out,
-        "  claw --resume session.json /status /diff /export notes.txt"
+        "  luci --resume session.json /status /diff /export notes.txt"
     )?;
-    writeln!(out, "  claw agents")?;
-    writeln!(out, "  claw /skills")?;
-    writeln!(out, "  claw login")?;
-    writeln!(out, "  claw init")?;
+    writeln!(out, "  luci agents")?;
+    writeln!(out, "  luci /skills")?;
+    writeln!(out, "  luci login")?;
+    writeln!(out, "  luci init")?;
     Ok(())
 }
 
@@ -4861,7 +5393,8 @@ mod tests {
         format_status_report, format_tool_call_start, format_tool_result,
         normalize_permission_mode, parse_args, parse_git_status_metadata, permission_policy,
         print_help_to, push_output_block, render_config_report, render_lucidota_status_report,
-        render_memory_report, render_repl_help, render_unknown_repl_command, resolve_model_alias,
+        render_memory_report, render_repl_help, render_unknown_repl_command, render_version_report,
+        resolve_model_alias,
         response_to_events, resume_supported_slash_commands, slash_command_completion_candidates,
         status_context, CliAction, CliOutputFormat, InternalPromptProgressEvent,
         InternalPromptProgressState, SlashCommand, StatusUsage, DEFAULT_MODEL,
@@ -5172,6 +5705,13 @@ mod tests {
             }
         );
         assert_eq!(
+            parse_args(&["model-admission".to_string(), "--json".to_string()])
+                .expect("model-admission should parse"),
+            CliAction::ModelAdmission {
+                args: vec!["--json".to_string()]
+            }
+        );
+        assert_eq!(
             parse_args(&["model-validate".to_string(), "--json".to_string()])
                 .expect("model-validate should parse"),
             CliAction::ModelRunner {
@@ -5321,6 +5861,293 @@ mod tests {
     }
 
     #[test]
+    fn parses_promptflow_and_luci_flow_subcommands() {
+        assert_eq!(
+            parse_args(&[
+                "flow".to_string(),
+                "run".to_string(),
+                "04_RUNTIME/promptflow_smoke_flow".to_string(),
+                "--batch-data".to_string(),
+                "04_RUNTIME/promptflow_smoke_flow/data.jsonl".to_string(),
+                "--run-id".to_string(),
+                "smoke".to_string(),
+            ])
+            .expect("flow run should parse"),
+            CliAction::PromptFlow {
+                args: vec![
+                    "--flow".to_string(),
+                    "04_RUNTIME/promptflow_smoke_flow".to_string(),
+                    "--data".to_string(),
+                    "04_RUNTIME/promptflow_smoke_flow/data.jsonl".to_string(),
+                    "--run-id".to_string(),
+                    "smoke".to_string(),
+                ]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "luci".to_string(),
+                "flow".to_string(),
+                "batch".to_string(),
+                "--dag".to_string(),
+                "dagdir".to_string(),
+                "--eval".to_string(),
+                "eval.jsonl".to_string(),
+                "--run-id".to_string(),
+                "rid".to_string(),
+            ])
+            .expect("luci flow batch should parse"),
+            CliAction::PromptFlow {
+                args: vec![
+                    "--flow".to_string(),
+                    "dagdir".to_string(),
+                    "--data".to_string(),
+                    "eval.jsonl".to_string(),
+                    "--run-id".to_string(),
+                    "rid".to_string(),
+                ]
+            }
+        );
+    }
+
+    #[test]
+    fn parses_luci_delegate_class_command() {
+        assert_eq!(
+            parse_args(&[
+                "luci".to_string(),
+                "delegate".to_string(),
+                "--kind".to_string(),
+                "review".to_string(),
+                "--text".to_string(),
+                "study this".to_string(),
+            ])
+            .expect("luci delegate should parse"),
+            CliAction::Delegate {
+                args: vec![
+                    "--kind".to_string(),
+                    "review".to_string(),
+                    "--text".to_string(),
+                    "study this".to_string(),
+                ]
+            }
+        );
+    }
+
+    #[test]
+    fn parses_luci_operator_route_class_command() {
+        assert_eq!(
+            parse_args(&[
+                "luci".to_string(),
+                "operator-route".to_string(),
+                "--raw-command".to_string(),
+                "create case".to_string(),
+                "--case-id".to_string(),
+                "case-1".to_string(),
+                "--source-folder".to_string(),
+                "drop".to_string(),
+            ])
+            .expect("luci operator-route should parse"),
+            CliAction::OperatorRoute {
+                args: vec![
+                    "--raw-command".to_string(),
+                    "create case".to_string(),
+                    "--case-id".to_string(),
+                    "case-1".to_string(),
+                    "--source-folder".to_string(),
+                    "drop".to_string(),
+                ]
+            }
+        );
+    }
+
+    #[test]
+    fn parses_luci_graph_class_command() {
+        assert_eq!(
+            parse_args(&[
+                "luci".to_string(),
+                "graph".to_string(),
+                "promote".to_string(),
+                "--execute".to_string(),
+            ])
+            .expect("luci graph should parse"),
+            CliAction::Graph {
+                args: vec!["promote".to_string(), "--execute".to_string()]
+            }
+        );
+    }
+
+    #[test]
+    fn parses_luci_provider_class_command() {
+        assert_eq!(
+            parse_args(&[
+                "luci".to_string(),
+                "provider".to_string(),
+                "groq-chat".to_string(),
+                "--prompt".to_string(),
+                "hello".to_string(),
+            ])
+            .expect("luci provider should parse"),
+            CliAction::Provider {
+                args: vec![
+                    "groq-chat".to_string(),
+                    "--prompt".to_string(),
+                    "hello".to_string(),
+                ]
+            }
+        );
+    }
+
+    #[test]
+    fn parses_luci_model_class_command() {
+        assert_eq!(
+            parse_args(&[
+                "luci".to_string(),
+                "model".to_string(),
+                "admission".to_string(),
+                "--run-diogenes-gate".to_string(),
+            ])
+            .expect("luci model should parse"),
+            CliAction::Model {
+                args: vec!["admission".to_string(), "--run-diogenes-gate".to_string()]
+            }
+        );
+    }
+
+    #[test]
+    fn parses_claw_moa_operator_subcommands() {
+        assert_eq!(
+            parse_args(&[
+                "operate".to_string(),
+                "--text".to_string(),
+                "status check".to_string(),
+                "--json".to_string(),
+            ])
+            .expect("operate should parse"),
+            CliAction::ClawMoa {
+                args: vec![
+                    "--text".to_string(),
+                    "status check".to_string(),
+                    "--json".to_string(),
+                ]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "moa".to_string(),
+                "--text".to_string(),
+                "shortpath".to_string(),
+                "--json".to_string(),
+            ])
+            .expect("moa alias should parse"),
+            CliAction::ClawMoa {
+                args: vec![
+                    "--text".to_string(),
+                    "shortpath".to_string(),
+                    "--json".to_string(),
+                ]
+            }
+        );
+        assert_eq!(
+            parse_args(&["hyperplex".to_string(), "--text".to_string(), "deep audit".to_string()])
+                .expect("hyperplex alias should parse"),
+            CliAction::ClawMoa {
+                args: vec!["--text".to_string(), "deep audit".to_string()]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "moa-worker".to_string(),
+                "--absurd-dir".to_string(),
+                "05_OUTPUTS/claw_moa/absurd".to_string(),
+            ])
+            .expect("moa-worker should parse"),
+            CliAction::ClawMoaWorker {
+                args: vec![
+                    "--absurd-dir".to_string(),
+                    "05_OUTPUTS/claw_moa/absurd".to_string(),
+                ]
+            }
+        );
+    }
+
+    #[test]
+    fn parses_luci_ingest_modes() {
+        assert_eq!(
+            parse_args(&["ingest".to_string()]).expect("ingest should parse"),
+            CliAction::Ingest { args: vec![] }
+        );
+        assert_eq!(
+            parse_args(&[
+                "ingest".to_string(),
+                "markdown".to_string(),
+                "--json".to_string(),
+            ])
+            .expect("ingest markdown should parse"),
+            CliAction::Ingest {
+                args: vec!["markdown".to_string(), "--json".to_string()]
+            }
+        );
+        assert_eq!(
+            parse_args(&["ingestion".to_string(), "krampus".to_string()])
+                .expect("ingestion krampus should parse"),
+            CliAction::Ingest {
+                args: vec!["krampus".to_string()]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "ingest".to_string(),
+                "status".to_string(),
+                "--json".to_string(),
+            ])
+            .expect("ingest status should parse"),
+            CliAction::Ingest {
+                args: vec!["status".to_string(), "--json".to_string()]
+            }
+        );
+        assert_eq!(
+            parse_args(&[
+                "ingest".to_string(),
+                "archive".to_string(),
+                "--max-members".to_string(),
+                "1".to_string(),
+            ])
+            .expect("ingest archive should parse"),
+            CliAction::Ingest {
+                args: vec![
+                    "archive".to_string(),
+                    "--max-members".to_string(),
+                    "1".to_string()
+                ]
+            }
+        );
+    }
+
+    #[test]
+    fn parses_lucidota_status_alias() {
+        assert_eq!(
+            parse_args(&["status".to_string()]).expect("status should parse"),
+            CliAction::LucidotaStatus
+        );
+        assert_eq!(
+            parse_args(&["lucidota-status".to_string()]).expect("lucidota-status should parse"),
+            CliAction::LucidotaStatus
+        );
+    }
+
+    #[test]
+    fn parses_luci_source_alias() {
+        assert_eq!(
+            parse_args(&["source".to_string()]).expect("source should parse"),
+            CliAction::Source { args: vec![] }
+        );
+        assert_eq!(
+            parse_args(&["current-world".to_string()]).expect("current-world should parse"),
+            CliAction::Source { args: vec![] }
+        );
+    }
+
+    #[test]
     fn parses_direct_agents_and_skills_slash_commands() {
         assert_eq!(
             parse_args(&["/agents".to_string()]).expect("/agents should parse"),
@@ -5418,7 +6245,7 @@ mod tests {
         let help = commands::render_slash_command_help();
         assert!(help.contains("Slash commands"));
         assert!(help.contains("Tab completes commands inside the REPL."));
-        assert!(help.contains("available via claw --resume SESSION.json"));
+        assert!(help.contains("available via luci --resume SESSION.json"));
     }
 
     #[test]
@@ -5544,12 +6371,22 @@ mod tests {
         let mut help = Vec::new();
         print_help_to(&mut help).expect("help should render");
         let help = String::from_utf8(help).expect("help should be utf8");
-        assert!(help.contains("claw init"));
-        assert!(help.contains("claw agents"));
-        assert!(help.contains("claw skills"));
-        assert!(help.contains("claw lucidota-status"));
-        assert!(help.contains("claw lucidota-survey"));
-        assert!(help.contains("claw /skills"));
+        assert!(help.contains("LUCI CLI"));
+        assert!(help.contains("luci init"));
+        assert!(help.contains("luci agents"));
+        assert!(help.contains("luci skills"));
+        assert!(help.contains("luci lucidota-status"));
+        assert!(help.contains("luci lucidota-survey"));
+        assert!(help.contains("luci operate --text TEXT"));
+        assert!(help.contains("luci operator-route --raw-command TEXT"));
+        assert!(help.contains("luci graph <promote|materialize|edge>"));
+        assert!(help.contains("luci source --text TEXT"));
+        assert!(help.contains("luci model <governor|admission|provider|runner>"));
+        assert!(help.contains("luci provider <groq-chat|cohere-chat|local-chat>"));
+        assert!(help.contains("luci moa-worker --absurd-dir DIR"));
+        assert!(help.contains("luci flow run <flow-dir> --batch-data DATA --run-id ID"));
+        assert!(help.contains("luci flow batch --dag FLOW --eval DATA --run-id ID"));
+        assert!(help.contains("luci /skills"));
     }
 
     #[test]
@@ -5558,8 +6395,24 @@ mod tests {
         assert!(report.contains("LUCIDOTA Build Status"));
         assert!(report.contains("003 Postgres Office"));
         assert!(report.contains("[█████████░░░]  76%"));
+        assert!(report.contains("002 LUCI Interface"));
+        assert!(report.contains("graph, provider, model, and flow rails wired"));
+        assert!(report.contains("005 ABSURD Plane"));
+        assert!(!report.contains("DBOS Plane"));
         assert!(report.contains("000-007 Green Slice"));
         assert!(report.contains("007 Extractors"));
+        assert!(report.contains("provider"));
+        assert!(report.contains("model"));
+        assert!(report.contains("resident lanes live on 8080/8081/8082/8101"));
+        assert!(report.contains("local GGUF inventory, BGE lane, and startup receipts verified"));
+    }
+
+    #[test]
+    fn version_report_is_luci_branded() {
+        let report = render_version_report();
+        assert!(report.starts_with("LUCI"));
+        assert!(report.contains("Help             luci --help"));
+        assert!(!report.contains("Claw Code"));
     }
 
     #[test]

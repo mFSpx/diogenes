@@ -1,6 +1,6 @@
 {
   "schema": "diogenes.gpu_model_runtime_registry.v1",
-  "updated_at": "2026-05-27T18:52:55.338710Z",
+  "updated_at": "2026-06-01T06:25:00Z",
   "detected_gpu": "Sun May 17 14:19:49 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.126.18             Driver Version: 580.126.18     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce GTX 1650        Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   48C    P8              2W /   50W |       2MiB /   4096MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|  No running processes found                                                             |\n+-----------------------------------------------------------------------------------------+\n",
   "torch_probe": "torch_probe_error ModuleNotFoundError(\"No module named 'torch'\")\n",
   "vram_budget_rules": {
@@ -16,10 +16,10 @@
       "runtime_status": "active_strict_stack"
     },
     {
-      "path": "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
-      "size_bytes": 2565011808,
+      "path": "03_VAULT/models/mamba-1.4b-hf-Q2_K.gguf",
+      "size_bytes": 525594560,
       "kind": "gguf",
-      "runtime_status": "active_strict_stack"
+      "runtime_status": "legacy_reference"
     },
     {
       "path": "03_VAULT/models/prism-ml/Ternary-Bonsai-4B-gguf/Ternary-Bonsai-4B-Q2_0.gguf",
@@ -28,10 +28,16 @@
       "runtime_status": "active_strict_stack"
     },
     {
-      "path": "03_VAULT/models/mamba-1.4b-hf-Q2_K.gguf",
-      "size_bytes": 525594560,
+      "path": "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
+      "size_bytes": 2565011808,
       "kind": "gguf",
-      "runtime_status": "legacy_reference"
+      "runtime_status": "active_strict_stack"
+    },
+    {
+      "path": "04_RUNTIME/models/bge-m3-q8_0.gguf",
+      "size_bytes": 634553760,
+      "kind": "gguf",
+      "runtime_status": "active_strict_stack"
     }
   ],
   "feasible_now": [
@@ -40,7 +46,6 @@
     "CPU/low VRAM GLiNER/doc parsing"
   ],
   "feasible_later": [
-    "BGE reranker after weights",
     "ModernBERT after weights",
     "FairyFuse after real backend"
   ],
@@ -62,9 +67,10 @@
     "verified_by": "tests/test_model_runtime_registry_alignment.py",
     "active_model_paths": [
       "03_VAULT/models/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
-      "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
+      "03_VAULT/models/needle/needle.pkl",
       "03_VAULT/models/prism-ml/Ternary-Bonsai-4B-gguf/Ternary-Bonsai-4B-Q2_0.gguf",
-      "03_VAULT/models/needle/needle.pkl"
+      "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
+      "04_RUNTIME/models/bge-m3-q8_0.gguf"
     ],
     "required_services": [
       {
@@ -72,7 +78,12 @@
         "model_path": "03_VAULT/models/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
         "port": 8080,
         "required": true,
-        "device_lane": "nvidia_vram_model_only"
+        "device_lane": "nvidia_vram_model_only",
+        "switch_group": "reasoning_generation_slot",
+        "switch_role": "default_vram_resident",
+        "switchable_with": [
+          "bonsai4b_ram"
+        ]
       },
       {
         "name": "mamba7b_ram",
@@ -86,7 +97,11 @@
         "model_path": "03_VAULT/models/prism-ml/Ternary-Bonsai-4B-gguf/Ternary-Bonsai-4B-Q2_0.gguf",
         "port": 8082,
         "required": true,
-        "device_lane": "system_ram_cpu"
+        "device_lane": "system_ram_cpu",
+        "switch_group": "reasoning_generation_slot",
+        "switch_role": "ram_resident_gpu_switchable",
+        "alternate_device_lane": "nvidia_vram_model_only",
+        "gpu_switch_env": "LUCIDOTA_BONSAI_NGL"
       },
       {
         "name": "mamba7b_gpu_partial",
@@ -108,11 +123,27 @@
         "port": null,
         "required": true,
         "device_lane": "system_ram_cpu"
+      },
+      {
+        "name": "bge_m3_vram",
+        "model_path": "04_RUNTIME/models/bge-m3-q8_0.gguf",
+        "port": 8101,
+        "required": false,
+        "device_lane": "nvidia_vram_embedding"
       }
     ],
     "spark_alias": "needle_0",
     "legacy_mamba_1_4b_status": "reference_only_not_active_loadout",
-    "mamba_gpu_partial_status": "optional_preemptible"
+    "mamba_gpu_partial_status": "optional_preemptible",
+    "switch_groups": {
+      "reasoning_generation_slot": {
+        "default": "deepseek_r1_qwen_1p5b_gpu",
+        "alternates": [
+          "bonsai4b_ram"
+        ],
+        "policy": "only admitted resident lane is exposed as active; Bonsai remains CPU/RAM unless LUCIDOTA_BONSAI_NGL requests a GPU switch."
+      }
+    }
   },
   "current_gpu_probe": {
     "name": "NVIDIA GeForce GTX 1650",
@@ -123,5 +154,51 @@
     "utilization_gpu_percent": 0,
     "source": "nvidia-smi --query-gpu",
     "updated_at": "2026-05-27T18:52:55.338710Z"
-  }
+  },
+  "vision_model_candidates": [
+    {
+      "model_id": "nvidia-locateanything-3b",
+      "name": "NVIDIA LocateAnything-3B",
+      "source_url": "https://huggingface.co/nvidia/LocateAnything-3B",
+      "project_url": "https://research.nvidia.com/labs/lpr/locate-anything/",
+      "paper_url": "https://arxiv.org/abs/2605.27365",
+      "sha": "7a81d810571dc5f244b2f0b6868128f24b1cbd85",
+      "release_date": "2026-05-26",
+      "last_modified": "2026-05-27T08:30:54.000Z",
+      "architecture": "Transformer VLM with MoonViT vision encoder, Qwen2.5-3B-Instruct language model, multimodal projector, Parallel Box Decoding",
+      "parameter_count": 3000000000,
+      "license": "nvidia-license non-commercial research/development",
+      "runtime_status": "declared_optional_not_downloaded",
+      "local_path": null,
+      "artifact_size_bytes_observed": 7661427376,
+      "expected_device_lane": "optional_local_image_grounding_lane; not resident with current strict text stack on GTX 1650 4GB",
+      "local_image_roles": [
+        "object_detection",
+        "visual_grounding",
+        "gui_grounding",
+        "ocr_localization",
+        "document_layout_grounding"
+      ],
+      "serving_options": [
+        "transformers trust_remote_code",
+        "vLLM OpenAI-compatible",
+        "SGLang OpenAI-compatible"
+      ],
+      "operator_note": "Machine vision / visual grounding model for local images; not an image generation model and not a live PromptFlow gate.",
+      "sources": [
+        {
+          "title": "Hugging Face model card",
+          "url": "https://huggingface.co/nvidia/LocateAnything-3B"
+        },
+        {
+          "title": "NVIDIA research page",
+          "url": "https://research.nvidia.com/labs/lpr/locate-anything/"
+        },
+        {
+          "title": "arXiv:2605.27365",
+          "url": "https://arxiv.org/abs/2605.27365"
+        }
+      ]
+    }
+  ]
 }

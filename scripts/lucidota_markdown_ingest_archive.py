@@ -10,6 +10,7 @@ from pathlib import Path
 import psycopg
 
 ROOT=Path(__file__).resolve().parents[1]
+OUT=ROOT/'05_OUTPUTS'/'receipts'
 DSN=os.environ.get('LUCIDOTA_GO_STORAGE_DSN','postgresql:///lucidota_storage')
 OPERATOR_UUID=os.environ.get('LUCIDOTA_OPERATOR_UUID','00000000-0000-4000-8000-000000000414')
 SCHEMAS=[ROOT/'06_SCHEMA'/'016_go_graph_core.sql', ROOT/'06_SCHEMA'/'017_indy_reads_library.sql']
@@ -19,6 +20,7 @@ GRAPH_APPROVAL_MODE='approved' if os.environ.get('LUCIDOTA_GRAPH_APPROVAL_MODE',
 
 def sha(b:bytes)->str: return hashlib.sha256(b).hexdigest()
 def rel(p:Path)->str: return str(p.relative_to(ROOT))
+def stable_json(payload:dict)->str: return json.dumps(payload, sort_keys=True, separators=(',',':'), default=str)
 def title_of(text:str,path:Path)->str:
     for line in text.splitlines()[:20]:
         m=re.match(r'^#\s+(.+)', line.strip())
@@ -51,6 +53,16 @@ def graph_item(cur, original:str, h:str, title:str, excerpt:str)->str:
         """,(u,title,original,json.dumps({'path':original}),OPERATOR_UUID,json.dumps(payload,sort_keys=True)))
     return cur.fetchone()[0]
 
+def write_receipt(*, executed:bool, count:int, skipped_count:int, archive:Path|None, skipped:list[dict], manifest:list[dict], graph_approval_mode:str)->str:
+    OUT.mkdir(parents=True, exist_ok=True)
+    receipt_payload={'schema':'lucidota.markdown_ingest_archive.receipt.v1','executed':executed,'count':count,'skipped_count':skipped_count,'archive':rel(archive) if archive else None,'graph_approval_mode':graph_approval_mode,'skipped':skipped[:10],'items':manifest[:10]}
+    receipt_key=sha(stable_json({k:receipt_payload[k] for k in ('executed','count','skipped_count','archive','graph_approval_mode','skipped','items')}).encode('utf-8'))
+    path=OUT/f'lucidota_markdown_ingest_archive_{receipt_key[:24]}.json'
+    receipt_payload['receipt_path']=rel(path)
+    receipt_payload['generated_at_utc']=datetime.now(timezone.utc).isoformat().replace('+00:00','Z')
+    path.write_text(json.dumps(receipt_payload,indent=2,sort_keys=True,default=str)+'\n',encoding='utf-8')
+    return receipt_payload['receipt_path']
+
 def main()->int:
     ap=argparse.ArgumentParser()
     ap.add_argument('--execute',action='store_true')
@@ -59,12 +71,21 @@ def main()->int:
     run_id=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     archive=ROOT/'03_VAULT'/'ingested_markdown'/run_id
     manifest=[]
+    skipped=[]
     files=candidates()
     with psycopg.connect(DSN) as conn:
         with conn.cursor() as cur:
             for s in SCHEMAS: cur.execute(s.read_text())
             for p in files:
-                data=p.read_bytes(); h=sha(data); text=data.decode('utf-8',errors='ignore')
+                try:
+                    data=p.read_bytes()
+                except FileNotFoundError:
+                    skipped.append({'original_path': rel(p), 'reason': 'vanished_before_read'})
+                    continue
+                except OSError as exc:
+                    skipped.append({'original_path': rel(p), 'reason': f'{type(exc).__name__}:{exc}'})
+                    continue
+                h=sha(data); text=data.decode('utf-8',errors='ignore')
                 original=rel(p); title=title_of(text,p); excerpt='\n'.join(text.splitlines()[:40])
                 gid=graph_item(cur,original,h,title,excerpt)
                 archived=''
@@ -83,7 +104,8 @@ def main()->int:
         conn.commit()
     if args.execute:
         (archive/'manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
-    out={'ok':True,'executed':args.execute,'count':len(manifest),'archive':rel(archive) if args.execute else None,'graph_approval_mode':GRAPH_APPROVAL_MODE,'items':manifest[:10]}
+    receipt_path=write_receipt(executed=args.execute,count=len(manifest),skipped_count=len(skipped),archive=archive if args.execute else None,skipped=skipped,manifest=manifest,graph_approval_mode=GRAPH_APPROVAL_MODE)
+    out={'ok':True,'executed':args.execute,'count':len(manifest),'skipped_count':len(skipped),'skipped':skipped[:10],'archive':rel(archive) if args.execute else None,'graph_approval_mode':GRAPH_APPROVAL_MODE,'items':manifest[:10],'receipt_path':receipt_path}
     print(json.dumps(out,indent=2,sort_keys=True) if args.json else out)
     return 0
 if __name__=='__main__': raise SystemExit(main())

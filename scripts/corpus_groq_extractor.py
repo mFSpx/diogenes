@@ -26,7 +26,7 @@ def _load_groq_key():
             line = line.strip()
             if line.startswith('GROQ_API_KEY='):
                 return line.split('=', 1)[1].strip().strip('"').strip("'")
-    except FileNotFoundError:
+    except (FileNotFoundError, OSError, UnicodeDecodeError):
         pass
     return ''
 
@@ -119,8 +119,37 @@ def read_cas_file(sha256):
         return None
     return path.read_bytes()
 
+def extract_email(file_bytes):
+    import email as _email, email.policy as _ep, re as _re
+    try:
+        msg = _email.message_from_bytes(file_bytes, policy=_ep.compat32)
+        parts = []
+        for part in msg.walk():
+            ct = part.get_content_type()
+            if ct == 'text/plain':
+                raw = part.get_payload(decode=True)
+                if raw:
+                    parts.append(raw.decode('utf-8', errors='replace'))
+            elif ct == 'text/html' and not parts:
+                raw = part.get_payload(decode=True)
+                if raw:
+                    parts.append(_re.sub('<[^>]+>', ' ', raw.decode('utf-8', errors='replace')))
+        body = '\n'.join(parts).strip()
+        if len(body) < 30:
+            return None
+        alpha = sum(1 for c in body if c.isalpha())
+        if len(body) > 0 and alpha / len(body) < 0.25:
+            return None
+        subject = msg.get('Subject', '')
+        from_ = msg.get('From', '')
+        return f'Subject: {subject}\nFrom: {from_}\n\n{body}'
+    except Exception:
+        return None
+
 def extract_text(file_bytes, mime):
-    if mime.startswith('text/'):
+    if mime == 'message/rfc822':
+        return extract_email(file_bytes)
+    elif mime.startswith('text/'):
         return file_bytes.decode('utf-8', errors='ignore')
     elif mime.startswith('image/'):
         return ocr_image(file_bytes, mime)
@@ -165,11 +194,14 @@ def extract_zip(file_bytes):
         return '\n'.join(texts)
 
 def get_mime(filename):
-    if filename.endswith('.txt'):
+    fn = filename.lower()
+    if fn.endswith('.txt') or fn.endswith('.md') or fn.endswith('.json') or fn.endswith('.csv'):
         return 'text/plain'
-    elif filename.endswith('.jpg') or filename.endswith('.png'):
+    elif fn.endswith('.eml') or fn.endswith('.mbox'):
+        return 'message/rfc822'
+    elif fn.endswith('.jpg') or fn.endswith('.jpeg') or fn.endswith('.png'):
         return 'image/jpeg'
-    elif filename.endswith('.zip'):
+    elif fn.endswith('.zip'):
         return 'application/zip'
     else:
         return 'application/octet-stream'

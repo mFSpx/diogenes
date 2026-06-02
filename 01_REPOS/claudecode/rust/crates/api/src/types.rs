@@ -102,6 +102,7 @@ pub enum ToolChoice {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MessageResponse {
+    #[serde(default)]
     pub id: String,
     #[serde(rename = "type")]
     pub kind: String,

@@ -43,6 +43,7 @@ LUCIDOTA is a highly advanced ternary/binary ontological truth machine: truth me
 - `GOALS/SWARM_CURRENT_BRIEF.md` plus `scripts/goal_swarm_brief.py` turn the compare-driven loop into compact per-script worker packets for new sessions.
 - Worker packets now carry an explicit output contract: required fields are `status`, `result`, `next_action`, and `receipt_path`, with minimum decision-pair evidence requested from the worker.
 - Exact JSON envelopes should be given breathing room: the worker packet contract now recommends a 256-token floor and 512-token ceiling for compact, parseable responses.
+- LUCI convergence now treats the deterministic attempt engine as the real state machine: `task_intake -> classify -> generate_attempts -> execute_attempt -> observe -> score -> mutate/branch -> retry/escalate/archive -> receipt`, with the LUCI front door writing attempt-engine task metadata into the operator receipt. Front-door convergence is complete; full LUCI convergence is still ongoing.
 - Confidence-weighted symbol condensation runs through `scripts/graph_symbol_condensation.py` against graph/Postgres evidence, with Bayes-style confidence and morphing claims.
 - Temporal comparison runs through `scripts/graph_symbol_compare.py` to diff condensation receipts and propose the next GO-25 seed.
 - Symbol dispatch runs through `scripts/graph_symbol_dispatch.py` to fan that next seed out to Groq/local worker packets.

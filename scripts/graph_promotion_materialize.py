@@ -54,13 +54,14 @@ def rel(path: Path | str) -> str:
         return str(path)
 
 
-def write_report(name: str, payload: dict[str, Any]) -> Path:
+def write_report(name: str, payload: dict[str, Any], *, emit: bool = True) -> Path:
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"graph_promotion_materialize_{name}_{stamp()}.json"
     payload.setdefault("generated_at", now_iso())
     payload["report_path"] = rel(path)
     path.write_text(json.dumps(payload, indent=2, sort_keys=False, ensure_ascii=False), encoding="utf-8")
-    print(f"REPORT_PATH={rel(path)}")
+    if emit:
+        print(f"REPORT_PATH={rel(path)}")
     return path
 
 
@@ -143,11 +144,14 @@ def init_schema(args: argparse.Namespace) -> int:
                 for schema in SCHEMAS:
                     cur.execute(schema.read_text(encoding="utf-8"))
             conn.commit()
-    write_report("init_schema_execute" if args.execute else "init_schema_dry_run", {
+    report = {
         "action": "init_schema",
         "execute_performed": bool(args.execute),
         "schemas": [rel(s) for s in SCHEMAS],
-    })
+    }
+    write_report("init_schema_execute" if args.execute else "init_schema_dry_run", report, emit=not args.json)
+    if args.json:
+        print(json.dumps(report, sort_keys=True, default=str))
     return 0
 
 
@@ -177,6 +181,7 @@ def materialize(args: argparse.Namespace) -> int:
     result: dict[str, Any] = {
         "action": "materialize",
         "execute_performed": False,
+        "status": "FAIL",
         "db_writes_performed": False,
         "canonical_graph_writes_performed": False,
         "promotion_path_used": False,
@@ -195,7 +200,9 @@ def materialize(args: argparse.Namespace) -> int:
         "blockers": blockers,
     }
     if blockers:
-        write_report("blocked", result)
+        write_report("blocked", result, emit=not args.json)
+        if args.json:
+            print(json.dumps(result, sort_keys=True, default=str))
         return 2
 
     with psycopg.connect(storage_db(args)) as conn:
@@ -211,11 +218,15 @@ def materialize(args: argparse.Namespace) -> int:
                 blockers.extend(preflight.get("blockers", []))
                 result["blockers"] = blockers
                 conn.rollback()
-                write_report("preflight_blocked", result)
+                write_report("preflight_blocked", result, emit=not args.json)
+                if args.json:
+                    print(json.dumps(result, sort_keys=True, default=str))
                 return 2
             if not args.execute:
                 conn.rollback()
-                write_report("dry_run", result)
+                write_report("dry_run", result, emit=not args.json)
+                if args.json:
+                    print(json.dumps(result, sort_keys=True, default=str))
                 return 0
             term = str(payload.get("term") or "CLAIM")
             label = str(payload.get("label") or payload.get("claim") or "Promoted candidate")[:300]
@@ -227,7 +238,9 @@ def materialize(args: argparse.Namespace) -> int:
                 blockers.append(f"term_not_in_registry:{term}")
                 result["blockers"] = blockers
                 conn.rollback()
-                write_report("preflight_blocked", result)
+                write_report("preflight_blocked", result, emit=not args.json)
+                if args.json:
+                    print(json.dumps(result, sort_keys=True, default=str))
                 return 2
             graph_payload = dict(payload)
             valency = ternary_valency(payload)
@@ -239,6 +252,8 @@ def materialize(args: argparse.Namespace) -> int:
                 INSERT INTO lucidota_go.graph_promotion_packet
                   (source_system, candidate_kind, candidate_payload, evidence_refs, authority_class, promotion_status, detail)
                 VALUES (%s, 'node', %s::jsonb, %s::jsonb, %s, 'operator_confirmed', %s::jsonb)
+                ON CONFLICT (packet_dedupe_key) DO UPDATE
+                  SET detail = lucidota_go.graph_promotion_packet.detail || EXCLUDED.detail
                 RETURNING packet_uuid::text
                 """,
                 (
@@ -327,14 +342,19 @@ def materialize(args: argparse.Namespace) -> int:
                 "journal_uuid": journal_uuid,
                 "materialization_uuid": materialization_uuid,
             })
+            result["status"] = "PASS"
             result["counts_after"] = counts(cur)
         conn.commit()
-    write_report("execute", result)
-    print(f"PACKET_UUID={result['packet_uuid']}")
-    print(f"DECISION_UUID={result['decision_uuid']}")
-    print(f"GRAPH_ITEM_UUID={result['graph_item_uuid']}")
-    print(f"JOURNAL_UUID={result['journal_uuid']}")
-    print(f"MATERIALIZATION_UUID={result['materialization_uuid']}")
+    write_report("execute", result, emit=not args.json)
+    if args.json:
+        print(json.dumps(result, sort_keys=True, default=str))
+    else:
+        print("GRAPH_PROMOTION_MATERIALIZE=" + result["status"])
+        print(f"PACKET_UUID={result['packet_uuid']}")
+        print(f"DECISION_UUID={result['decision_uuid']}")
+        print(f"GRAPH_ITEM_UUID={result['graph_item_uuid']}")
+        print(f"JOURNAL_UUID={result['journal_uuid']}")
+        print(f"MATERIALIZATION_UUID={result['materialization_uuid']}")
     return 0
 
 
@@ -342,6 +362,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Materialize graph promotion packets through the guarded promotion path")
     parser.add_argument("--storage-database-url")
     parser.add_argument("--control-database-url")
+    parser.add_argument("--json", action="store_true")
     sub = parser.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("init-schema")
     p.add_argument("--execute", action="store_true")

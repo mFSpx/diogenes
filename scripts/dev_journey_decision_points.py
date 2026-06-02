@@ -318,7 +318,7 @@ def train_tree_artifacts(points: list[dict[str, Any]], out_dir: Path | None = No
     }
 
 
-def write_outputs(points: list[dict[str, Any]], *, train: bool) -> dict[str, Any]:
+def write_outputs(points: list[dict[str, Any]], *, train: bool, emit: bool = True) -> dict[str, Any]:
     OUT.mkdir(parents=True, exist_ok=True)
     base = stamp()
     jsonl = OUT / f"dev_journey_decision_points_{base}.jsonl"
@@ -352,8 +352,9 @@ def write_outputs(points: list[dict[str, Any]], *, train: bool) -> dict[str, Any
     OBS.parent.mkdir(parents=True, exist_ok=True)
     OBS.write_text(json.dumps(payload, indent=2, sort_keys=True, default=str), encoding="utf-8")
     update_big_board(payload)
-    print("RECEIPT_PATH=" + rel(receipt))
-    print("DECISION_POINTS=" + str(len(points)))
+    if emit:
+        print("RECEIPT_PATH=" + rel(receipt))
+        print("DECISION_POINTS=" + str(len(points)))
     return payload
 
 
@@ -409,10 +410,11 @@ def main() -> int:
     args = build_parser().parse_args()
     sources = [Path(s) for s in args.source] if args.source else default_sources()
     points = compile_decision_points(sources, max_points=args.max_points)
-    payload = write_outputs(points, train=bool(args.train))
+    payload = write_outputs(points, train=bool(args.train), emit=not args.json)
     if args.json:
         print(json.dumps(payload, sort_keys=True, default=str))
-    print("DEV_JOURNEY_DECISION_POINTS=PASS" if points else "DEV_JOURNEY_DECISION_POINTS=EMPTY")
+    else:
+        print("DEV_JOURNEY_DECISION_POINTS=PASS" if points else "DEV_JOURNEY_DECISION_POINTS=EMPTY")
     return 0 if points else 2
 
 

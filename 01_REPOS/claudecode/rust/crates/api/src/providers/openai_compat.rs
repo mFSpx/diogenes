@@ -592,6 +592,7 @@ impl ToolCallState {
 
 #[derive(Debug, Deserialize)]
 struct ChatCompletionResponse {
+    #[serde(default)]
     id: String,
     model: String,
     choices: Vec<ChatChoice>,
@@ -617,6 +618,7 @@ struct ChatMessage {
 
 #[derive(Debug, Deserialize)]
 struct ResponseToolCall {
+    #[serde(default)]
     id: String,
     function: ResponseToolFunction,
 }
@@ -637,6 +639,7 @@ struct OpenAiUsage {
 
 #[derive(Debug, Deserialize)]
 struct ChatCompletionChunk {
+    #[serde(default)]
     id: String,
     #[serde(default)]
     model: Option<String>,
@@ -761,12 +764,11 @@ fn translate_message(message: &InputMessage) -> Vec<Value> {
                 InputContentBlock::ToolResult {
                     tool_use_id,
                     content,
-                    is_error,
+                    ..
                 } => Some(json!({
                     "role": "tool",
                     "tool_call_id": tool_use_id,
                     "content": flatten_tool_result_content(content),
-                    "is_error": is_error,
                 })),
                 InputContentBlock::ToolUse { .. } => None,
             })
@@ -811,6 +813,11 @@ fn normalize_response(
     model: &str,
     response: ChatCompletionResponse,
 ) -> Result<MessageResponse, ApiError> {
+    let response_id = if response.id.is_empty() {
+        format!("chatcmpl_{model}")
+    } else {
+        response.id
+    };
     let choice = response
         .choices
         .into_iter()
@@ -822,16 +829,21 @@ fn normalize_response(
     if let Some(text) = choice.message.content.filter(|value| !value.is_empty()) {
         content.push(OutputContentBlock::Text { text });
     }
-    for tool_call in choice.message.tool_calls {
+    for (index, tool_call) in choice.message.tool_calls.into_iter().enumerate() {
+        let tool_call_id = if tool_call.id.is_empty() {
+            format!("tool_call_{index}")
+        } else {
+            tool_call.id
+        };
         content.push(OutputContentBlock::ToolUse {
-            id: tool_call.id,
+            id: tool_call_id,
             name: tool_call.function.name,
             input: parse_tool_arguments(&tool_call.function.arguments),
         });
     }
 
     Ok(MessageResponse {
-        id: response.id,
+        id: response_id,
         kind: "message".to_string(),
         role: choice.message.role,
         content,
@@ -997,7 +1009,8 @@ impl StringExt for String {
 mod tests {
     use super::{
         build_chat_completion_request, chat_completions_endpoint, normalize_finish_reason,
-        openai_tool_choice, parse_tool_arguments, OpenAiCompatClient, OpenAiCompatConfig,
+        normalize_response, openai_tool_choice, parse_tool_arguments, ChatCompletionResponse,
+        OpenAiCompatClient, OpenAiCompatConfig,
     };
     use crate::error::ApiError;
     use crate::types::{
@@ -1042,6 +1055,7 @@ mod tests {
         assert_eq!(payload["messages"][2]["role"], json!("tool"));
         assert_eq!(payload["tools"][0]["type"], json!("function"));
         assert_eq!(payload["tool_choice"], json!("auto"));
+        assert!(payload["messages"][2].get("is_error").is_none());
     }
 
     #[test]
@@ -1062,6 +1076,44 @@ mod tests {
             json!({"city": "Paris"})
         );
         assert_eq!(parse_tool_arguments("not-json"), json!({"raw": "not-json"}));
+    }
+
+    #[test]
+    fn normalizes_response_without_provider_ids() {
+        let response: ChatCompletionResponse = serde_json::from_str(
+            r#"{
+                "model":"llama-3.1-8b-instant",
+                "choices":[
+                    {
+                        "message":{
+                            "role":"assistant",
+                            "content":"hello",
+                            "tool_calls":[
+                                {
+                                    "type":"function",
+                                    "function":{"name":"test_tool","arguments":"{}"}
+                                }
+                            ]
+                        },
+                        "finish_reason":"stop"
+                    }
+                ],
+                "usage":{"prompt_tokens":1,"completion_tokens":2}
+            }"#,
+        )
+        .expect("response should deserialize with missing ids");
+
+        let normalized = normalize_response("llama-3.1-8b-instant", response)
+            .expect("response should normalize");
+
+        assert!(!normalized.id.is_empty());
+        assert!(matches!(
+            normalized.content.as_slice(),
+            [
+                crate::types::OutputContentBlock::Text { text },
+                crate::types::OutputContentBlock::ToolUse { id, name, .. }
+            ] if text == "hello" && !id.is_empty() && name == "test_tool"
+        ));
     }
 
     #[test]

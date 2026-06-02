@@ -46,7 +46,7 @@ _Generated 2026-05-30 — full-depth scan, no filtering_
 
 **5. Logical replication slot `lucidota_bytewax_abductive_slot` — never created. `pg_replication_slots` is empty.**
 
-**6. BGE fleet NGL regression: current `lucidota_bge_fleet.sh` has `NGL="${LUCIDOTA_BGE_NGL:-99}"`. Safe-ops sets `LUCIDOTA_BGE_NGL=0` but the script's own fallback of `:-99` wins if safe-ops runs first then the var gets cleared, or if script is called standalone. This is the freeze.**
+**6. BGE fleet NGL regression: before the 2026-06-02 repair, `lucidota_bge_fleet.sh` had `NGL="${LUCIDOTA_BGE_NGL:-99}"`. Safe-ops set `LUCIDOTA_BGE_NGL=0`, but the script's own fallback of `:-99` won if safe-ops was bypassed and the script was called standalone. Current contract: default `NGL=0`; GPU mode only when explicitly requested.**
 
 **7. `asyncpg` IS installed (agent 1 was wrong — agent 2's full pip list confirms it). `psycopg 3.3.4` (async), `psycopg2-binary 2.9.12` (sync), and `asyncpg` are all present.**
 
@@ -103,7 +103,7 @@ graph LR
 ```
 CPU:   Intel Core i5-10300H @ 2.50GHz — 8 threads
 RAM:   7.6 GiB total | 4.3G used | 3.3G available
-       Swap: 11G (zram + dm-2 partition) | swappiness=180 ← AGGRESSIVE, FREEZE RISK
+       Swap: 11G (zram + dm-2 partition) | swappiness config conflict: sysctl.d=10, pop-zram=180
 GPU:   NVIDIA GeForce GTX 1650
        VRAM: 4096 MiB total | 2 MiB used (idle now)
        Driver: 580.126.18 | CUDA: 13.0 | Power: 4W/50W
@@ -248,7 +248,7 @@ rapidfuzz              (present)  — fuzzy string match
 bitloops               MISSING    — bitloops_river_worker.py will ImportError
 protoc binary          MISSING    — system binary, not pip; blocks Rust gRPC build
 activitywatch client   MISSING    — diogenes hardware interlock is blind
-earlyoom               MISSING    — system binary; no OOM kill guard → freeze risk
+earlyoom               INSTALLED/ACTIVE as of 2026-06-02 — stale MISSING note corrected
 ```
 
 ---
@@ -426,7 +426,7 @@ cosmic-comp           (Wayland)        RUNNING
 
 **NOT running / NOT installed:**
 ```
-earlyoom              NOT INSTALLED   ← install now, prevents hard freezes
+earlyoom              INSTALLED/ACTIVE as of 2026-06-02
 llama-server          NOT RUNNING     ← all inference ports offline
 ActivityWatch         NOT RUNNING     ← diogenes hw_interlock blind
 Port 8080/8081/8082/8083/8101-8116    ALL OFFLINE
@@ -436,14 +436,16 @@ Port 8080/8081/8082/8083/8101-8116    ALL OFFLINE
 
 ### BGE FREEZE — EXACT CAUSE + FIX
 
-**Cause:** `lucidota_bge_fleet.sh` line 41: `NGL="${LUCIDOTA_BGE_NGL:-99}"`. Safe-ops sets the var to 0, but `:-99` is the script's own fallback which only fires if the var is **unset**, not if it's empty. When safe-ops exports `LUCIDOTA_BGE_NGL=0`, the script sees it as set and uses 0 — **safe**. When the script is run directly without sourcing safe-ops first, it gets NGL=99 — **GPU mode** — model loads into VRAM + 16 parallel KV slots = 3.56GB against 3.71GB free. Any other GPU process tips it over. `swappiness=180` + no earlyoom = unrecoverable swap storm.
+**Cause before repair:** `lucidota_bge_fleet.sh` line 41 had `NGL="${LUCIDOTA_BGE_NGL:-99}"`. Safe-ops set the var to 0, but `:-99` was the script's own fallback when the var was **unset**. When the script was run directly without sourcing safe-ops first, it got NGL=99 — **GPU mode** — model loaded into VRAM + 16 parallel KV slots = 3.56GB against 3.71GB free. Any other GPU process could tip it over. Current contract: default `NGL=0`; GPU mode only when explicitly requested.
+
+Correction note, 2026-06-02: earlyoom is installed/enabled/active. The current swap issue is not “no earlyoom”; it is that `/etc/default/pop-zram` still declares `SWAPPINESS=180` while sysctl.d declares `vm.swappiness=10`, so the live kernel value can be 180 unless the pop-zram config is corrected/reloaded.
 
 **Three-line fix:**
 ```bash
-# 1. Install earlyoom NOW
-sudo apt install -y earlyoom && sudo systemctl enable --now earlyoom
+# 1. earlyoom is already installed/enabled/active as of 2026-06-02.
+#    Keep it that way; do not re-state the stale "not installed" note.
 
-# 2. Fix the NGL default in the script (change :-99 to :-0)
+# 2. Fix/keep the NGL default in the script (:-0, never implicit :-99)
 # scripts/lucidota_bge_fleet.sh line 41
 
 # 3. Never run embed workers without the cap wrapper
@@ -463,7 +465,7 @@ scripts/lucidota_capped_run.sh python3 scripts/corpus_embed_fill_worker.py --con
 ```
 protoc binary               — NOT in PATH; gRPC Rust build cached only
 bitloops Python package     — NOT installed; bitloops_river_worker.py will fail
-earlyoom                    — NOT installed; freeze prevention
+earlyoom                    — INSTALLED/ACTIVE as of 2026-06-02
 ActivityWatch (aw-server)   — NOT running; diogenes hw_stress_score = blind
 bytewax_rete_bandit_decision — NOT in DB; inline Python SQL never applied
 bytewax_bandit_policy        — NOT in DB; same

@@ -318,7 +318,9 @@ fn build_assistant_message(
         ));
     }
     if blocks.is_empty() {
-        return Err(RuntimeError::new("assistant stream produced no content"));
+        blocks.push(ContentBlock::Text {
+            text: "[no visible assistant content; provider lane completed]".to_string(),
+        });
     }
 
     Ok((
@@ -519,6 +521,44 @@ mod tests {
                 ..
             }
         ));
+    }
+
+    #[test]
+    fn synthesizes_placeholder_text_when_stream_returns_no_visible_content() {
+        struct EmptyApiClient;
+        impl ApiClient for EmptyApiClient {
+            fn stream(&mut self, _request: ApiRequest) -> Result<Vec<AssistantEvent>, RuntimeError> {
+                Ok(vec![
+                    AssistantEvent::Usage(TokenUsage {
+                        input_tokens: 3,
+                        output_tokens: 0,
+                        cache_creation_input_tokens: 0,
+                        cache_read_input_tokens: 0,
+                    }),
+                    AssistantEvent::MessageStop,
+                ])
+            }
+        }
+
+        let mut runtime = ConversationRuntime::new(
+            Session::new(),
+            EmptyApiClient,
+            StaticToolExecutor::new(),
+            PermissionPolicy::new(PermissionMode::DangerFullAccess),
+            vec!["system".to_string()],
+        );
+
+        let summary = runtime
+            .run_turn("check placeholder", None)
+            .expect("empty stream should still yield a placeholder assistant message");
+
+        assert_eq!(summary.assistant_messages.len(), 1);
+        assert!(matches!(
+            &summary.assistant_messages[0].blocks[0],
+            ContentBlock::Text { text }
+            if text == "[no visible assistant content; provider lane completed]"
+        ));
+        assert_eq!(summary.usage.input_tokens, 3);
     }
 
     #[test]

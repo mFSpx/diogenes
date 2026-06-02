@@ -75,6 +75,20 @@ def build_strict_stack_plan(*, root: Path = ROOT, env: dict[str, str] | None = N
             "device_lane": "nvidia_vram_model_only",
             "requested_vram_mb": _env_int(env, "LUCIDOTA_DEEPSEEK_VRAM_MB", 1500),
             "required": True,
+            "switch_group": "reasoning_generation_slot",
+            "switch_role": "default_vram_resident",
+            "switchable_with": ["bonsai4b_ram"],
+        },
+        {
+            "name": "bge_m3_vram",
+            "role": "embedding",
+            "port": 8101,
+            "start_script": "scripts/lucidota_bge_fleet.sh",
+            "launcher": str(root / "scripts" / "lucidota_bge_fleet.sh"),
+            "model_path": "04_RUNTIME/models/bge-m3-q8_0.gguf",
+            "device_lane": "nvidia_vram_embedding",
+            "requested_vram_mb": _env_int(env, "LUCIDOTA_BGE_VRAM_MB", 0),
+            "required": False,
         },
         {
             "name": "mamba7b_ram",
@@ -97,6 +111,10 @@ def build_strict_stack_plan(*, root: Path = ROOT, env: dict[str, str] | None = N
             "device_lane": "system_ram_cpu",
             "requested_vram_mb": 0,
             "required": True,
+            "switch_group": "reasoning_generation_slot",
+            "switch_role": "ram_resident_gpu_switchable",
+            "alternate_device_lane": "nvidia_vram_model_only",
+            "gpu_switch_env": "LUCIDOTA_BONSAI_NGL",
         },
         {
             "name": "mamba7b_gpu_partial",
@@ -151,6 +169,13 @@ def build_strict_stack_plan(*, root: Path = ROOT, env: dict[str, str] | None = N
             "gate_script": "scripts/diogenes_memory_gate.py",
         },
         "services": services,
+        "switch_groups": {
+            "reasoning_generation_slot": {
+                "default": "deepseek_r1_qwen_1p5b_gpu",
+                "alternates": ["bonsai4b_ram"],
+                "policy": "only admitted resident lane is exposed as active; Bonsai remains CPU/RAM unless LUCIDOTA_BONSAI_NGL requests a GPU switch.",
+            }
+        },
         "external_rule": "LLMs are bounded processing lanes; deterministic graph/DB/math remain the controller.",
     }
 
@@ -310,9 +335,10 @@ def main(argv: Iterable[str] | None = None) -> int:
     )
     if args.json:
         print(json.dumps(receipt, sort_keys=True))
-    print("STRICT_MODEL_STACK_ADMISSION=" + ("PASS" if receipt["passed"] else "FAIL"))
-    print("RECEIPT_PATH=" + receipt["receipt_path"])
-    print("ENV_PATH=" + receipt["env_path"])
+    else:
+        print("STRICT_MODEL_STACK_ADMISSION=" + ("PASS" if receipt["passed"] else "FAIL"))
+        print("RECEIPT_PATH=" + receipt["receipt_path"])
+        print("ENV_PATH=" + receipt["env_path"])
     return 0 if receipt["passed"] else 2
 
 

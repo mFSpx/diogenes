@@ -19,7 +19,9 @@ _2026-05-30_
 
 The design is: BGE fleet runs CPU-only (NGL=0), 16 instances share mmap'd weights (~606MB once in RAM, not 16× loaded), each gets ~195MB compute buffers, total ~3.7GB RAM. That fits. The Mamba lanes and BGE fleet are never meant to run simultaneously — there's a load governor (`lucidota_runtime.load_governor_decision` with `budget_vram_mb`, `observed_free_mb`, `headroom_mb`, `decision` columns) specifically to prevent that.
 
-The actual bug: `lucidota_bge_fleet.sh` line 41 has `NGL="${LUCIDOTA_BGE_NGL:-99}"`. The safe-ops env exports `LUCIDOTA_BGE_NGL=0` — but the script's own fallback of `:-99` fires when the var is **unset**, not empty. If you run the script without sourcing safe-ops first, NGL=99 activates GPU mode, loads the model into VRAM per-instance (not mmap'd), and blows the 4GB ceiling. Plus there's no earlyoom installed — no OOM killer fires, so `swappiness=180` cascades into a full swap storm and the machine locks cold. Five hard reboots, no logs.
+The actual bug, before the 2026-06-02 repair, was `lucidota_bge_fleet.sh` line 41 having `NGL="${LUCIDOTA_BGE_NGL:-99}"`. The safe-ops env exports `LUCIDOTA_BGE_NGL=0` — but the script's own fallback of `:-99` fired when the var was **unset**, not empty. If the script ran without sourcing safe-ops first, NGL=99 activated GPU mode, loaded the model into VRAM per-instance (not mmap'd), and blew the 4GB ceiling. Current contract: default `NGL=0`; GPU mode only when explicitly requested.
+
+Correction note, 2026-06-02: the earlier “no earlyoom installed” note is stale. Live check shows `/usr/bin/earlyoom`, systemd enabled+active. The remaining swap truth is a config conflict: `/etc/sysctl.d/*` says `vm.swappiness=10`, but `/etc/default/pop-zram` still says `SWAPPINESS=180`, and the live kernel value can read 180 when pop-zram wins after sysctl. Do not cite “no earlyoom” as current truth.
 
 The "enterprise server" framing isn't quite right either. This is a layered-on-demand stack, not everything hot simultaneously. The model lane facts in PG (`runtime_facts`) track which lanes are `always_hot` vs preemptible. Most aren't always-hot.
 

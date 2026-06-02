@@ -257,6 +257,109 @@ def record_worker_contract_rejection(
     return gate_result, error_kind
 
 
+@dataclass(frozen=True)
+class SchemaVersionDecision:
+    ok: bool
+    error_kind: str = ""
+    error_message: str = ""
+    worker_key: str | None = None
+    worker_version: str | None = None
+    job_version: str | None = None
+    is_compatible: bool = True
+
+    def as_result(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+def validate_schema_contract_version(
+    cur: Any,
+    *,
+    worker_key: str,
+    payload: dict[str, Any],
+    queue_name: str,
+    job_kind: str,
+) -> SchemaVersionDecision:
+    """Check schema contract version compatibility between worker and job.
+
+    Returns PASS if:
+    - No version record exists for worker (backwards compatible)
+    - No schema_contract_version in job payload
+    - Compatibility matrix confirms (job_version, worker_version) is_compatible=true
+
+    Returns FAIL if compatibility matrix says is_compatible=false.
+    Fails open (returns PASS) on any DB error.
+    """
+    try:
+        # Look up worker's latest version record
+        cur.execute(
+            """
+            SELECT schema_contract_version, compatible_branches
+            FROM lucidota_control.worker_contract_version
+            WHERE worker_key=%s
+            ORDER BY declared_at DESC
+            LIMIT 1
+            """,
+            (worker_key,),
+        )
+        version_row = cur.fetchone()
+        
+        # No version record = backwards compatible, proceed
+        if not version_row:
+            return SchemaVersionDecision(True, worker_key=worker_key)
+        
+        worker_version = version_row[0] if not isinstance(version_row, dict) else version_row.get("schema_contract_version")
+        
+        # No worker version = backwards compatible, proceed
+        if not worker_version:
+            return SchemaVersionDecision(True, worker_key=worker_key)
+        
+        job_version = payload.get("schema_contract_version")
+        
+        # No job version = backwards compatible, proceed
+        if not job_version:
+            return SchemaVersionDecision(True, worker_key=worker_key, worker_version=str(worker_version))
+        
+        # Check compatibility matrix
+        cur.execute(
+            """
+            SELECT is_compatible
+            FROM lucidota_control.schema_compatibility_matrix
+            WHERE job_version=%s AND worker_version=%s
+            LIMIT 1
+            """,
+            (str(job_version), str(worker_version)),
+        )
+        matrix_row = cur.fetchone()
+        
+        if matrix_row:
+            is_compatible = matrix_row[0] if not isinstance(matrix_row, dict) else matrix_row.get("is_compatible")
+            if is_compatible is False:
+                return SchemaVersionDecision(
+                    False,
+                    error_kind="schema_version_mismatch",
+                    error_message=f"Job version {job_version} incompatible with worker version {worker_version}",
+                    worker_key=worker_key,
+                    worker_version=str(worker_version),
+                    job_version=str(job_version),
+                    is_compatible=False,
+                )
+        
+        # No matrix entry = assume compatible (fail open)
+        return SchemaVersionDecision(
+            True,
+            worker_key=worker_key,
+            worker_version=str(worker_version),
+            job_version=str(job_version),
+            is_compatible=True,
+        )
+    except Exception as e:
+        # DB unavailable or any error: fail open, log warning, proceed
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"schema_contract_version check failed for worker {worker_key}: {e}")
+        return SchemaVersionDecision(True, worker_key=worker_key)
+
+
 def validate_worker_contract(cur: Any, *, queue_name: str, job_kind: str, worker_key: str | None = None) -> WorkerContractDecision:
     """Return PASS only when the DB contract explicitly allows queue/job_kind.
 

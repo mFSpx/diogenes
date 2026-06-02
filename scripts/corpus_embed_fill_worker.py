@@ -10,7 +10,7 @@ Enqueuer:        scripts/absurd_embed_fill_enqueuer.py
 
 Usage:
     source scripts/lucidota_safe_ops_env.sh
-    python3 scripts/corpus_embed_fill_worker.py [--concurrency 14] [--http-batch 32] [--dry-run]
+    python3 scripts/corpus_embed_fill_worker.py [--concurrency 3] [--http-batch 32] [--dry-run]
     python3 scripts/corpus_embed_fill_worker.py --loop          # run until queue empty
 """
 from __future__ import annotations
@@ -31,6 +31,7 @@ import psycopg2.extras
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
+from lucidota_ingestion_quality_audit import classify_readability, embedding_quality_sql_where  # noqa: E402
 
 STATE_DSN   = os.environ.get("LUCIDOTA_GO_STATE_DSN",   "postgresql:///lucidota_state")
 STORAGE_DSN = os.environ.get("LUCIDOTA_GO_STORAGE_DSN", "postgresql:///lucidota_storage")
@@ -195,6 +196,37 @@ def write_embeddings(pairs: list[tuple]) -> int:
 
 # ── Job handler ─────────────────────────────────────────────────────────────────
 
+def fetch_quality_gated_rows(limit: int, oversample_factor: int = 20) -> tuple[list[tuple[str, str]], int, int]:
+    """Fetch next NULL rows, but only return chunks readable enough to embed."""
+    fetch_limit = max(limit, limit * oversample_factor)
+    where = embedding_quality_sql_where()
+    conn = psycopg2.connect(STORAGE_DSN)
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""SELECT chunk_uuid::text, content, mime, source_path
+                    FROM lucidota_korpus.corpus_chunk
+                    WHERE {where}
+                    ORDER BY created_at, chunk_uuid
+                    LIMIT %s""",
+                (fetch_limit,),
+            )
+            raw_rows = cur.fetchall()
+    finally:
+        conn.close()
+
+    rows: list[tuple[str, str]] = []
+    quality_skipped = 0
+    for uid, content, mime, source_path in raw_rows:
+        quality = classify_readability(content or "", mime=mime or "", source_path=source_path or "")
+        if quality["status"] == "pass":
+            rows.append((uid, content))
+            if len(rows) >= limit:
+                break
+        else:
+            quality_skipped += 1
+    return rows, quality_skipped, len(raw_rows)
+
 def run_job(
     job: dict,
     concurrency: int,
@@ -203,31 +235,42 @@ def run_job(
     max_chunks: int = 0,
 ) -> dict:
     payload = job["payload"]
-    offset  = int(payload["offset"])
-    limit   = int(payload["limit"])
+    legacy_offset = int(payload.get("offset") or 0)
+    limit = int(payload["limit"])
     if max_chunks > 0:
         limit = min(limit, max_chunks)
 
-    # Fetch rows
-    conn = psycopg2.connect(STORAGE_DSN)
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT chunk_uuid::text, content FROM lucidota_korpus.corpus_chunk"
-                " WHERE embedding IS NULL ORDER BY created_at OFFSET %s LIMIT %s",
-                (offset, limit),
-            )
-            rows = cur.fetchall()
-    finally:
-        conn.close()
+    rows, quality_skipped, fetched_candidates = fetch_quality_gated_rows(limit)
 
     if not rows:
-        return {"filled": 0, "errors": 0, "skipped": limit, "note": "no null rows at offset"}
+        return {
+            "filled": 0,
+            "errors": 0,
+            "skipped": limit,
+            "selection": "next_null_chunks",
+            "quality_gate": "readable_text_only",
+            "quality_skipped": quality_skipped,
+            "fetched_candidates": fetched_candidates,
+            "legacy_offset_ignored": legacy_offset,
+            "limit": limit,
+            "note": "no quality-eligible null rows",
+        }
 
     t0 = time.time()
     if dry_run:
         elapsed = time.time() - t0
-        return {"filled": 0, "errors": 0, "dry_run": True, "rows_found": len(rows)}
+        return {
+            "filled": 0,
+            "errors": 0,
+            "dry_run": True,
+            "rows_found": len(rows),
+            "selection": "next_null_chunks",
+            "quality_gate": "readable_text_only",
+            "quality_skipped": quality_skipped,
+            "fetched_candidates": fetched_candidates,
+            "legacy_offset_ignored": legacy_offset,
+            "limit": limit,
+        }
 
     pairs, errors = asyncio.run(embed_all_async(rows, http_batch, concurrency))
 
@@ -240,7 +283,11 @@ def run_job(
         "errors":    errors,
         "elapsed_s": round(elapsed, 2),
         "rate_per_s": round(rate, 2),
-        "offset":    offset,
+        "selection": "next_null_chunks",
+        "quality_gate": "readable_text_only",
+        "quality_skipped": quality_skipped,
+        "fetched_candidates": fetched_candidates,
+        "legacy_offset_ignored": legacy_offset,
         "limit":     limit,
     }
 
@@ -265,12 +312,12 @@ def write_receipt(job_uuid: str, result: dict) -> Path:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="ABSURD embed_fill_batch consumer")
-    ap.add_argument("--concurrency", type=int, default=14,
-                    help="Parallel HTTP requests to BGE (default 14; leave 2 of 16 slots free)")
+    ap.add_argument("--concurrency", type=int, default=3,
+                    help="Parallel HTTP requests to BGE (safe default for 7.6GB RAM)")
     ap.add_argument("--http-batch", type=int, default=32,
                     help="Texts per HTTP POST to /v1/embeddings (default 32)")
-    ap.add_argument("--max-chunks", type=int, default=0,
-                    help="Cap rows per job for testing (0=full job)")
+    ap.add_argument("--max-chunks", type=int, default=500,
+                    help="safe per-job cap for laptop BGE leases (0=full queued job)")
     ap.add_argument("--loop", action="store_true",
                     help="Keep running until queue is empty")
     ap.add_argument("--dry-run", action="store_true",
@@ -294,11 +341,17 @@ def main() -> int:
             attempt  = job["attempt_count"]
             max_att  = job["max_attempts"]
             print(f"[embed_worker] claimed job {job_uuid[:8]} attempt={attempt} "
-                  f"offset={job['payload'].get('offset')} limit={job['payload'].get('limit')}")
+                  f"selection=next_null_chunks legacy_offset={job['payload'].get('offset')} "
+                  f"payload_limit={job['payload'].get('limit')} max_chunks={args.max_chunks}")
 
             try:
                 result = run_job(job, args.concurrency, args.http_batch, args.dry_run,
                                  max_chunks=args.max_chunks)
+                if not args.dry_run and int(result.get("errors") or 0) > 0 and int(result.get("filled") or 0) == 0:
+                    raise RuntimeError(
+                        f"no_embedding_progress: errors={result.get('errors')} "
+                        f"limit={result.get('limit')} fetched={result.get('fetched_candidates')}"
+                    )
                 mark_done(conn, job_uuid, result)
                 receipt_path = write_receipt(job_uuid, result)
                 jobs_done += 1

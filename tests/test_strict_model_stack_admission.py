@@ -28,6 +28,7 @@ def test_strict_stack_plan_names_required_model_lanes() -> None:
     names = {service["name"] for service in plan["services"]}
     assert {
         "deepseek_r1_qwen_1p5b_gpu",
+        "bge_m3_vram",
         "mamba7b_ram",
         "bonsai4b_ram",
         "mamba7b_gpu_partial",
@@ -126,3 +127,18 @@ def test_cpu_ram_start_scripts_hide_cuda_for_zero_gpu_layers() -> None:
     assert "LUCIDOTA_BONSAI_CUDA_VISIBLE_DEVICES" not in fabric
     assert 'LUCIDOTA_BONSAI_NGL="${LUCIDOTA_BONSAI_NGL:-0}"' in safe_env
     assert 'LUCIDOTA_BONSAI_NGL="${LUCIDOTA_BONSAI_NGL:-99}"' not in safe_env
+
+
+def test_deepseek_and_bonsai_are_declared_switchable_reasoning_lanes() -> None:
+    plan = build_strict_stack_plan(env={})
+    services = {service["name"]: service for service in plan["services"]}
+
+    deepseek = services["deepseek_r1_qwen_1p5b_gpu"]
+    bonsai = services["bonsai4b_ram"]
+    assert deepseek["switch_group"] == "reasoning_generation_slot"
+    assert bonsai["switch_group"] == "reasoning_generation_slot"
+    assert deepseek["switch_role"] == "default_vram_resident"
+    assert bonsai["switch_role"] == "ram_resident_gpu_switchable"
+    assert bonsai["gpu_switch_env"] == "LUCIDOTA_BONSAI_NGL"
+    assert plan["switch_groups"]["reasoning_generation_slot"]["default"] == "deepseek_r1_qwen_1p5b_gpu"
+    assert "bonsai4b_ram" in plan["switch_groups"]["reasoning_generation_slot"]["alternates"]

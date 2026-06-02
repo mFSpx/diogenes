@@ -8,6 +8,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 IMPLEMENTATION = ROOT / "scripts" / "legacy" / "lucidota_indy_brief.py"
+SCRIPTS_DIR = ROOT / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
 _spec = importlib.util.spec_from_file_location("_lucidota_legacy_indy_brief", IMPLEMENTATION)
 if _spec is None or _spec.loader is None:

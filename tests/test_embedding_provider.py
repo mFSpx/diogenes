@@ -59,3 +59,31 @@ def test_groq_configured_mock_returns_embedding_receipt(monkeypatch, tmp_path):
     assert result.row["receipt_ref"].startswith("05_OUTPUTS/model_invocation_audits/")
     assert result.groq_receipt["provider"] == "groq"
     assert result.groq_receipt["dimensions"] == 2
+
+
+def test_embed_file_counts_local_embeddings(monkeypatch, tmp_path):
+    import json
+
+    import scripts.embedding_provider as ep
+
+    monkeypatch.setattr(
+        ep,
+        "groq_embedding_config",
+        lambda: {
+            "configured": False,
+            "api_key_present": False,
+            "model": "",
+            "base_url": "https://api.groq.com/openai/v1",
+            "reason": "GROQ_EMBEDDING_NOT_CONFIGURED",
+        },
+    )
+    chunks = tmp_path / "chunks.jsonl"
+    out = tmp_path / "embeddings.jsonl"
+    chunks.write_text(json.dumps({"chunk_id": "c1", "source_path": "a.md", "text": "hello world"}) + "\n")
+
+    report = ep.embed_file(chunks, out)
+
+    assert report["stats"]["seen"] == 1
+    assert report["stats"]["embedded_local"] == 1
+    assert report["stats"]["blocked"] == 0
+    assert out.exists()

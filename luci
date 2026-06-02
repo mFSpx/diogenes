@@ -1,0 +1,238 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PY="$ROOT/.venv/bin/python"
+if [[ ! -x "$PY" ]]; then
+  PY="python3"
+fi
+
+source "$ROOT/scripts/lucidota_safe_ops_env.sh"
+
+unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN
+LUCIDOTA_SECRET_ENV="${LUCIDOTA_SECRET_ENV:-$HOME/.config/lucidota/secrets.env}"
+if [[ -f "$LUCIDOTA_SECRET_ENV" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$LUCIDOTA_SECRET_ENV"
+  set +a
+fi
+LUCIDOTA_GROQ_KEY_FILE="${LUCIDOTA_GROQ_KEY_FILE:-/tmp/lucidota_groq_key}"
+if [[ -r "$LUCIDOTA_GROQ_KEY_FILE" ]]; then
+  GROQ_API_KEY="$(tr -d '\r\n' < "$LUCIDOTA_GROQ_KEY_FILE")"
+  export GROQ_API_KEY
+fi
+
+export LUCIDOTA_HOME="${LUCIDOTA_HOME:-$ROOT}"
+export LUCIDOTA_ALLOW_EXTERNAL_CLAW=1
+export CLAW_LOCAL_GRAPH_RUNTIME=0
+export LUCIDOTA_LOCAL_API_KEY="${LUCIDOTA_LOCAL_API_KEY:-local-no-secret}"
+export LUCIDOTA_LOCAL_BASE_URL="${LUCIDOTA_LOCAL_BASE_URL:-http://127.0.0.1:8080/v1}"
+export LUCIDOTA_MAMBA_RAM_BASE_URL="${LUCIDOTA_MAMBA_RAM_BASE_URL:-http://127.0.0.1:8081/v1}"
+export LUCIDOTA_MAMBA_GPU_BASE_URL="${LUCIDOTA_MAMBA_GPU_BASE_URL:-http://127.0.0.1:8083/v1}"
+export GROQ_BASE_URL="${GROQ_BASE_URL:-https://api.groq.com/openai/v1}"
+export OPENAI_API_KEY="${OPENAI_API_KEY:-${GROQ_API_KEY:-}}"
+export OPENAI_BASE_URL="${OPENAI_BASE_URL:-$GROQ_BASE_URL}"
+export COHERE_BASE_URL="${COHERE_BASE_URL:-https://api.cohere.ai/compatibility/v1}"
+export CLAW_TOKEN_EFFICIENCY_MODE="${CLAW_TOKEN_EFFICIENCY_MODE:-local_first_cloud_optional}"
+export MISTRAL_API_KEY="${MISTRAL_API_KEY:-}"
+export MISTRAL_BASE_URL="${MISTRAL_BASE_URL:-https://api.mistral.ai/v1}"
+export CEREBRAS_API_KEY="${CEREBRAS_API_KEY:-}"
+
+if command -v psql >/dev/null 2>&1; then
+  _RUNG=$(psql lucidota_state -Atc "SELECT fact_value FROM lucidota_control.runtime_status_fact WHERE subsystem='governor' AND fact_key='governor_rung' LIMIT 1;" 2>/dev/null | tr -d '"')
+  if [[ "$_RUNG" == "3" ]]; then
+    echo "[luci] WARNING: governor rung=3 — severe memory pressure. BGE fleet should already be shrinking." >&2
+  fi
+  unset _RUNG
+fi
+
+LUCI_ENGINE="$ROOT/01_REPOS/claudecode/rust/target/release/luci"
+LEGACY_ENGINE="$ROOT/01_REPOS/claudecode/rust/target/release/claw"
+if [[ ! -x "$LUCI_ENGINE" ]]; then
+  if [[ -x "$LEGACY_ENGINE" ]]; then
+    ln -sf claw "$LUCI_ENGINE"
+  else
+    echo "LUCI engine missing. Build it with: cargo build --release --manifest-path 01_REPOS/claudecode/rust/Cargo.toml -p claw-cli" >&2
+    exit 127
+  fi
+fi
+
+run_luci_engine() {
+  local model="${LUCI_MODEL:-${CLAW_MODEL:-groq}}"
+  exec "$LUCI_ENGINE" --model "$model" --permission-mode danger-full-access --dangerously-skip-permissions "$@"
+}
+
+usage() {
+  cat <<'EOF'
+LUCI — LUCIDOTA operator front door
+
+Usage
+  printf "do the thing\n" | luci
+  luci                             # prompts for one line on stdin when launched interactively
+  luci operate --text "do the thing" [--json]
+  luci attempt --text "do the thing" [--json]
+  luci learn --text TEXT [--run-id ID] [--artifact PATH] [--candidate-kind KIND] [--json]
+  luci operator-route --raw-command "create case" --case-id ID --source-folder PATH
+  luci graph promote [--execute]
+  luci source --text "read the live world" [--json]
+  luci delegate --kind review --text "ask Groq/Vibes to review this"
+  luci provider groq-chat --prompt "ask a provider lane"
+  luci model admission [--run-diogenes-gate]
+  luci status
+  luci model-governor
+  luci model-admission [--run-diogenes-gate]
+  luci model-runner <validate|stub>
+  luci ingest status [--json]
+  luci ingest markdown [--execute] [--json]
+  luci ingest archive [--max-members N] [--json]
+  luci ingest krampus
+  luci "do the thing"
+  luci flow batch --dag FLOW --eval DATA --run-id ID [--json]
+  luci moa-worker --absurd-dir DIR
+
+Live path
+  user input -> ontology packet -> fast/slow route -> attempt-engine task + receipt
+  -> algorithm/model/workflow lane -> Postgres workflow_event + visible response
+
+PromptFlow is sidecar-only. Legacy backend details stay internal.
+Indy_READs is the greeter/co-operator voice on the operator surface.
+EOF
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ $# -eq 0 ]]; then
+  if [[ -t 0 ]]; then
+    echo "Indy_READs: LUCI online — co-operators ready, PromptFlow sidecar armed, receipts on deck." >&2
+    read -r -p "luci> " stdin_text || true
+    if [[ -z "${stdin_text//[[:space:]]/}" ]]; then
+      usage
+      exit 0
+    fi
+  else
+    stdin_text="$(cat)"
+    if [[ -z "${stdin_text//[[:space:]]/}" ]]; then
+      usage
+      exit 0
+    fi
+  fi
+  run_luci_engine attempt --text "$stdin_text"
+fi
+
+case "$1" in
+  operate|attempt)
+    shift
+    run_luci_engine attempt "$@"
+    ;;
+  learn|improve|learning)
+    shift
+    run_luci_engine learn "$@"
+    ;;
+  operator-route|case-route)
+    shift
+    run_luci_engine operator-route "$@"
+    ;;
+  graph)
+    shift
+    run_luci_engine graph "$@"
+    ;;
+  source)
+    shift
+    run_luci_engine source "$@"
+    ;;
+  delegate|vibes-delegate|provider-delegate)
+    shift
+    run_luci_engine delegate "$@"
+    ;;
+  provider|provider-chat)
+    shift
+    run_luci_engine provider "$@"
+    ;;
+  model)
+    shift
+    run_luci_engine model "$@"
+    ;;
+  status)
+    shift
+    run_luci_engine lucidota-status "$@"
+    ;;
+  model-governor|governor)
+    shift
+    run_luci_engine model-governor "$@"
+    ;;
+  model-admission|admission)
+    shift
+    run_luci_engine model-admission "$@"
+    ;;
+  model-runner)
+    shift
+    run_luci_engine model-runner "$@"
+    ;;
+  ingest)
+    shift
+    run_luci_engine ingest "$@"
+    ;;
+  flow)
+    shift
+    if [[ "${1:-}" != "batch" ]]; then
+      echo "LUCI flow supports: batch --dag FLOW --eval DATA --run-id ID [--output-dir DIR]" >&2
+      exit 2
+    fi
+    shift
+    flow_path=""
+    data_path=""
+    run_id=""
+    output_dir=""
+    json_out=0
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --dag|--flow)
+          flow_path="${2:-}"; shift 2;;
+        --dag=*|--flow=*)
+          flow_path="${1#*=}"; shift;;
+        --eval|--data)
+          data_path="${2:-}"; shift 2;;
+        --eval=*|--data=*)
+          data_path="${1#*=}"; shift;;
+        --run-id)
+          run_id="${2:-}"; shift 2;;
+        --run-id=*)
+          run_id="${1#*=}"; shift;;
+        --output-dir)
+          output_dir="${2:-}"; shift 2;;
+        --output-dir=*)
+          output_dir="${1#*=}"; shift;;
+        --json)
+          json_out=1; shift;;
+        *)
+          shift;;
+      esac
+    done
+    if [[ -z "$flow_path" || -z "$run_id" ]]; then
+      echo "LUCI flow batch requires --dag FLOW and --run-id ID" >&2
+      exit 2
+    fi
+    args=(--flow "$flow_path" --run-id "$run_id")
+    if [[ -n "$data_path" ]]; then
+      args+=(--data "$data_path")
+    fi
+    if [[ -n "$output_dir" ]]; then
+      args+=(--output-dir "$output_dir")
+    fi
+    if [[ "$json_out" -eq 1 ]]; then
+      args+=(--json)
+    fi
+    exec "$PY" "$ROOT/scripts/promptflow_eval_runner.py" "${args[@]}"
+    ;;
+  moa-worker|chain-worker)
+    shift
+    exec "$PY" "$ROOT/scripts/claw_moa_chain_worker.py" "$@"
+    ;;
+  *)
+    exec "$PY" "$ROOT/scripts/luci_operator.py" --text "$*"
+    ;;
+esac
