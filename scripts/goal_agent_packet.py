@@ -28,7 +28,7 @@ def pick_adapter(task:str, complexity:str, m:dict)->dict[str,Any]:
  if local:
   if ('needle' in low or complexity in {'simple','repeat'}) and 'needle_swarm_6x' in local: name='needle_swarm_6x'
   elif re.search(r'local|offline|vram|llama|mamba|bonsai|deepseek',low): name='llama_cpp_heavy'
-  else: name='llama_cpp_heavy' if any(x in local for x in ['mamba7b_ram','bonsai4b_ram','deepseek_r1_qwen_1p5b_gpu']) else (local[0] if local else 'llama_cpp_heavy')
+  else: name='llama_cpp_heavy' if any(x in local for x in ['mamba7b_ram','bonsai8b_1bit','deepseek_r1_qwen_1p5b_gpu']) else (local[0] if local else 'llama_cpp_heavy')
  else:
   if 'needle' in low: name='needle_swarm_6x'
   elif re.search(r'local|offline|vram|llama|mamba|bonsai|deepseek',low): name='llama_cpp_heavy'

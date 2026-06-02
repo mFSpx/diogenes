@@ -9,7 +9,7 @@ OUT = ROOT / "05_OUTPUTS" / "model_runtime"
 STACK = {
     "deepseek_r1_qwen_1p5b_gpu": (8080, "coder", "DeepSeek Qwen 1.5B GPU"),
     "mamba7b_ram": (8081, "db_watch", "Falcon3 Mamba 7B RAM"),
-    "bonsai4b_ram": (8082, "review", "Ternary Bonsai 4B RAM"),
+    "bonsai8b_1bit": (8082, "review", "Ternary Bonsai 8B 1-bit GGUF"),
     "mamba7b_gpu_partial": (8083, "planner", "Falcon3 Mamba 7B partial VRAM"),
     "needle_0": (8090, "router", "Needle"),
     "needle_1": (8091, "router", "Needle"),

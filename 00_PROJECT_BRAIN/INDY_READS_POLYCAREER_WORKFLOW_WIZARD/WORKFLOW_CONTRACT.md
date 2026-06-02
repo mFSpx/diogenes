@@ -60,6 +60,17 @@ Every output should declare:
 ## Auto-start rule
 
 When the operator enters through `./claw`, the Glow Watch daemon should be alive unless explicitly stopped. It is allowed to observe local workflow events and Claw agent artifacts, but it is not allowed to execute external collection or promote new doctrine without operator review.
+
+## IronClaw runtime binding
+
+IronClaw is the operator-facing shell for Indy_READs when the local stack is live.
+
+- IronClaw may route reading, triage, and workflow prompts into Indy_READs 24/7.
+- Groq is the default cloud reasoning fallback for hard or broad turns.
+- Local model lanes remain the first-choice execution path when already admitted.
+- Email, Signal, and other outbound contact hooks stay operator-gated and must not auto-send without an explicit receipt-backed action.
+- Book intake, watcher loops, and LoRA staging stay custody-first: preserve, classify, queue, then promote.
+- External effects require a recorded receipt and an allowed action path.
 ## Hunch Record + Subtle Knife Binding
 
 Runtime binding: `04_RUNTIME/indy_percyphon_hunch_subtleknife_binding.json`.
@@ -68,4 +79,3 @@ Runtime binding: `04_RUNTIME/indy_percyphon_hunch_subtleknife_binding.json`.
 - Indy_READs must preserve hunch source paths/hashes, separate hunch/evidence/inference/truth, and route proof work before promotion.
 - Subtle Knife cuts are allowed only inside current authority and must be sealed by receipt/log; unsealed cuts are invalid.
 - This binding also applies to PercyphonAI procedural slots; Percyphon may scaffold leads, never factualize them.
-

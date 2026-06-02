@@ -26,7 +26,7 @@ start_server deepseek 8080 "$ROOT/04_RUNTIME/inference_os/deepseek_q4.pid" "$ROO
 start_server mamba7b_ram 8081 "$ROOT/04_RUNTIME/inference_os/mamba7b_ternary.pid" "$ROOT/04_RUNTIME/inference_os/mamba7b_ternary_cpu_llama_server.log" \
   env CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 "$LLAMA" \
   -m "$ROOT/03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf" --host 127.0.0.1 --port 8081 -ngl 0 -c 256 --parallel 1 --batch-size 32 --ubatch-size 8 --cache-ram 0 --no-warmup
-start_server bonsai4b_ram 8082 "$ROOT/04_RUNTIME/inference_os/bonsai4b_ternary.pid" "$ROOT/04_RUNTIME/inference_os/bonsai4b_ternary_cpu_llama_server.log" \
+start_server bonsai8b_1bit 8082 "$ROOT/04_RUNTIME/inference_os/bonsai8b_1bit.pid" "$ROOT/04_RUNTIME/inference_os/bonsai8b_1bit_llama_server.log" \
   "$ROOT/scripts/lucidota_start_bonsai_ternary_llama.sh"
 if [[ "${LUCIDOTA_ENABLE_MAMBA_GPU_PARTIAL:-0}" == "1" ]]; then
   start_server mamba7b_gpu_partial 8083 "$ROOT/04_RUNTIME/inference_os/mamba7b_gpu.pid" "$ROOT/04_RUNTIME/inference_os/mamba7b_gpu_llama_server.log" \

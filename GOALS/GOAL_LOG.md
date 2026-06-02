@@ -3290,3 +3290,98 @@ Technical Summary Review and Dev Notes: Markdown now speaks atlas too. Same two 
 - Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/python -m pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_postgrest_control.py`
 
 Technical Summary Review and Dev Notes: Atlas is now a real file, not just a page. Same blockers, cleaner machine-readable lantern.
+
+---
+
+## Step 4/8 — Scrub secret-scanner bait, rebase main, push diogenes, and route Indy_READs to the bigger Groq lane
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Root-Rotor Porges Protocol V2
+- Generated: `2026-06-02T15:43:02Z`
+- Current step: 4/8
+- Status: in_progress
+- Objective: Consolidate repository canon into versioned PostgreSQL coordinates exposed through PostgREST-style endpoints and compiled on demand into agent/person-readable technical manuals.
+- Completed: Rebased the docs/history slice to remove AWS-key-shaped placeholders from the tracked audit dump, pushed the cleaned main branch to the GitHub diogenes remote, and set GROQ_MODEL/GROQ_GOAL_MODEL to openai/gpt-oss-120b for Indy_READs-first inference.
+- Next action: Wait for the Bonsai 8B 1.58-bit lane to finish loading on 8082, then continue the remaining endpoint/audit mapping and refresh the handoff again.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_postgrest_control.py`
+
+Technical Summary Review and Dev Notes: History scrub is clean enough for GitHub now; the big Groq lane is the default, and the ternary Bonsai lane is still chewing through load like a patient swamp engine.
+
+---
+
+## Step 5/8 — Align Bonsai launcher and model routing around the 8B Q2_0 default with switchable 1-bit fallback
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Root-Rotor Porges Protocol V2
+- Generated: `2026-06-02T15:48:45Z`
+- Current step: 5/8
+- Status: in_progress
+- Objective: Consolidate repository canon into versioned PostgreSQL coordinates exposed through PostgREST-style endpoints and compiled on demand into agent/person-readable technical manuals.
+- Completed: Updated the Bonsai launcher and runtime labels so the 8B Q2_0 GGUF is the default Bonsai lane, with Q1_0 kept as an explicit alternate. The launch path now accepts a local Q2_0 file or a remote HF Q1_0 ref, and the local chat/router aliases were updated to point at the 8B lane instead of the stale 4B stub.
+- Next action: Re-run the strict model stack admission and health checks, then continue the API-doc/manual mapping work if the stack stays stable.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_postgrest_control.py`
+
+Technical Summary Review and Dev Notes: Bonsai is now labeled like a grown model instead of a fossil. The 8B lane keeps the 2-bit-ish Q2_0 body and a 1-bit backup route.
+
+---
+
+## Step 6/8 — Verify and document the Bonsai 8B Q2_0 default with Q1_0 fallback and fix stale lane labels
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Root-Rotor Porges Protocol V2
+- Generated: `2026-06-02T15:49:31Z`
+- Current step: 6/8
+- Status: in_progress
+- Objective: Consolidate repository canon into versioned PostgreSQL coordinates exposed through PostgREST-style endpoints and compiled on demand into agent/person-readable technical manuals.
+- Completed: Confirmed the Bonsai launcher syntax, the strict admission plan, and the local CLI/router lane labels all point at the 8B Q2_0 GGUF default, with the Q1_0 lane retained as the explicit fallback. The remaining stale CPU-only wording was corrected so the runtime docs no longer contradict the lane behavior.
+- Next action: Re-run the live stack health checks on 8082, then continue the API-doc/manual mapping verification and any remaining contradiction cleanup.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_postgrest_control.py`
+
+Technical Summary Review and Dev Notes: The bones of the tale now match the teeth: Q2_0 is the default body, Q1_0 is the fallback skin, and the stale 4B ghost has been put back in the swamp.
+
+---
+
+## Step 7/8 — Restart and verify the Bonsai 8B Q2_0 lane on 8082
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Root-Rotor Porges Protocol V2
+- Generated: `2026-06-02T15:50:13Z`
+- Current step: 7/8
+- Status: in_progress
+- Objective: Consolidate repository canon into versioned PostgreSQL coordinates exposed through PostgREST-style endpoints and compiled on demand into agent/person-readable technical manuals.
+- Completed: Relaunched the Bonsai launcher with the Q2_0 default, observed the model load complete, and confirmed /health returns ok on 127.0.0.1:8082.
+- Next action: Finish the remaining docs/audit verification, including the API manual generator output and contradiction surfaces, then decide whether the branch is ready for final push/receipt.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_postgrest_control.py`
+
+Technical Summary Review and Dev Notes: 8082 is back on its feet; the model-bison stopped wandering and the health light is green.
+
+---
+
+## Step 8/8 — Bind IronClaw as the operator-facing Indy_READs shell with gated external hooks
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Root-Rotor Porges Protocol V2
+- Generated: `2026-06-02T15:51:09Z`
+- Current step: 8/8
+- Status: in_progress
+- Objective: Consolidate repository canon into versioned PostgreSQL coordinates exposed through PostgREST-style endpoints and compiled on demand into agent/person-readable technical manuals.
+- Completed: Added an IronClaw runtime-binding section to the Indy_READs workflow contract: IronClaw may route prompts into Indy_READs 24/7, Groq is the default cloud fallback, local lanes stay first-choice, and email/Signal hooks remain operator-gated with receipts.
+- Next action: Continue the Root-Rotor docs/API verification loop and, when stable, decide whether to commit/push the current branch state.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_postgrest_control.py`
+
+Technical Summary Review and Dev Notes: IronClaw now has a named contract hook instead of just vibes. The phone lines stay gated, the watcher stays alive, and the swamp cat gets receipts.

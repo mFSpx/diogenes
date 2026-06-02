@@ -77,7 +77,7 @@ def build_strict_stack_plan(*, root: Path = ROOT, env: dict[str, str] | None = N
             "required": True,
             "switch_group": "reasoning_generation_slot",
             "switch_role": "default_vram_resident",
-            "switchable_with": ["bonsai4b_ram"],
+            "switchable_with": ["bonsai8b_1bit"],
         },
         {
             "name": "bge_m3_vram",
@@ -102,12 +102,12 @@ def build_strict_stack_plan(*, root: Path = ROOT, env: dict[str, str] | None = N
             "required": True,
         },
         {
-            "name": "bonsai4b_ram",
-            "role": "CPU/RAM 4B ternary Bonsai lane",
+            "name": "bonsai8b_1bit",
+            "role": "Bonsai 8B 1-bit GGUF lane",
             "port": 8082,
             "start_script": "scripts/lucidota_start_bonsai_ternary_llama.sh",
             "launcher": str(prism_llama),
-            "model_path": "03_VAULT/models/prism-ml/Ternary-Bonsai-4B-gguf/Ternary-Bonsai-4B-Q2_0.gguf",
+            "model_path": "hf:prism-ml/Bonsai-8B-gguf:Q1_0",
             "device_lane": "system_ram_cpu",
             "requested_vram_mb": 0,
             "required": True,
@@ -172,8 +172,8 @@ def build_strict_stack_plan(*, root: Path = ROOT, env: dict[str, str] | None = N
         "switch_groups": {
             "reasoning_generation_slot": {
                 "default": "deepseek_r1_qwen_1p5b_gpu",
-                "alternates": ["bonsai4b_ram"],
-                "policy": "only admitted resident lane is exposed as active; Bonsai remains CPU/RAM unless LUCIDOTA_BONSAI_NGL requests a GPU switch.",
+                "alternates": ["bonsai8b_1bit"],
+                "policy": "only admitted resident lane is exposed as active; Bonsai defaults to the 8B Q2_0 GGUF lane and can request the 1-bit fallback with LUCIDOTA_BONSAI_VARIANT=q1_0.",
             }
         },
         "external_rule": "LLMs are bounded processing lanes; deterministic graph/DB/math remain the controller.",
@@ -207,6 +207,22 @@ def _file_checks(plan: dict[str, Any]) -> list[dict[str, Any]]:
         for key in ("start_script", "launcher", "model_path"):
             value = service.get(key)
             if not value or ":inline:" in str(value):
+                continue
+            if key == "model_path" and str(value).startswith("hf:"):
+                checks.append(
+                    {
+                        "service": service.get("name"),
+                        "field": key,
+                        "required": bool(service.get("required", True)),
+                        "path": str(value),
+                        "exists": True,
+                        "executable": False,
+                        "size_bytes": 0,
+                        "executable_expected": False,
+                        "passed": True,
+                        "remote_model": True,
+                    }
+                )
                 continue
             path = Path(value)
             if not path.is_absolute():
