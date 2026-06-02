@@ -351,6 +351,21 @@ def run(
                 )
     markdown_path.write_text("\n".join(lines), encoding="utf-8")
 
+    gap_atlas_path = output_dir / "root_law_gap_atlas.json"
+    gap_atlas_payload = {
+        "schema": "lucidota.root_rotor.gap_atlas.v1",
+        "generated_at": payload["generated_at"],
+        "payload_hash": payload["payload_hash"],
+        "manual_ids": manual_ids,
+        "route_count": len(routes),
+        "blockers": payload["contradictions"].get("blockers", []),
+        "warnings": payload["contradictions"].get("warnings", []),
+        "coverage_ratio": payload["contradictions"].get("coverage_ratio", 0),
+        "gap_atlas": payload["contradictions"].get("gap_atlas", []),
+        "surfaces": payload["contradictions"].get("surfaces", {}),
+    }
+    gap_atlas_path.write_text(json.dumps(gap_atlas_payload, indent=2, sort_keys=False), encoding="utf-8")
+
     sync_result = sync_routes_to_bible_nodes(dsn, routes, include_all=include_all) if sync_routes else {"upserted": 0, "updated": 0, "errors": []}
 
     result: dict[str, Any] = {
@@ -360,6 +375,7 @@ def run(
         "route_count": len(routes),
         "html_path": str(html_path),
         "markdown_path": str(markdown_path),
+        "gap_atlas_path": str(gap_atlas_path),
         "contradictions": contradictions,
         "sync_routes": sync_routes,
         "sync_routes_result": sync_result,

@@ -199,6 +199,12 @@ def test_root_rotor_api_docs_runs_and_writes_artifacts(tmp_path, monkeypatch) ->
     assert "4.1.0" in html_text
     assert re.search(r"[0-9a-f]{16}", html_text)
     assert Path(result["markdown_path"]).exists()
+    atlas_path = Path(result["gap_atlas_path"])
+    assert atlas_path.exists()
+    atlas = json.loads(atlas_path.read_text(encoding="utf-8"))
+    assert atlas["schema"] == "lucidota.root_rotor.gap_atlas.v1"
+    assert atlas["gap_atlas"][0]["name"] == "sidecar"
+    assert atlas["gap_atlas"][1]["name"] == "red_team"
     md_text = Path(result["markdown_path"]).read_text(encoding="utf-8")
     assert "## Gap Atlas" in md_text
     assert "sidecar: blockers=1 warnings=1 coverage=0.25" in md_text
