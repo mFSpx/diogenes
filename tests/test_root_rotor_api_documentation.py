@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 
@@ -37,6 +38,7 @@ def test_root_rotor_api_docs_can_render_html_from_db_payload(tmp_path) -> None:
                 "target": "target",
                 "sample_request": "{\"ok\":true}",
                 "sample_response": "{\"v\":1}",
+                "content_hash": "abc123",
             }
         ],
         "contradictions": {
@@ -44,6 +46,7 @@ def test_root_rotor_api_docs_can_render_html_from_db_payload(tmp_path) -> None:
             "warnings": ["gap_x"],
             "coverage_ratio": 0.88,
         },
+        "payload_hash": "deadbeef",
     }
     template_text = """
     <h1>{{ generated_at }}</h1>
@@ -54,7 +57,7 @@ def test_root_rotor_api_docs_can_render_html_from_db_payload(tmp_path) -> None:
       {% endfor %}
     {% endfor %}
     {% for route in api_routes %}
-      <div>{{ route.path_pattern }}</div>
+      <div>{{ route.path_pattern }} {{ route.content_hash }}</div>
     {% endfor %}
     {% for warning in warnings %}
       <span>{{ warning }}</span>
@@ -65,6 +68,7 @@ def test_root_rotor_api_docs_can_render_html_from_db_payload(tmp_path) -> None:
     assert "FLIGHT_MAN" in html
     assert "4.100.0 Route index" in html
     assert "/api/a" in html
+    assert "abc123" in html
     assert "gap_x" in html
 
 
@@ -84,6 +88,7 @@ def test_root_rotor_api_docs_runs_and_writes_artifacts(tmp_path, monkeypatch) ->
                 "target": "lucidota_canon.api_bible_nodes",
                 "sample_request": "{}",
                 "sample_response": "[]",
+                "content_hash": "routehash",
             }
         ]
 
@@ -98,7 +103,7 @@ def test_root_rotor_api_docs_runs_and_writes_artifacts(tmp_path, monkeypatch) ->
     monkeypatch.setattr(doc, "sync_routes_to_bible_nodes", lambda *_, **__: {"upserted": 0, "updated": 0, "errors": []})
 
     template = tmp_path / "tpl.html"
-    template.write_text("<html><body>{% for m in manuals %}{% for node in m.nodes %}{{ node.node_id }}{% endfor %}{% endfor %}</body></html>", encoding="utf-8")
+    template.write_text("<html><body>{% for m in manuals %}{{ m.content_hash }}{% for node in m.nodes %}{{ node.node_id }}{% endfor %}{% endfor %}{% for r in api_routes %}{{ r.content_hash }}{% endfor %}</body></html>", encoding="utf-8")
     result = doc.run(
         dsn="postgresql:///ignore",
         manual_ids=["FLIGHT_MAN"],
@@ -113,6 +118,7 @@ def test_root_rotor_api_docs_runs_and_writes_artifacts(tmp_path, monkeypatch) ->
     assert result["route_count"] == 1
     html_text = Path(result["html_path"]).read_text(encoding="utf-8")
     assert "4.1.0" in html_text
+    assert re.search(r"[0-9a-f]{16}", html_text)
     assert Path(result["markdown_path"]).exists()
 
 

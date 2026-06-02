@@ -29,6 +29,7 @@
       <div class="card"><strong>API Routes</strong><br/>{{ api_routes|length }}</div>
       <div class="card"><strong>Contradiction Blocks</strong><br/>{{ contradictions.blockers|length }}</div>
     </div>
+    <div class="card"><strong>Payload Hash</strong><br/><code>{{ payload_hash }}</code></div>
   </section>
 
   <section>
@@ -37,6 +38,7 @@
       <article>
         <h3>[{{ route.method }}] {{ route.path_pattern }}</h3>
         <p>{{ route.description }}</p>
+        <p class="muted">hash <code>{{ route.content_hash }}</code></p>
         <p><strong>Route ID:</strong> {{ route.route_id }}</p>
         <p><strong>Target:</strong> <code>{{ route.target or 'n/a' }}</code></p>
         <pre>{{ route.sample_request }}</pre>
@@ -49,6 +51,7 @@
     <h2>Manual Nodes</h2>
     {% for manual in manuals %}
       <h3>{{ manual.manual_id }} ({{ manual.nodes|length }} nodes)</h3>
+      <p class="muted">hash <code>{{ manual.content_hash }}</code></p>
       {% for node in manual.nodes %}
         <article>
           <h4>{{ node.node_id }} · {{ node.title }}</h4>

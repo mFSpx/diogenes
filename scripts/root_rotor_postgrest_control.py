@@ -17,7 +17,7 @@ from typing import Any, Callable
 import requests
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = ROOT / "GOALS" / "postgrest" / "root_rotor_postgrest.conf"
+DEFAULT_CONFIG = ROOT / "GOALS" / "root_rotor_postgrest.conf"
 DEFAULT_PID_FILE = ROOT / "04_RUNTIME" / "root_rotor_postgrest.pid"
 DEFAULT_LOG_FILE = ROOT / "04_RUNTIME" / "root_rotor_postgrest.log"
 REQUEST_TIMEOUT = 0.5

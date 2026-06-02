@@ -15,7 +15,8 @@ def test_bible_node_tags_migration_adds_kind_tags_and_api_projection() -> None:
     assert "bible_nodes_ontology_tags_not_empty" in schema
     assert "'node_kind', node_row.node_kind" in schema
     assert "'ontology_tags', node_row.ontology_tags" in schema
-    assert "CREATE OR REPLACE VIEW lucidota_canon.api_bible_nodes" in schema
+    assert "CREATE TABLE IF NOT EXISTS lucidota_canon.api_route_catalog" in schema
+    assert "CREATE OR REPLACE VIEW lucidota_canon.api_bible_route_catalog" in schema
     assert "node_kind" in schema
     assert "ontology_tags" in schema
 

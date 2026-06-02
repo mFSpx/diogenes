@@ -4,14 +4,20 @@ from __future__ import annotations
 
 import argparse
 import json
+import hashlib
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
+from contextlib import nullcontext
 
 import psycopg
 from psycopg.rows import dict_row
 
 from jinja2 import Template
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from ALGOS.minhash import signature as minhash_signature
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DSN = "postgresql:///lucidota_state"
@@ -42,6 +48,19 @@ def sorted_nodes(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted((dict(r) for r in rows), key=key)
 
 
+def stable_json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, default=str, separators=(",", ":"))
+
+
+def short_hash(value: Any) -> str:
+    return hashlib.blake2s(stable_json(value).encode("utf-8"), digest_size=8).hexdigest()
+
+
+def token_fingerprint(text: str) -> list[int]:
+    tokens = [t for t in "".join(ch.lower() if ch.isalnum() else " " for ch in text).split() if t]
+    return minhash_signature(tokens, k=16)
+
+
 def fetch_rows(sql: str, dsn: str, params: tuple[Any, ...] | None = None, *, all_rows: bool = True) -> list[dict[str, Any]]:
     with psycopg.connect(dsn, row_factory=dict_row) as conn:
         with conn.cursor() as cur:
@@ -54,12 +73,12 @@ def fetch_manual_nodes(dsn: str, manual_ids: list[str] | None = None) -> dict[st
     if manual_ids:
         placeholders = ",".join("%s" for _ in manual_ids)
         rows = fetch_rows(
-            f"SELECT * FROM lucidota_canon.api_bible_nodes WHERE manual_id IN ({placeholders}) ORDER BY manual_id, node_sort_key",
+            f"SELECT * FROM lucidota_canon.bible_nodes WHERE manual_id IN ({placeholders}) AND valid_to IS NULL ORDER BY manual_id, node_sort_key",
             dsn,
             tuple(manual_ids),
         )
     else:
-        rows = fetch_rows("SELECT * FROM lucidota_canon.api_bible_nodes ORDER BY manual_id, node_sort_key", dsn)
+        rows = fetch_rows("SELECT * FROM lucidota_canon.bible_nodes WHERE valid_to IS NULL ORDER BY manual_id, node_sort_key", dsn)
     grouped: dict[str, list[dict[str, Any]]] = {m: [] for m in (manual_ids or [])}
     for row in rows:
         grouped.setdefault(row["manual_id"], []).append(row)
@@ -69,7 +88,12 @@ def fetch_manual_nodes(dsn: str, manual_ids: list[str] | None = None) -> dict[st
 
 
 def fetch_route_catalog(dsn: str) -> list[dict[str, Any]]:
-    return fetch_rows("SELECT * FROM lucidota_canon.api_bible_route_catalog ORDER BY route_id", dsn)
+    for relation in ("lucidota_canon.api_bible_route_catalog", "lucidota_canon.api_route_catalog"):
+        try:
+            return fetch_rows(f"SELECT * FROM {relation} ORDER BY route_id", dsn)
+        except psycopg.errors.UndefinedTable:
+            continue
+    return []
 
 
 def fetch_latest_audit(prefix: str, root: Path = DEFAULT_RECEIPT_DIR) -> dict[str, Any] | None:
@@ -83,15 +107,28 @@ def fetch_latest_audit(prefix: str, root: Path = DEFAULT_RECEIPT_DIR) -> dict[st
 
 
 def render_api_payload(manuals: dict[str, list[dict[str, Any]]], routes: list[dict[str, Any]], contradictions: dict[str, Any]) -> dict[str, Any]:
+    manual_payloads = []
+    for manual_id, nodes in manuals.items():
+        manual_payloads.append({
+            "manual_id": manual_id,
+            "nodes": sorted_nodes(nodes),
+            "content_hash": short_hash([manual_id, nodes]),
+            "fingerprint": token_fingerprint(" ".join([manual_id] + [str(n.get("title", "")) for n in nodes])),
+        })
+    route_payloads = []
+    for route in routes:
+        route_payloads.append({
+            **route,
+            "content_hash": short_hash(route),
+            "fingerprint": token_fingerprint(" ".join([str(route.get("route_id", "")), str(route.get("description", "")), str(route.get("path_pattern", ""))])),
+        })
     return {
         "schema": "lucidota.root_law_api_payload.v1",
         "generated_at": now(),
-        "manuals": [
-            {"manual_id": manual_id, "nodes": sorted_nodes(nodes)}
-            for manual_id, nodes in manuals.items()
-        ],
-        "api_routes": routes,
+        "manuals": manual_payloads,
+        "api_routes": route_payloads,
         "contradictions": contradictions,
+        "payload_hash": short_hash({"manuals": manual_payloads, "api_routes": route_payloads, "contradictions": contradictions}),
     }
 
 
@@ -102,6 +139,7 @@ def render_html(template_text: str, payload: dict[str, Any]) -> str:
         "manuals": payload["manuals"],
         "api_routes": payload["api_routes"],
         "contradictions": payload.get("contradictions", {}),
+        "payload_hash": payload.get("payload_hash", ""),
         "blockers": contradictions.get("blockers", []),
         "warnings": contradictions.get("warnings", []),
         "coverage_ratio": contradictions.get("coverage_ratio", 0),
@@ -166,53 +204,55 @@ def sync_routes_to_bible_nodes(dsn: str, routes: list[dict[str, Any]], *, includ
     with psycopg.connect(dsn) as conn:
         with conn.cursor() as cur:
             for route in routes:
-                route_uri = f"api://route/{route['route_id']}"
-                cur.execute(
-                    "SELECT node_id FROM lucidota_canon.bible_nodes WHERE manual_id=%s AND payload_format='json' AND source_refs @> %s::jsonb LIMIT 1",
-                    (ENDPOINT_MANUAL, json.dumps([route_uri])),
-                )
-                row = cur.fetchone()
-                if row:
-                    node_id = str(row[0])
-                else:
-                    cur.execute(
-                        "SELECT node_id FROM lucidota_canon.bible_nodes WHERE manual_id=%s AND node_id LIKE '4.%'",
-                        (ENDPOINT_MANUAL,),
-                    )
-                    for old in cur.fetchall():
-                        nid = _parse_route_node_id(str(old[0]))
-                        if nid is not None:
-                            used_ids.add(nid)
-                    n = ENDPOINT_NODE_START
-                    while n in used_ids:
-                        n += 1
-                    node_id = f"4.{n}.0"
-                    used_ids.add(n)
-
-                payload = {
-                    "schema": "lucidota.root_rotor.route_payload.v1",
-                    "source": "api_bible_route_catalog",
-                    "route": route,
-                    "generated_at": now(),
-                }
-                record = {
-                    "node_id": node_id,
-                    "parent_id": ENDPOINT_PARENT,
-                    "manual_id": ENDPOINT_MANUAL,
-                    "node_kind": "REFERENCE",
-                    "title": f"API route {route['route_id']}",
-                    "payload": json.dumps(payload, sort_keys=True),
-                    "payload_format": "json",
-                    "ontology_tags": ["API", "REFERENCE", "RECEIPT"],
-                    "source_refs": [route_uri],
-                    "evidence_hashes": [],
-                    "dependencies": [],
-                    "affects_nodes": [],
-                    "status": "verified" if include_all else "review_required",
-                }
                 try:
-                    cur.execute(sync_sql, record)
-                    payloads["updated"] += 1
+                    transaction = conn.transaction() if callable(getattr(conn, "transaction", None)) else nullcontext()
+                    with transaction:
+                        route_uri = f"api://route/{route['route_id']}"
+                        cur.execute(
+                            "SELECT node_id FROM lucidota_canon.bible_nodes WHERE manual_id=%s AND payload_format='json' AND source_refs @> %s::jsonb LIMIT 1",
+                            (ENDPOINT_MANUAL, json.dumps([route_uri])),
+                        )
+                        row = cur.fetchone()
+                        if row:
+                            node_id = str(row[0])
+                        else:
+                            cur.execute(
+                                "SELECT node_id FROM lucidota_canon.bible_nodes WHERE manual_id=%s AND node_id LIKE '4.%%'",
+                                (ENDPOINT_MANUAL,),
+                            )
+                            for old in cur.fetchall():
+                                nid = _parse_route_node_id(str(old[0]))
+                                if nid is not None:
+                                    used_ids.add(nid)
+                            n = ENDPOINT_NODE_START
+                            while n in used_ids:
+                                n += 1
+                            node_id = f"4.{n}.0"
+                            used_ids.add(n)
+
+                        payload = {
+                            "schema": "lucidota.root_rotor.route_payload.v1",
+                            "source": "api_bible_route_catalog",
+                            "route": route,
+                            "generated_at": now(),
+                        }
+                        record = {
+                            "node_id": node_id,
+                            "parent_id": ENDPOINT_PARENT,
+                            "manual_id": ENDPOINT_MANUAL,
+                            "node_kind": "REFERENCE",
+                            "title": f"API route {route['route_id']}",
+                            "payload": json.dumps(payload, sort_keys=True, default=str),
+                            "payload_format": "json",
+                            "ontology_tags": ["API", "REFERENCE", "RECEIPT"],
+                            "source_refs": json.dumps([route_uri]),
+                            "evidence_hashes": json.dumps([]),
+                            "dependencies": [],
+                            "affects_nodes": [],
+                            "status": "verified" if include_all else "review_required",
+                        }
+                        cur.execute(sync_sql, record)
+                        payloads["updated"] += 1
                 except Exception as exc:  # pragma: no cover - error path
                     payloads["errors"].append({"route_id": route["route_id"], "error": str(exc)})
 
@@ -243,13 +283,13 @@ def run(
     html_path.write_text(html, encoding="utf-8")
 
     markdown_path = output_dir / "root_law_api_docs.md"
-    lines = [f"# Root-Law Technical Bible", f"Generated: {payload['generated_at']}", "", f"Manuals: {len(payload['manuals'])}", f"API routes: {len(payload['api_routes'])}"]
+    lines = [f"# Root-Law Technical Bible", f"Generated: {payload['generated_at']}", f"Payload hash: {payload['payload_hash']}", "", f"Manuals: {len(payload['manuals'])}", f"API routes: {len(payload['api_routes'])}"]
     for manual in payload["manuals"]:
-        lines.append(f"\n## {manual['manual_id']}")
+        lines.append(f"\n## {manual['manual_id']} [{manual['content_hash']}]")
         for node in manual["nodes"]:
             lines.append(f"- {node['node_id']} {node['title']} ({node['status']} v{node['version']})")
     for route in payload["api_routes"]:
-        lines.append(f"- [{route['method']}] {route['path_pattern']} -> {route['route_id']}")
+        lines.append(f"- [{route['method']}] {route['path_pattern']} -> {route['route_id']} [{route['content_hash']}]")
     markdown_path.write_text("\n".join(lines), encoding="utf-8")
 
     sync_result = sync_routes_to_bible_nodes(dsn, routes, include_all=include_all) if sync_routes else {"upserted": 0, "updated": 0, "errors": []}

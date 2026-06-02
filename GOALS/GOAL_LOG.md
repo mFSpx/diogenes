@@ -3119,3 +3119,79 @@ Technical Summary Review and Dev Notes: The migration now composes node_kind and
 - Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --json && .venv/bin/pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_bible_node_tags_schema.py tests/test_root_rotor_seed_bible_nodes.py tests/test_root_rotor_red_team_audit.py tests/test_root_rotor_sidecar_anomaly_audit.py tests/test_root_rotor_postgrest_control.py`
 
 Technical Summary Review and Dev Notes: The new docs spine now renders from DB payload to HTML/markdown without model fog, and the route node sync uses deterministic 4.x IDs. Cryptid note: the ledger cat is still prowling, but its tracks are now indexed with receipts.
+
+---
+
+## Step 4/8 — Push Root-Rotor docs snapshot to GitHub
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Root-Rotor Porges Protocol V2
+- Generated: `2026-06-02T14:52:35Z`
+- Current step: 4/8
+- Status: in_progress
+- Objective: Consolidate repository canon into versioned PostgreSQL coordinates exposed through PostgREST-style endpoints and compiled on demand into agent/person-readable technical manuals.
+- Completed: Committed the current Root-Rotor documentation/db-mapping snapshot and pushed it to the GitHub remote on main (814d39f6). The pushed set includes the new root_law_api docs generator/template/tests, route-catalog seed migration, and the broader canonical docs surface already staged in this branch.
+- Next action: Run the live docs generator against the DB with --sync-route-nodes, verify the HTML/markdown receipts, then continue contradiction coverage and any remaining endpoint/manual mapping gaps.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/python -m pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_bible_node_tags_schema.py tests/test_root_rotor_seed_bible_nodes.py tests/test_root_rotor_red_team_audit.py tests/test_root_rotor_sidecar_anomaly_audit.py tests/test_root_rotor_postgrest_control.py`
+
+Technical Summary Review and Dev Notes: GitHub has the new snapshot now. One submodule crumb remains dirty locally (phantom), but the mainline Root-Rotor docs spine is pushed and verifiable; little museum beetle keeps its own room.
+
+---
+
+## Step 5/8 — Refresh handoff/log after reuse-law update and live verification
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Root-Rotor Porges Protocol V2
+- Generated: `2026-06-02T15:18:35Z`
+- Current step: 5/8
+- Status: in_progress
+- Objective: Consolidate repository canon into versioned PostgreSQL coordinates exposed through PostgREST-style endpoints and compiled on demand into agent/person-readable technical manuals.
+- Completed: Added a durable reuse-law line to the Dev Library spec and the IronClaw seed; reran the live root_law_api docs generator with --sync-route-nodes and it still passed with 5 routes, 5 upserts, and 21 targeted tests green.
+- Next action: Continue contradiction coverage and the remaining endpoint/manual mapping gaps, then decide whether the docs spine is ready for final push/receipt consolidation.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/python -m pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_bible_node_tags_schema.py tests/test_root_rotor_seed_bible_nodes.py tests/test_root_rotor_red_team_audit.py tests/test_root_rotor_sidecar_anomaly_audit.py tests/test_root_rotor_postgrest_control.py`
+
+Technical Summary Review and Dev Notes: Reuse-law beetle now has a brighter label. Docs spine still renders clean; two contradiction crumbs remain in the hedge.
+
+---
+
+## Step 6/8 — Add current-version hash fingerprints to docs payload and HTML
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Root-Rotor Porges Protocol V2
+- Generated: `2026-06-02T15:21:21Z`
+- Current step: 6/8
+- Status: in_progress
+- Objective: Consolidate repository canon into versioned PostgreSQL coordinates exposed through PostgREST-style endpoints and compiled on demand into agent/person-readable technical manuals.
+- Completed: Integrated cheap versioned hashes into the root_law_api payload, HTML, and markdown so manuals and API routes carry current fingerprints; verified the direct script path still renders and syncs 5 routes with 21 targeted tests green.
+- Next action: Continue contradiction coverage and remaining endpoint/manual mapping gaps, then decide whether the nested GOALS/postgrest config pocket should be flattened or kept as a deliberate receipt shard.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/python -m pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_bible_node_tags_schema.py tests/test_root_rotor_seed_bible_nodes.py tests/test_root_rotor_red_team_audit.py tests/test_root_rotor_sidecar_anomaly_audit.py tests/test_root_rotor_postgrest_control.py`
+
+Technical Summary Review and Dev Notes: Hash lanterns lit. Contradiction hedge still shows two blockers, but now each docs artifact has a cheap current fingerprint.
+
+---
+
+## Step 7/8 — Flatten GOALS workspace pocket and verify handoff tree law
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Root-Rotor Porges Protocol V2
+- Generated: `2026-06-02T15:21:55Z`
+- Current step: 7/8
+- Status: in_progress
+- Objective: Consolidate repository canon into versioned PostgreSQL coordinates exposed through PostgREST-style endpoints and compiled on demand into agent/person-readable technical manuals.
+- Completed: Moved the PostgREST config out of GOALS/postgrest into the top-level GOALS directory, removed the nested folder, and verified `scripts/goal_handoff.py check` now passes with no nested dirs while the Root-Rotor docs/hash tests still pass.
+- Next action: Decide whether to commit/push the latest docs-law/hash/config flattening set or do one more contradiction sweep before final receipt consolidation.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/python -m pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_bible_node_tags_schema.py tests/test_root_rotor_seed_bible_nodes.py tests/test_root_rotor_red_team_audit.py tests/test_root_rotor_sidecar_anomaly_audit.py tests/test_root_rotor_postgrest_control.py`
+
+Technical Summary Review and Dev Notes: Pocket flattened. The handoff tree stopped rustling and the audit lantern has a clean line of sight.

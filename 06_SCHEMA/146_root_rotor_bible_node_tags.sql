@@ -14,7 +14,13 @@ UPDATE lucidota_canon.bible_nodes
 SET node_kind = CASE
     WHEN (node_kind IS NULL OR btrim(node_kind) = '') THEN
         NULLIF(
-            COALESCE(NULLIF(payload::jsonb->>'node_kind', ''),
+            COALESCE(NULLIF(
+                CASE
+                    WHEN payload_format = 'json' AND payload ~ '^\s*[\{\[]' THEN payload::jsonb->>'node_kind'
+                    ELSE NULL
+                END,
+                ''
+            ),
                 CASE
                     WHEN source_refs->>0 LIKE '06_SCHEMA/%' OR source_refs->>0 LIKE '%.sql' THEN 'SCHEMA'
                     WHEN source_refs->>0 LIKE 'scripts/%' THEN 'WORKFLOW'
@@ -30,7 +36,8 @@ ontology_tags = CASE
         COALESCE(
             CASE
                 WHEN payload_format = 'json'
-                     AND payload::jsonb ? 'ontology_tags'
+                     AND payload ~ '^\s*[\{\[]'
+                     AND (payload::jsonb ? 'ontology_tags')
                      AND jsonb_typeof(payload::jsonb->'ontology_tags') = 'array' THEN
                     ARRAY(
                         SELECT jsonb_array_elements_text(payload::jsonb->'ontology_tags')
@@ -115,32 +122,7 @@ EXCEPTION WHEN duplicate_object THEN
 END;
 $$;
 
--- Keep API material surface aligned with tagged nodes.
-CREATE OR REPLACE VIEW lucidota_canon.api_bible_nodes AS
-SELECT
-    node_id,
-    parent_id,
-    node_sort_key,
-    manual_id,
-    node_kind,
-    title,
-    payload,
-    payload_format,
-    ontology_tags,
-    source_refs,
-    evidence_hashes,
-    dependencies,
-    affects_nodes,
-    status,
-    version,
-    valid_from,
-    valid_to,
-    hash_current,
-    previous_hash,
-    created_at,
-    updated_at
-FROM lucidota_canon.bible_nodes
-WHERE valid_to IS NULL;
+-- Keep the canonical table aligned with tags; docs compiler reads the table directly.
 
 -- Route catalog for DB/API/manual compile surface.
 CREATE TABLE IF NOT EXISTS lucidota_canon.api_route_catalog (
@@ -183,7 +165,7 @@ VALUES
 ('subtree', 'GET', '/api_bible_subtree?root_id=eq.{node_id}', 'Fetch canonical subtree rooted at node id.', 'lucidota_canon.get_subtree(root_id text)',
  '{"root_id":"1"}', '{"node_id":"1"...}', 'implemented'),
 ('route_catalog', 'GET', '/api_bible_route_catalog', 'List route catalog used by compiler and clients.', 'lucidota_canon.api_bible_route_catalog',
- '{"status":"implemented"}', '{"route_id":"nodes"...}', 'implemented')
+ '{"status":"implemented"}', '{"route_id":"nodes"...}', 'implemented'),
 ('root_law_docs', 'GET', '/root_law_docs', 'Render extensive Root-Law manuals, API routes, and contradiction ledger from PostgREST/route/state evidence.', 'lucidota_canon.api_root_law_docs',
  '{"route":"root_law_docs","manual_ids":["SYSTEM_ARCH","RUNTIME_GOVERNOR","AVIONICS","FLIGHT_MAN","LEDGER"],"emit":"html"}',
  '{"status":"ok","html_path":"05_OUTPUTS/root_rotor_manuals/root_law_docs.html"}', 'implemented')
