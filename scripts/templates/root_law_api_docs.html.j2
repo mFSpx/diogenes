@@ -76,6 +76,28 @@
     <div class="card">
       <strong>Coverage Ratio:</strong> {{ contradictions.coverage_ratio|default('n/a') }}
     </div>
+    {% if gap_atlas %}
+      <h3>Gap Atlas</h3>
+      {% for item in gap_atlas %}
+        <article class="card">
+          <strong>{{ item.name }}</strong>
+          <div>blockers: {{ item.blockers }}</div>
+          <div>warnings: {{ item.warnings }}</div>
+          <div>coverage: {{ item.coverage_ratio }}</div>
+          {% if item.name == 'sidecar' %}
+            <div>valid sidecars: {{ item.valid_sidecars }}</div>
+            <div>missing sidecars: {{ item.missing_sidecars }}</div>
+            <div>manifest files: {{ item.manifest_files }}</div>
+            <div>symbolic edges: {{ item.symbolic_edge_values }}</div>
+          {% else %}
+            <div>draft nodes: {{ item.draft_nodes }}</div>
+            <div>verified nodes: {{ item.verified_nodes }}</div>
+            <div>model payloads: {{ item.model_payload_count }}</div>
+            <div>total nodes: {{ item.total_nodes }}</div>
+          {% endif %}
+        </article>
+      {% endfor %}
+    {% endif %}
     {% if audit_surfaces.sidecar or audit_surfaces.red_team %}
       <h3>Audit Surface Metrics</h3>
       {% for name, surface in audit_surfaces.items() %}

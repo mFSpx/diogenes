@@ -142,6 +142,7 @@ def render_html(template_text: str, payload: dict[str, Any]) -> str:
         "contradictions": payload.get("contradictions", {}),
         "payload_hash": payload.get("payload_hash", ""),
         "audit_surfaces": surfaces,
+        "gap_atlas": contradictions.get("gap_atlas", []),
         "blockers": contradictions.get("blockers", []),
         "warnings": contradictions.get("warnings", []),
         "coverage_ratio": contradictions.get("coverage_ratio", 0),
@@ -152,14 +153,38 @@ def render_html(template_text: str, payload: dict[str, Any]) -> str:
 def read_default_contradictions(*, receipt_dir: Path = DEFAULT_RECEIPT_DIR) -> dict[str, Any]:
     sidecar = fetch_latest_audit("sidecar_anomaly_audit", receipt_dir) or {}
     redteam = fetch_latest_audit("red_team_audit", receipt_dir) or {}
+    sidecar_metrics = sidecar.get("metrics", {}) if isinstance(sidecar, dict) else {}
+    redteam_metrics = redteam.get("metrics", {}) if isinstance(redteam, dict) else {}
     return {
         "blockers": sidecar.get("blockers", []) + redteam.get("blockers", []),
         "warnings": sidecar.get("warnings", []) + redteam.get("warnings", []),
-        "coverage_ratio": sidecar.get("metrics", {}).get("coverage_ratio", 0),
+        "coverage_ratio": sidecar_metrics.get("coverage_ratio", 0),
         "surfaces": {
             "sidecar": sidecar,
             "red_team": redteam,
         },
+        "gap_atlas": [
+            {
+                "name": "sidecar",
+                "blockers": len(sidecar.get("blockers", [])) if isinstance(sidecar, dict) else 0,
+                "warnings": len(sidecar.get("warnings", [])) if isinstance(sidecar, dict) else 0,
+                "coverage_ratio": sidecar_metrics.get("coverage_ratio", 0),
+                "missing_sidecars": sidecar_metrics.get("missing_sidecars", 0),
+                "valid_sidecars": sidecar_metrics.get("valid_sidecars", 0),
+                "manifest_files": sidecar_metrics.get("manifest_files", 0),
+                "symbolic_edge_values": sidecar_metrics.get("symbolic_edge_values", 0),
+            },
+            {
+                "name": "red_team",
+                "blockers": len(redteam.get("blockers", [])) if isinstance(redteam, dict) else 0,
+                "warnings": len(redteam.get("warnings", [])) if isinstance(redteam, dict) else 0,
+                "coverage_ratio": redteam_metrics.get("coverage_ratio", 0),
+                "draft_nodes": redteam_metrics.get("draft_nodes", 0),
+                "verified_nodes": redteam_metrics.get("verified_nodes", 0),
+                "model_payload_count": redteam_metrics.get("model_payload_count", 0),
+                "total_nodes": redteam_metrics.get("total_nodes", 0),
+            },
+        ],
     }
 
 

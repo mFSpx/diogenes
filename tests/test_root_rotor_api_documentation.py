@@ -45,6 +45,28 @@ def test_root_rotor_api_docs_can_render_html_from_db_payload(tmp_path) -> None:
             "blockers": ["none"],
             "warnings": ["gap_x"],
             "coverage_ratio": 0.88,
+            "gap_atlas": [
+                {
+                    "name": "sidecar",
+                    "blockers": 1,
+                    "warnings": 1,
+                    "coverage_ratio": 0.25,
+                    "missing_sidecars": 3,
+                    "valid_sidecars": 2,
+                    "manifest_files": 5,
+                    "symbolic_edge_values": 0,
+                },
+                {
+                    "name": "red_team",
+                    "blockers": 1,
+                    "warnings": 1,
+                    "coverage_ratio": 0.5,
+                    "draft_nodes": 3,
+                    "verified_nodes": 7,
+                    "model_payload_count": 5,
+                    "total_nodes": 10,
+                },
+            ],
             "surfaces": {
                 "sidecar": {
                     "blockers": ["sidecar_coverage_incomplete"],
@@ -87,6 +109,9 @@ def test_root_rotor_api_docs_can_render_html_from_db_payload(tmp_path) -> None:
     {% for name, surface in audit_surfaces.items() %}
       <section>{{ name }} {{ surface.metrics.coverage_ratio }}</section>
     {% endfor %}
+    {% for item in gap_atlas %}
+      <section>{{ item.name }} {{ item.blockers }}</section>
+    {% endfor %}
     """
     html = doc.render_html(template_text, payload)
     assert "2026-06-02T00:00:00Z" in html
@@ -96,6 +121,7 @@ def test_root_rotor_api_docs_can_render_html_from_db_payload(tmp_path) -> None:
     assert "abc123" in html
     assert "gap_x" in html
     assert "sidecar 0.25" in html
+    assert "red_team 1" in html
 
 
 def test_root_rotor_api_docs_runs_and_writes_artifacts(tmp_path, monkeypatch) -> None:
