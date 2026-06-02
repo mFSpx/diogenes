@@ -331,6 +331,24 @@ def run(
                 f"warnings={len(surface.get('warnings', [])) if isinstance(surface, dict) else 0} "
                 f"coverage={metrics.get('coverage_ratio', 'n/a')}"
             )
+    atlas = payload["contradictions"].get("gap_atlas", [])
+    if atlas:
+        lines.append("\n## Gap Atlas")
+        for item in atlas:
+            lines.append(
+                f"- {item['name']}: blockers={item['blockers']} warnings={item['warnings']} "
+                f"coverage={item['coverage_ratio']}"
+            )
+            if item["name"] == "sidecar":
+                lines.append(
+                    f"  - valid={item['valid_sidecars']} missing={item['missing_sidecars']} "
+                    f"manifest={item['manifest_files']} symbolic_edges={item['symbolic_edge_values']}"
+                )
+            else:
+                lines.append(
+                    f"  - draft={item['draft_nodes']} verified={item['verified_nodes']} "
+                    f"payloads={item['model_payload_count']} total={item['total_nodes']}"
+                )
     markdown_path.write_text("\n".join(lines), encoding="utf-8")
 
     sync_result = sync_routes_to_bible_nodes(dsn, routes, include_all=include_all) if sync_routes else {"upserted": 0, "updated": 0, "errors": []}

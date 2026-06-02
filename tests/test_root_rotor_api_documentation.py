@@ -147,7 +147,34 @@ def test_root_rotor_api_docs_runs_and_writes_artifacts(tmp_path, monkeypatch) ->
     class Dummy:
         @staticmethod
         def read_default_contradictions(receipt_dir: Path):
-            return {"blockers": [], "warnings": [], "coverage_ratio": 1.0}
+            return {
+                "blockers": [],
+                "warnings": [],
+                "coverage_ratio": 1.0,
+                "gap_atlas": [
+                    {
+                        "name": "sidecar",
+                        "blockers": 1,
+                        "warnings": 1,
+                        "coverage_ratio": 0.25,
+                        "missing_sidecars": 3,
+                        "valid_sidecars": 2,
+                        "manifest_files": 5,
+                        "symbolic_edge_values": 0,
+                    },
+                    {
+                        "name": "red_team",
+                        "blockers": 1,
+                        "warnings": 1,
+                        "coverage_ratio": 0.5,
+                        "draft_nodes": 3,
+                        "verified_nodes": 7,
+                        "model_payload_count": 5,
+                        "total_nodes": 10,
+                    },
+                ],
+                "surfaces": {},
+            }
 
     monkeypatch.setattr(doc, "fetch_manual_nodes", fake_fetch_manual_nodes)
     monkeypatch.setattr(doc, "fetch_route_catalog", fake_fetch_routes)
@@ -155,7 +182,7 @@ def test_root_rotor_api_docs_runs_and_writes_artifacts(tmp_path, monkeypatch) ->
     monkeypatch.setattr(doc, "sync_routes_to_bible_nodes", lambda *_, **__: {"upserted": 0, "updated": 0, "errors": []})
 
     template = tmp_path / "tpl.html"
-    template.write_text("<html><body>{% for m in manuals %}{{ m.content_hash }}{% for node in m.nodes %}{{ node.node_id }}{% endfor %}{% endfor %}{% for r in api_routes %}{{ r.content_hash }}{% endfor %}</body></html>", encoding="utf-8")
+    template.write_text("<html><body>{% for m in manuals %}{{ m.content_hash }}{% for node in m.nodes %}{{ node.node_id }}{% endfor %}{% endfor %}{% for r in api_routes %}{{ r.content_hash }}{% endfor %}{% for item in gap_atlas %}{{ item.name }}{% endfor %}</body></html>", encoding="utf-8")
     result = doc.run(
         dsn="postgresql:///ignore",
         manual_ids=["FLIGHT_MAN"],
@@ -172,6 +199,9 @@ def test_root_rotor_api_docs_runs_and_writes_artifacts(tmp_path, monkeypatch) ->
     assert "4.1.0" in html_text
     assert re.search(r"[0-9a-f]{16}", html_text)
     assert Path(result["markdown_path"]).exists()
+    md_text = Path(result["markdown_path"]).read_text(encoding="utf-8")
+    assert "## Gap Atlas" in md_text
+    assert "sidecar: blockers=1 warnings=1 coverage=0.25" in md_text
 
 
 class FakeCursor:
