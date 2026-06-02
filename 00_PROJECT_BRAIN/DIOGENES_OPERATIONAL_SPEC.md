@@ -7,7 +7,7 @@
 ## 0. Roles & operating law
 - **Indy_READs (Opus) = Orchestrator + Planner.** Designs, sequences, reviews. Does not hand-build sprawling code.
 - **Groq + Cohere + Cerebras + Claude = the hands** (cloud lanes, API-keyed). Bulk generation, extraction, audit fan-out.
-- **Local model suite** (DeepSeek/Mamba/Bonsai/Needle×6/BGE/ModernBERT/SmolDocling/GLiNER) = fully at the orchestrator's disposal *once embedding completes*. Until then, reserved for the embed crush.
+- **Local model suite** (DeepSeek/Mamba/Bonsai/Needle×6/BGE/ModernBERT/SmolDocling/GLiNER) = fully at the orchestrator's disposal for embedding and all operational use. BGE explicitly requires VRAM offloading governance per LUCIDOTA_BGE_NGL law: CPU-safe default (LUCIDOTA_BGE_NGL=0, mmap-shared weights), GPU mode only when LUCIDOTA_BGE_NGL>0 explicitly set. Until embedding completes, BGE remains reserved for the embed crush under the same governor control.
 - Everything wires through **rig.rs** (uniform CompletionModel) + **llama.cpp**, and **everything interacts with the Dynamic Governor (the guvna)**, all surfaced through **`./claw`**.
 - Non-negotiable: nothing runs live that isn't *functionally awesome*. ALL schemas online + audited; ALL scripts audited; adversarial audit suites + daily schedules exist; gaps/stubs/handwaving are rejected.
 
@@ -21,6 +21,12 @@
 - **All local models** wired in.
 - Orchestrated via **rig.rs** + **llama.cpp** (+ anything missed).
 - **All of it interacts with the Dynamic Governor**, wired directly into `./claw`.
+- Operator clarification, 2026-06-01: `./claw` is not "one chat to one LLM."
+  It is the operator front door into a multiplexed local MOA-style work system:
+  inbound text is packetized, routed, split across fast/slow lanes, chained into
+  complex task execution, checked by deterministic sidepieces wherever possible,
+  and only then uses LLMs as bounded workers. Model outputs are side-lanes, not
+  system authority.
 
 ## 3. UX — conversational, deterministic routing (no mandatory slash commands)
 - Slash commands available but never required. Interacting feels like **chatting with a friend**.
@@ -32,6 +38,9 @@
 ## 4. OUTPUT multiplexer — better than any AI chat
 - Outputs **multiplexed + sequenced** across: **Jinja/templating (Rust: minijinja/tera), stylography, LLM generation, templated wrappers, on-the-money book quotes, and Indy_READs' own commentary.**
 - The return feed gives the operator **what they need, when they need it** — hyperplexed, sequenced, beautiful.
+- Sequencing must preserve the hack: deterministic receipts/templates/routing
+  and retrieved evidence should stay inspectable even when the final surface is
+  polished. Beauty is required; flattening provenance into vibes is not.
 
 ## 5. PERCYPHON.AI — fully fleshed out
 - **Generative maths for the 5,000-soul village.** The active 5,000 are a **derived function of signal**: current cases + recent emails + operator telemetry + operator inputs + the graph → "what's important NOW."

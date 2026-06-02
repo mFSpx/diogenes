@@ -158,6 +158,14 @@ VRAM is governed by model admission/scheduling:
   cap batch/context sizes
   preserve custody/ops
   emit events
+
+LUCIDOTA_BGE_NGL law:
+  BGE model VRAM offloading MUST be explicitly controlled via LUCIDOTA_BGE_NGL.
+  Default: LUCIDOTA_BGE_NGL=0 (CPU-safe, mmap-shared weights).
+  GPU mode ONLY when LUCIDOTA_BGE_NGL>0 explicitly set.
+  Never default to NGL=99 or any GPU-assuming fallback.
+  One llama-server process maximum in GPU mode.
+  SLOTS_PER and CTX_PER math preserved (SLOTS_PER * 2048).
 ```
 
 ---
