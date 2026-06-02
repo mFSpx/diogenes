@@ -134,12 +134,14 @@ def render_api_payload(manuals: dict[str, list[dict[str, Any]]], routes: list[di
 
 def render_html(template_text: str, payload: dict[str, Any]) -> str:
     contradictions = payload.get("contradictions", {})
+    surfaces = contradictions.get("surfaces", {})
     payload = {
         "generated_at": payload.get("generated_at", now()),
         "manuals": payload["manuals"],
         "api_routes": payload["api_routes"],
         "contradictions": payload.get("contradictions", {}),
         "payload_hash": payload.get("payload_hash", ""),
+        "audit_surfaces": surfaces,
         "blockers": contradictions.get("blockers", []),
         "warnings": contradictions.get("warnings", []),
         "coverage_ratio": contradictions.get("coverage_ratio", 0),
@@ -154,6 +156,10 @@ def read_default_contradictions(*, receipt_dir: Path = DEFAULT_RECEIPT_DIR) -> d
         "blockers": sidecar.get("blockers", []) + redteam.get("blockers", []),
         "warnings": sidecar.get("warnings", []) + redteam.get("warnings", []),
         "coverage_ratio": sidecar.get("metrics", {}).get("coverage_ratio", 0),
+        "surfaces": {
+            "sidecar": sidecar,
+            "red_team": redteam,
+        },
     }
 
 
@@ -290,6 +296,16 @@ def run(
             lines.append(f"- {node['node_id']} {node['title']} ({node['status']} v{node['version']})")
     for route in payload["api_routes"]:
         lines.append(f"- [{route['method']}] {route['path_pattern']} -> {route['route_id']} [{route['content_hash']}]")
+    surfaces = payload["contradictions"].get("surfaces", {})
+    if surfaces:
+        lines.append("\n## Audit Surfaces")
+        for name, surface in surfaces.items():
+            metrics = surface.get("metrics", {}) if isinstance(surface, dict) else {}
+            lines.append(
+                f"- {name}: blockers={len(surface.get('blockers', [])) if isinstance(surface, dict) else 0} "
+                f"warnings={len(surface.get('warnings', [])) if isinstance(surface, dict) else 0} "
+                f"coverage={metrics.get('coverage_ratio', 'n/a')}"
+            )
     markdown_path.write_text("\n".join(lines), encoding="utf-8")
 
     sync_result = sync_routes_to_bible_nodes(dsn, routes, include_all=include_all) if sync_routes else {"upserted": 0, "updated": 0, "errors": []}

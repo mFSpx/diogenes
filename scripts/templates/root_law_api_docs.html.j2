@@ -76,6 +76,22 @@
     <div class="card">
       <strong>Coverage Ratio:</strong> {{ contradictions.coverage_ratio|default('n/a') }}
     </div>
+    {% if audit_surfaces.sidecar or audit_surfaces.red_team %}
+      <h3>Audit Surface Metrics</h3>
+      {% for name, surface in audit_surfaces.items() %}
+        {% if surface %}
+          <article class="card">
+            <strong>{{ name }}</strong>
+            <div>blockers: {{ surface.blockers|length }}</div>
+            <div>warnings: {{ surface.warnings|length }}</div>
+            <div>coverage: {{ surface.metrics.coverage_ratio|default('n/a') }}</div>
+            <div>verified: {{ surface.metrics.verified_nodes|default('n/a') }}</div>
+            <div>draft: {{ surface.metrics.draft_nodes|default('n/a') }}</div>
+            <div>model payloads: {{ surface.metrics.model_payload_count|default('n/a') }}</div>
+          </article>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
   </section>
 
 </body>
