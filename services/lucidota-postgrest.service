@@ -1,0 +1,22 @@
+[Unit]
+Description=LUCIDOTA PostgREST API server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/LUCIDOTA
+EnvironmentFile=-%h/.config/lucidota/postgrest.env
+ExecStart=/bin/bash -lc 'source "$HOME/LUCIDOTA/scripts/lucidota_safe_ops_env.sh" >/dev/null 2>&1; exec postgrest "$HOME/LUCIDOTA/GOALS/root_rotor_postgrest.conf" >>"$HOME/LUCIDOTA/04_RUNTIME/root_rotor_postgrest.log" 2>&1'
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+KillSignal=SIGINT
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=%h/LUCIDOTA/04_RUNTIME %h/LUCIDOTA/05_OUTPUTS
+
+[Install]
+WantedBy=default.target

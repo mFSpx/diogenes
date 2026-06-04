@@ -16,6 +16,7 @@ from typing import Any
 
 from ALGOS.bandit_router import BanditUpdate, select_action, update_policy
 from ALGOS.regret_engine import MathAction, MathCounterfactual, compute_regret_weighted_strategy
+from ALGOS import runtime_caps
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_VERSION = "lucidota.rete_bandit_gate.v1"
@@ -186,7 +187,9 @@ def rete_prune(packet: dict[str, Any]) -> tuple[list[str], list[str], dict[str, 
     friction = friction_from_packet(packet)
     terms = ontology_set(packet)
     text = str(packet.get("text_surface") or "")
-    payload_dump = json.dumps(packet.get("payload") or {}, sort_keys=True, default=str)
+    text, _text_truncated = runtime_caps.cap_text(text)
+    payload = packet.get("payload") or {}
+    payload_dump, _payload_truncated = runtime_caps.bounded_payload(payload)
     low = (text + " " + payload_dump).lower()
     pool: list[str] = []
     hits: list[str] = []
@@ -232,13 +235,15 @@ def rete_prune(packet: dict[str, Any]) -> tuple[list[str], list[str], dict[str, 
 
 
 def execute_algorithm(algorithm: str, packet: dict[str, Any]) -> dict[str, Any]:
-    text = str(packet.get("text_surface") or "")[:20000]
+    text = str(packet.get("text_surface") or "")
+    text, _ = runtime_caps.cap_text(text)
     payload = packet.get("payload") or {}
     terms = sorted(ontology_set(packet))
     if algorithm == "minhash":
         from ALGOS.minhash import shingles, signature
-        sig = signature(shingles(text, width=5), k=64)
-        return {"backend": "ALGOS.minhash", "signature_head": sig[:8], "shingle_count": len(shingles(text, width=5)), "fact_markers": int(bool(sig))}
+        shingle_set = shingles(text, width=5)
+        sig = signature(shingle_set, k=64)
+        return {"backend": "ALGOS.minhash", "signature_head": sig[:8], "shingle_count": len(shingle_set), "fact_markers": int(bool(sig))}
     if algorithm == "gliner_zero_shot":
         from ALGOS.gliner_zero_shot_extractor import literal_fallback
         labels = ["Operator", "Chrono-Ledger", "KRAMPUSCHEWING", "KORPUS", "Command Envelope Protocol", "Evidence", "Claim"]

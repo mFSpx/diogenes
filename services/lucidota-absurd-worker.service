@@ -1,0 +1,23 @@
+[Unit]
+Description=LUCIDOTA ABSURD wake-plane worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/LUCIDOTA
+Environment=DATABASE_URL=postgresql:///lucidota_state
+Environment=ABSURD_SYSTEM_DATABASE_URL=postgresql:///lucidota_state
+ExecStart=%h/LUCIDOTA/.venv/bin/python %h/LUCIDOTA/scripts/absurd_queue_spine.py --action wake-plane --execute --queue control
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=20
+KillSignal=SIGINT
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=%h/LUCIDOTA/04_RUNTIME %h/LUCIDOTA/05_OUTPUTS
+
+[Install]
+WantedBy=default.target

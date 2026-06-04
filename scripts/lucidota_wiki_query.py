@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse, json, re
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-WIKI_DIRS=[ROOT/'00_PROJECT_BRAIN', ROOT/'02_RECORDS_OFFICE']
+WIKI_DIRS=[ROOT/'00_PROJECT_BRAIN', ROOT/'02_RECORDS_OFFICE', ROOT/'BOOKS/.indy_reads/wiki', ROOT/'BOOKS/.indy_reads/private_journal']
 
 def sections():
     for d in WIKI_DIRS:

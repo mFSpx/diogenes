@@ -22,6 +22,7 @@ from scripts.spine_job_adapter import ABSURDJobAdapter  # noqa: E402
 from scripts.spine_common import now, rel, sha256_json  # noqa: E402
 
 OUT = ROOT / "05_OUTPUTS" / "luci"
+CONDUIT_OUT = ROOT / "05_OUTPUTS" / "indy_conduit"
 INGRESS_CACHE = ROOT / "04_RUNTIME" / "luci" / "operator_ingress.jsonl"
 ATTEMPT_ENGINE_ROOT = ROOT / "09_STORAGE" / "luci" / "attempt_engine"
 SCHEMA = "lucidota.luci.operator_frontdoor.v1"
@@ -79,6 +80,61 @@ def append_ingress_cache(entry: dict[str, Any]) -> str:
     with INGRESS_CACHE.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(entry, sort_keys=True, ensure_ascii=False) + "\n")
     return rel(INGRESS_CACHE)
+
+
+def normalize_indy_conduit_mode(mode: str | None) -> str:
+    value = (mode or os.environ.get("LUCI_INDY_CONDUIT_MODE") or "off").strip().lower()
+    aliases = {"dryrun": "dry-run", "dry_run": "dry-run", "execute": "execute", "exec": "execute", "on": "dry-run", "true": "dry-run", "1": "dry-run", "off": "off", "false": "off", "0": "off"}
+    value = aliases.get(value, value)
+    if value not in {"off", "dry-run", "execute"}:
+        raise ValueError(f"invalid_indy_conduit_mode:{mode}")
+    return value
+
+
+def is_indy_conduit_trigger(text: str) -> bool:
+    return text.lstrip().lower().startswith("/indy")
+
+
+def build_operator_conduit_event(text: str, *, run_id: str) -> dict[str, Any]:
+    event_id = "$luci-" + sha256_json({"run_id": run_id, "text": text, "channel": "luci_operator"})[:28]
+    return {
+        "event_id": event_id,
+        "room_id": "!luci_operator:local",
+        "sender": "@luci_operator:local",
+        "origin_server_ts": int(datetime.now(timezone.utc).timestamp() * 1000),
+        "content": {"msgtype": "m.text", "body": text},
+    }
+
+
+def process_indy_conduit_for_chat_message(
+    text: str,
+    *,
+    run_id: str,
+    mode: str | None = None,
+    output_dir: Path | str | None = None,
+    database_url: str | None = None,
+) -> dict[str, Any]:
+    resolved_mode = normalize_indy_conduit_mode(mode)
+    if resolved_mode == "off" and not is_indy_conduit_trigger(text):
+        return {"performed": False, "reason": "not_triggered", "mode": "off"}
+    if resolved_mode == "off":
+        resolved_mode = "dry-run"
+    from scripts.indy_conduit_driver import process_event_payload  # local import keeps CLI startup cheap
+
+    event = build_operator_conduit_event(text, run_id=run_id)
+    result = process_event_payload(
+        event,
+        dry_run=resolved_mode != "execute",
+        output_dir=Path(output_dir or CONDUIT_OUT),
+        database_url=database_url,
+    )
+    return {
+        "performed": True,
+        "mode": resolved_mode,
+        "transport": "direct_import",
+        "event_id": event["event_id"],
+        **result,
+    }
 
 
 def run_attempt_engine(text: str, *, run_id: str, database_url: str, queue_name: str = "luci_operator") -> dict[str, Any]:
@@ -289,8 +345,17 @@ def operate(
     execute_groq: bool = False,
     enqueue_slow: bool = True,
     json_out: bool = False,
+    conduit_mode: str | None = None,
+    conduit_output_dir: Path | str | None = None,
 ) -> dict[str, Any]:
     run_id = run_id or "luci:" + sha256_json({"text": text, "at": now()})[:24]
+    indy_conduit = process_indy_conduit_for_chat_message(
+        text,
+        run_id=run_id,
+        mode=conduit_mode,
+        output_dir=conduit_output_dir or CONDUIT_OUT,
+        database_url=database_url,
+    )
     language = language_router.write(language_router.route_text(text, channel="operator", verbosity="brief"))
     moa = claw_moa_router.orchestrate_text(
         text,
@@ -352,6 +417,7 @@ def operate(
         "attempt_engine_task": attempt_task,
         "learning_mode": learning_mode,
         "learning_loop": learning_loop,
+        "indy_conduit": indy_conduit,
     }
     db_event = emit_workflow_event(database_url, detail, run_id=run_id)
     ingress_cache_path = append_ingress_cache(
@@ -368,8 +434,10 @@ def operate(
             "language_router_report": language.get("report_path"),
             "moa_receipt": moa.get("receipt_path"),
             "attempt_engine_task": attempt_task,
+            "indy_conduit": indy_conduit,
         }
     )
+    conduit_ok = not indy_conduit.get("performed") or bool(indy_conduit.get("ok"))
     work_order_id = (
         (attempt_task.get("visible_response", {}) if isinstance(attempt_task.get("visible_response"), dict) else {}).get("work_order_id")
         or attempt_task.get("db_write", {}).get("work_order_uuid")
@@ -416,6 +484,7 @@ def operate(
             "preview": text[:160],
             "text": text,
             "ingress_cache_path": ingress_cache_path,
+            "indy_conduit": indy_conduit,
         },
         "ontology_packet": {
             "report_path": language.get("report_path"),
@@ -429,6 +498,7 @@ def operate(
             "moa_receipt": moa.get("receipt_path"),
         },
         "attempt_engine": attempt_task,
+        "indy_conduit": indy_conduit,
         "learning_slice": attempt_task if learning_mode else None,
         "learning_loop": learning_loop,
         "source_slice": attempt_task if source_mode else None,
@@ -447,8 +517,8 @@ def operate(
         "promptflow_role": "sidecar_only_not_live_gate",
         "composition": composition,
         "visible_response": composition["visible_response"],
-        "verdict": "PASS" if moa.get("verdict") == "PASS" and db_event.get("performed") and attempt_task.get("passed") else "DEGRADED",
-        "blockers": [] if db_event.get("performed") and attempt_task.get("passed") else [b for b, ok in [("postgres_workflow_event_not_written", db_event.get("performed")), ("attempt_engine_failed", attempt_task.get("passed"))] if not ok],
+        "verdict": "PASS" if moa.get("verdict") == "PASS" and db_event.get("performed") and attempt_task.get("passed") and conduit_ok else "DEGRADED",
+        "blockers": [] if db_event.get("performed") and attempt_task.get("passed") and conduit_ok else [b for b, ok in [("postgres_workflow_event_not_written", db_event.get("performed")), ("attempt_engine_failed", attempt_task.get("passed")), ("indy_conduit_failed", conduit_ok)] if not ok],
         "model_calls_performed": moa.get("model_calls_performed", False),
         "network_calls_performed": moa.get("network_calls_performed", False),
         "canonical_graph_writes_performed": False,
@@ -466,6 +536,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--run-id")
     parser.add_argument("--execute-groq", action="store_true")
     parser.add_argument("--no-enqueue-slow", action="store_true")
+    parser.add_argument("--indy-conduit", choices=["off", "dry-run", "execute"], default=None, help="Route operator text through Indy_READs conduit; /indy defaults to dry-run.")
+    parser.add_argument("--indy-conduit-output-dir", default=str(CONDUIT_OUT))
     parser.add_argument("--json", action="store_true")
     return parser
 
@@ -479,6 +551,8 @@ def main() -> int:
         execute_groq=args.execute_groq,
         enqueue_slow=not args.no_enqueue_slow,
         json_out=args.json,
+        conduit_mode=args.indy_conduit,
+        conduit_output_dir=args.indy_conduit_output_dir,
     )
     if args.json:
         print(json.dumps(payload, sort_keys=True))

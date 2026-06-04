@@ -8,6 +8,7 @@ graph tables.
 """
 from __future__ import annotations
 
+import asyncio
 import argparse
 import hashlib
 import json
@@ -27,6 +28,12 @@ from spine_kernel_authorization import validate_job_kernel_authorization
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "05_OUTPUTS" / "absurd"
+DB_URL = (
+    os.environ.get("ABSURD_SYSTEM_DATABASE_URL")
+    or os.environ.get("DATABASE_URL")
+    or "postgresql:///lucidota_state"
+)
+LISTEN_CHANNEL = "lucidota_queue_wakeup"
 
 ALLOWED_EXTERNAL_COMMANDS = {
     "scripts/chrono_queue_event_bridge.py",
@@ -42,6 +49,7 @@ ALLOWED_EXTERNAL_COMMANDS = {
     "scripts/goal_dev_control.py",
     "scripts/goal_model_fabric_control.py",
     "scripts/groq_goal_delegate.py",
+    "scripts/provider_rate_conductor.py",
     "scripts/goal_model_fabric_orchestrate.py",
     "scripts/model_runner_cli.py",
     "scripts/language_router.py",
@@ -132,6 +140,146 @@ def handle(payload: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
     return False, {"error": "unsupported_handler", "handler": handler}
 
 
+async def attempt_durable_claim(args: argparse.Namespace) -> tuple[bool, dict[str, Any]]:
+    report: dict[str, Any] = {
+        "action": "consume_one",
+        "queue_name": args.queue_name,
+        "execute_performed": True,
+        "job_processed": False,
+        "blockers": [],
+    }
+    async with await psycopg.AsyncConnection.connect(db(args), row_factory=dict_row) as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SET LOCAL lucidota.actor_role='worker'")
+            await cur.execute(
+                """
+                SELECT job_uuid::text,idempotency_key,payload,attempt_count,max_attempts,job_kind,workflow_name
+                FROM lucidota_control.absurd_queue_job
+                WHERE queue_name=%s AND status='queued' AND run_after<=now()
+                ORDER BY priority,created_at
+                FOR UPDATE SKIP LOCKED
+                LIMIT 1
+                """,
+                (args.queue_name,),
+            )
+            row = await cur.fetchone()
+            if not row:
+                report["blockers"].append("no_queued_job")
+                return False, report
+
+            job_uuid = row["job_uuid"]
+            payload = dict(row["payload"] or {})
+            contract = validate_worker_contract(
+                cur,
+                queue_name=args.queue_name,
+                job_kind=str(row["job_kind"]),
+            )
+            await cur.execute(
+                """
+                UPDATE lucidota_control.absurd_queue_job
+                SET status='running',
+                    locked_by=%s,
+                    leased_by=%s,
+                    locked_at=now(),
+                    lease_expires_at=now()+interval '5 minutes',
+                    last_heartbeat_at=now(),
+                    attempt_count=attempt_count+1
+                WHERE job_uuid=%s::uuid
+                """,
+                (args.worker_id, args.worker_id, job_uuid),
+            )
+            await cur.execute(
+                """
+                INSERT INTO lucidota_control.absurd_queue_event(job_uuid,queue_name,event_kind,event_source,detail)
+                VALUES (%s::uuid,%s,'started','absurd_consume_one',%s::jsonb)
+                """,
+                (job_uuid, args.queue_name, json.dumps({"worker_id": args.worker_id})),
+            )
+
+            if not contract.ok:
+                ok = False
+                result = {"error": "worker_contract_rejected", "worker_contract": contract.as_result()}
+                error_kind = contract.error_kind or "worker_contract_error"
+                error_message = contract.error_message or "worker contract rejected job"
+            else:
+                auth = validate_job_kernel_authorization(
+                    queue_name=args.queue_name,
+                    job_kind=str(row["job_kind"]),
+                    payload=payload,
+                )
+                if not auth.ok:
+                    ok = False
+                    result = {"error": "kernel_authorization_rejected", "kernel_authorization": auth.as_result()}
+                    error_kind = auth.error_kind or "kernel_authorization_error"
+                    error_message = auth.error_message or "kernel authorization rejected job"
+                else:
+                    ok, result = handle(payload)
+                    error_kind = "" if ok else "handler_error"
+                    error_message = "" if ok else json.dumps(result, sort_keys=True, default=str)
+            status = "succeeded" if ok else ("dead_lettered" if int(row["attempt_count"]) + 1 >= int(row["max_attempts"]) else "failed")
+            await cur.execute(
+                """
+                UPDATE lucidota_control.absurd_queue_job
+                SET status=%s,
+                    result=%s::jsonb,
+                    last_heartbeat_at=now(),
+                    error_kind=%s,
+                    error_message=%s,
+                    last_error=%s,
+                    completed_at=CASE WHEN %s='succeeded' THEN now() ELSE completed_at END
+                WHERE job_uuid=%s::uuid
+                """,
+                (status, json.dumps(result, default=str), error_kind, error_message, error_message, status, job_uuid),
+            )
+            await cur.execute(
+                """
+                INSERT INTO lucidota_control.absurd_queue_event(job_uuid,queue_name,event_kind,event_source,detail)
+                VALUES (%s::uuid,%s,%s,'absurd_consume_one',%s::jsonb)
+                """,
+                (job_uuid, args.queue_name, status if status in {"succeeded", "failed", "dead_lettered"} else "failed", json.dumps(result, default=str)),
+            )
+            if status == "dead_lettered":
+                await cur.execute(
+                    """
+                    INSERT INTO lucidota_control.absurd_queue_dead_letter
+                      (job_uuid,queue_name,workflow_name,job_kind,idempotency_key,error_kind,error_message,attempt_count,payload_sha256,context)
+                    VALUES (%s::uuid,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb)
+                    ON CONFLICT (job_uuid) WHERE resolved=false DO UPDATE SET
+                      error_kind=EXCLUDED.error_kind,
+                      error_message=EXCLUDED.error_message,
+                      attempt_count=EXCLUDED.attempt_count,
+                      last_seen_at=now(),
+                      context=EXCLUDED.context
+                    """,
+                    (
+                        job_uuid,
+                        args.queue_name,
+                        row["workflow_name"],
+                        row["job_kind"],
+                        row["idempotency_key"],
+                        error_kind or "handler_error",
+                        error_message,
+                        int(row["attempt_count"]) + 1,
+                        sha256_obj(payload),
+                        json.dumps(result, default=str),
+                    ),
+                )
+        await conn.commit()
+
+    report.update({"job_processed": True, "job_uuid": job_uuid, "status": status, "result": result, "worker_contract": contract.as_result()})
+    return True, report
+
+
+async def wake_plane_loop(args: argparse.Namespace) -> None:
+    async with await psycopg.AsyncConnection.connect(db(args), autocommit=True) as listen_conn:
+        await listen_conn.execute(f"LISTEN {LISTEN_CHANNEL};")
+        while await attempt_durable_claim(args):
+            pass
+        async for _notify in listen_conn.notifies():
+            while await attempt_durable_claim(args):
+                pass
+
+
 def consume(args: argparse.Namespace) -> int:
     report: dict[str, Any] = {
         "action": "consume_one",
@@ -167,128 +315,14 @@ def consume(args: argparse.Namespace) -> int:
                 write_report("dry_run", report)
                 return 0
 
-            cur.execute("SET LOCAL lucidota.actor_role='worker'")
-            cur.execute(
-                """
-                SELECT job_uuid::text,idempotency_key,payload,attempt_count,max_attempts,job_kind,workflow_name
-                FROM lucidota_control.absurd_queue_job
-                WHERE queue_name=%s AND status='queued' AND run_after<=now()
-                ORDER BY priority,created_at
-                FOR UPDATE SKIP LOCKED
-                LIMIT 1
-                """,
-                (args.queue_name,),
-            )
-            row = cur.fetchone()
-            if not row:
-                report["blockers"].append("no_queued_job")
-                write_report("execute", report)
-                return 0
-
-            job_uuid = row["job_uuid"]
-            payload = dict(row["payload"] or {})
-            contract = validate_worker_contract(
-                cur,
-                queue_name=args.queue_name,
-                job_kind=str(row["job_kind"]),
-            )
-            cur.execute(
-                """
-                UPDATE lucidota_control.absurd_queue_job
-                SET status='running',
-                    locked_by=%s,
-                    leased_by=%s,
-                    locked_at=now(),
-                    lease_expires_at=now()+interval '5 minutes',
-                    last_heartbeat_at=now(),
-                    attempt_count=attempt_count+1
-                WHERE job_uuid=%s::uuid
-                """,
-                (args.worker_id, args.worker_id, job_uuid),
-            )
-            cur.execute(
-                """
-                INSERT INTO lucidota_control.absurd_queue_event(job_uuid,queue_name,event_kind,event_source,detail)
-                VALUES (%s::uuid,%s,'started','absurd_consume_one',%s::jsonb)
-                """,
-                (job_uuid, args.queue_name, json.dumps({"worker_id": args.worker_id})),
-            )
-
-            if not contract.ok:
-                ok = False
-                result = {"error": "worker_contract_rejected", "worker_contract": contract.as_result()}
-                error_kind = contract.error_kind or "worker_contract_error"
-                error_message = contract.error_message or "worker contract rejected job"
-            else:
-                auth = validate_job_kernel_authorization(
-                    queue_name=args.queue_name,
-                    job_kind=str(row["job_kind"]),
-                    payload=payload,
-                )
-                if not auth.ok:
-                    ok = False
-                    result = {"error": "kernel_authorization_rejected", "kernel_authorization": auth.as_result()}
-                    error_kind = auth.error_kind or "kernel_authorization_error"
-                    error_message = auth.error_message or "kernel authorization rejected job"
-                else:
-                    ok, result = handle(payload)
-                    error_kind = "" if ok else "handler_error"
-                    error_message = "" if ok else json.dumps(result, sort_keys=True, default=str)
-            status = "succeeded" if ok else ("dead_lettered" if int(row["attempt_count"]) + 1 >= int(row["max_attempts"]) else "failed")
-            cur.execute(
-                """
-                UPDATE lucidota_control.absurd_queue_job
-                SET status=%s,
-                    result=%s::jsonb,
-                    last_heartbeat_at=now(),
-                    error_kind=%s,
-                    error_message=%s,
-                    last_error=%s,
-                    completed_at=CASE WHEN %s='succeeded' THEN now() ELSE completed_at END
-                WHERE job_uuid=%s::uuid
-                """,
-                (status, json.dumps(result, default=str), error_kind, error_message, error_message, status, job_uuid),
-            )
-            cur.execute(
-                """
-                INSERT INTO lucidota_control.absurd_queue_event(job_uuid,queue_name,event_kind,event_source,detail)
-                VALUES (%s::uuid,%s,%s,'absurd_consume_one',%s::jsonb)
-                """,
-                (job_uuid, args.queue_name, status if status in {"succeeded", "failed", "dead_lettered"} else "failed", json.dumps(result, default=str)),
-            )
-            if status == "dead_lettered":
-                cur.execute(
-                    """
-                    INSERT INTO lucidota_control.absurd_queue_dead_letter
-                      (job_uuid,queue_name,workflow_name,job_kind,idempotency_key,error_kind,error_message,attempt_count,payload_sha256,context)
-                    VALUES (%s::uuid,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb)
-                    ON CONFLICT (job_uuid) WHERE resolved=false DO UPDATE SET
-                      error_kind=EXCLUDED.error_kind,
-                      error_message=EXCLUDED.error_message,
-                      attempt_count=EXCLUDED.attempt_count,
-                      last_seen_at=now(),
-                      context=EXCLUDED.context
-                    """,
-                    (
-                        job_uuid,
-                        args.queue_name,
-                        row["workflow_name"],
-                        row["job_kind"],
-                        row["idempotency_key"],
-                        error_kind or "handler_error",
-                        error_message,
-                        int(row["attempt_count"]) + 1,
-                        sha256_obj(payload),
-                        json.dumps(result, default=str),
-                    ),
-                )
-        conn.commit()
-
-    report.update({"job_processed": True, "job_uuid": job_uuid, "status": status, "result": result, "worker_contract": contract.as_result()})
+    ok, action_report = asyncio.run(attempt_durable_claim(args))
+    report.update(action_report)
     write_report("execute", report)
-    print(f"JOB_UUID={job_uuid}")
-    print(f"STATUS={status}")
-    return 0 if status == "succeeded" else 2
+    if ok:
+        print(f"JOB_UUID={report.get('job_uuid')}")
+        print(f"STATUS={report.get('status')}")
+        return 0
+    return 2
 
 
 def main() -> int:
@@ -296,8 +330,12 @@ def main() -> int:
     parser.add_argument("--database-url")
     parser.add_argument("--queue-name", default="boring_beast")
     parser.add_argument("--worker-id", default="absurd-consume-one")
+    parser.add_argument("--listen", action="store_true")
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
+    if args.listen and args.execute:
+        asyncio.run(wake_plane_loop(args))
+        return 0
     return consume(args)
 
 

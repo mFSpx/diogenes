@@ -14,6 +14,8 @@ from pathlib import Path
 import psycopg
 from psycopg.rows import dict_row
 
+from ALGOS.runtime_caps import MAX_DB_ROWS
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = PROJECT_ROOT / "05_OUTPUTS" / "chaotic_sprint"
@@ -47,10 +49,26 @@ def table_exists(conn, schema: str, table: str) -> bool:
     return bool(row["ok"] if isinstance(row, dict) else row[0])
 
 
-def safe_fetchall(conn, sql: str, params: tuple | None = None) -> list[dict]:
+def safe_fetchall(
+    conn,
+    sql: str,
+    params: tuple | None = None,
+    *,
+    batch_size: int = 500,
+    max_rows: int = MAX_DB_ROWS,
+) -> list[dict]:
+    """Fetch bounded rows in batches; avoids client-side unbounded fetchall."""
     cur = conn.execute(sql, params or ())
-    rows = cur.fetchall()
-    return list(rows)
+    rows: list[dict] = []
+    remaining = max(0, int(max_rows))
+    batch_size = max(1, min(int(batch_size), remaining or 1))
+    while remaining > 0:
+        batch = cur.fetchmany(min(batch_size, remaining))
+        if not batch:
+            break
+        rows.extend(batch)
+        remaining -= len(batch)
+    return rows
 
 
 class ChaoticOmniEngine:
@@ -69,7 +87,7 @@ class ChaoticOmniEngine:
             SELECT uuid::text AS item_uuid, canonical_uuid::text AS parent_uuid, term, 1 AS weight, payload AS detail
             FROM lucidota_go.graph_item
             WHERE status = 'active'
-            LIMIT 5000;
+            LIMIT 1000;
             """,
         )
         if not rows:
@@ -134,7 +152,7 @@ class ChaoticOmniEngine:
         claims = safe_fetchall(
             conn,
             """
-            SELECT claim_uuid::text, file_uuid::text, candidate_timestamp, evidence_source, trust_weight, raw_evidence
+            SELECT claim_uuid::text, file_uuid::text, candidate_timestamp, evidence_source, trust_weight, LEFT(raw_evidence, 400) AS raw_evidence
             FROM lucidota_korpus.temporal_claim
             WHERE invalid = false
             ORDER BY candidate_timestamp NULLS LAST

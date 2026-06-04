@@ -1,0 +1,14 @@
+# LEGACY RETIRED UNIT.
+# Canonical supervised watcher: services/ironclaw-indy-reads.service
+# Do not install or enable this file; kept only so old references fail safely.
+
+[Unit]
+Description=LEGACY RETIRED - use ironclaw-indy-reads.service
+ConditionPathExists=/run/lucidota-enable-legacy-indy-reads-watcher
+
+[Service]
+Type=oneshot
+ExecStart=/bin/false
+
+[Install]
+WantedBy=default.target

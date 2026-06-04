@@ -1,0 +1,11 @@
+[Unit]
+Description=Periodic KRAMPUSCHEWING triage timer
+
+[Timer]
+OnBootSec=30min
+OnUnitActiveSec=6h
+Persistent=true
+Unit=lucidota-krampus-triage.service
+
+[Install]
+WantedBy=timers.target

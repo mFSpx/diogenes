@@ -1,0 +1,17 @@
+# API shield for Claude/Codex/Vibe prompt surfaces.
+# Keep ambient prompt collection away from bulk model/data/corpus payloads.
+models/
+data/
+.treelite/
+**/.treelite/
+**/*.gguf
+**/*.safetensors
+**/*.bin
+**/*.parquet
+**/*.duckdb
+**/*.sqlite
+**/*.sqlite3
+**/*.db
+**/*.log
+KRAMPUSCHEWING/
+05_OUTPUTS/

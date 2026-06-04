@@ -61,11 +61,26 @@ __all__ = [
     "LTCSequence",
     "feature_hash",
     "evidence_intensity",
+    "MAX_FEATURE_DIM",
+    "MAX_HIDDEN_SIZE",
+    "MAX_DELTA_T",
+    "MAX_SUB_STEPS",
+    "MAX_SUB_DT",
 ]
 
 
 def _sigmoid(x: np.ndarray) -> np.ndarray:
     return 1.0 / (1.0 + np.exp(-np.clip(x, -30.0, 30.0)))
+
+
+from ALGOS.runtime_caps import MAX_DIM, MAX_HIDDEN, MAX_SUBSTEPS
+
+
+MAX_HIDDEN_SIZE = MAX_HIDDEN
+MAX_FEATURE_DIM = MAX_DIM
+MAX_DELTA_T = 1.0
+MAX_SUB_STEPS = MAX_SUBSTEPS
+MAX_SUB_DT = 0.2
 
 
 class LTCCell:
@@ -84,6 +99,15 @@ class LTCCell:
         epsilon: float = 0.01,
         attractor: float = 1.0,
     ) -> None:
+        if input_size <= 0:
+            raise ValueError("input_size must be > 0")
+        if hidden_size <= 0:
+            raise ValueError("hidden_size must be > 0")
+        if input_size > MAX_FEATURE_DIM:
+            raise ValueError(f"input_size exceeds cap of {MAX_FEATURE_DIM}")
+        if hidden_size > MAX_HIDDEN_SIZE:
+            raise ValueError(f"hidden_size exceeds cap of {MAX_HIDDEN_SIZE}")
+
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.tau_base = tau_base
@@ -119,10 +143,15 @@ class LTCCell:
         max_sub_dt caps the per-sub-step size relative to tau_base so that
         the Euler method stays within its stability region (dt/τ << 1).
         """
-        if dt <= 0.0:
+        if dt <= 0.0 or not math.isfinite(dt):
             return x
-        n_steps = max(1, math.ceil(dt / max_sub_dt))
-        sub_dt = dt / n_steps
+        if not math.isfinite(max_sub_dt) or max_sub_dt <= 0.0:
+            raise ValueError("max_sub_dt must be a finite positive float")
+
+        dt = min(dt, MAX_DELTA_T)
+        max_sub_dt = min(max_sub_dt, MAX_SUB_DT)
+        n_steps = max(1, min(math.ceil(dt / max_sub_dt), MAX_SUB_STEPS))
+        sub_dt = dt / float(n_steps)
         for _ in range(n_steps):
             tau    = self.tau_base * _sigmoid(self.Wx_tau @ x + self.WI_tau @ I + self.b_tau) + self.epsilon
             f_gate = _sigmoid(self.Wx_f @ x + self.WI_f @ I + self.b_f)
@@ -147,21 +176,32 @@ class LTCSequence:
         self,
         sequence: Sequence[tuple[float, np.ndarray]],
         x0: np.ndarray | None = None,
-    ) -> list[np.ndarray]:
+        *,
+        return_states: bool = False,
+        keep_states: bool | None = None,
+    ) -> list[np.ndarray] | np.ndarray:
         """Return list of hidden states after each observation.
 
         sequence: list of (unix_timestamp_seconds, input_vector)
         """
+        if keep_states is not None:
+            return_states = keep_states
+
         x = self.cell.zero_state() if x0 is None else x0.copy()
         states: list[np.ndarray] = []
         prev_t = None
         for t, I in sequence:
+            if I.shape[0] != self.cell.input_size:
+                raise ValueError(f"feature vector size {I.shape[0]} does not match cell input_size {self.cell.input_size}")
             raw_dt = (t - prev_t) if prev_t is not None else 0.0
             dt = raw_dt * self.dt_scale
             x = self.cell.step(x, I, dt)
-            states.append(x.copy())
+            if return_states:
+                states.append(x.copy())
             prev_t = t
-        return states
+        if return_states:
+            return states
+        return x
 
 
 def feature_hash(text: str, dim: int = 32, seed: str = "ltc-fh") -> np.ndarray:
@@ -170,6 +210,9 @@ def feature_hash(text: str, dim: int = 32, seed: str = "ltc-fh") -> np.ndarray:
     Zero-dependency alternative to embeddings.  Adequate for temporal pattern
     detection on ontology terms / proposed_term strings.
     """
+    if dim > MAX_FEATURE_DIM:
+        raise ValueError(f"feature dimension exceeds cap of {MAX_FEATURE_DIM}")
+
     import hashlib
     full_seed = f"{seed}:{text}"
     raw = hashlib.sha256(full_seed.encode()).digest()
@@ -243,7 +286,7 @@ if __name__ == "__main__":
         for t, term in zip(timestamps, terms)
     ]
 
-    states = seq_obj.run(obs)
+    states = seq_obj.run(obs, return_states=True)
     intensity = evidence_intensity(states)
     print(json.dumps({"observations": len(obs), **intensity}, indent=2))
     print("PASS — LTC smoke test complete")

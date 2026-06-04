@@ -1,0 +1,16 @@
+{
+  "canonical_mutation_allowed": false,
+  "conversation_required": false,
+  "db_write_surface": "luci_flow.flow_spec and luci_flow.flow_receipt when migration exists",
+  "html_path": "07_SURFACES/generated/promptflow_canvas.html",
+  "html_sha256": "68da132d4f1dab06e35355541fac54fa2659377ce287074c26c8404a43af46ab",
+  "interaction_model": "Drag/drop/wire typed refs; explicit Save/Stage/Run/Validate/Promote/Rollback writes receipts under 05_OUTPUTS/flow/<flow_id>/.",
+  "launcher": "./luci flow ui --flow 04_RUNTIME/promptflow_smoke_flow --data 04_RUNTIME/promptflow_smoke_flow/data.jsonl --host 127.0.0.1 --port 8765",
+  "smoke": "./luci flow ui --flow 04_RUNTIME/promptflow_smoke_flow --data 04_RUNTIME/promptflow_smoke_flow/data.jsonl --smoke --json",
+  "source_state_path": null,
+  "surface_id": "promptflow_canvas",
+  "surface_kind": "local_visual_promptflow_canvas",
+  "title": "LUCI /flow Promptflow Canvas",
+  "view_key": "promptflow_canvas",
+  "why_it_exists": "Visual operator composition surface for LUCIDOTA flows; refs only until staged or expanded."
+}

@@ -10,6 +10,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 import psycopg
 from psycopg.rows import dict_row
+
+from ALGOS.runtime_caps import MAX_DB_ROWS
+
 ROOT=Path(__file__).resolve().parents[1]; OUT=ROOT/'05_OUTPUTS/surfaces'; SCHEMA=ROOT/'06_SCHEMA/029_darwinian_surfaces.sql'
 def ts(): return datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
 def now(): return datetime.now(timezone.utc).isoformat().replace('+00:00','Z')
@@ -17,6 +20,13 @@ def rel(p):
  try: return str(Path(p).resolve().relative_to(ROOT))
  except Exception: return str(p)
 def db(a): return a.database_url or os.environ.get('KORPUS_DATABASE_URL') or os.environ.get('DATABASE_URL') or 'postgresql:///lucidota_storage'
+def _clamp_limit(limit):
+ value=int(limit)
+ if value < 1:
+  return 1
+ if value > MAX_DB_ROWS:
+  return MAX_DB_ROWS
+ return value
 def write(name,payload):
  OUT.mkdir(parents=True,exist_ok=True); p=OUT/f'pheromone_{name}_{ts()}.json'; payload.setdefault('generated_at',now()); payload['report_path']=rel(p); p.write_text(json.dumps(payload,indent=2,default=str),encoding='utf-8'); print(f'REPORT_PATH={rel(p)}'); return p
 def ensure_schema(cur): cur.execute(SCHEMA.read_text())
@@ -33,12 +43,12 @@ def signal(a):
  report={'action':'signal','execute_performed':bool(a.execute),'db_writes_performed':bool(a.execute),'graph_writes_performed':False,'surface_key':a.surface_key,'signal_kind':a.signal_kind,'signal_value':a.signal_value,'pheromone_uuid':pheromone_uuid,'status':'PASS'}
  write('signal_execute' if a.execute else 'signal_dry_run',report); print('PHEROMONE_SIGNAL=PASS'); return 0
 def decay(a):
- updated=0; rows=[]
+ updated=0; rows=[]; limit=_clamp_limit(a.limit)
  if a.execute:
   with psycopg.connect(db(a), row_factory=dict_row) as conn:
    with conn.cursor() as cur:
     ensure_schema(cur)
-    cur.execute('''SELECT pheromone_uuid::text,surface_key,signal_value,half_life_seconds,created_at FROM lucidota_runtime.surface_pheromone WHERE active AND surface_key=%s ORDER BY created_at DESC LIMIT %s''',(a.surface_key,a.limit))
+    cur.execute('''SELECT pheromone_uuid::text,surface_key,signal_value,half_life_seconds,created_at FROM lucidota_runtime.surface_pheromone WHERE active AND surface_key=%s ORDER BY created_at DESC LIMIT %s''',(a.surface_key,limit))
     current=[dict(r) for r in cur.fetchall()]
     for r in current:
      hours=max(0.0,(datetime.now(timezone.utc)-r['created_at']).total_seconds()/3600.0); half=max(1,float(r['half_life_seconds'])/3600.0); decayed=float(r['signal_value'])*math.pow(0.5,hours/half)
@@ -47,7 +57,7 @@ def decay(a):
      updated+=1
    conn.commit()
  else:
-  rows=[{'surface_key':a.surface_key,'would_decay':'dry_run'}]
+  rows=[{'surface_key':a.surface_key,'would_decay':'dry_run','limit':limit}]
  report={'action':'decay','execute_performed':bool(a.execute),'db_writes_performed':bool(a.execute),'graph_writes_performed':False,'surface_key':a.surface_key,'rows_seen':len(rows),'rows_updated':updated,'rows':rows[:20],'status':'PASS'}
  write('decay_execute' if a.execute else 'decay_dry_run',report); print('PHEROMONE_DECAY=PASS'); return 0
 def main():

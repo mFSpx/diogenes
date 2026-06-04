@@ -1,0 +1,17 @@
+RECEIPT_PATH=05_OUTPUTS/claw_moa/claw_moa_router_20260604T052709251135Z.json
+LUCI=PASS
+INTENT=ops
+LANE=SLOWLANE
+Indy_READs: got it, mfspx — routed ops through SLOWLANE.
+INTENT=ops TERMS=["TIME", "EVENT", "TOOL", "MODE"] LANE=SLOWLANE TASK=ops: indy status/work/journal/learn/investigate = API/DB state.
+map: handoff -> # CURRENT GOAL HANDOFF "Save This Prompt, Pass on this Handoff:" - Goal: DB-backed test receipt gate recursion lane: recursive fanout policy - Generated: `2026-06-04T05:05:36Z` - Current step: 1/1 - Status: complete - Objective: Encode the bounded recursive fa | agent_policy -> # Agent Orchestration Policy Kernel Rule: GOALS is the local-first control plane / kernel spine for LUCIDOTA. Core operation must never require a cloud model; cloud lanes are optional peripherals only. Cheapest Capable Model: do not change the main-window mode | routing_fabric -> # LUCI Routing Fabric Decisions — Strict Local, Router-of-Routers Saved on 2026-06-01 from operator build-session notes. This is implementation-control doctrine, not decorative architecture prose. ## Decision Delta 1. **Local model admission is strict.** - Res
+math: chars=58 words=5 unique_terms=9 ontology_terms=4 digits=0
+quote: [rfc_contract] route work through role modes, | [rfc_interaction] **Local LLM fabric:** Indy can use local models/adapters for margin notes or synthesis, but output remains bounded by page/source state. | [authority] **Authority:** companion/synthesis/candidate authority; not graph truth or external-action authority.
+improve: recent self-learning receipts -> attempt=win | attempt=win | attempt=win | attempt=win
+slow: map: handoff -> # CURRENT GOAL HANDOFF "Save This Prompt, Pass on this Handoff:" - Goal: DB-backed test receipt gate recursion lane: recursive fanout policy - Generated: `2026-06-04T05:05:36Z` - Current step: 1/1 - Status: complete - Objective: Encode the bounded recursive fa | agent_policy -> # Agent Orchestration Policy Kernel Rule: GOALS is the local-first control plane / kernel spine for LUCIDOTA. Core operation must never require a cloud model; cloud lanes are optional peripherals only. Cheapest Capable Model: do not change the main-window mode | routing_fabric -> # LUCI Routing Fabric Decisions — Strict Local, Router-of-Routers Saved on 2026-06-01 from operator build-session notes. This is implementation-control doctrine, not decorative architecture prose. ## Decision Delta 1. **Local model admission is strict.** - Res
+review: Groq/Vibes review lane available and receipt-backed (groq=available, vibes=available); deferred unless the operator asks for an external audit.
+NEXT=receipt written; slow work queued
+WORKFLOW_EVENT_ID=ab35c08c-4c0a-415c-865f-914cba101e8c
+REPORT_PATH=05_OUTPUTS/luci/luci_operator_20260604T052709747943Z.json
+ATTEMPT_ENGINE_JOB_ID=2f2d5f63-be68-5314-aa14-ef36bf48a7a4
+ATTEMPT_ENGINE_RECEIPT_PATH=05_OUTPUTS/luci_attempt_engine/luci_attempt_2f2d5f63-be68-5314-aa14-ef36bf48a7a4_1.json

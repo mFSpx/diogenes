@@ -1,0 +1,25 @@
+[Unit]
+Description=IronClaw Indy_READs 24/7 DB daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/LUCIDOTA
+EnvironmentFile=-%h/.config/lucidota/indy-reads.env
+EnvironmentFile=-%h/.config/lucidota/ironclaw.env
+ExecStart=/home/mfspx/LUCIDOTA/scripts/lucidota_start_indy_reads_watcher.sh --foreground
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=20
+KillSignal=SIGINT
+MemoryMax=768M
+TasksMax=64
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=%h/LUCIDOTA/04_RUNTIME %h/LUCIDOTA/05_OUTPUTS
+
+[Install]
+WantedBy=default.target

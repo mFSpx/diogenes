@@ -18,6 +18,8 @@ def main():
  {'key':'goal_dev_control_check','risk':'low','execute_allowed':True,'script':'scripts/goal_dev_control.py --away-minutes 0 --text recovery'},
  {'key':'goal_agent_packet','risk':'low','execute_allowed':True,'script':'scripts/goal_agent_packet.py --target generic --task recovery --complexity simple --json'},
  {'key':'goal_swarm_dispatch','risk':'medium','execute_allowed':True,'script':'scripts/goal_swarm_dispatch.py --target generic --task recovery --jobs 1 --json'},
+ {'key':'root_rotor_red_team_audit','risk':'low','execute_allowed':True,'script':'scripts/root_rotor_red_team_audit.py --json'},
+ {'key':'krampus_quarantine_triage','risk':'medium','execute_allowed':True,'script':'scripts/krampuschewing_quarantine_triage.py --dry-run --json'},
  {'key':'goal_model_fabric_status','risk':'low','execute_allowed':True,'script':'scripts/goal_model_fabric_control.py status'},
  {'key':'goal_model_fabric_start_needles','risk':'low','execute_allowed':True,'script':'scripts/goal_model_fabric_control.py start --target needles --json'},
  {'key':'goal_model_fabric_stop_heavy','risk':'medium','execute_allowed':True,'script':'scripts/goal_model_fabric_control.py stop --target heavy'},

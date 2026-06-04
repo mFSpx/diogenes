@@ -29,6 +29,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from ALGOS.runtime_caps import MAX_LABELS, MAX_SPANS, MAX_TEXT_CHARS, cap_text
+
 INSTALL_COMMAND = "pip install gliner"
 DEFAULT_LABELS = [
     "Operator", "Rainmaker", "Paladin / God-Mode", "Psyche / State-Collapse",
@@ -60,16 +62,34 @@ def sha256_text(text: str) -> str:
 
 def parse_labels(raw: str | None) -> list[str]:
     if not raw:
-        return list(DEFAULT_LABELS)
+        return list(DEFAULT_LABELS)[:MAX_LABELS]
     p = Path(raw)
-    if p.exists() and p.is_file():
+    try:
+        is_file = p.exists() and p.is_file()
+    except OSError:
+        is_file = False
+    if is_file:
         data = json.loads(p.read_text(encoding="utf-8"))
         if isinstance(data, dict):
             labels = data.get("required_exact_labels") or data.get("labels") or []
         else:
             labels = data
-        return [str(x) for x in labels if str(x).strip()]
-    return [part.strip() for part in raw.split(",") if part.strip()]
+        return [str(x) for x in labels if str(x).strip()][:MAX_LABELS]
+    return [part.strip() for part in raw.split(",") if part.strip()][:MAX_LABELS]
+
+
+_MODEL_CACHE: dict[str, Any] = {}
+
+
+def _get_cached_model(model_name: str, allow_remote_model: bool):
+    cache_key = f"{model_name}|remote={bool(allow_remote_model)}"
+    return _MODEL_CACHE.get(cache_key)
+
+
+def _set_cached_model(model_name: str, allow_remote_model: bool, model: Any) -> Any:
+    cache_key = f"{model_name}|remote={bool(allow_remote_model)}"
+    _MODEL_CACHE[cache_key] = model
+    return model
 
 
 def load_text(args: argparse.Namespace) -> str:
@@ -124,7 +144,9 @@ def run_gliner(text: str, labels: list[str], model_name: str, threshold: float, 
         }
     try:
         from gliner import GLiNER
-        model = GLiNER.from_pretrained(model_name)
+        model = _get_cached_model(model_name, allow_remote_model)
+        if model is None:
+            model = _set_cached_model(model_name, allow_remote_model, GLiNER.from_pretrained(model_name))
         entities = model.predict_entities(text, labels, threshold=threshold)
     except Exception as exc:
         return [], {
@@ -136,15 +158,24 @@ def run_gliner(text: str, labels: list[str], model_name: str, threshold: float, 
     for ent in entities:
         start = int(ent.get("start", ent.get("start_pos", 0)))
         end = int(ent.get("end", ent.get("end_pos", start)))
+        if start < 0:
+            start = 0
+        if end < start:
+            end = start
         matched = str(ent.get("text", text[start:end]))
         label = str(ent.get("label", ent.get("class", "")))
         score = float(ent.get("score", ent.get("confidence", 0.0)))
-        if 0 <= start <= end <= len(text) and label:
+        if label:
             spans.append(Span(start, end, matched, label, score, "gliner"))
     return sorted(spans, key=lambda s: (s.start, s.end, s.label)), {"backend": "gliner", "model": model_name, "threshold": threshold}
 
 
 def extract(text: str, labels: list[str], *, model: str | None = None, threshold: float = 0.35, allow_remote_model: bool = False, no_fallback: bool = False) -> dict[str, Any]:
+    text, text_truncated = cap_text(text, limit=MAX_TEXT_CHARS)
+    if not labels:
+        labels = parse_labels(None)
+    else:
+        labels = [str(x) for x in labels if str(x).strip()][:MAX_LABELS]
     available, availability = gliner_available()
     backend_detail: dict[str, Any]
     spans: list[Span] = []
@@ -165,15 +196,17 @@ def extract(text: str, labels: list[str], *, model: str | None = None, threshold
         backend_detail = {"backend": "literal_fallback_no_gliner", "availability": availability, "install_command": INSTALL_COMMAND}
         spans = literal_fallback(text, labels)
         backend = "literal_fallback_no_gliner"
+    spans = spans[:MAX_SPANS]
     return {
         "schema": "lucidota.proof_hoard.gliner_zero_shot_extractor.v1",
         "generated_at": now_iso(),
         "text_sha256": sha256_text(text),
         "text_length": len(text),
-        "labels": labels,
+        "labels": labels[:MAX_LABELS],
         "backend": backend,
         "backend_detail": backend_detail,
         "install_instruction": INSTALL_COMMAND if not available else "gliner package importable",
+        "text_truncated": text_truncated,
         "spans": [asdict(s) for s in spans],
         "span_count": len(spans),
     }

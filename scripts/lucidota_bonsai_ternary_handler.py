@@ -19,6 +19,13 @@ ROOT = Path(__file__).resolve().parents[1]
 MODEL_PATH = Path("03_VAULT/models/prism-ml/Ternary-Bonsai-4B-gguf/Ternary-Bonsai-4B-Q2_0.gguf")
 MODEL_SOURCE_PATH = MODEL_PATH.parent / "model_source.json"
 MODEL_ID = MODEL_PATH.name
+Q1_MODEL_PATH = Path("03_VAULT/models/prism-ml/Bonsai-8B-gguf/Bonsai-8B-Q1_0.gguf")
+Q1_MODEL_SOURCE_PATH = Q1_MODEL_PATH.parent / "model_source.json"
+Q1_SHARED_MODEL_ID = "bonsai8b-q1-shared2"
+Q1_SHARED_CTX = 2048
+Q1_SHARED_NGL = 999
+Q1_SHARED_PARALLEL = 2
+Q1_SHARED_CACHE_TYPE = "q8_0"
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8082
 DEFAULT_CTX = 1024
@@ -42,11 +49,19 @@ def _rooted(path: str | Path) -> Path:
 
 
 def load_model_source() -> dict[str, Any]:
-    path = ROOT / MODEL_SOURCE_PATH
+    return _load_model_source(MODEL_SOURCE_PATH, MODEL_ID)
+
+
+def _load_model_source(path: Path, selected_file: str) -> dict[str, Any]:
+    path = ROOT / path
     data = json.loads(path.read_text(encoding="utf-8"))
-    if data.get("selected_file") != MODEL_ID:
-        raise SystemExit(f"model_source selected_file mismatch: {data.get('selected_file')!r} != {MODEL_ID!r}")
+    if data.get("selected_file") != selected_file:
+        raise SystemExit(f"model_source selected_file mismatch: {data.get('selected_file')!r} != {selected_file!r}")
     return data
+
+
+def load_q1_model_source() -> dict[str, Any]:
+    return _load_model_source(Q1_MODEL_SOURCE_PATH, Q1_MODEL_PATH.name)
 
 
 def llama_server_candidates() -> list[Path]:
@@ -107,6 +122,39 @@ def default_runtime_config(*, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT
     }
 
 
+def q1_shared_runtime_config(*, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> dict[str, Any]:
+    source = load_q1_model_source()
+    model_path = ROOT / Q1_MODEL_PATH
+    return {
+        "schema": "lucidota.local_bonsai_q1_shared.runtime.v1",
+        "model_id": Q1_SHARED_MODEL_ID,
+        "model_path": _rel(model_path),
+        "model_size_bytes": model_path.stat().st_size if model_path.exists() else None,
+        "source_model_id": source.get("model_id"),
+        "source_url": source.get("source_url"),
+        "expected_sha256": source.get("expected_sha256"),
+        "format": source.get("format"),
+        "base_model": source.get("base_model"),
+        "context_length": source.get("context_length"),
+        "handler": "llama.cpp-prismml-q1_0-shared-kv",
+        "llama_root": _rel(PRISMML_LLAMA_ROOT),
+        "preferred_build": _rel(PRISMML_BUILD_CUDA),
+        "base_url": base_url(host, port),
+        "host": host,
+        "port": int(port),
+        "slots": Q1_SHARED_PARALLEL,
+        "ctx": Q1_SHARED_CTX,
+        "ngl": Q1_SHARED_NGL,
+        "kv_unified": True,
+        "kv_offload": True,
+        "cache_type_k": Q1_SHARED_CACHE_TYPE,
+        "cache_type_v": Q1_SHARED_CACHE_TYPE,
+        "prompting_note": "single loaded Q1_0 Bonsai 8B model; proposer/critic or dual callers use two server slots over one unified KV buffer",
+        "local_only": True,
+        "offline": True,
+    }
+
+
 def build_server_command(
     *,
     binary: Path | None = None,
@@ -139,6 +187,52 @@ def build_server_command(
         "--cache-ram",
         os.environ.get("LUCIDOTA_BONSAI_CACHE_RAM", "0"),
         "--no-warmup",
+    ]
+
+
+def build_q1_shared_server_command(
+    *,
+    binary: Path | None = None,
+    host: str = DEFAULT_HOST,
+    port: int = DEFAULT_PORT,
+    ctx: int = Q1_SHARED_CTX,
+    ngl: int = Q1_SHARED_NGL,
+    model_path: Path | None = None,
+) -> list[str]:
+    model = model_path or (ROOT / Q1_MODEL_PATH)
+    exe = binary or find_llama_server()
+    return [
+        str(exe),
+        "-m",
+        str(model),
+        "--host",
+        host,
+        "--port",
+        str(int(port)),
+        "-ngl",
+        str(int(ngl)),
+        "-c",
+        str(int(ctx)),
+        "--parallel",
+        os.environ.get("LUCIDOTA_BONSAI_PARALLEL", str(Q1_SHARED_PARALLEL)),
+        "--kv-unified",
+        "--kv-offload",
+        "--cache-prompt",
+        "--cache-type-k",
+        os.environ.get("LUCIDOTA_BONSAI_CACHE_TYPE_K", Q1_SHARED_CACHE_TYPE),
+        "--cache-type-v",
+        os.environ.get("LUCIDOTA_BONSAI_CACHE_TYPE_V", Q1_SHARED_CACHE_TYPE),
+        "--batch-size",
+        os.environ.get("LUCIDOTA_BONSAI_BATCH", "128"),
+        "--ubatch-size",
+        os.environ.get("LUCIDOTA_BONSAI_UBATCH", "32"),
+        "--cache-ram",
+        os.environ.get("LUCIDOTA_BONSAI_CACHE_RAM", "0"),
+        "--slot-save-path",
+        os.environ.get("LUCIDOTA_BONSAI_SLOT_SAVE_PATH", str(ROOT / "04_RUNTIME" / "inference_os" / "bonsai_q1_shared_slots")),
+        "--no-warmup",
+        "--alias",
+        os.environ.get("LUCIDOTA_BONSAI_ALIAS", Q1_SHARED_MODEL_ID),
     ]
 
 

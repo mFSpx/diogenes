@@ -133,6 +133,9 @@ def add_noise_token(
     -------
     (x_ti, epsilon) both shape (d,).
     """
+    t_i = int(t_i)
+    if t_i < 0 or t_i >= len(alpha_bars):
+        raise ValueError(f"timesteps={t_i} outside [0, {len(alpha_bars) - 1}]")
     ab = alpha_bars[t_i]
     epsilon = rng.standard_normal(x0_i.shape)
     x_ti = np.sqrt(ab) * x0_i + np.sqrt(1.0 - ab) * epsilon
@@ -162,7 +165,17 @@ def add_noise_sequence(
     -------
     (x_noisy shape (N, d), epsilon shape (N, d))
     """
+    if x0.ndim != 2:
+        raise ValueError("x0 must be 2D array")
+    if t_seq.ndim != 1:
+        raise ValueError("t_seq must be 1D array")
+    if x0.shape[0] != t_seq.shape[0]:
+        raise ValueError("x0 and t_seq must have matching first-dimension length")
+    if x0.shape[0] == 0:
+        return x0.copy(), x0.copy()
     N, d = x0.shape
+    if alpha_bars.ndim != 1 or alpha_bars.size <= 1:
+        raise ValueError("alpha_bars must be a 1D array with at least 2 entries")
     x_noisy = np.empty_like(x0)
     epsilon = np.empty_like(x0)
     for i in range(N):
@@ -231,12 +244,26 @@ def diffusion_forcing_loss(
     -------
     Scalar float loss value.
     """
+    if x0.ndim != 2:
+        raise ValueError("x0 must be 2D")
+    if eps_pred.ndim != 2:
+        raise ValueError("eps_pred must be 2D and shape like x0")
+    if x0.shape != eps_pred.shape:
+        raise ValueError("x0 and eps_pred shape mismatch")
+    if t_seq.ndim != 1:
+        raise ValueError("t_seq must be 1D")
+    if t_seq.shape[0] != x0.shape[0]:
+        raise ValueError("x0 and t_seq first dimension must match")
+    if alpha_bars.ndim != 1 or alpha_bars.size == 0:
+        raise ValueError("alpha_bars must be a non-empty 1D array")
     T = len(alpha_bars) - 1
-    _x_noisy, epsilon_true = add_noise_sequence(x0, t_seq, alpha_bars, rng)
+    if T < 1:
+        raise ValueError(f"T={T} must be >= 1")
     loss = 0.0
     for i in range(x0.shape[0]):
+        _, epsilon_true = add_noise_token(x0[i], int(t_seq[i]), alpha_bars, rng)
         lam = weighting_lambda(int(t_seq[i]), T, alpha_bars)
-        diff = epsilon_true[i] - eps_pred[i]
+        diff = epsilon_true - eps_pred[i]
         loss += lam * float(np.dot(diff, diff))
     return loss
 
@@ -272,6 +299,8 @@ def sample_causal_t_seq(
     -------
     np.ndarray shape (N,) dtype int64.
     """
+    if T < 1:
+        raise ValueError(f"T={T} must be >= 1")
     if rng is None:
         rng = np.random.default_rng()
     if not (0 <= clean_prefix <= N):

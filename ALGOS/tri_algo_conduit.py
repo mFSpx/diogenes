@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+from pathlib import Path
 
 from ALGOS import hoeffding_tree, serpentina_self_righting, shannon_entropy, thanatosis
 
@@ -96,3 +97,40 @@ def decide(
         return ConduitDecision("burst", split.gain_gap, split.epsilon, signal, noise, 0.0, recovery, split.reason)
     dormancy = 1.0 - thanatosis.acceptance_probability(max(0.0, noise - signal), standby_temperature)
     return ConduitDecision("standby", split.gain_gap, split.epsilon, signal, noise, dormancy, recovery, "hoeffding_wait")
+
+
+def decide_path(
+    path: str | Path,
+    observations: int,
+    status_code: int | None = None,
+    mime: str = "",
+    keyword_hits: int = 0,
+    structural_links: int = 0,
+    max_bytes: int = 1_500_000,
+    sample_bytes: int = 65_536,
+    **kwargs,
+) -> ConduitDecision:
+    """Decide from a filesystem path using stat + bounded sample only.
+
+    This is the daemon-safe ingress contract: callers can hand us a path and
+    we reject oversized payloads before reading the whole file into RAM.
+    """
+    p = Path(path)
+    size = p.stat().st_size
+    if size > max_bytes:
+        sample = p.read_bytes()[: max(0, min(sample_bytes, max_bytes, size))]
+        signal, noise = signal_scores(sample, status_code, mime, keyword_hits, structural_links)
+        recovery = recovery_from_payload(b"x" * min(size, max_bytes * 4), max_bytes=max_bytes, parse_error=True)
+        return ConduitDecision("recover", 0.0, 0.0, signal, noise, 0.0, recovery, "payload_size_exceeds_max_bytes")
+    with p.open("rb") as fh:
+        data = fh.read(max(0, min(sample_bytes, max_bytes)))
+    return decide(
+        data,
+        observations=observations,
+        status_code=status_code,
+        mime=mime,
+        keyword_hits=keyword_hits,
+        structural_links=structural_links,
+        max_bytes=max_bytes,
+        **kwargs,
+    )

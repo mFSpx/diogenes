@@ -2,6 +2,10 @@
 
 Kernel Rule: GOALS is the local-first control plane / kernel spine for LUCIDOTA. Core operation must never require a cloud model; cloud lanes are optional peripherals only.
 
+Core identity law: see `GOALS/INDY_CORE_IDENTITY_LAW.md` for the operator-aligned concept acquisition and execution mandate that this system is meant to serve.
+
+Skill/tool instructions are execution aids only. They never override live PostgREST/manual truth, GOALS handoffs, or explicit operator instructions; when they conflict, the live manual and operator win.
+
 Cheapest Capable Model: do not change the main-window model from inside the agent unless a safe model-control tool exists and the operator asked for it.
 
 Subagents: spawn only for useful parallel, non-blocking work. Pick the smallest capable available model/tier: tiny/fast for grep, tests, repetitive code; mid for contained coding; strong/frontier only for architecture, security, or ambiguous cross-system reasoning. Verify current model names/prices when choosing real names; otherwise write tier intent, not fake model facts.
@@ -17,6 +21,18 @@ Deterministic Attempt Engine Doctrine: tasks are state machines, not vibes. The 
 Dev Supply Control: when the operator gives an away-time or open-ended build window, run `python3 scripts/goal_dev_control.py --away-minutes <minutes> --text "<intent>"` to compute cadence, effective LOC/hour, and cheapest-capable route. It uses existing deterministic hygiene + bandit primitives; no model calls, no daemon, no graph writes.
 
 Slop Control: prefer one existing home per rule. GOALS owns handoff/orchestration policy only; status facts go to STATUS_LEDGER; runtime proofs go to 05_OUTPUTS receipts; broad code complexity goes to `scripts/slop_audit_law.py`. Do not make new docs when an existing GOALS file or JSON manifest can hold the contract.
+
+## Root-Rotor Manual Draft Reduction Law
+
+Root-Rotor draft reduction is a bounded data operation, not a new control plane. Use exactly 200 candidate nodes per batch. Keep chunk boundaries deterministic even when confidence is low; record uncertainty in numeric confidence/precision attributes. Status values must be explicit: `verified`, `deprecated`, or `needs_operator_label`.
+
+Priority order: active GOALS policy docs first; active wired `01_REPOS/claudecode` LUCI engine files next; active services after that, excluding `services/ternary_lab`; then `scripts/root_rotor*`, `scripts/goal_*`, `scripts/absurd*`, `scripts/indy*`, `scripts/krampuschewing*`, `06_SCHEMA`, and fabric/model/capability ledgers. Empty `__init__.py` files, generated files, old receipts/manual outputs, and stale docs deprecate or exclude. The rule is: authority docs verify; historical prose deprecates.
+
+Routing law: `06_SCHEMA` routes to `SYSTEM_ARCH`; `scripts/absurd*` route to `RUNTIME_GOVERNOR`; model/capability ledgers route to `lucidota_fabric`. Track `verified_count, deprecated_count, and needs_operator_label_count` separately; all reduce debt in different ways, but they are not the same metric.
+
+Output law: Do not flatten all receipts into `05_OUTPUTS/`. Use shallow typed output directories plus UUID/hash filenames, with DB ledger rows as truth. JSONB is for flexible sidecar metadata; identity, status, routing, enforced, or frequently queried fields stay typed/canonical. PostgREST audits require live OpenAPI route enumeration; static config parsing is supplementary only.
+
+Mutation law: smaller models may run bounded inline SQL selection and emit approved sidecar/staging payloads only. They must not patch orchestration scripts, run arbitrary production DML/DDL, or bypass gates. Use staged row -> validate hash/schema/route -> receipt -> transactional promotion. systemd is read-only by default; start/restart/stop only through an explicit operator, GOALS, or ABSURD directive.
 Proof Law: if automation claims a lane, feature, check, or subsystem works, it must name a fresh receipt, command output, test, or status-ledger evidence path. No proof means status stays running/blocked, not complete.
 
 Capability Preservation: least mutation wins. Do not remove, rename, disable, or narrow an existing system capability unless the operator explicitly asks or a receipt proves it is dead/superseded. Build center-out: improve the smallest shared spine first, then adapters; never sprawl sideways when an existing surface can hold the rule.
@@ -29,7 +45,19 @@ Agent Packet Exporter: before handing work to any external CLI agent, emit `pyth
 
 Swarm Dispatch Bridge: when GOALS needs durable async logging instead of a one-off packet, use `python3 scripts/goal_swarm_dispatch.py --target <agent> --task "<coding slice>" --jobs <n> --json`. It turns the packet into ABSURD/Postgres external-command jobs and receipts so work can be consumed asynchronously without inventing a new scheduler; the default command is the tiny packet exporter, but any allowlisted repo-local Python command can be queued.
 
+Recursive Fanout Contract: recursive fanout is allowed only as an explicit bounded orchestration shape, not as freeform swarm sprawl. Canonical shape: `Codex -> mini-orchestrator -> 2 Vibe coding workers + 2 Groq coding workers -> best minimal bundle returned`. Each mini-orchestrator owns one lane, keeps file ownership disjoint from sibling orchestrators, and returns one minimal integrated bundle instead of four competing patches.
+
+Worker law: Vibe/Groq workers are candidate generators, not authorities. Give each worker one bounded coding-only slice with exact file ownership, acceptance checks, and no-revert warning. Default worker count is exactly four per mini-orchestrator for this pattern; change the count only if the operator explicitly overrides it or a blocker receipt proves the lane cannot be served by `2 + 2`.
+
+Route law: route deterministic local checks, packet generation, and final integration through the mini-orchestrator; route only bounded candidate generation to Vibe/Groq workers. `scripts/goal_agent_packet.py` is the packet source for single-worker prompts; `scripts/goal_swarm_dispatch.py` is the durable async bridge when queue receipts are needed. Do not re-run an already-working DB-backed test gate inside recursive fanout policy work; only reference the existing gate in acceptance checks.
+
+Bundle law: each worker must return code, SQL, tests, or an exact blocker only. The mini-orchestrator compares the four returns, keeps the smallest bundle that satisfies the lane objective, and records why larger or overlapping bundles were rejected.
+
 Groq cloud worker: optional only, never core. Catalog with `python3 scripts/groq_model_catalog.py --execute --json`; delegate bounded non-mutating audit/plan slices with `python3 scripts/groq_goal_delegate.py --task "<slice>" --kind audit --model llama-3.1-8b-instant --max-tokens 512 --execute --json`. Default cheap worker is `llama-3.1-8b-instant`; escalate only when the slice proves it needs more reasoning. Every call must leave a redacted receipt; VRAM lanes stay off unless admission/routing proof passes first.
+
+ABBA63 End-Cycle Hook: every build cycle closes with `GOALS/69.md`, a tiny local shorthand file, not a domain term. It says: run two deterministic ABBA63 heuristic rounds first, emit the tiny JSONL + ontology report, queue the result into the slow lane, then run a four-round comparative Groq audit. The prompt window stays light; the queue behavior stays explicit.
+
+Provider Rate Conductor: when a build cycle needs the Groq comparative cannon, use `scripts/provider_rate_conductor.sh` (Rust-backed, with a tiny compatibility shim only for allowlist continuity) so each model keeps its own token bucket, Retry-After/backoff is honored, and queued audits are retried instead of dropped.
 
 Adapter Source of Truth: GOALS adapter facts live in `GOALS/plugin_build_mode_bootstrap.json`; exporters should read the registry instead of inventing provider facts. Never store secret values, only environment variable names and receipt paths. Cloud lanes are optional and must never be the only route for baseline LUCIDOTA operation.
 

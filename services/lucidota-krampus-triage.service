@@ -1,0 +1,16 @@
+[Unit]
+Description=KRAMPUSCHEWING quarantine triage
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/LUCIDOTA
+Environment=DATABASE_URL=postgresql:///lucidota_state
+Environment=LUCIDOTA_KRAMPUS_TRIAGE_EXECUTE=0
+ExecStart=/bin/bash -lc 'source "$HOME/LUCIDOTA/scripts/lucidota_safe_ops_env.sh" >/dev/null 2>&1; args=(--source-root "${LUCIDOTA_KRAMPUS_TRIAGE_SOURCE_ROOT:-$HOME/LUCIDOTA}" --quarantine-root "${LUCIDOTA_KRAMPUS_TRIAGE_QUARANTINE_ROOT:-$HOME/LUCIDOTA/KRAMPUSCHEWING/quarantine}"); if [[ "${LUCIDOTA_KRAMPUS_TRIAGE_EXECUTE:-0}" == "1" ]]; then args+=(--execute); else args+=(--dry-run); fi; exec "$HOME/LUCIDOTA/.venv/bin/python" "$HOME/LUCIDOTA/scripts/krampuschewing_quarantine_triage.py" "${args[@]}" --json'
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=%h/LUCIDOTA/KRAMPUSCHEWING %h/LUCIDOTA/05_OUTPUTS %h/LUCIDOTA/04_RUNTIME

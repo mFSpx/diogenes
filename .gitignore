@@ -148,3 +148,9 @@ scripts/cases/
 /BOOKS/
 /01_REPOS/
 !/01_REPOS/README.md
+
+# API shield: keep bulky model/data payloads out of ambient prompt collection.
+models/
+data/
+.treelite/
+**/.treelite/

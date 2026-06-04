@@ -24,6 +24,7 @@ def test_goal_agent_packet_builds_coding_only_cheapest_capable_prompt(tmp_path):
     assert pkt["model_policy"]["output_contract"]["decision_pairs_min"] == 2
     assert pkt["adapters"]["cloud_lanes"] == ["groq", "cohere"]
     assert pkt["adapter"]["selected"] == "needle_swarm_6x"
+    assert pkt["role"] == "CODE_PATCHER"
     assert pkt["model_calls_performed"] is False
 
 
@@ -100,6 +101,11 @@ def test_goal_agent_packet_uses_registry_as_adapter_source_for_heavy_local_tasks
     assert pkt["adapter"]["execute_cmd"] == json.loads(Path("GOALS/plugin_build_mode_bootstrap.json").read_text())["adapter_registry"]["llama_cpp_heavy"]["execute_cmd"]
     assert pkt["adapters"]["registry_source"] == "GOALS/plugin_build_mode_bootstrap.json"
     assert "frontier/high only for architecture" in pkt["model_policy"]["reasoning_split"]
+
+
+def test_goal_agent_packet_infers_archive_roles_for_quarantine_work():
+    pkt = goal_agent_packet.build_packet(task="scan files and quarantine archive garbage", complexity="standard")
+    assert pkt["role"] == "ARCHIVE_EXTRACTOR"
 
 
 def test_goal_agent_packet_enforces_exact_top_level_worker_envelope():

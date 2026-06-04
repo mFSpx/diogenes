@@ -39,6 +39,7 @@ if str(ROOT) not in sys.path:
 
 from ALGOS.bandit_router import BanditUpdate, update_policy
 from ALGOS.rete_bandit_gate import apply_rete_bandit, bandit_update_from_decision
+from scripts.polycareer_treelite_gate import route as treelite_route
 from core.runtime_dsns import resolve_state_dsn, resolve_storage_dsn
 from core.telemetry.diogenes import compress_activity, sample_hardware_telemetry, staple_activity
 
@@ -196,6 +197,31 @@ CREATE TABLE IF NOT EXISTS lucidota_learning.bytewax_abductive_cursor (
     last_seen_ref text NOT NULL DEFAULT '',
     updated_at timestamptz NOT NULL DEFAULT now(),
     detail jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE TABLE IF NOT EXISTS lucidota_learning.bytewax_compact_window (
+    compact_window_uuid uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    work_order_uuid uuid REFERENCES lucidota_control.work_order(work_order_uuid) ON DELETE SET NULL,
+    work_order_id text NOT NULL DEFAULT '',
+    source text NOT NULL,
+    topic text NOT NULL,
+    object_type text NOT NULL,
+    window_kind text NOT NULL CHECK (window_kind IN ('tumbling', 'sliding')),
+    window_start_at timestamptz NOT NULL,
+    window_end_at timestamptz NOT NULL,
+    event_count integer NOT NULL DEFAULT 0 CHECK (event_count >= 0),
+    dropped_raw_bodies integer NOT NULL DEFAULT 0 CHECK (dropped_raw_bodies >= 0),
+    summary text NOT NULL DEFAULT '',
+    features jsonb NOT NULL DEFAULT '{}'::jsonb,
+    scores jsonb NOT NULL DEFAULT '{}'::jsonb,
+    needs_cloud_reasoning boolean NOT NULL DEFAULT false,
+    event_ids jsonb NOT NULL DEFAULT '[]'::jsonb,
+    source_hashes jsonb NOT NULL DEFAULT '[]'::jsonb,
+    receipt_refs jsonb NOT NULL DEFAULT '[]'::jsonb,
+    detail jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE(work_order_uuid, source, topic, object_type, window_kind, window_start_at, window_end_at)
 );
 
 CREATE TABLE IF NOT EXISTS lucidota_go.graph_promotion_evidence_resolution (
@@ -961,6 +987,275 @@ def event_to_hint(event: BlenderEvent) -> dict[str, Any]:
     }
 
 
+def _event_epoch_seconds(event_time: str) -> int:
+    raw = (event_time or "").replace("Z", "+00:00")
+    try:
+        return int(datetime.fromisoformat(raw).timestamp())
+    except Exception:
+        return int(datetime.now(timezone.utc).timestamp())
+
+
+def _group_value(payload: dict[str, Any], *keys: str, default: str) -> str:
+    for key in keys:
+        value = payload.get(key)
+        if value is None:
+            continue
+        text = str(value).strip()
+        if text:
+            return text
+    return default
+
+
+def _compact_identity(event: BlenderEvent) -> dict[str, str]:
+    payload = event.payload if isinstance(event.payload, dict) else {}
+    event_id = _group_value(payload, "event_id", "id", "uuid", default=event.source_ref)
+    work_order_id = _group_value(payload, "work_order_id", "work_order_uuid", "work_order", default="")
+    topic = _group_value(payload, "topic", "phase", "channel", default=event.source)
+    object_type = _group_value(payload, "object_type", "kind", "type", default="event")
+    return {
+        "event_id": event_id,
+        "work_order_id": work_order_id,
+        "topic": topic,
+        "object_type": object_type,
+    }
+
+
+def _compact_source_hash(event: BlenderEvent) -> str:
+    payload = event.payload if isinstance(event.payload, dict) else {}
+    source_hash = payload.get("source_hash") or payload.get("content_hash") or payload.get("sha256") or payload.get("text_sha256")
+    if source_hash:
+        return str(source_hash)
+    return hashlib.sha256(jdump({"source": event.source, "source_ref": event.source_ref, "text": event.text_surface}).encode("utf-8")).hexdigest()
+
+
+def _compact_receipt_ref(event: BlenderEvent) -> str:
+    payload = event.payload if isinstance(event.payload, dict) else {}
+    for key in ("receipt_ref", "receipt_path", "receipt_id", "source_receipt", "receipt"):
+        value = payload.get(key)
+        if value:
+            return str(value)
+    return ""
+
+
+def _deterministic_local_score(event_count: int, unique_receipts: int, unique_hashes: int, summary_len: int) -> float:
+    score = 0.08 * event_count + 0.12 * unique_receipts + 0.18 * unique_hashes + min(summary_len / 500.0, 0.25)
+    return round(min(1.0, score), 4)
+
+
+def build_compact_windows(
+    events: list[BlenderEvent],
+    *,
+    run_id: str,
+    window_seconds: int = 60,
+    sliding_seconds: int = 120,
+    include_raw_bodies: bool = False,
+) -> list[dict[str, Any]]:
+    buckets: dict[tuple[str, str, str, str, str], list[dict[str, Any]]] = defaultdict(list)
+    sliding_groups: dict[tuple[str, str, str, str], list[dict[str, Any]]] = defaultdict(list)
+    for event in events:
+        payload = event.payload if isinstance(event.payload, dict) else {}
+        identity = _compact_identity(event)
+        epoch = _event_epoch_seconds(event.event_time)
+        body = str(payload.get("raw_body") or payload.get("body") or payload.get("text") or payload.get("summary") or event.text_surface)
+        row = {
+            "event_id": identity["event_id"],
+            "work_order_id": identity["work_order_id"],
+            "source": event.source,
+            "topic": identity["topic"],
+            "object_type": identity["object_type"],
+            "event_time": event.event_time,
+            "event_epoch": epoch,
+            "summary_seed": body[:5000],
+            "source_hash": _compact_source_hash(event),
+            "receipt_ref": _compact_receipt_ref(event),
+            "raw_body": body if include_raw_bodies else "",
+            "payload": payload,
+        }
+        bucket_start = epoch - (epoch % max(1, window_seconds))
+        bucket_end = bucket_start + max(1, window_seconds)
+        sliding_start = max(0, epoch - max(1, sliding_seconds))
+        sliding_end = epoch
+        buckets[(row["work_order_id"], row["source"], row["topic"], row["object_type"], f"{bucket_start}:{bucket_end}")].append(row)
+        sliding_groups[(row["work_order_id"], row["source"], row["topic"], row["object_type"])].append(row)
+
+    windows: list[dict[str, Any]] = []
+    for (work_order_id, source, topic, object_type, bucket_key), rows in sorted(buckets.items(), key=lambda item: item[0]):
+        start_s, end_s = (int(x) for x in bucket_key.split(":", 1))
+        windows.append(_compact_window_row(
+            rows,
+            run_id=run_id,
+            work_order_id=work_order_id,
+            source=source,
+            topic=topic,
+            object_type=object_type,
+            window_kind="tumbling",
+            window_start_at=datetime.fromtimestamp(start_s, tz=timezone.utc),
+            window_end_at=datetime.fromtimestamp(end_s, tz=timezone.utc),
+            include_raw_bodies=include_raw_bodies,
+        ))
+    for (work_order_id, source, topic, object_type), rows in sorted(sliding_groups.items(), key=lambda item: item[0]):
+        end_epoch = max(int(r["event_epoch"]) for r in rows)
+        start_epoch = max(0, end_epoch - max(1, sliding_seconds))
+        windows.append(_compact_window_row(
+            rows,
+            run_id=run_id,
+            work_order_id=work_order_id,
+            source=source,
+            topic=topic,
+            object_type=object_type,
+            window_kind="sliding",
+            window_start_at=datetime.fromtimestamp(start_epoch, tz=timezone.utc),
+            window_end_at=datetime.fromtimestamp(end_epoch, tz=timezone.utc),
+            include_raw_bodies=include_raw_bodies,
+        ))
+    return windows
+
+
+def _compact_window_row(
+    rows: list[dict[str, Any]],
+    *,
+    run_id: str,
+    work_order_id: str,
+    source: str,
+    topic: str,
+    object_type: str,
+    window_kind: str,
+    window_start_at: datetime,
+    window_end_at: datetime,
+    include_raw_bodies: bool,
+) -> dict[str, Any]:
+    event_ids = [str(r["event_id"]) for r in rows if str(r.get("event_id") or "").strip()]
+    source_hashes = [str(r["source_hash"]) for r in rows if str(r.get("source_hash") or "").strip()]
+    receipt_refs = [str(r["receipt_ref"]) for r in rows if str(r.get("receipt_ref") or "").strip()]
+    summaries = [str(r["summary_seed"]) for r in rows if str(r.get("summary_seed") or "").strip()]
+    compact_text = " | ".join(summaries)[:1200]
+    local_score = _deterministic_local_score(len(rows), len(set(receipt_refs)), len(set(source_hashes)), len(compact_text))
+    treelite = treelite_route(
+        None,
+        {
+            "source_type": source,
+            "mutation": any(
+                bool((r.get("payload") or {}).get("mutation"))
+                or "mutation" in str((r.get("payload") or {}).get("kind") or "").lower()
+                for r in rows
+            ),
+        },
+    )
+    needs_cloud = bool(
+        local_score < 0.55
+        or treelite.get("lane") in {"audit", "external"}
+        or any(bool((r.get("payload") or {}).get("needs_cloud_reasoning")) for r in rows)
+    )
+    raw_bodies = [str(r["raw_body"])[:1000] for r in rows if include_raw_bodies and str(r.get("raw_body") or "").strip()]
+    summary = {
+        "window_kind": window_kind,
+        "run_id": run_id,
+        "source": source,
+        "topic": topic,
+        "object_type": object_type,
+        "event_count": len(rows),
+        "event_ids": event_ids[:32],
+        "source_hashes": source_hashes[:32],
+        "receipt_refs": receipt_refs[:32],
+    }
+    compact_summary = f"{window_kind}:{source}/{topic}/{object_type} events={len(rows)} local={local_score:.3f} treelite={float(treelite.get('score') or 0.0):.3f}"
+    if summaries:
+        compact_summary += f" | {summaries[0][:200]}"
+    if raw_bodies:
+        compact_summary += f" | raw={raw_bodies[0][:120]}"
+    return {
+        "run_id": run_id,
+        "work_order_id": work_order_id,
+        "source": source,
+        "topic": topic,
+        "object_type": object_type,
+        "window_kind": window_kind,
+        "window_start_at": window_start_at.isoformat().replace("+00:00", "Z"),
+        "window_end_at": window_end_at.isoformat().replace("+00:00", "Z"),
+        "event_count": len(rows),
+        "dropped_raw_bodies": 0 if include_raw_bodies else len(rows),
+        "summary": compact_summary[:2000],
+        "features": {
+            "event_count": len(rows),
+            "unique_event_ids": len(set(event_ids)),
+            "unique_source_hashes": len(set(source_hashes)),
+            "unique_receipt_refs": len(set(receipt_refs)),
+            "time_span_seconds": max(0, int((window_end_at - window_start_at).total_seconds())),
+        },
+        "scores": {
+            "local_score": local_score,
+            "treelite_score": float(treelite.get("score") or 0.0),
+            "treelite_lane": treelite.get("lane") or "slow",
+        },
+        "needs_cloud_reasoning": needs_cloud,
+        "event_ids": event_ids[:32],
+        "source_hashes": source_hashes[:32],
+        "receipt_refs": receipt_refs[:32],
+        "detail": {
+            "run_id": run_id,
+            "selected_event_ids": event_ids[:8],
+            "include_raw_bodies": include_raw_bodies,
+            "sliding_window": window_kind == "sliding",
+        },
+    }
+
+
+def persist_compact_windows(windows: list[dict[str, Any]]) -> int:
+    if not windows:
+        return 0
+    with psycopg.connect(STATE_DSN) as conn:
+        for row in windows:
+            conn.execute(
+                """
+                INSERT INTO lucidota_learning.bytewax_compact_window(
+                    work_order_uuid, work_order_id, source, topic, object_type, window_kind,
+                    window_start_at, window_end_at, event_count, dropped_raw_bodies, summary,
+                    features, scores, needs_cloud_reasoning, event_ids, source_hashes, receipt_refs, detail
+                ) VALUES (
+                    NULLIF(%s, '')::uuid, %s, %s, %s, %s, %s,
+                    %s::timestamptz, %s::timestamptz, %s, %s, %s,
+                    %s::jsonb, %s::jsonb, %s, %s::jsonb, %s::jsonb, %s::jsonb
+                )
+                ON CONFLICT (work_order_uuid, source, topic, object_type, window_kind, window_start_at, window_end_at)
+                DO UPDATE SET
+                    work_order_id = EXCLUDED.work_order_id,
+                    event_count = EXCLUDED.event_count,
+                    dropped_raw_bodies = EXCLUDED.dropped_raw_bodies,
+                    summary = EXCLUDED.summary,
+                    features = EXCLUDED.features,
+                    scores = EXCLUDED.scores,
+                    needs_cloud_reasoning = EXCLUDED.needs_cloud_reasoning,
+                    event_ids = EXCLUDED.event_ids,
+                    source_hashes = EXCLUDED.source_hashes,
+                    receipt_refs = EXCLUDED.receipt_refs,
+                    detail = EXCLUDED.detail,
+                    updated_at = now()
+                """,
+                (
+                    row.get("work_order_id", ""),
+                    row.get("work_order_id", ""),
+                    row.get("source", ""),
+                    row.get("topic", ""),
+                    row.get("object_type", ""),
+                    row.get("window_kind", "tumbling"),
+                    row.get("window_start_at", now_z()),
+                    row.get("window_end_at", now_z()),
+                    int(row.get("event_count") or 0),
+                    int(row.get("dropped_raw_bodies") or 0),
+                    str(row.get("summary") or ""),
+                    jdump(row.get("features") or {}),
+                    jdump(row.get("scores") or {}),
+                    bool(row.get("needs_cloud_reasoning")),
+                    jdump(row.get("event_ids") or []),
+                    jdump(row.get("source_hashes") or []),
+                    jdump(row.get("receipt_refs") or []),
+                    jdump(row.get("detail") or {}),
+                ),
+            )
+        conn.commit()
+    return len(windows)
+
+
 def run_bytewax_or_fallback(events: list[BlenderEvent]) -> tuple[list[dict[str, Any]], str]:
     hydrate_bandit_policy_from_db()
     try:
@@ -1250,6 +1545,9 @@ def tick(
     )
     hints, backend = run_bytewax_or_fallback(events)
     summary = persist_hints(events, hints, "live_cursor" if live_cursor else "latest_window", backend)
+    compact_windows = build_compact_windows(events, run_id=str(summary.get("run_id") or ""), include_raw_bodies=False)
+    summary["compact_windows_out"] = persist_compact_windows(compact_windows)
+    summary["compact_window_kinds"] = sorted({row["window_kind"] for row in compact_windows})
     summary["unix_socket"] = unix_socket
     summary["activity_window_seconds"] = activity_window_seconds
     summary["prefer_replication"] = controller["prefer_replication"]

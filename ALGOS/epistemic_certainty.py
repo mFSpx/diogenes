@@ -11,6 +11,8 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from typing import Any, Iterable
 
+from .runtime_caps import MAX_EVIDENCE_REFS, MAX_RATIONALE, MAX_REF_CHARS
+
 EPISTEMIC_FLAGS: tuple[str, ...] = ("FACT", "PROBABLE", "POSSIBLE", "BULLSHIT", "SURE_MAYBE")
 
 
@@ -47,8 +49,8 @@ def certainty(
         label=label,
         confidence_bps=int(confidence_bps),
         authority_class=authority_class,
-        rationale=rationale,
-        evidence_refs=tuple(str(x) for x in evidence_refs if x is not None),
+        rationale=str(rationale)[:MAX_RATIONALE],
+        evidence_refs=tuple(str(x)[:MAX_REF_CHARS] for x in evidence_refs if x is not None)[:MAX_EVIDENCE_REFS],
     )
 
 

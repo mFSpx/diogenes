@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -25,6 +26,7 @@ def test_luci_shell_wrapper_exposes_promptflow_batch_class(tmp_path):
             str(outdir),
         ],
         cwd=ROOT,
+        env={**os.environ, "LUCI_FLOW_DISABLE_DB_WRITE": "1"},
         text=True,
         capture_output=True,
         check=True,
@@ -54,6 +56,7 @@ def test_luci_shell_wrapper_exposes_promptflow_batch_json_only(tmp_path):
             "--json",
         ],
         cwd=ROOT,
+        env={**os.environ, "LUCI_FLOW_DISABLE_DB_WRITE": "1"},
         text=True,
         capture_output=True,
         check=True,
@@ -67,3 +70,93 @@ def test_luci_shell_wrapper_exposes_promptflow_batch_json_only(tmp_path):
     assert "runtime=alive" not in proc.stdout
     assert "eval_quality=unproven" not in proc.stdout
     assert proc.stderr == "" or "WARNING:" in proc.stderr
+
+
+def test_luci_shell_wrapper_exposes_visual_flow_smoke(tmp_path):
+    proc = subprocess.run(
+        [
+            str(ROOT / "luci"),
+            "flow",
+            "smoke",
+            "--output-dir",
+            str(tmp_path / "flow"),
+            "--json",
+        ],
+        cwd=ROOT,
+        env={**os.environ, "LUCI_FLOW_DISABLE_DB_WRITE": "1"},
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    payload = json.loads(proc.stdout)
+    assert payload["status"] == "PASS"
+    assert payload["spec_path"].endswith(".flow.json")
+    assert "flow" in payload["receipt_path"]
+
+
+def test_luci_shell_wrapper_routes_slash_flow_to_visual_smoke(tmp_path):
+    proc = subprocess.run(
+        [
+            str(ROOT / "luci"),
+            "/flow",
+            "--smoke",
+            "--output-dir",
+            str(tmp_path / "flow"),
+            "--json",
+        ],
+        cwd=ROOT,
+        env={**os.environ, "LUCI_FLOW_DISABLE_DB_WRITE": "1"},
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    payload = json.loads(proc.stdout)
+    assert payload["status"] == "PASS"
+    assert payload["checks"]["center_canvas"] is True
+
+
+def test_luci_shell_wrapper_routes_flow_ui_alias_to_visual_smoke(tmp_path):
+    proc = subprocess.run(
+        [
+            str(ROOT / "luci"),
+            "flow",
+            "ui",
+            "--smoke",
+            "--output-dir",
+            str(tmp_path / "flow"),
+            "--json",
+        ],
+        cwd=ROOT,
+        env={**os.environ, "LUCI_FLOW_DISABLE_DB_WRITE": "1"},
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    payload = json.loads(proc.stdout)
+    assert payload["status"] == "PASS"
+    assert payload["checks"]["top_controls"] is True
+
+
+def test_luci_shell_wrapper_accepts_flow_ui_seed_refs_in_smoke(tmp_path):
+    proc = subprocess.run(
+        [
+            str(ROOT / "luci"),
+            "flow",
+            "ui",
+            "--flow",
+            "04_RUNTIME/promptflow_smoke_flow",
+            "--data",
+            "04_RUNTIME/promptflow_smoke_flow/data.jsonl",
+            "--smoke",
+            "--output-dir",
+            str(tmp_path / "flow"),
+            "--json",
+        ],
+        cwd=ROOT,
+        env={**os.environ, "LUCI_FLOW_DISABLE_DB_WRITE": "1"},
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    payload = json.loads(proc.stdout)
+    assert payload["status"] == "PASS"

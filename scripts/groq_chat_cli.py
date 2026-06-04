@@ -438,8 +438,19 @@ def main() -> int:
         except urllib.error.HTTPError as exc:
             latency_ms = (time.perf_counter() - started) * 1000
             body = exc.read().decode("utf-8", errors="replace")
+            retry_after = None
+            try:
+                retry_after = exc.headers.get("Retry-After")
+            except Exception:
+                retry_after = None
             payload["blockers"].append(f"groq_http_error:{exc.code}")
             payload["error_body"] = body[:4000]
+            if retry_after is not None:
+                payload["retry_after_header"] = str(retry_after)
+                try:
+                    payload["retry_after_seconds"] = float(retry_after)
+                except Exception:
+                    pass
             payload["latency_ms"] = round(latency_ms, 3)
             payload["generation_trace"] = build_generation_trace(target="groq", model_name=args.model, request_payload=request_payload, latency_ms=latency_ms, raw_output=body[:4000], raw_response=None, execute_performed=False)
         except Exception as exc:

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LUCIDOTA Operations Manual</title>
+  <style>
+    :root { color-scheme: dark; --bg:#111318; --panel:#171a21; --line:#2b3140; --text:#e7ecf6; --muted:#aeb8cc; --accent:#7dd3fc; --warn:#fbbf24; --good:#86efac; }
+    body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    .wrap { max-width:1100px; margin:0 auto; padding:24px; }
+    header, section, .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; }
+    header { padding:20px; margin-bottom:16px; }
+    h1,h2,h3 { margin:0 0 8px; }
+    h1 { font-size:28px; }
+    h2 { font-size:18px; margin-top:0; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; }
+    .card { padding:16px; }
+    pre, code { background:#0b0d12; border:1px solid #262c3b; border-radius:10px; }
+    pre { padding:12px; overflow:auto; }
+    code { padding:1px 6px; }
+    .muted { color:var(--muted); }
+    .good { color:var(--good); }
+    .warn { color:var(--warn); }
+    .pill { display:inline-block; padding:3px 10px; border-radius:999px; background:#0f172a; border:1px solid #2b3140; margin-right:8px; }
+    a { color:var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="pill good">PASS</div><div class="pill warn">LoRA queued</div><div class="pill">No giant remote compact</div>
+      <h1>LUCIDOTA Operations Manual</h1>
+      <p class="muted">One-page operator console: current canon, live commands, receipts, and gates. This page is a static manual, not a model output.</p>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Current truth</h2>
+        <ul>
+          <li>RunPod/Talkie SSH live.</li>
+          <li>Talkie custody PASS written on-pod.</li>
+          <li>Model fabric status receipt current.</li>
+          <li>LoRA work orders queued, not trained.</li>
+        </ul>
+      </section>
+      <section class="card">
+        <h2>Live commands</h2>
+        <pre>.venv/bin/python scripts/goal_model_fabric_control.py status --json
+python3 scripts/runpod_talkie_control.py probe --force-after-auth-change --json
+.venv/bin/python scripts/absurd_queue_spine.py --action worker-once --queue manual_canon --execute</pre>
+      </section>
+      <section class="card">
+        <h2>Gates</h2>
+        <ul>
+          <li>Receipts beat claims.</li>
+          <li>Queue jobs need real UUIDs.</li>
+          <li>Prompts over context limit must be chunked.</li>
+          <li>Restart only the failing worker.</li>
+        </ul>
+      </section>
+      <section class="card">
+        <h2>Recovery</h2>
+        <ol>
+          <li>Check the latest receipt.</li>
+          <li>Check the live log.</li>
+          <li>Restart only the worker that stalled.</li>
+          <li>Write blocker receipt if the gate cannot move.</li>
+        </ol>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

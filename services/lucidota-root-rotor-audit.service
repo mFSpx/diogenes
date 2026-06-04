@@ -1,0 +1,15 @@
+[Unit]
+Description=Root-Rotor readiness and red-team audit
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/LUCIDOTA
+Environment=DATABASE_URL=postgresql:///lucidota_state
+ExecStart=%h/LUCIDOTA/.venv/bin/python %h/LUCIDOTA/scripts/root_rotor_red_team_audit.py --json
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=%h/LUCIDOTA/05_OUTPUTS %h/LUCIDOTA/04_RUNTIME

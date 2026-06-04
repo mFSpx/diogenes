@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import socket
 import subprocess
 import time
 from pathlib import Path
@@ -25,6 +26,8 @@ STATE_PATH = DATA / "watch_state.json"
 CONTROL_SCHEMA = ROOT / "06_SCHEMA" / "001_lucidota_control.sql"
 WORKFLOW_SCHEMA = ROOT / "06_SCHEMA" / "006_workflow_registry.sql"
 STATE_DSN = os.environ.get("LUCIDOTA_GO_STATE_DSN", os.environ.get("DBOS_SYSTEM_DATABASE_URL", "postgresql:///lucidota_state"))
+DAEMON_NAME = "indy_reads"
+TRANSPORT_SOCKET = "/tmp/lucidota_ego.sock"
 SUPPORTED = {".epub", ".pdf", ".mobi", ".txt", ".md"}
 SKIP_PREFIXES = ("GO_", "ROOT414_")
 SKIP_NAMES = {"README_INDY_READS.md", "OFFICIAL_ONTOLOGY_POINTER.md", "ROOT414_GAME_GRADING_SCHEMA.md"}
@@ -94,6 +97,40 @@ def workflow_event(run_id: str, phase: str, status: str, detail: dict[str, Any])
         return
 
 
+def record_heartbeat(*, books_root: Path, result: dict[str, Any]) -> None:
+    try:
+        with psycopg.connect(STATE_DSN) as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO ironclaw.daemon_heartbeats
+                  (daemon_name, host_name, process_id, transport_socket, socket_active, terminal_active, batch_size, river_state, telemetry, detail)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb,%s::jsonb)
+                """,
+                (
+                    DAEMON_NAME,
+                    socket.gethostname(),
+                    os.getpid(),
+                    TRANSPORT_SOCKET,
+                    False,
+                    False,
+                    int(result.get("changed") or 0),
+                    json.dumps({"watching": str(books_root), "changed": result.get("changed", 0), "ok": result.get("ok", False)}),
+                    json.dumps({"books_root": str(books_root), "watch_state": rel_state_key(books_root)}, sort_keys=True),
+                    json.dumps({"source": "scripts/legacy/lucidota_indy_reads_watcher.py", "mode": "watch_loop", "results": result}, sort_keys=True),
+                ),
+            )
+            conn.commit()
+    except psycopg.Error:
+        return
+
+
+def rel_state_key(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def run_ingest(book: Path, max_tokens: int, append_lora_jsonl: bool) -> dict[str, Any]:
     cmd = [
         str(ROOT / ".venv" / "bin" / "python") if (ROOT / ".venv" / "bin" / "python").exists() else "python3",
@@ -140,6 +177,7 @@ def process_once(root: Path, max_tokens: int, append_lora_jsonl: bool) -> dict[s
             workflow_event(run_id, "embedded", "failed", {"book": run_id, "result": result})
     state["updated_at"] = time.time()
     save_state(state)
+    record_heartbeat(books_root=root, result={"ok": all(r.get("ok") for r in results), "changed": len(changed), "results": results})
     return {"ok": all(r.get("ok") for r in results), "changed": len(changed), "results": results}
 
 

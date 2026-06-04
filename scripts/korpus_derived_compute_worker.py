@@ -8,12 +8,13 @@ never hold the evidence storage pump hostage again.
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import os
 import socket
 import sys
-import time
 import traceback
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -26,9 +27,20 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import korpus_krampii as kk  # noqa: E402
 
-STORAGE_DSN = os.environ.get("LUCIDOTA_GO_STORAGE_DSN", "postgresql:///lucidota_storage")
+WAKE_CHANNEL = "lucidota_korpus_file_ingested"
 QUEUE_SCHEMA = ROOT / "06_SCHEMA" / "020_korpus_derived_compute_queue.sql"
 WORKFLOW_ID = "korpus-derived-compute-worker"
+
+
+def resolve_storage_dsn() -> str:
+    for key in ("LUCIDOTA_GO_STORAGE_DSN", "KORPUS_DATABASE_URL", "DATABASE_URL"):
+        value = os.environ.get(key)
+        if value:
+            return value
+    return "postgresql:///lucidota_storage"
+
+
+STORAGE_DSN = resolve_storage_dsn()
 
 
 def jdump(obj: Any) -> str:
@@ -41,6 +53,11 @@ def ensure_schema(conn: psycopg.Connection) -> None:
     # DDL while raw ingest is under load.
     conn.execute(QUEUE_SCHEMA.read_text(encoding="utf-8"))
     conn.commit()
+
+
+async def ensure_schema_async(conn: psycopg.AsyncConnection) -> None:
+    await conn.execute(QUEUE_SCHEMA.read_text(encoding="utf-8"))
+    await conn.commit()
 
 
 def worker_id(prefix: str = "korpus-derived") -> str:
@@ -92,6 +109,47 @@ def claim_job(conn: psycopg.Connection, wid: str, lease_seconds: int, task_types
     """
     params.extend([wid, lease_seconds])
     row = conn.execute(claim_sql, params).fetchone()
+    return dict(row) if row else None
+
+
+async def claim_job_async(
+    conn: psycopg.AsyncConnection,
+    wid: str,
+    lease_seconds: int,
+    task_types: list[str] | None,
+) -> dict[str, Any] | None:
+    params: list[Any] = []
+    task_filter = ""
+    if task_types:
+        task_filter = "AND task_type = ANY(%s)"
+        params.append(task_types)
+    claim_sql = f"""
+        WITH job AS (
+            SELECT job_uuid
+            FROM lucidota_korpus.derived_compute_queue
+            WHERE (
+                (status = 'queued' AND run_after <= now())
+                OR (status = 'running' AND locked_until < now() AND attempts < max_attempts)
+            )
+            {task_filter}
+            ORDER BY priority DESC, created_at ASC
+            LIMIT 1
+            FOR UPDATE SKIP LOCKED
+        )
+        UPDATE lucidota_korpus.derived_compute_queue q
+        SET status = 'running',
+            locked_by = %s,
+            locked_until = now() + (%s * interval '1 second'),
+            attempts = attempts + 1,
+            last_error = '',
+            updated_at = now()
+        FROM job
+        WHERE q.job_uuid = job.job_uuid
+        RETURNING q.*
+    """
+    params.extend([wid, lease_seconds])
+    cur = await conn.execute(claim_sql, params)
+    row = await cur.fetchone()
     return dict(row) if row else None
 
 
@@ -313,6 +371,131 @@ def process_one(conn: psycopg.Connection, wid: str, lease_seconds: int, task_typ
         return {"claimed": True, "ok": False, "job_uuid": job_uuid, "task_type": job["task_type"], "status": status, "error": str(exc)[:500]}
 
 
+def process_claimed_job(dsn: str, job: dict[str, Any]) -> dict[str, Any]:
+    job_uuid = str(job["job_uuid"])
+    with psycopg.connect(dsn, row_factory=dict_row) as conn:
+        try:
+            result = dispatch_task(conn, job)
+            mark_succeeded(conn, job_uuid, result)
+            conn.commit()
+            return {"claimed": True, "ok": True, "job_uuid": job_uuid, "task_type": job["task_type"], "result": result}
+        except Exception as exc:
+            status = mark_failed(conn, job, exc)
+            conn.commit()
+            return {"claimed": True, "ok": False, "job_uuid": job_uuid, "task_type": job["task_type"], "status": status, "error": str(exc)[:500]}
+
+
+def new_work_stats(wid: str) -> dict[str, Any]:
+    return {
+        "ok": True,
+        "worker_id": wid,
+        "wake_channel": WAKE_CHANNEL,
+        "notifications": 0,
+        "processed": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "samples": [],
+        "wake_samples": [],
+    }
+
+
+def record_work_item(stats: dict[str, Any], item: dict[str, Any]) -> None:
+    if not item.get("claimed"):
+        return
+    stats["processed"] += 1
+    if item.get("ok"):
+        stats["succeeded"] += 1
+    else:
+        stats["failed"] += 1
+        stats["ok"] = False
+    if len(stats["samples"]) < 20:
+        stats["samples"].append(item)
+
+
+def record_wake(stats: dict[str, Any], notify: Any) -> None:
+    stats["notifications"] += 1
+    if len(stats["wake_samples"]) < 20:
+        stats["wake_samples"].append(
+            {
+                "channel": getattr(notify, "channel", WAKE_CHANNEL),
+                "pid": getattr(notify, "pid", None),
+                "payload": getattr(notify, "payload", ""),
+            }
+        )
+
+
+async def attempt_durable_claim(
+    claim_conn: psycopg.AsyncConnection,
+    dsn: str,
+    wid: str,
+    lease_seconds: int,
+    task_types: list[str] | None,
+    stats: dict[str, Any],
+    max_jobs: int,
+) -> bool:
+    if max_jobs and stats["processed"] >= max_jobs:
+        return False
+    job = await claim_job_async(claim_conn, wid, lease_seconds, task_types)
+    if not job:
+        await claim_conn.commit()
+        return False
+    await claim_conn.commit()
+    try:
+        item = await asyncio.to_thread(process_claimed_job, dsn, job)
+    except Exception as exc:
+        item = {
+            "claimed": True,
+            "ok": False,
+            "job_uuid": str(job.get("job_uuid", "")),
+            "task_type": job.get("task_type", ""),
+            "status": "running_until_lease_expiry",
+            "error": str(exc)[:500],
+        }
+    record_work_item(stats, item)
+    return True
+
+
+async def drain_available_jobs(
+    dsn: str,
+    wid: str,
+    lease_seconds: int,
+    task_types: list[str] | None,
+    stats: dict[str, Any],
+    max_jobs: int,
+) -> None:
+    async with await psycopg.AsyncConnection.connect(dsn, row_factory=dict_row) as claim_conn:
+        while await attempt_durable_claim(claim_conn, dsn, wid, lease_seconds, task_types, stats, max_jobs):
+            pass
+
+
+async def run_worker(
+    dsn: str,
+    wid: str,
+    lease_seconds: int,
+    task_types: list[str] | None,
+    max_jobs: int,
+) -> dict[str, Any]:
+    stats = new_work_stats(wid)
+    async with await psycopg.AsyncConnection.connect(dsn, row_factory=dict_row) as schema_conn:
+        await ensure_schema_async(schema_conn)
+
+    listen_conn = await psycopg.AsyncConnection.connect(dsn, row_factory=dict_row)
+    try:
+        await listen_conn.set_autocommit(True)
+        await listen_conn.execute(f"LISTEN {WAKE_CHANNEL}")
+        await drain_available_jobs(dsn, wid, lease_seconds, task_types, stats, max_jobs)
+        if max_jobs and stats["processed"] >= max_jobs:
+            return stats
+        async for notify in listen_conn.notifies():
+            record_wake(stats, notify)
+            await drain_available_jobs(dsn, wid, lease_seconds, task_types, stats, max_jobs)
+            if max_jobs and stats["processed"] >= max_jobs:
+                break
+    finally:
+        await listen_conn.close()
+    return stats
+
+
 def backfill(conn: psycopg.Connection, task_type: str, limit: int, priority: int, dry_run: bool) -> dict[str, Any]:
     specs = {
         "river_replay_component": ("component", """
@@ -359,7 +542,7 @@ def backfill(conn: psycopg.Connection, task_type: str, limit: int, priority: int
         ON CONFLICT(task_type, target_table, target_uuid) DO NOTHING
         RETURNING job_uuid::text
         """,
-        (limit, task_type, target_table, priority, jdump({"backfilled_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})),
+        (limit, task_type, target_table, priority, jdump({"backfilled_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")})),
     ).fetchall()
     return {"task_type": task_type, "target_table": target_table, "dry_run": False, "inserted": len(rows)}
 
@@ -385,44 +568,29 @@ def main() -> int:
     p.add_argument("--dry-run", action="store_true")
 
     p = sub.add_parser("work")
-    p.add_argument("--limit", type=int, default=1, help="Max jobs to process before exiting; 0 means loop forever.")
-    p.add_argument("--idle-sleep", type=float, default=5.0)
+    p.add_argument("--limit", type=int, default=0, help="Max jobs to process before exiting; 0 means listen forever.")
+    p.add_argument("--idle-sleep", type=float, default=0.0, help=argparse.SUPPRESS)
     p.add_argument("--lease-seconds", type=int, default=300)
     p.add_argument("--worker-id", default="")
     p.add_argument("--task-types", default="", help="Comma-separated allowlist, e.g. near_duplicate_scan,graph_promote_file")
 
     args = ap.parse_args()
     results: dict[str, Any]
-    with psycopg.connect(args.db_url, row_factory=dict_row) as conn:
-        ensure_schema(conn)
-        if args.cmd == "status":
-            results = {"ok": True, "summary": queue_summary(conn)}
-        elif args.cmd == "backfill":
-            results = {"ok": True, **backfill(conn, args.task_type, args.limit, args.priority, args.dry_run)}
-            conn.commit()
-        elif args.cmd == "work":
-            wid = args.worker_id or worker_id()
-            task_types = parse_task_types(args.task_types)
-            processed = succeeded = failed = 0
-            samples: list[dict[str, Any]] = []
-            while args.limit == 0 or processed < args.limit:
-                item = process_one(conn, wid, args.lease_seconds, task_types)
-                if not item.get("claimed"):
-                    if args.limit == 0:
-                        time.sleep(args.idle_sleep)
-                        continue
-                    break
-                processed += 1
-                if item.get("ok"):
-                    succeeded += 1
-                else:
-                    failed += 1
-                if len(samples) < 20:
-                    samples.append(item)
-            results = {"ok": failed == 0, "worker_id": wid, "processed": processed, "succeeded": succeeded, "failed": failed, "samples": samples}
-            kk.emit_event(WORKFLOW_ID, wid, "work", "succeeded" if failed == 0 else "failed", results)
-        else:
-            raise ValueError(args.cmd)
+    if args.cmd == "work":
+        wid = args.worker_id or worker_id()
+        task_types = parse_task_types(args.task_types)
+        results = asyncio.run(run_worker(args.db_url, wid, args.lease_seconds, task_types, args.limit))
+        kk.emit_event(WORKFLOW_ID, wid, "work", "succeeded" if results.get("ok") else "failed", results)
+    else:
+        with psycopg.connect(args.db_url, row_factory=dict_row) as conn:
+            ensure_schema(conn)
+            if args.cmd == "status":
+                results = {"ok": True, "summary": queue_summary(conn)}
+            elif args.cmd == "backfill":
+                results = {"ok": True, **backfill(conn, args.task_type, args.limit, args.priority, args.dry_run)}
+                conn.commit()
+            else:
+                raise ValueError(args.cmd)
     print(jdump(results) if args.json else json.dumps(results, indent=2, ensure_ascii=False, sort_keys=True, default=str))
     return 0 if results.get("ok") else 1
 

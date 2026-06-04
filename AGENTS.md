@@ -29,6 +29,18 @@ At the start of every persistent goal operation in LUCIDOTA:
 
 For persistent GOALS work, the orchestrator must not try to change the main-window model unless a safe model-control tool exists and the operator explicitly asked for it. For subagents, use the cheapest capable available model/tier for the bounded task, write coding-only prompts with exact file ownership and acceptance checks, chunk work by complexity, sequence dependent work locally, and parallelize only disjoint useful slices. See `GOALS/AGENT_ORCHESTRATION_POLICY.md`.
 
+## Test Gating Law
+
+Before any pytest/smoke verification that matters for a persistent change, route the command through `scripts/test_receipt_gate.py run --scope <scope> --watch <files> -- <command>`.
+
+- Postgres is the source of truth for test receipts.
+- Do not run duplicate ungated tests when a passing DB receipt for the same dependency signature already exists.
+- T0 syntax checks only for touched scripts.
+- T1 unit tests only for the touched subsystem.
+- T2 live smoke only when DB/API/systemd/luci surfaces changed.
+- T3 full suite only when explicitly required for cross-subsystem or pre-merge verification.
+- If the DB gate is unavailable, stop and report `DB_BLOCKED`; do not invent a file-plane fallback truth.
+
 ## Persistent Build-Meeting Memory
 
 Exact quote to remember and apply:

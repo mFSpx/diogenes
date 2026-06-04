@@ -97,15 +97,18 @@ def gini_impurity(labels: Iterable[int]) -> float:
 
     ``labels`` can be any iterable of hashable class identifiers.
     """
-    total = 0
-    counts: Counter = Counter()
-    for lbl in labels:
-        counts[lbl] += 1
-        total += 1
+    counts = _to_counts(labels)
+    total = sum(counts.values())
     if total == 0:
         return 0.0
-    probs = np.array(list(counts.values())) / total
+    probs = np.array(list(counts.values()), dtype=np.float64) / total
     return 1.0 - np.sum(probs ** 2)
+
+
+def _to_counts(labels_or_counts: Iterable[int] | Counter[int]) -> Counter[int]:
+    if isinstance(labels_or_counts, Counter):
+        return labels_or_counts
+    return Counter(labels_or_counts)
 
 
 def gini_gain(parent_labels: Iterable[int],
@@ -114,16 +117,28 @@ def gini_gain(parent_labels: Iterable[int],
     """Reduction in Gini impurity obtained by splitting ``parent`` into
     ``left`` and ``right``.
     """
-    parent_imp = gini_impurity(parent_labels)
-    n_parent = len(list(parent_labels))
-    n_left = len(list(left_labels))
-    n_right = len(list(right_labels))
+    parent_counts = _to_counts(parent_labels)
+    left_counts = _to_counts(left_labels)
+    right_counts = _to_counts(right_labels)
+
+    n_parent = sum(parent_counts.values())
+    n_left = sum(left_counts.values())
+    n_right = sum(right_counts.values())
     if n_parent == 0:
         return 0.0
-    left_imp = gini_impurity(left_labels)
-    right_imp = gini_impurity(right_labels)
+
+    parent_imp = _gini_impurity_from_counts(parent_counts, n_parent)
+    left_imp = _gini_impurity_from_counts(left_counts, n_left)
+    right_imp = _gini_impurity_from_counts(right_counts, n_right)
     weighted_imp = (n_left / n_parent) * left_imp + (n_right / n_parent) * right_imp
     return parent_imp - weighted_imp
+
+
+def _gini_impurity_from_counts(counts: Counter[int], total: int) -> float:
+    if total == 0:
+        return 0.0
+    probs = np.array(list(counts.values()), dtype=np.float64) / total
+    return 1.0 - np.sum(probs ** 2)
 
 
 # ----------------------------------------------------------------------
@@ -200,12 +215,10 @@ class StreamingNode:
         """
         if self.n_examples < 2:
             return SplitDecision(False, 0.0, 0.0, "insufficient_examples")
-        parent_labels = list(self.class_counts.elements())
+        parent_counts = self.class_counts
         gains = []
         for left_counts, right_counts in self.feature_stats.values():
-            left_labels = list(left_counts.elements())
-            right_labels = list(right_counts.elements())
-            gain = gini_gain(parent_labels, left_labels, right_labels)
+            gain = gini_gain(parent_counts, left_counts, right_counts)
             gains.append(gain)
         return should_split_hybrid(gains, self.delta, self.n_examples, self.tie_threshold)
 

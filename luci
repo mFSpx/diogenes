@@ -70,6 +70,162 @@ LUCI — LUCIDOTA operator front door
 Usage
   printf "do the thing\n" | luci
   luci                             # prompts for one line on stdin when launched interactively
+  luci help|/help|commands [--json] [--base-url URL]
+  luci openapi [--json] [--base-url URL]
+  luci manual|/manual [--json] [--base-url URL]
+  luci manual current [--json] [--base-url URL]
+  luci active goal [--json] [--base-url URL]
+  luci todo [--json] [--base-url URL]
+  luci todo current [--json] [--base-url URL]
+  luci root-orchestrator [--json] [--base-url URL]
+  luci root orchestrator current [--json] [--base-url URL]
+  luci canon current [--json] [--base-url URL]
+  luci skill policy current [--json] [--base-url URL]
+  luci chrono current [--json] [--base-url URL]
+  luci model-routing-current [--json] [--base-url URL]
+  luci model-routing-blockers [--json] [--base-url URL]
+  luci model routing current [--json] [--base-url URL]
+  luci model routing blockers [--json] [--base-url URL]
+  luci model registry [--json] [--base-url URL]
+  luci model registry raw [--json] [--base-url URL]
+  luci model registry current [--json] [--base-url URL]
+  luci capability current [--json] [--base-url URL]
+  luci capability registry [--json] [--base-url URL]
+  luci capability registry raw [--json] [--base-url URL]
+  luci provider current [--json] [--base-url URL]
+  luci provider registry [--json] [--base-url URL]
+  luci provider registry raw [--json] [--base-url URL]
+  luci workflow registry raw [--json] [--base-url URL]
+  luci workflow registry [--json] [--base-url URL]
+  luci api workflow registry [--json] [--base-url URL]
+  luci api workflow registry raw [--json] [--base-url URL]
+  luci api root law docs [--json] [--base-url URL]
+  luci api root-law-docs [--json] [--base-url URL]
+  luci api canon current [--json] [--base-url URL]
+  luci api canon versions [--json] [--base-url URL]
+  luci api manual current [--json] [--base-url URL]
+  luci api active goal [--json] [--base-url URL]
+  luci api root orchestrator current [--json] [--base-url URL]
+  luci api daemon status [--json] [--base-url URL]
+  luci api chrono current [--json] [--base-url URL]
+  luci api model routing current [--json] [--base-url URL]
+  luci api model routing blockers [--json] [--base-url URL]
+  luci api model registry current [--json] [--base-url URL]
+  luci api model registry raw [--json] [--base-url URL]
+  luci api provider current [--json] [--base-url URL]
+  luci api provider registry [--json] [--base-url URL]
+  luci api provider registry raw [--json] [--base-url URL]
+  luci api capability current [--json] [--base-url URL]
+  luci api capability registry [--json] [--base-url URL]
+  luci api capability registry raw [--json] [--base-url URL]
+  luci api workflow current [--json] [--base-url URL]
+  luci api indy queue [--json] [--base-url URL]
+  luci api indy responses [--json] [--base-url URL]
+  luci api todo current [--json] [--base-url URL]
+  luci api sheet current [--json]
+  luci api flow specs [--json] [--base-url URL]
+  luci api flow receipts [--json] [--base-url URL]
+  luci api prompt <recent|filed|links|unlinked|catalog> [--json] [--base-url URL]
+  luci api prompt raw <recent|filed|links|unlinked|catalog> [--json] [--base-url URL]
+  luci api prompt recent [--json] [--base-url URL]
+  luci api prompt filed [--json] [--base-url URL]
+  luci api prompt links [--json] [--base-url URL]
+  luci api prompt unlinked [--json] [--base-url URL]
+  luci api prompt catalog [--json] [--base-url URL]
+  luci api book source [--json] [--base-url URL]
+  luci api book scan [--json] [--base-url URL]
+  luci api book read-queue [--json] [--base-url URL]
+  luci api book note [--json] [--base-url URL]
+  luci api book candidate [--json] [--base-url URL]
+  luci api book adapter [--json] [--base-url URL]
+  luci api book training [--json] [--base-url URL]
+  luci api book receipt [--json] [--base-url URL]
+  luci api book raw source [--json] [--base-url URL]
+  luci api book raw scan [--json] [--base-url URL]
+  luci api book raw read-queue [--json] [--base-url URL]
+  luci api book raw note [--json] [--base-url URL]
+  luci api book raw candidate [--json] [--base-url URL]
+  luci api book raw adapter [--json] [--base-url URL]
+  luci api book raw training [--json] [--base-url URL]
+  luci api book raw receipt [--json] [--base-url URL]
+  luci api book read queue [--json] [--base-url URL]
+  luci api ontology work batch [--json] [--base-url URL]
+  luci api ontology work item [--json] [--base-url URL]
+  luci api ontology work raw batch [--json] [--base-url URL]
+  luci api ontology work raw item [--json] [--base-url URL]
+  luci api prompt raw recent [--json] [--base-url URL]
+  luci api prompt raw filed [--json] [--base-url URL]
+  luci api prompt raw links [--json] [--base-url URL]
+  luci api prompt raw unlinked [--json] [--base-url URL]
+  luci api prompt raw catalog [--json] [--base-url URL]
+  luci api prompts filed [--json] [--base-url URL]
+  luci api prompt work-order links [--json] [--base-url URL]
+  luci api prompt catalog status [--json] [--base-url URL]
+  luci api bytewax compact windows [--json] [--base-url URL]
+  luci api rpc subtree --root-id ID [--json] [--base-url URL]
+  luci api rpc sort-key --node-id ID [--json] [--base-url URL]
+  luci api rpc material --node-id ID [--json] [--base-url URL]
+  luci api rpc cloud-packet --work-order-id ID [--json] [--base-url URL]
+  luci api rpc file-prompt --payload-json JSON [--json] [--base-url URL]
+  luci api rpc decompose-prompt --payload-json JSON [--json] [--base-url URL]
+  luci api rpc link-prompt --payload-json JSON [--json] [--base-url URL]
+  luci api cloud packet --work-order-id ID [--json] [--base-url URL]
+  luci api cli process receipts [--json] [--base-url URL]
+  luci api payload archive status [--json] [--base-url URL]
+  luci api bytewax windows [--json] [--base-url URL]
+  luci api bytewax raw windows [--json] [--base-url URL]
+  luci api book <source|scan|read-queue|note|candidate|adapter|training|receipt> [--json] [--base-url URL]
+  luci api book raw <source|scan|read-queue|note|candidate|adapter|training|receipt> [--json] [--base-url URL]
+  luci api ontology work <batch|item> [--json] [--base-url URL]
+  luci api ontology work raw <batch|item> [--json] [--base-url URL]
+  luci api test execution receipts [--json] [--base-url URL]
+  luci api route catalog [--json] [--base-url URL]
+  luci api bible manuals [--json] [--base-url URL]
+  luci api bible route catalog [--json] [--base-url URL]
+  luci api bible edges [--json] [--base-url URL]
+  luci api bible nodes --manual-id ID [--json] [--base-url URL]
+  luci api bible subtree --root-id ID [--json] [--base-url URL]
+  luci rpc subtree --root-id ID [--json] [--base-url URL]
+  luci rpc sort-key --node-id ID [--json] [--base-url URL]
+  luci rpc material --node-id ID [--json] [--base-url URL]
+  luci rpc cloud-packet --work-order-id ID [--json] [--base-url URL]
+  luci rpc file-prompt --payload-json JSON [--json] [--base-url URL]
+  luci rpc decompose-prompt --payload-json JSON [--json] [--base-url URL]
+  luci rpc link-prompt --payload-json JSON [--json] [--base-url URL]
+  luci bible manuals [--json] [--base-url URL]
+  luci bible route catalog [--json] [--base-url URL]
+  luci bible edges [--json] [--base-url URL]
+  luci bible nodes --manual-id ID [--json] [--base-url URL]
+  luci bible subtree --root-id ID [--json] [--base-url URL]
+  luci flow specs [--json] [--base-url URL]
+  luci flow receipts [--json] [--base-url URL]
+  luci daemon status [--json] [--base-url URL]
+  luci prompt <recent|filed|links|unlinked|catalog> [--json] [--base-url URL]
+  luci prompt raw <recent|filed|links|unlinked|catalog> [--json] [--base-url URL]
+  luci prompt recent [--json] [--base-url URL]
+  luci prompt filed [--json] [--base-url URL]
+  luci prompt links [--json] [--base-url URL]
+  luci prompt unlinked [--json] [--base-url URL]
+  luci prompt catalog [--json] [--base-url URL]
+  luci indy responses [--json] [--base-url URL]
+  luci indy queue [--json] [--base-url URL]
+  luci bytewax windows [--json] [--base-url URL]
+  luci bytewax raw windows [--json] [--base-url URL]
+  luci cloud packet --work-order-id ID [--json] [--base-url URL]
+  luci book <source|scan|read-queue|note|candidate|adapter|training|receipt> [--json] [--base-url URL]
+  luci book raw <source|scan|read-queue|note|candidate|adapter|training|receipt> [--json] [--base-url URL]
+  luci lora candidate [--json] [--base-url URL]
+  luci lora adapter [--json] [--base-url URL]
+  luci training job [--json] [--base-url URL]
+  luci ontology work <batch|item> [--json] [--base-url URL]
+  luci ontology work raw <batch|item> [--json] [--base-url URL]
+  luci canon versions [--json] [--base-url URL]
+  luci sheet current [--json]
+  luci workflow current [--json] [--base-url URL]
+  luci root-law-docs [--json] [--base-url URL]
+  luci cli-process-receipts [--json] [--base-url URL]
+  luci cli-retention [--json] [--archive-all] [--max-rows N] [--older-than-hours N]
+  luci payload-archive-status [--json] [--base-url URL]
   luci operate --text "do the thing" [--json]
   luci attempt --text "do the thing" [--json]
   luci learn --text TEXT [--run-id ID] [--artifact PATH] [--candidate-kind KIND] [--json]
@@ -86,8 +242,17 @@ Usage
   luci ingest status [--json]
   luci ingest markdown [--execute] [--json]
   luci ingest archive [--max-members N] [--json]
+  luci sheet <list|show|refresh|export|diff|promote|explain> [--json]
+  luci indy-comms <status|queue-email>
+  luci indy-response [--json] [--base-url URL]
+  luci speed-probe --command "./luci sheet list --json"
+  luci edge-loop-smoke [--json]
+  luci ingest route-bridge [--chunks PATH] [--max-chunks N] [--json]
   luci ingest krampus
   luci "do the thing"
+  luci /flow [--smoke] [--json]
+  luci flow open|ui [--no-browser] [--port N]
+  luci flow smoke [--json]
   luci flow batch --dag FLOW --eval DATA --run-id ID [--json]
   luci moa-worker --absurd-dir DIR
 
@@ -109,9 +274,25 @@ if [[ $# -eq 0 ]]; then
   if [[ -t 0 ]]; then
     echo "Indy_READs: LUCI online — co-operators ready, PromptFlow sidecar armed, receipts on deck." >&2
     read -r -p "luci> " stdin_text || true
-    if [[ -z "${stdin_text//[[:space:]]/}" ]]; then
+  if [[ -z "${stdin_text//[[:space:]]/}" ]]; then
       usage
       exit 0
+    fi
+    stdin_norm="$(printf '%s' "$stdin_text" | tr '[:upper:]' '[:lower:]' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+    if [[ "$stdin_norm" == "/help" || "$stdin_norm" == "help" || "$stdin_norm" == "what commands exist?" || "$stdin_norm" == "how do i run this?" ]]; then
+      exec "$PY" "$ROOT/scripts/luci_help_manual.py" help
+    fi
+    if [[ "$stdin_norm" == "/manual" || "$stdin_norm" == "manual" ]]; then
+      exec "$PY" "$ROOT/scripts/luci_help_manual.py" manual
+    fi
+    if [[ "$stdin_norm" == "/todo" || "$stdin_norm" == "todo" ]]; then
+      exec "$PY" "$ROOT/scripts/luci_todo.py"
+    fi
+    if [[ "$stdin_norm" == "/root-orchestrator" || "$stdin_norm" == "root-orchestrator" ]]; then
+      exec "$PY" "$ROOT/scripts/luci_help_manual.py" help
+    fi
+    if [[ "${stdin_text//[[:space:]]/}" == "/flow" ]]; then
+      exec "$PY" "$ROOT/07_SURFACES/sidecars/promptflow_canvas.py"
     fi
   else
     stdin_text="$(cat)"
@@ -119,11 +300,646 @@ if [[ $# -eq 0 ]]; then
       usage
       exit 0
     fi
+    stdin_norm="$(printf '%s' "$stdin_text" | tr '[:upper:]' '[:lower:]' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+    if [[ "$stdin_norm" == "/help" || "$stdin_norm" == "help" || "$stdin_norm" == "what commands exist?" || "$stdin_norm" == "how do i run this?" ]]; then
+      exec "$PY" "$ROOT/scripts/luci_help_manual.py" help
+    fi
+    if [[ "$stdin_norm" == "/manual" || "$stdin_norm" == "manual" ]]; then
+      exec "$PY" "$ROOT/scripts/luci_help_manual.py" manual
+    fi
+    if [[ "$stdin_norm" == "/todo" || "$stdin_norm" == "todo" ]]; then
+      exec "$PY" "$ROOT/scripts/luci_todo.py"
+    fi
+    if [[ "$stdin_norm" == "/root-orchestrator" || "$stdin_norm" == "root-orchestrator" ]]; then
+      exec "$PY" "$ROOT/scripts/luci_help_manual.py" help
+    fi
+    if [[ "${stdin_text//[[:space:]]/}" == "/flow" ]]; then
+      exec "$PY" "$ROOT/07_SURFACES/sidecars/promptflow_canvas.py"
+    fi
   fi
   run_luci_engine attempt --text "$stdin_text"
 fi
 
+if [[ "${1:-}" == "/flow" ]]; then
+  shift
+  exec "$PY" "$ROOT/07_SURFACES/sidecars/promptflow_canvas.py" "$@"
+fi
+
+joined_args="$*"
+joined_norm="$(printf '%s' "$joined_args" | tr '[:upper:]' '[:lower:]' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+if [[ "$joined_norm" == "what commands exist?" || "$joined_norm" == "how do i run this?" ]]; then
+  exec "$PY" "$ROOT/scripts/luci_help_manual.py" help
+fi
+
 case "$1" in
+  help|/help|commands|what-commands)
+    shift
+    exec "$PY" "$ROOT/scripts/luci_help_manual.py" help "$@"
+    ;;
+  manual|/manual)
+    shift
+    if [[ "${1:-}" == "current" ]]; then
+      shift
+    fi
+    exec "$PY" "$ROOT/scripts/luci_help_manual.py" manual "$@"
+    ;;
+  active|active-goal|active_goal)
+    shift
+    if [[ "${1:-}" == "goal" ]]; then
+      shift
+    fi
+    base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+    json_out=0
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --base-url)
+          base_url="${2:-}"; shift 2;;
+        --base-url=*)
+          base_url="${1#*=}"; shift;;
+        --json)
+          json_out=1; shift;;
+        *)
+          echo "LUCI active goal supports: [--json] [--base-url URL]" >&2
+          exit 2;;
+      esac
+    done
+    exec "$PY" - "$base_url" "$json_out" <<'PY'
+import json
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+base_url = sys.argv[1].rstrip("/")
+json_out = sys.argv[2] == "1"
+
+def fetch(path: str, query: dict[str, str] | None = None):
+    qs = urllib.parse.urlencode(query or {}, safe=",.")
+    url = f"{base_url}/{path.lstrip('/')}" + (f"?{qs}" if qs else "")
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            return url, json.loads(resp.read().decode("utf-8") or "null"), None
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", "replace")[:400]
+        return url, None, f"HTTPError:{exc.code}:{body}"
+    except Exception as exc:
+        return url, None, f"{type(exc).__name__}:{exc}"
+
+openapi_url, openapi, openapi_error = fetch("")
+paths = sorted((openapi or {}).get("paths", {}).keys()) if isinstance(openapi, dict) else []
+route_present = "/active_goal" in paths
+route_url = f"{base_url}/active_goal"
+if route_present:
+    route_url, rows, route_error = fetch("active_goal", {"limit": "1"})
+    if route_error:
+        print(f"ACTIVE_GOAL_UNAVAILABLE={route_url} error={route_error}", file=sys.stderr)
+        raise SystemExit(2)
+    if json_out:
+        print(json.dumps({"ok": True, "status": "FOUND", "source_url": route_url, "rows": rows}, sort_keys=True, ensure_ascii=False))
+        raise SystemExit(0)
+    else:
+        first = rows[0] if isinstance(rows, list) and rows else {}
+        print(f"ROUTE=/active_goal")
+        print(f"URL={route_url}")
+        print(f"ROW_COUNT={len(rows) if isinstance(rows, list) else 0}")
+        if isinstance(first, dict) and first:
+            print(f"TITLE={first.get('title') or first.get('goal_id') or first.get('route_id') or ''}")
+            print(f"STATUS={first.get('status') or first.get('route_status') or ''}")
+        else:
+            print("TITLE=")
+            print("STATUS=")
+        raise SystemExit(0)
+
+if json_out:
+    print(json.dumps({"ok": False, "status": "ROUTE_NOT_LIVE", "source_url": route_url, "openapi_url": openapi_url, "openapi_error": openapi_error}, sort_keys=True, ensure_ascii=False))
+else:
+    print("ACTIVE_GOAL_ROUTE_NOT_LIVE")
+    print(f"OPENAPI={openapi_url}")
+    if openapi_error:
+        print(f"OPENAPI_ERROR={openapi_error}")
+    print(f"ROUTE={route_url}")
+PY
+    ;;
+  todo|/todo)
+    shift
+    exec "$PY" "$ROOT/scripts/luci_todo.py" "$@"
+    ;;
+  todo-current|todo/current)
+    shift
+    if [[ "${1:-}" == "current" ]]; then
+      shift
+    fi
+    exec "$PY" "$ROOT/scripts/luci_todo.py" current "$@"
+    ;;
+  root-orchestrator|/root-orchestrator|root-orchestrator-current)
+    shift
+    base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+    json_out=0
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --base-url)
+          base_url="${2:-}"; shift 2;;
+        --base-url=*)
+          base_url="${1#*=}"; shift;;
+        --json)
+          json_out=1; shift;;
+        *)
+          echo "LUCI root-orchestrator supports: [--json] [--base-url URL]" >&2
+          exit 2;;
+      esac
+    done
+    exec "$PY" - "$base_url" "$json_out" <<'PY'
+import json
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+base_url = sys.argv[1].rstrip("/")
+json_out = sys.argv[2] == "1"
+
+def fetch(path: str, query: dict[str, str] | None = None):
+    qs = urllib.parse.urlencode(query or {}, safe=",.")
+    url = f"{base_url}/{path.lstrip('/')}" + (f"?{qs}" if qs else "")
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            return url, json.loads(resp.read().decode("utf-8") or "null"), None
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", "replace")[:400]
+        return url, None, f"HTTPError:{exc.code}:{body}"
+    except Exception as exc:
+        return url, None, f"{type(exc).__name__}:{exc}"
+
+openapi_url, openapi, openapi_error = fetch("")
+paths = sorted((openapi or {}).get("paths", {}).keys()) if isinstance(openapi, dict) else []
+route_present = "/root_orchestrator_current" in paths
+route_url = f"{base_url}/root_orchestrator_current"
+if route_present:
+    route_url, rows, route_error = fetch("root_orchestrator_current", {"limit": "1"})
+    if route_error:
+        print(f"ROOT_ORCHESTRATOR_UNAVAILABLE={route_url} error={route_error}", file=sys.stderr)
+        raise SystemExit(2)
+    if json_out:
+        print(json.dumps({"ok": True, "status": "FOUND", "source_url": route_url, "rows": rows}, sort_keys=True, ensure_ascii=False))
+    else:
+        first = rows[0] if isinstance(rows, list) and rows else {}
+        print(f"ROUTE=/root_orchestrator_current")
+        print(f"URL={route_url}")
+        print(f"ROW_COUNT={len(rows) if isinstance(rows, list) else 0}")
+        if isinstance(first, dict) and first:
+            print(f"TITLE={first.get('title') or first.get('orchestrator_id') or first.get('route_id') or ''}")
+            print(f"STATUS={first.get('status') or first.get('route_status') or ''}")
+        else:
+            print("TITLE=")
+            print("STATUS=")
+        raise SystemExit(0)
+
+if json_out:
+    print(json.dumps({"ok": False, "status": "ROUTE_NOT_LIVE", "source_url": route_url, "openapi_url": openapi_url, "openapi_error": openapi_error}, sort_keys=True, ensure_ascii=False))
+else:
+    print("ROOT_ORCHESTRATOR_ROUTE_NOT_LIVE")
+    print(f"OPENAPI={openapi_url}")
+    if openapi_error:
+        print(f"OPENAPI_ERROR={openapi_error}")
+    print(f"ROUTE={route_url}")
+PY
+  ;;
+  canon|canon-current)
+    shift
+    if [[ "${1:-}" == "current" ]]; then
+      shift
+    fi
+    if [[ "${1:-}" == "versions" ]]; then
+      shift
+      exec "$PY" "$ROOT/scripts/luci_canon_versions.py" "$@"
+    fi
+    exec "$PY" "$ROOT/scripts/luci_canon.py" "$@"
+    ;;
+  skill|skill-policy|skill-policy-current)
+    shift
+    if [[ "${1:-}" == "policy" ]]; then shift; fi
+    if [[ "${1:-}" == "current" ]]; then shift; fi
+    exec "$PY" "$ROOT/scripts/luci_skill_policy.py" "$@"
+    ;;
+  chrono|chrono-current)
+    shift
+    if [[ "${1:-}" == "current" ]]; then
+      shift
+    fi
+    exec "$PY" "$ROOT/scripts/luci_chrono.py" "$@"
+    ;;
+  model-routing-current|/model-routing-current)
+    shift
+    base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+    json_out=0
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --base-url)
+          base_url="${2:-}"; shift 2;;
+        --base-url=*)
+          base_url="${1#*=}"; shift;;
+        --json)
+          json_out=1; shift;;
+        *)
+          echo "LUCI model-routing-current supports: [--json] [--base-url URL]" >&2
+          exit 2;;
+      esac
+    done
+    exec "$PY" - "$base_url" "$json_out" <<'PY'
+import json
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+base_url = sys.argv[1].rstrip("/")
+json_out = sys.argv[2] == "1"
+
+def fetch(path: str, query: dict[str, str] | None = None):
+    qs = urllib.parse.urlencode(query or {}, safe=",.")
+    url = f"{base_url}/{path.lstrip('/')}" + (f"?{qs}" if qs else "")
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            return url, json.loads(resp.read().decode("utf-8") or "null"), None
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", "replace")[:400]
+        return url, None, f"HTTPError:{exc.code}:{body}"
+    except Exception as exc:
+        return url, None, f"{type(exc).__name__}:{exc}"
+
+openapi_url, openapi, openapi_error = fetch("")
+paths = sorted((openapi or {}).get("paths", {}).keys()) if isinstance(openapi, dict) else []
+route_present = "/model_routing_current" in paths
+route_url = f"{base_url}/model_routing_current"
+if route_present:
+    route_url, rows, route_error = fetch("model_routing_current", {"limit": "1"})
+    if route_error:
+        print(f"MODEL_ROUTING_CURRENT_UNAVAILABLE={route_url} error={route_error}", file=sys.stderr)
+        raise SystemExit(2)
+    if json_out:
+        print(json.dumps({"ok": True, "status": "FOUND", "source_url": route_url, "rows": rows}, sort_keys=True, ensure_ascii=False))
+    else:
+        first = rows[0] if isinstance(rows, list) and rows else {}
+        print(f"ROUTE=/model_routing_current")
+        print(f"URL={route_url}")
+        print(f"ROW_COUNT={len(rows) if isinstance(rows, list) else 0}")
+        if isinstance(first, dict) and first:
+            print(f"TITLE={first.get('routing_packet_id') or first.get('title') or first.get('route_id') or ''}")
+            print(f"STATUS={first.get('status') or first.get('route_status') or ''}")
+        else:
+            print("TITLE=")
+            print("STATUS=")
+        raise SystemExit(0)
+
+if json_out:
+    print(json.dumps({"ok": False, "status": "ROUTE_NOT_LIVE", "source_url": route_url, "openapi_url": openapi_url, "openapi_error": openapi_error}, sort_keys=True, ensure_ascii=False))
+else:
+    print("MODEL_ROUTING_CURRENT_ROUTE_NOT_LIVE")
+    print(f"OPENAPI={openapi_url}")
+    if openapi_error:
+        print(f"OPENAPI_ERROR={openapi_error}")
+    print(f"ROUTE={route_url}")
+PY
+    ;;
+  model-routing-blockers|/model-routing-blockers)
+    shift
+    base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+    json_out=0
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --base-url)
+          base_url="${2:-}"; shift 2;;
+        --base-url=*)
+          base_url="${1#*=}"; shift;;
+        --json)
+          json_out=1; shift;;
+        *)
+          echo "LUCI model-routing-blockers supports: [--json] [--base-url URL]" >&2
+          exit 2;;
+      esac
+    done
+    exec "$PY" - "$base_url" "$json_out" <<'PY'
+import json
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+base_url = sys.argv[1].rstrip("/")
+json_out = sys.argv[2] == "1"
+
+def fetch(path: str, query: dict[str, str] | None = None):
+    qs = urllib.parse.urlencode(query or {}, safe=",.")
+    url = f"{base_url}/{path.lstrip('/')}" + (f"?{qs}" if qs else "")
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            return url, json.loads(resp.read().decode("utf-8") or "null"), None
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", "replace")[:400]
+        return url, None, f"HTTPError:{exc.code}:{body}"
+    except Exception as exc:
+        return url, None, f"{type(exc).__name__}:{exc}"
+
+openapi_url, openapi, openapi_error = fetch("")
+paths = sorted((openapi or {}).get("paths", {}).keys()) if isinstance(openapi, dict) else []
+route_present = "/model_routing_current" in paths
+route_url = f"{base_url}/model_routing_current"
+if route_present:
+    route_url, rows, route_error = fetch("model_routing_current", {"limit": "1"})
+    if route_error:
+        print(f"MODEL_ROUTING_BLOCKERS_UNAVAILABLE={route_url} error={route_error}", file=sys.stderr)
+        raise SystemExit(2)
+    first = rows[0] if isinstance(rows, list) and rows else {}
+    missing_roles = first.get("missing_roles") if isinstance(first, dict) else []
+    if json_out:
+        print(json.dumps({"ok": True, "status": "FOUND", "source_url": route_url, "missing_roles": missing_roles, "missing_role_count": len(missing_roles) if isinstance(missing_roles, list) else 0, "routing_notes": first.get("routing_notes") if isinstance(first, dict) else {}, "local_model_roles": first.get("local_model_roles") if isinstance(first, dict) else {}}, sort_keys=True, ensure_ascii=False))
+    else:
+        print("ROUTE=/model_routing_current")
+        print(f"URL={route_url}")
+        print(f"MISSING_ROLE_COUNT={len(missing_roles) if isinstance(missing_roles, list) else 0}")
+        print(f"MISSING_ROLES={', '.join(missing_roles) if isinstance(missing_roles, list) else ''}")
+    raise SystemExit(0)
+
+if json_out:
+    print(json.dumps({"ok": False, "status": "ROUTE_NOT_LIVE", "source_url": route_url, "openapi_url": openapi_url, "openapi_error": openapi_error}, sort_keys=True, ensure_ascii=False))
+else:
+    print("MODEL_ROUTING_BLOCKERS_ROUTE_NOT_LIVE")
+    print(f"OPENAPI={openapi_url}")
+    if openapi_error:
+        print(f"OPENAPI_ERROR={openapi_error}")
+    print(f"ROUTE={route_url}")
+PY
+    ;;
+  root)
+    shift
+    if [[ "${1:-}" == "orchestrator" ]]; then
+      shift
+      if [[ "${1:-}" == "current" ]]; then
+        shift
+      fi
+      exec "$PY" "$ROOT/scripts/luci_root_orchestrator.py" "$@"
+    fi
+    echo "LUCI root supports: orchestrator current [--json] [--base-url URL]" >&2
+    exit 2
+    ;;
+  model-registry|model-registry-current)
+    shift
+    if [[ "${1:-}" == "registry" ]]; then shift; fi
+    if [[ "${1:-}" == "current" ]]; then shift; fi
+    exec "$PY" "$ROOT/scripts/luci_model_registry.py" "$@"
+    ;;
+  capability|capability-current)
+    shift
+    if [[ "${1:-}" == "current" ]]; then
+      shift
+    fi
+    if [[ "${1:-}" == "registry" ]]; then
+      shift
+      if [[ "${1:-}" == "raw" ]]; then
+        shift
+        base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+        json_out=0
+        while [[ $# -gt 0 ]]; do
+          case "$1" in
+            --base-url)
+              base_url="${2:-}"; shift 2;;
+            --base-url=*)
+              base_url="${1#*=}"; shift;;
+            --json)
+              json_out=1; shift;;
+            *)
+              echo "LUCI capability registry raw supports: [--json] [--base-url URL]" >&2
+              exit 2;;
+          esac
+        done
+        if [[ "$json_out" -eq 1 ]]; then
+          exec "$PY" "$ROOT/scripts/luci_capability_registry_raw.py" --base-url "$base_url" --json
+        fi
+        exec "$PY" "$ROOT/scripts/luci_capability_registry_raw.py" --base-url "$base_url"
+      fi
+      exec "$PY" "$ROOT/scripts/luci_capability_registry.py" "$@"
+    fi
+    exec "$PY" "$ROOT/scripts/luci_capability.py" "$@"
+    ;;
+  provider|provider-current)
+    shift
+    if [[ "${1:-}" == "current" ]]; then
+      shift
+    fi
+    if [[ "${1:-}" == "registry" ]]; then
+      shift
+      if [[ "${1:-}" == "raw" ]]; then
+        shift
+        base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+        json_out=0
+        while [[ $# -gt 0 ]]; do
+          case "$1" in
+            --base-url)
+              base_url="${2:-}"; shift 2;;
+            --base-url=*)
+              base_url="${1#*=}"; shift;;
+            --json)
+              json_out=1; shift;;
+            *)
+              echo "LUCI provider registry raw supports: [--json] [--base-url URL]" >&2
+              exit 2;;
+          esac
+        done
+        if [[ "$json_out" -eq 1 ]]; then
+          exec "$PY" "$ROOT/scripts/luci_provider_registry_raw.py" --base-url "$base_url" --json
+        fi
+        exec "$PY" "$ROOT/scripts/luci_provider_registry_raw.py" --base-url "$base_url"
+      fi
+      exec "$PY" "$ROOT/scripts/luci_provider_registry.py" "$@"
+    fi
+    exec "$PY" "$ROOT/scripts/luci_provider.py" "$@"
+    ;;
+  cli-process-receipts|/cli-process-receipts)
+    shift
+    exec "$PY" "$ROOT/scripts/luci_cli_process_receipts.py" "$@"
+    ;;
+  cli-retention|/cli-retention)
+    shift
+    exec "$PY" "$ROOT/scripts/cli_payload_retention.py" "$@"
+    ;;
+  payload-archive-status|/payload-archive-status)
+    shift
+    exec "$PY" "$ROOT/scripts/luci_payload_archive.py" "$@"
+    ;;
+  root-law-docs|root-law|root-manual)
+    shift
+    base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+    json_out=0
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --base-url)
+          base_url="${2:-}"; shift 2;;
+        --base-url=*)
+          base_url="${1#*=}"; shift;;
+        --json)
+          json_out=1; shift;;
+        *)
+          echo "LUCI root-law-docs supports: [--json] [--base-url URL]" >&2
+          exit 2;;
+      esac
+    done
+    exec "$PY" - "$base_url" "$json_out" <<'PY'
+import json
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+base_url = sys.argv[1].rstrip("/")
+json_out = sys.argv[2] == "1"
+
+def fetch(path: str, query: dict[str, str] | None = None):
+    qs = urllib.parse.urlencode(query or {}, safe=",.")
+    url = f"{base_url}/{path.lstrip('/')}" + (f"?{qs}" if qs else "")
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            return url, json.loads(resp.read().decode("utf-8") or "null"), None
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", "replace")[:400]
+        return url, None, f"HTTPError:{exc.code}:{body}"
+    except Exception as exc:
+        return url, None, f"{type(exc).__name__}:{exc}"
+
+openapi_url, openapi, openapi_error = fetch("")
+paths = sorted((openapi or {}).get("paths", {}).keys()) if isinstance(openapi, dict) else []
+route_present = "/root_law_docs" in paths
+route_url = f"{base_url}/root_law_docs"
+if route_present:
+    route_url, rows, route_error = fetch("root_law_docs", {"limit": "1"})
+    if route_error:
+        print(f"ROOT_LAW_DOCS_UNAVAILABLE={route_url} error={route_error}", file=sys.stderr)
+        raise SystemExit(2)
+    if json_out:
+        print(json.dumps({"ok": True, "status": "FOUND", "source_url": route_url, "rows": rows}, sort_keys=True, ensure_ascii=False))
+        raise SystemExit(0)
+    else:
+        first = rows[0] if isinstance(rows, list) and rows else {}
+        print(f"ROUTE=/root_law_docs")
+        print(f"URL={route_url}")
+        print(f"ROW_COUNT={len(rows) if isinstance(rows, list) else 0}")
+        if isinstance(first, dict) and first:
+            print(f"TITLE={first.get('title') or first.get('manual_id') or first.get('route_id') or ''}")
+            print(f"STATUS={first.get('status') or first.get('route_status') or ''}")
+        else:
+            print("TITLE=")
+            print("STATUS=")
+        raise SystemExit(0)
+
+if json_out:
+    print(json.dumps({"ok": False, "status": "ROUTE_NOT_LIVE", "source_url": route_url, "openapi_url": openapi_url, "openapi_error": openapi_error}, sort_keys=True, ensure_ascii=False))
+else:
+    print("ROOT_LAW_DOCS_ROUTE_NOT_LIVE")
+    print(f"OPENAPI={openapi_url}")
+    if openapi_error:
+        print(f"OPENAPI_ERROR={openapi_error}")
+    print(f"ROUTE={route_url}")
+PY
+    ;;
+  bible)
+    shift
+    subcommand="${1:-}"
+    case "$subcommand" in
+      subtree)
+        shift || true
+        base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+        json_out=0
+        root_id=""
+        while [[ $# -gt 0 ]]; do
+          case "$1" in
+            --base-url)
+              base_url="${2:-}"; shift 2;;
+            --base-url=*)
+              base_url="${1#*=}"; shift;;
+            --json)
+              json_out=1; shift;;
+            --root-id)
+              root_id="${2:-}"; shift 2;;
+            --root-id=*)
+              root_id="${1#*=}"; shift;;
+            *)
+              echo "LUCI bible subtree supports: --root-id ID [--json] [--base-url URL]" >&2
+              exit 2;;
+          esac
+        done
+        if [[ -z "$root_id" ]]; then
+          echo "LUCI bible subtree requires --root-id ID" >&2
+          exit 2
+        fi
+        exec "$PY" - "$base_url" "$json_out" "$root_id" <<'PY'
+import json
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+base_url = sys.argv[1].rstrip("/")
+json_out = sys.argv[2] == "1"
+root_id = sys.argv[3]
+route_url = f"{base_url}/api_bible_subtree?root_id=eq.{urllib.parse.quote(root_id)}&limit=1"
+try:
+    with urllib.request.urlopen(route_url, timeout=5) as resp:
+        rows = json.loads(resp.read().decode("utf-8") or "null")
+except urllib.error.HTTPError as exc:
+    body = exc.read().decode("utf-8", "replace")[:400]
+    if json_out:
+        print(json.dumps({"ok": False, "status": "ROUTE_NOT_LIVE", "source_url": route_url, "error": f"HTTPError:{exc.code}:{body}"}, sort_keys=True, ensure_ascii=False))
+    else:
+        print("BIBLE_SUBTREE_ROUTE_NOT_LIVE")
+        print(f"ROUTE={route_url}")
+        print(f"ERROR=HTTPError:{exc.code}:{body}")
+    raise SystemExit(2)
+except Exception as exc:
+    if json_out:
+        print(json.dumps({"ok": False, "status": "ERROR", "source_url": route_url, "error": f"{type(exc).__name__}:{exc}"}, sort_keys=True, ensure_ascii=False))
+    else:
+        print("BIBLE_SUBTREE_ERROR")
+        print(f"ROUTE={route_url}")
+        print(f"ERROR={type(exc).__name__}:{exc}")
+    raise SystemExit(2)
+if json_out:
+    print(json.dumps({"ok": True, "status": "FOUND", "source_url": route_url, "rows": rows}, sort_keys=True, ensure_ascii=False))
+else:
+first = rows[0] if isinstance(rows, list) and rows else {}
+    print("ROUTE=/api_bible_subtree")
+    print(f"URL={route_url}")
+    print(f"ROW_COUNT={len(rows) if isinstance(rows, list) else 0}")
+    print(f"ROOT_ID={first.get('root_id') if isinstance(first, dict) else ''}")
+    print(f"TITLE={first.get('title') if isinstance(first, dict) else ''}")
+PY
+        ;;
+      manuals)
+        shift || true
+        exec "$PY" "$ROOT/scripts/luci_bible_manuals.py" "$@"
+        ;;
+      route)
+        shift || true
+        if [[ "${1:-}" == "catalog" ]]; then
+          shift
+        fi
+        exec "$PY" "$ROOT/scripts/luci_bible_route_catalog.py" "$@"
+        ;;
+      edges)
+        shift || true
+        exec "$PY" "$ROOT/scripts/luci_bible_edges.py" "$@"
+        ;;
+      nodes)
+        shift || true
+        exec "$PY" "$ROOT/scripts/luci_bible_nodes.py" "$@"
+        ;;
+      *)
+        echo "LUCI bible supports: manuals [--json] [--base-url URL]" >&2
+        echo "LUCI bible supports: route catalog [--json] [--base-url URL]" >&2
+        echo "LUCI bible supports: edges [--json] [--base-url URL]" >&2
+        echo "LUCI bible supports: nodes --manual-id ID [--json] [--base-url URL]" >&2
+        echo "LUCI bible supports: subtree --root-id ID [--json] [--base-url URL]" >&2
+        exit 2;;
+    esac
+    ;;
   operate|attempt)
     shift
     run_luci_engine attempt "$@"
@@ -152,8 +968,218 @@ case "$1" in
     shift
     run_luci_engine provider "$@"
     ;;
+  indy)
+    shift
+    case "${1:-}" in
+      queue)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_indy_queue.py" "$@"
+        ;;
+      response|responses)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_indy_response.py" "$@"
+        ;;
+      *)
+        echo "LUCI indy supports: queue|responses [--json] [--base-url URL]" >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  bytewax)
+    shift
+    mode="${1:-windows}"
+    if [[ $# -gt 0 ]]; then shift; fi
+    case "$mode" in
+      raw)
+        raw_mode="${1:-}"
+        if [[ $# -gt 0 ]]; then shift; fi
+        case "$raw_mode" in
+          windows)
+            exec "$PY" "$ROOT/scripts/luci_bytewax_windows.py" raw windows "$@"
+            ;;
+          *)
+            echo "LUCI bytewax raw supports: windows [--json] [--base-url URL]" >&2
+            exit 2
+            ;;
+        esac
+        ;;
+      windows)
+        exec "$PY" "$ROOT/scripts/luci_bytewax_windows.py" windows "$@"
+        ;;
+      *)
+        echo "LUCI bytewax supports: windows [--json] [--base-url URL]" >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  cloud)
+    shift
+    case "${1:-}" in
+      packet)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_cloud_packet.py" "$@"
+        ;;
+      *)
+        echo "LUCI cloud supports: packet --work-order-id ID [--json] [--base-url URL]" >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  book)
+    shift
+    mode="${1:-source}"
+    if [[ $# -gt 0 ]]; then shift; fi
+    case "$mode" in
+      raw)
+        raw_mode="${1:-}"
+        if [[ $# -gt 0 ]]; then shift; fi
+        case "$raw_mode" in
+          source|scan|read-queue|note|candidate|adapter|training|receipt)
+            exec "$PY" "$ROOT/scripts/luci_book.py" raw "$raw_mode" "$@"
+            ;;
+          *)
+            echo "LUCI book raw supports: source|scan|read-queue|note|candidate|adapter|training|receipt [--json] [--base-url URL]" >&2
+            exit 2
+            ;;
+        esac
+        ;;
+      source|scan|read-queue|note|candidate|adapter|training|receipt)
+        exec "$PY" "$ROOT/scripts/luci_book.py" "$mode" "$@"
+        ;;
+      *)
+        echo "LUCI book supports: source|scan|read-queue|note|candidate|adapter|training|receipt [--json] [--base-url URL]" >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  lora)
+    shift
+    mode="${1:-}"
+    if [[ $# -gt 0 ]]; then shift; fi
+    case "$mode" in
+      candidate|adapter)
+        exec "$PY" "$ROOT/scripts/luci_lora.py" "$mode" "$@"
+        ;;
+      *)
+        echo "LUCI lora supports: candidate|adapter [--json] [--base-url URL]" >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  training)
+    shift
+    case "${1:-}" in
+      job)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_training.py" job "$@"
+        ;;
+      *)
+        echo "LUCI training supports: job [--json] [--base-url URL]" >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  ontology)
+    shift
+    case "${1:-}" in
+      work)
+        shift
+        mode="${1:-batch}"
+        if [[ $# -gt 0 ]]; then shift; fi
+        case "$mode" in
+          raw)
+            raw_mode="${1:-}"
+            if [[ $# -gt 0 ]]; then shift; fi
+            case "$raw_mode" in
+              batch|item)
+                exec "$PY" "$ROOT/scripts/luci_ontology_work.py" raw "$raw_mode" "$@"
+                ;;
+              *)
+                echo "LUCI ontology work raw supports: batch|item [--json] [--base-url URL]" >&2
+                exit 2
+                ;;
+            esac
+            ;;
+          batch|item)
+            exec "$PY" "$ROOT/scripts/luci_ontology_work.py" "$mode" "$@"
+            ;;
+          *)
+            echo "LUCI ontology work supports: batch|item [--json] [--base-url URL]" >&2
+            exit 2
+            ;;
+        esac
+        ;;
+      *)
+        echo "LUCI ontology supports: work batch|item [--json] [--base-url URL]" >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  daemon|daemon-status)
+    shift
+    if [[ "${1:-}" == "status" ]]; then
+      shift
+    fi
+    exec "$PY" "$ROOT/scripts/luci_daemon_status.py" "$@"
+    ;;
+  prompt)
+    shift
+    mode="${1:-recent}"
+    if [[ $# -gt 0 ]]; then shift; fi
+    case "$mode" in
+      raw)
+        raw_mode="${1:-}"
+        if [[ $# -gt 0 ]]; then shift; fi
+        case "$raw_mode" in
+          recent|filed|links|unlinked|catalog)
+            exec "$PY" "$ROOT/scripts/luci_prompt_ledger.py" raw "$raw_mode" "$@"
+            ;;
+          *)
+            echo "LUCI prompt raw supports: recent|filed|links|unlinked|catalog [--json] [--base-url URL]" >&2
+            exit 2
+            ;;
+        esac
+        ;;
+      recent|filed|links|unlinked|catalog)
+        exec "$PY" "$ROOT/scripts/luci_prompt_ledger.py" "$mode" "$@"
+        ;;
+      *)
+        echo "LUCI prompt supports: recent|filed|links|unlinked|catalog [--json] [--base-url URL]" >&2
+        exit 2
+        ;;
+    esac
+    ;;
   model)
     shift
+    if [[ "${1:-}" == "registry" ]]; then
+      shift
+      if [[ "${1:-}" == "raw" ]]; then
+        shift
+        exec "$PY" "$ROOT/scripts/luci_model_registry_raw.py" "$@"
+      fi
+      if [[ "${1:-}" == "current" ]]; then
+        shift
+        exec "$PY" "$ROOT/scripts/luci_model_registry.py" "$@"
+      fi
+      exec "$PY" "$ROOT/scripts/luci_model_registry_raw.py" "$@"
+    fi
+    if [[ "${1:-}" == "routing" ]]; then
+      shift
+      case "${1:-}" in
+        current)
+          shift
+          exec "$PY" "$ROOT/scripts/luci_model_routing_current.py" "$@"
+          ;;
+        blockers)
+          shift
+          exec "$PY" "$ROOT/scripts/luci_model_routing_blockers.py" "$@"
+          ;;
+        *)
+          echo "LUCI model routing supports: current|blockers [--json] [--base-url URL]" >&2
+          exit 2
+          ;;
+      esac
+    fi
     run_luci_engine model "$@"
     ;;
   status)
@@ -174,12 +1200,767 @@ case "$1" in
     ;;
   ingest)
     shift
+    if [[ "${1:-}" == "route-bridge" ]]; then
+      shift
+      exec "$PY" "$ROOT/scripts/luci_ingest_route_bridge.py" "$@"
+    fi
+    if [[ "${1:-}" == "seed-workflow-tasks" ]]; then
+      shift
+      exec "$PY" "$ROOT/scripts/lucidota_workflow_task_seed.py" "$@"
+    fi
     run_luci_engine ingest "$@"
+    ;;
+  sheet)
+    shift
+    exec "$PY" "$ROOT/scripts/luci_sheet.py" "$@"
+    ;;
+  workflow|workflow-current)
+    shift
+    if [[ "${1:-}" == "registry" ]]; then
+      shift
+      if [[ "${1:-}" == "raw" ]]; then
+        shift
+        base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+        json_out=0
+        while [[ $# -gt 0 ]]; do
+          case "$1" in
+            --base-url)
+              base_url="${2:-}"; shift 2;;
+            --base-url=*)
+              base_url="${1#*=}"; shift;;
+            --json)
+              json_out=1; shift;;
+            *)
+              echo "LUCI workflow registry raw supports: [--json] [--base-url URL]" >&2
+              exit 2;;
+          esac
+        done
+        if [[ "$json_out" -eq 1 ]]; then
+          exec "$PY" "$ROOT/scripts/luci_workflow_registry_raw.py" --base-url "$base_url" --json
+        fi
+        exec "$PY" "$ROOT/scripts/luci_workflow_registry_raw.py" --base-url "$base_url"
+      fi
+      base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+      json_out=0
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --base-url)
+            base_url="${2:-}"; shift 2;;
+          --base-url=*)
+            base_url="${1#*=}"; shift;;
+          --json)
+            json_out=1; shift;;
+          *)
+            echo "LUCI workflow registry supports: [--json] [--base-url URL]" >&2
+            exit 2;;
+        esac
+      done
+      if [[ "$json_out" -eq 1 ]]; then
+        exec "$PY" "$ROOT/scripts/luci_workflow_registry.py" --base-url "$base_url" --json
+      fi
+      exec "$PY" "$ROOT/scripts/luci_workflow_registry.py" --base-url "$base_url"
+    fi
+    base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+    json_out=0
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --base-url)
+          base_url="${2:-}"; shift 2;;
+        --base-url=*)
+          base_url="${1#*=}"; shift;;
+        --json)
+          json_out=1; shift;;
+        *)
+          echo "LUCI workflow current supports: [--json] [--base-url URL]" >&2
+          exit 2;;
+      esac
+    done
+    exec "$PY" - "$base_url" "$json_out" <<'PY'
+import json
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+base_url = sys.argv[1].rstrip("/")
+json_out = sys.argv[2] == "1"
+
+def fetch(path: str, query: dict[str, str] | None = None):
+    qs = urllib.parse.urlencode(query or {}, safe=",.")
+    url = f"{base_url}/{path.lstrip('/')}" + (f"?{qs}" if qs else "")
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            return url, json.loads(resp.read().decode("utf-8") or "null"), None
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", "replace")[:400]
+        return url, None, f"HTTPError:{exc.code}:{body}"
+    except Exception as exc:
+        return url, None, f"{type(exc).__name__}:{exc}"
+
+openapi_url, openapi, openapi_error = fetch("")
+paths = sorted((openapi or {}).get("paths", {}).keys()) if isinstance(openapi, dict) else []
+route_present = "/workflow_current" in paths
+route_url = f"{base_url}/workflow_current"
+if route_present:
+    route_url, rows, route_error = fetch("workflow_current", {"limit": "1"})
+    if route_error:
+        print(f"WORKFLOW_CURRENT_UNAVAILABLE={route_url} error={route_error}", file=sys.stderr)
+        raise SystemExit(2)
+    if json_out:
+        print(json.dumps({"ok": True, "status": "FOUND", "source_url": route_url, "rows": rows}, sort_keys=True, ensure_ascii=False))
+    else:
+        first = rows[0] if isinstance(rows, list) and rows else {}
+        print(f"ROUTE=/workflow_current")
+        print(f"URL={route_url}")
+        print(f"ROW_COUNT={len(rows) if isinstance(rows, list) else 0}")
+        if isinstance(first, dict) and first:
+            print(f"TITLE={first.get('workflow_packet_id') or first.get('title') or first.get('route_id') or ''}")
+            print(f"STATUS={first.get('status') or first.get('route_status') or ''}")
+        else:
+            print("TITLE=")
+            print("STATUS=")
+        raise SystemExit(0)
+
+if json_out:
+    print(json.dumps({"ok": False, "status": "ROUTE_NOT_LIVE", "source_url": route_url, "openapi_url": openapi_url, "openapi_error": openapi_error}, sort_keys=True, ensure_ascii=False))
+else:
+    print("WORKFLOW_CURRENT_ROUTE_NOT_LIVE")
+    print(f"OPENAPI={openapi_url}")
+    if openapi_error:
+        print(f"OPENAPI_ERROR={openapi_error}")
+    print(f"ROUTE={route_url}")
+PY
+    ;;
+  openapi)
+    shift
+    base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+    json_out=0
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --base-url)
+          base_url="${2:-}"; shift 2;;
+        --base-url=*)
+          base_url="${1#*=}"; shift;;
+        --json)
+          json_out=1; shift;;
+        *)
+          echo "LUCI openapi supports: [--json] [--base-url URL]" >&2
+          exit 2;;
+      esac
+    done
+    exec "$PY" - "$base_url" "$json_out" <<'PY'
+import json
+import sys
+import urllib.error
+import urllib.request
+
+base_url = sys.argv[1].rstrip('/')
+json_out = sys.argv[2] == '1'
+openapi_url = f'{base_url}/'
+try:
+    with urllib.request.urlopen(openapi_url, timeout=5) as resp:
+        payload = json.loads(resp.read().decode('utf-8') or '{}')
+        if json_out:
+            print(json.dumps({'ok': True, 'source_url': openapi_url, 'payload': payload}, sort_keys=True, ensure_ascii=False))
+        else:
+            print(json.dumps(payload, sort_keys=True, ensure_ascii=False))
+except urllib.error.HTTPError as exc:
+    body = exc.read().decode('utf-8', 'replace')[:500]
+    if json_out:
+        print(json.dumps({'ok': False, 'status': exc.code, 'source_url': openapi_url, 'body': body}, sort_keys=True, ensure_ascii=False))
+    else:
+        print(f'OPENAPI_HTTP_ERROR={exc.code}')
+        print(body)
+        raise SystemExit(2)
+except Exception as exc:
+    if json_out:
+        print(json.dumps({'ok': False, 'status': 'ERROR', 'source_url': openapi_url, 'error': f'{type(exc).__name__}: {exc}'}, sort_keys=True, ensure_ascii=False))
+    else:
+        print(f'OPENAPI_ERROR={type(exc).__name__}: {exc}')
+        raise SystemExit(2)
+PY
+    ;;
+  api)
+    shift
+    if [[ "${1:-}" == "manual" && "${2:-}" == "current" ]]; then
+      shift 2
+      exec "$0" manual current "$@"
+    fi
+    if [[ "${1:-}" == "active" && "${2:-}" == "goal" ]]; then
+      shift 2
+      exec "$0" active goal "$@"
+    fi
+    if [[ "${1:-}" == "root" && "${2:-}" == "orchestrator" && "${3:-}" == "current" ]]; then
+      shift 3
+      exec "$0" root orchestrator current "$@"
+    fi
+    if [[ "${1:-}" == "canon" && "${2:-}" == "current" ]]; then
+      shift 2
+      exec "$0" canon current "$@"
+    fi
+    if [[ "${1:-}" == "canon" && "${2:-}" == "versions" ]]; then
+      shift 2
+      exec "$0" canon versions "$@"
+    fi
+    if [[ "${1:-}" == "daemon" && "${2:-}" == "status" ]]; then
+      shift 2
+      exec "$0" daemon status "$@"
+    fi
+    if [[ "${1:-}" == "chrono" && "${2:-}" == "current" ]]; then
+      shift 2
+      exec "$0" chrono current "$@"
+    fi
+    if [[ "${1:-}" == "model" && "${2:-}" == "routing" && "${3:-}" == "current" ]]; then
+      shift 3
+      exec "$0" model routing current "$@"
+    fi
+    if [[ "${1:-}" == "model" && "${2:-}" == "routing" && "${3:-}" == "blockers" ]]; then
+      shift 3
+      exec "$0" model routing blockers "$@"
+    fi
+    if [[ "${1:-}" == "model" && "${2:-}" == "registry" && "${3:-}" == "raw" ]]; then
+      shift 3
+      exec "$0" model registry raw "$@"
+    fi
+    if [[ "${1:-}" == "model" && "${2:-}" == "registry" ]]; then
+      shift 2
+      exec "$0" model registry "$@"
+    fi
+    if [[ "${1:-}" == "model" && "${2:-}" == "registry" && "${3:-}" == "current" ]]; then
+      shift 3
+      exec "$0" model registry current "$@"
+    fi
+    if [[ "${1:-}" == "provider" && "${2:-}" == "current" ]]; then
+      shift 2
+      exec "$0" provider current "$@"
+    fi
+    if [[ "${1:-}" == "provider" && "${2:-}" == "registry" ]]; then
+      shift 2
+      exec "$0" provider registry "$@"
+    fi
+    if [[ "${1:-}" == "capability" && "${2:-}" == "current" ]]; then
+      shift 2
+      exec "$0" capability current "$@"
+    fi
+    if [[ "${1:-}" == "capability" && "${2:-}" == "registry" ]]; then
+      shift 2
+      exec "$0" capability registry "$@"
+    fi
+    if [[ "${1:-}" == "workflow" && "${2:-}" == "current" ]]; then
+      shift 2
+      exec "$0" workflow current "$@"
+    fi
+    if [[ "${1:-}" == "todo" && "${2:-}" == "current" ]]; then
+      shift 2
+      exec "$0" todo current "$@"
+    fi
+    if [[ "${1:-}" == "indy" && "${2:-}" == "queue" ]]; then
+      shift 2
+      exec "$0" indy queue "$@"
+    fi
+    if [[ "${1:-}" == "indy" && "${2:-}" == "responses" ]]; then
+      shift 2
+      exec "$0" indy responses "$@"
+    fi
+    if [[ "${1:-}" == "sheet" && "${2:-}" == "current" ]]; then
+      shift 2
+      exec "$0" sheet current "$@"
+    fi
+    if [[ "${1:-}" == "flow" && "${2:-}" == "specs" ]]; then
+      shift 2
+      exec "$0" flow specs "$@"
+    fi
+    if [[ "${1:-}" == "flow" && "${2:-}" == "receipts" ]]; then
+      shift 2
+      exec "$0" flow receipts "$@"
+    fi
+    if [[ "${1:-}" == "book" && "${2:-}" == "read" && "${3:-}" == "queue" ]]; then
+      shift 3
+      exec "$0" api book read-queue "$@"
+    fi
+    if [[ "${1:-}" == "prompts" && "${2:-}" == "filed" ]]; then
+      shift 2
+      exec "$0" api prompt filed "$@"
+    fi
+    if [[ "${1:-}" == "prompt" && "${2:-}" == "work-order" && "${3:-}" == "links" ]]; then
+      shift 3
+      exec "$0" api prompt links "$@"
+    fi
+    if [[ "${1:-}" == "prompt" && "${2:-}" == "catalog" && "${3:-}" == "status" ]]; then
+      shift 3
+      exec "$0" api prompt catalog "$@"
+    fi
+    if [[ "${1:-}" == "bytewax" && "${2:-}" == "compact" && "${3:-}" == "windows" ]]; then
+      shift 3
+      exec "$0" api bytewax windows "$@"
+    fi
+    if [[ "${1:-}" == "bytewax" ]]; then
+      shift
+      mode="${1:-windows}"
+      if [[ $# -gt 0 ]]; then shift; fi
+      case "$mode" in
+        raw)
+          raw_mode="${1:-}"
+          if [[ $# -gt 0 ]]; then shift; fi
+          case "$raw_mode" in
+            windows)
+              exec "$PY" "$ROOT/scripts/luci_bytewax_windows.py" raw windows "$@"
+              ;;
+            *)
+              echo "LUCI api bytewax raw supports: windows [--json] [--base-url URL]" >&2
+              exit 2
+              ;;
+          esac
+          ;;
+        windows)
+          exec "$PY" "$ROOT/scripts/luci_bytewax_windows.py" windows "$@"
+          ;;
+        *)
+          echo "LUCI api bytewax supports: windows [--json] [--base-url URL]" >&2
+          exit 2
+          ;;
+      esac
+    fi
+    if [[ "${1:-}" == "cloud" ]]; then
+      shift
+      if [[ "${1:-}" == "packet" ]]; then
+        shift
+        exec "$PY" "$ROOT/scripts/luci_cloud_packet.py" "$@"
+      fi
+    fi
+    if [[ "${1:-}" == "cli" ]]; then
+      shift
+      if [[ "${1:-}" == "process" ]]; then
+        shift
+        if [[ "${1:-}" == "receipts" ]]; then
+          shift
+          exec "$PY" "$ROOT/scripts/luci_cli_process_receipts.py" "$@"
+        fi
+      fi
+    fi
+    if [[ "${1:-}" == "payload" ]]; then
+      shift
+      if [[ "${1:-}" == "archive" ]]; then
+        shift
+        if [[ "${1:-}" == "status" ]]; then
+          shift
+          exec "$PY" "$ROOT/scripts/luci_payload_archive.py" "$@"
+        fi
+      fi
+    fi
+    if [[ "${1:-}" == "book" ]]; then
+      shift
+      mode="${1:-source}"
+      if [[ $# -gt 0 ]]; then shift; fi
+      case "$mode" in
+        raw)
+          raw_mode="${1:-}"
+          if [[ $# -gt 0 ]]; then shift; fi
+          case "$raw_mode" in
+            source|scan|read-queue|note|candidate|adapter|training|receipt)
+              exec "$PY" "$ROOT/scripts/luci_book.py" raw "$raw_mode" "$@"
+              ;;
+            *)
+              echo "LUCI api book raw supports: source|scan|read-queue|note|candidate|adapter|training|receipt [--json] [--base-url URL]" >&2
+              exit 2
+              ;;
+          esac
+          ;;
+        source|scan|read-queue|note|candidate|adapter|training|receipt)
+          exec "$PY" "$ROOT/scripts/luci_book.py" "$mode" "$@"
+          ;;
+        *)
+          echo "LUCI api book supports: source|scan|read-queue|note|candidate|adapter|training|receipt [--json] [--base-url URL]" >&2
+          exit 2
+          ;;
+      esac
+    fi
+    if [[ "${1:-}" == "ontology" ]]; then
+      shift
+      if [[ "${1:-}" == "work" ]]; then
+        shift
+        mode="${1:-batch}"
+        if [[ $# -gt 0 ]]; then shift; fi
+        case "$mode" in
+          raw)
+            raw_mode="${1:-}"
+            if [[ $# -gt 0 ]]; then shift; fi
+            case "$raw_mode" in
+              batch|item)
+                exec "$PY" "$ROOT/scripts/luci_ontology_work.py" raw "$raw_mode" "$@"
+                ;;
+              *)
+                echo "LUCI api ontology work raw supports: batch|item [--json] [--base-url URL]" >&2
+                exit 2
+                ;;
+            esac
+            ;;
+          batch|item)
+            exec "$PY" "$ROOT/scripts/luci_ontology_work.py" "$mode" "$@"
+            ;;
+          *)
+            echo "LUCI api ontology work supports: batch|item [--json] [--base-url URL]" >&2
+            exit 2
+            ;;
+        esac
+      fi
+    fi
+    if [[ "${1:-}" == "prompt" ]]; then
+      shift
+      mode="${1:-recent}"
+      if [[ $# -gt 0 ]]; then shift; fi
+      case "$mode" in
+        catalog)
+          exec "$PY" "$ROOT/scripts/luci_prompt_ledger.py" catalog "$@"
+          ;;
+        raw)
+          raw_mode="${1:-}"
+          if [[ $# -gt 0 ]]; then shift; fi
+          case "$raw_mode" in
+            recent|filed|links|unlinked|catalog)
+              exec "$PY" "$ROOT/scripts/luci_prompt_ledger.py" raw "$raw_mode" "$@"
+              ;;
+            *)
+              echo "LUCI api prompt raw supports: recent|filed|links|unlinked|catalog [--json] [--base-url URL]" >&2
+              exit 2
+              ;;
+          esac
+          ;;
+        recent|filed|links|unlinked|catalog)
+          exec "$PY" "$ROOT/scripts/luci_prompt_ledger.py" "$mode" "$@"
+          ;;
+        *)
+          echo "LUCI api prompt supports: recent|filed|links|unlinked|catalog [--json] [--base-url URL]" >&2
+          exit 2
+          ;;
+      esac
+    fi
+    if [[ "${1:-}" == "rpc" ]]; then
+      shift
+      exec "$0" rpc "$@"
+    fi
+    if [[ "${1:-}" == "root" ]]; then
+      shift
+      if [[ "${1:-}" == "law" ]]; then
+        shift
+      fi
+      if [[ "${1:-}" == "docs" ]]; then
+        shift
+        base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+        json_out=0
+        while [[ $# -gt 0 ]]; do
+          case "$1" in
+            --base-url)
+              base_url="${2:-}"; shift 2;;
+            --base-url=*)
+              base_url="${1#*=}"; shift;;
+            --json)
+              json_out=1; shift;;
+            *)
+              echo "LUCI api root law docs supports: [--json] [--base-url URL]" >&2
+              exit 2;;
+          esac
+        done
+        exec "$PY" - "$base_url" "$json_out" <<'PY'
+import json
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+base_url = sys.argv[1].rstrip("/")
+json_out = sys.argv[2] == "1"
+
+def fetch(path: str, query: dict[str, str] | None = None):
+    qs = urllib.parse.urlencode(query or {}, safe=",.")
+    url = f"{base_url}/{path.lstrip('/')}" + (f"?{qs}" if qs else "")
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            return True, json.loads(resp.read().decode("utf-8") or "[]"), url
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", "replace")[:500]
+        return False, {"error": f"HTTPError:{exc.code}", "body": body}, url
+    except Exception as exc:
+        return False, {"error": f"{type(exc).__name__}: {exc}"}, url
+
+ok, rows, route_url = fetch("api_root_law_docs", {"limit": "1"})
+if json_out:
+    print(json.dumps({"ok": ok, "status": "FOUND" if ok else "MISSING", "source_url": route_url, "rows": rows if ok else []}, sort_keys=True, ensure_ascii=False))
+else:
+    print(f"API_ROOT_LAW_DOCS={route_url}")
+    print(f"STATUS={'FOUND' if ok else 'MISSING'}")
+    if ok and rows:
+        print(f"TITLE={rows[0].get('title')}")
+PY
+      fi
+    fi
+    if [[ "${1:-}" == "root-law-docs" ]]; then
+      shift
+      exec "$0" root-law-docs "$@"
+    fi
+    if [[ "${1:-}" == "workflow" ]]; then
+      shift
+      if [[ "${1:-}" == "registry" ]]; then
+        shift
+        if [[ "${1:-}" == "raw" ]]; then
+          shift
+          base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+          json_out=0
+          while [[ $# -gt 0 ]]; do
+            case "$1" in
+              --base-url)
+                base_url="${2:-}"; shift 2;;
+              --base-url=*)
+                base_url="${1#*=}"; shift;;
+              --json)
+                json_out=1; shift;;
+              *)
+                echo "LUCI api workflow registry raw supports: [--json] [--base-url URL]" >&2
+                exit 2;;
+            esac
+          done
+          if [[ "$json_out" -eq 1 ]]; then
+            exec "$PY" "$ROOT/scripts/luci_api_workflow_registry_raw.py" --base-url "$base_url" --json
+          fi
+          exec "$PY" "$ROOT/scripts/luci_api_workflow_registry_raw.py" --base-url "$base_url"
+        fi
+      fi
+      exec "$PY" "$ROOT/scripts/luci_workflow_registry.py" "$@"
+    fi
+    if [[ "${1:-}" == "bible" ]]; then
+      shift
+      case "${1:-}" in
+        manuals)
+          shift
+          exec "$PY" "$ROOT/scripts/luci_bible_manuals.py" "$@"
+          ;;
+        route)
+          shift
+          if [[ "${1:-}" == "catalog" ]]; then
+            shift
+          fi
+          exec "$PY" "$ROOT/scripts/luci_bible_route_catalog.py" "$@"
+          ;;
+        edges)
+          shift
+          exec "$PY" "$ROOT/scripts/luci_bible_edges.py" "$@"
+          ;;
+        nodes)
+          shift
+          exec "$PY" "$ROOT/scripts/luci_bible_nodes.py" "$@"
+          ;;
+        subtree)
+          shift
+          exec "$PY" "$ROOT/scripts/luci_api_bible_subtree.py" "$@"
+          ;;
+        *)
+          echo "LUCI api bible supports: manuals [--json] [--base-url URL]" >&2
+          echo "LUCI api bible supports: route catalog [--json] [--base-url URL]" >&2
+          echo "LUCI api bible supports: edges [--json] [--base-url URL]" >&2
+          echo "LUCI api bible supports: nodes --manual-id ID [--json] [--base-url URL]" >&2
+          echo "LUCI api bible supports: subtree --root-id ID [--json] [--base-url URL]" >&2
+          exit 2
+          ;;
+      esac
+    fi
+    if [[ "${1:-}" == "test" ]]; then
+      shift
+      if [[ "${1:-}" == "execution" ]]; then
+        shift
+      fi
+      if [[ "${1:-}" == "receipts" ]]; then
+        shift
+      fi
+      exec "$PY" "$ROOT/scripts/luci_api_test_execution_receipts.py" "$@"
+    fi
+    if [[ "${1:-}" == "route" ]]; then
+      shift
+      if [[ "${1:-}" == "catalog" ]]; then
+        shift
+      fi
+      exec "$PY" "$ROOT/scripts/luci_api_route_catalog.py" "$@"
+    fi
+    echo "LUCI api supports: workflow registry [--json] [--base-url URL]" >&2
+    echo "LUCI api supports: bible manuals [--json] [--base-url URL]" >&2
+    echo "LUCI api supports: bible route catalog [--json] [--base-url URL]" >&2
+    echo "LUCI api supports: bible edges [--json] [--base-url URL]" >&2
+    echo "LUCI api supports: bible nodes --manual-id ID [--json] [--base-url URL]" >&2
+    echo "LUCI api supports: bible subtree --root-id ID [--json] [--base-url URL]" >&2
+    echo "LUCI api supports: canon current [--json] [--base-url URL]" >&2
+    echo "LUCI api supports: canon versions [--json] [--base-url URL]" >&2
+    echo "LUCI api supports: test execution receipts [--json] [--base-url URL]" >&2
+    echo "LUCI api supports: route catalog [--json] [--base-url URL]" >&2
+    exit 2
+    ;;
+  rpc)
+    shift
+    case "${1:-}" in
+      subtree)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_rpc.py" subtree "$@"
+        ;;
+      sort-key)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_rpc.py" sort-key "$@"
+        ;;
+      material)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_rpc.py" material "$@"
+        ;;
+      cloud-packet|cloud)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_rpc.py" cloud-packet "$@"
+        ;;
+      file-prompt|file-prompt-rpc)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_rpc.py" file-prompt "$@"
+        ;;
+      decompose-prompt|decompose-prompt-to-work-orders)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_rpc.py" decompose-prompt "$@"
+        ;;
+      link-prompt|link-prompt-work-order)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_rpc.py" link-prompt "$@"
+        ;;
+      *)
+        echo "LUCI rpc supports: subtree --root-id ID [--json] [--base-url URL]" >&2
+        echo "LUCI rpc supports: sort-key --node-id ID [--json] [--base-url URL]" >&2
+        echo "LUCI rpc supports: material --node-id ID [--json] [--base-url URL]" >&2
+        echo "LUCI rpc supports: cloud-packet --work-order-id ID [--json] [--base-url URL]" >&2
+        echo "LUCI rpc supports: file-prompt --payload-json JSON [--json] [--base-url URL]" >&2
+        echo "LUCI rpc supports: decompose-prompt --payload-json JSON [--json] [--base-url URL]" >&2
+        echo "LUCI rpc supports: link-prompt --payload-json JSON [--json] [--base-url URL]" >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  bible)
+    shift
+    case "${1:-}" in
+      manuals)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_bible_manuals.py" "$@"
+        ;;
+      route)
+        shift
+        if [[ "${1:-}" == "catalog" ]]; then
+          shift
+        fi
+        exec "$PY" "$ROOT/scripts/luci_bible_route_catalog.py" "$@"
+        ;;
+      edges)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_bible_edges.py" "$@"
+        ;;
+      nodes)
+        shift
+        exec "$PY" "$ROOT/scripts/luci_bible_nodes.py" "$@"
+        ;;
+      *)
+        echo "LUCI bible supports: manuals [--json] [--base-url URL]" >&2
+        echo "LUCI bible supports: route catalog [--json] [--base-url URL]" >&2
+        echo "LUCI bible supports: edges [--json] [--base-url URL]" >&2
+        echo "LUCI bible supports: nodes --manual-id ID [--json] [--base-url URL]" >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  indy-comms)
+    shift
+    exec "$PY" "$ROOT/scripts/indy_reads_comms.py" "$@"
+    ;;
+  indy-response|indy-responses)
+    shift
+    base_url="${POSTGREST_BASE_URL:-http://127.0.0.1:3000}"
+    json_out=0
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --base-url)
+          base_url="${2:-}"; shift 2;;
+        --base-url=*)
+          base_url="${1#*=}"; shift;;
+        --json)
+          json_out=1; shift;;
+        *)
+          echo "LUCI indy-response supports: [--json] [--base-url URL]" >&2
+          exit 2;;
+      esac
+    done
+    exec "$PY" - "$base_url" "$json_out" <<'PY'
+import json
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+base_url = sys.argv[1].rstrip("/")
+json_out = sys.argv[2] == "1"
+query = urllib.parse.urlencode(
+    {
+        "select": "dialogue_id,event_id,response_id,response_body,response_body_sha256,response_delivery_status,response_queued_at,processed_status",
+        "order": "response_queued_at.desc",
+        "limit": "1",
+    },
+    safe=",.",
+)
+url = f"{base_url}/indy_responses?{query}"
+try:
+    with urllib.request.urlopen(url, timeout=5) as resp:
+        rows = json.loads(resp.read().decode("utf-8") or "[]")
+except urllib.error.HTTPError as exc:
+    body = exc.read().decode("utf-8", "replace")[:400]
+    print(f"INDY_RESPONSE_API_UNAVAILABLE={url} status={exc.code} body={body}", file=sys.stderr)
+    raise SystemExit(2)
+except Exception as exc:
+    print(f"INDY_RESPONSE_API_UNAVAILABLE={url} error={type(exc).__name__}:{exc}", file=sys.stderr)
+    raise SystemExit(2)
+
+if not rows:
+    if json_out:
+        print(json.dumps({"ok": True, "status": "NO_INDY_RESPONSE", "source_url": url}, sort_keys=True))
+    else:
+        print("INDY_RESPONSE_NONE")
+    raise SystemExit(0)
+
+row = rows[0]
+if json_out:
+    print(json.dumps({"ok": True, "status": "FOUND", "source_url": url, "response": row}, sort_keys=True, ensure_ascii=False))
+else:
+    print(f"RESPONSE_ID={row.get('response_id') or ''}")
+    print(f"DIALOGUE_ID={row.get('dialogue_id') or ''}")
+    print(f"EVENT_ID={row.get('event_id') or ''}")
+    print(f"STATUS={row.get('response_delivery_status') or ''}")
+    print(f"QUEUED_AT={row.get('response_queued_at') or ''}")
+    print(f"BODY_SHA256={row.get('response_body_sha256') or ''}")
+    print("BODY=" + str(row.get("response_body") or ""))
+PY
+    ;;
+  speed-probe)
+    shift
+    exec "$PY" "$ROOT/scripts/luci_speed_probe.py" "$@"
+    ;;
+  edge-loop-smoke)
+    shift
+    exec "$PY" "$ROOT/scripts/luci_edge_loop_smoke.py" "$@"
     ;;
   flow)
     shift
+    if [[ $# -eq 0 || "${1:-}" == "open" || "${1:-}" == "ui" ]]; then
+      [[ $# -gt 0 ]] && shift
+      exec "$PY" "$ROOT/07_SURFACES/sidecars/promptflow_canvas.py" "$@"
+    fi
+    if [[ "${1:-}" == "smoke" ]]; then
+      shift
+      exec "$PY" "$ROOT/07_SURFACES/sidecars/promptflow_canvas.py" --smoke "$@"
+    fi
+    if [[ "${1:-}" == "specs" || "${1:-}" == "receipts" ]]; then
+      mode="${1:-specs}"
+      shift
+      exec "$PY" "$ROOT/scripts/luci_flow.py" "$mode" "$@"
+    fi
     if [[ "${1:-}" != "batch" ]]; then
-      echo "LUCI flow supports: batch --dag FLOW --eval DATA --run-id ID [--output-dir DIR]" >&2
+      echo "LUCI flow supports: open|ui [--no-browser] [--port N]; smoke [--json]; specs|receipts [--json] [--base-url URL]; batch --dag FLOW --eval DATA --run-id ID [--output-dir DIR]" >&2
       exit 2
     fi
     shift

@@ -3461,3 +3461,4593 @@ Technical Summary Review and Dev Notes: The paper and the stone match: the HTML 
 - Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/python scripts/root_rotor_api_documentation.py --sync-route-nodes --json && .venv/bin/pytest -q tests/test_root_rotor_api_documentation.py tests/test_root_rotor_postgrest_control.py`
 
 Technical Summary Review and Dev Notes: The swamp ledger is happier when the road map and the bones share the same excerpt hashes. Broad audit sources are now visible to the docs spine.
+
+---
+
+## Step 1/4 — Start durable Q1 shared-KV wiring pass
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T18:52:28Z`
+- Current step: 1/4
+- Status: in_progress
+- Objective: Make the Bonsai 8B Q1_0 single-server two-slot shared/unified-KV topology durable, verified, and documented while preserving the broader edge-compute topology goal.
+- Completed: Confirmed live Bonsai-8B-Q1_0 server state: one llama-server process on :8082, alias bonsai8b-q1-shared2, --parallel 2, --kv-unified, all layers offloaded to GTX 1650 VRAM; read current handoff and LUCIDOTA Dev Library laws.
+- Next action: Write failing tests for Q1 source metadata and shared-KV command wiring, then implement minimal durable metadata/script support.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/pytest -q tests/test_local_bonsai_ternary_wiring.py tests/test_bonsai_q1_shared_runtime.py`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: The live beast is real; now we put its footprints in the ledger so it survives chat amnesia.
+
+---
+
+## Step 2/4 — Q1 runtime wiring and Treelite inventory
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T18:55:44Z`
+- Current step: 2/4
+- Status: in_progress
+- Objective: Make the Bonsai 8B Q1_0 single-server two-slot shared/unified-KV topology durable, verified, and document the Needle x6 shared-server / rolling-window KV policy plus available Treelite assets.
+- Completed: Downloaded and recorded explicit Bonsai-8B-Q1_0 weight; added tested q1_shared runtime command/config helpers; updated Bonsai launcher defaults to one VRAM server with two slots and unified/offloaded q8_0 KV; found AHOY Treelite compiled artifacts and the two non-AHOY Treelite families.
+- Next action: Encode the rolling-window KV management policy for Mamba->Needle x6->Bonsai and decide whether to install/enable Treelite runtime bindings for live FIL/GTIL execution.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/pytest -q tests/test_bonsai_q1_shared_runtime.py tests/test_local_bonsai_ternary_wiring.py && curl -sS http://127.0.0.1:8082/props | python3 -m json.tool | grep -E "total_slots|model_path|model_alias"`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: The Q1 Bonsai goblin has a reproducible summon circle now; AHOY had a whole reef of tiny tree-ships hiding under BOARD_GAMES.
+
+---
+
+## Step 3/4 — Needle x6 shared server and rolling cache policy
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T18:59:21Z`
+- Current step: 3/4
+- Status: in_progress
+- Objective: Make the Bonsai 8B Q1_0 single-server two-slot shared/unified-KV topology durable, verified, and document the Needle x6 shared-server / rolling-window KV policy plus available Treelite assets.
+- Completed: Replaced six separate Needle workers with one needle-shared-6 server on :8090; verified /health and /generate_batch; wrote GOALS/EDGE_GRAIL_RUNTIME_LEDGER.md and Treelite inventory receipt.
+- Next action: Decide/install live Treelite runtime support and implement exact Needle tensor-level prefix/KV reuse if required beyond current one-process batched shared-prefix server.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; .venv/bin/pytest -q tests/test_needle_shared_runtime.py tests/test_bonsai_q1_shared_runtime.py tests/test_local_bonsai_ternary_wiring.py && curl -sS http://127.0.0.1:8090/health | python3 -m json.tool`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: Six Needle mouths now share one body. Bonsai already has llama.cpp unified KV; Needle has the right cage shape and still wants a deeper tensor-cache tooth.
+
+---
+
+## Step 3/4 — Verify official Cactus Needle source against local runtime
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T19:03:53Z`
+- Current step: 3/4
+- Status: in_progress
+- Objective: Make the Bonsai 8B Q1_0 single-server two-slot shared/unified-KV topology durable, verified, and document the Needle x6 shared-server / rolling-window KV policy plus available Treelite assets.
+- Completed: Checked https://github.com/cactus-compute/needle at commit 1c6fa9309f6d5b5b91738c9b6595ec7f709f5828; confirmed upstream Needle is a 26M JAX Simple Attention Network with generate_batch but no external KV-cache API; verified local Needle package resolves to 01_REPOS/needle and live needle-shared-6 remains healthy on :8090.
+- Next action: Update the stale Treelite inventory receipt, then decide whether to vendor the tiny upstream Needle doc/finetune-warning deltas or leave local copy unchanged.
+- Resume command: `source scripts/lucidota_safe_ops_env.sh >/dev/null 2>&1; curl -sS http://127.0.0.1:8090/health | python3 -m json.tool; curl -sS http://127.0.0.1:8082/props -o /tmp/bonsai_props.json`
+
+Technical Summary Review and Dev Notes: Official cactus tooth inspected. It has batch jaws, not exposed KV fangs; our one-body six-lane server is truthful, tensor-level cache sharing remains a runner surgery target.
+
+---
+
+## Step 3/4 — Expose Treelite locations for operator reading
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T19:04:50Z`
+- Current step: 3/4
+- Status: in_progress
+- Objective: Make the Bonsai 8B Q1_0 single-server two-slot shared/unified-KV topology durable, verified, and document the Needle x6 shared-server / rolling-window KV policy plus available Treelite assets.
+- Completed: Generated full Treelite location receipts: 301 Treelite-ish artifacts found across LUCIDOTA and BOARD_GAMES/AHOY; wrote markdown map and JSON inventory under 05_OUTPUTS/model_runtime.
+- Next action: Use 05_OUTPUTS/model_runtime/TREELITE_WHERE_ARE_THEY.md for reading paths; next verify which AHOY .so files are true loadable shared libraries versus serialized/invalid-ELF artifacts.
+- Resume command: `sed -n "1,120p" 05_OUTPUTS/model_runtime/TREELITE_WHERE_ARE_THEY.md; python3 -m json.tool 05_OUTPUTS/model_runtime/treelite_where_are_they_latest.json | sed -n "1,80p"`
+
+Technical Summary Review and Dev Notes: Treelite burrow map written. The artifacts are no longer in the fog: AHOY, router, dev-journey, receipts, scripts.
+
+---
+
+## Step 3/4 — Stage closest Mamba one-bit-class weight and answer Indy_READs book count
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T19:19:04Z`
+- Current step: 3/4
+- Status: in_progress
+- Objective: Make the Bonsai 8B Q1_0 single-server two-slot shared/unified-KV topology durable, verified, and document the Needle x6 shared-server / rolling-window KV policy plus available Treelite assets.
+- Completed: Downloaded and checksummed Falcon3-Mamba-7B-Instruct.i1-IQ1_S.gguf at 1,636,121,600 bytes with source receipt; verified Indy_READs watcher is running and BOOKS has 6 actual book files plus 1 markdown context pack visible to the library function.
+- Next action: Draft/encode Talkie RunPod upcycling design without touching Dolphin, and keep explicit caveats: Mamba artifact is IQ1_S not Q1_0; Needle exact tensor-KV reuse remains runner surgery.
+- Resume command: `python3 - <<"PY"\nfrom scripts.indy_reads import library\nprint(len(library()))\nPY\npython3 -m json.tool 03_VAULT/models/mradermacher/Falcon3-Mamba-7B-Instruct-i1-GGUF/model_source.json | sed -n "1,80p"`
+
+Technical Summary Review and Dev Notes: Mamba tooth is in the vault, but named honestly: IQ1_S, not fake Q1_0. Indy has six paper critters and one markdown field-ration.
+
+---
+
+## Step 1/3 — Write focused failing tests for Counter-based gini/LTC caps and state retention
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Harden Hoeffding-Gini and LTC safeguards
+- Generated: `2026-06-02T19:20:56Z`
+- Current step: 1/3
+- Status: in_progress
+- Objective: Add tight, test-driven constraints to split evaluation and LTC runtime safety paths.
+- Completed: Added scoped tests for Counter-based split math inputs, single-pass generators, non-state-retaining LTC run mode, and dimension/dt/substep caps; tests are currently failing against existing behavior.
+- Next action: Implement minimal code changes in ALGOS/hoeffding_gini_split.py and ALGOS/ltc.py to satisfy the new tests.
+- Resume command: `pytest -q tests/test_hoeffding_gini_split.py tests/test_ltc.py`
+
+Technical Summary Review and Dev Notes: I logged this as a tiny, bounded checkpoint: the tiger tracks point at the split gate, but it still hasn't moved.
+
+---
+
+## Step 2/3 — Implement Counter-based gini path and LTC caps/state-mode controls
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Harden Hoeffding-Gini and LTC safeguards
+- Generated: `2026-06-02T19:21:27Z`
+- Current step: 2/3
+- Status: in_progress
+- Objective: Add tight, test-driven constraints to split evaluation and LTC runtime safety paths.
+- Completed: Updated hoeffding_gini_split.py to compute Gini/gain from Counters in hot paths and rewired StreamingNode split evaluation to avoid Counter.elements(); added runtime-cap aware dimension, substep, and delta-time constraints plus optional state retention controls in LTC.
+- Next action: Run the full targeted module test files again and confirm pass with no regressions.
+- Resume command: `pytest -q tests/test_hoeffding_gini_split.py tests/test_ltc.py`
+
+Technical Summary Review and Dev Notes: Caps and split logic now bite only where needed; the split-hall tracks are clean and the signal is stable.
+
+---
+
+## Step 3/3 — Run tests and finalize hardening handoff
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Harden Hoeffding-Gini and LTC safeguards
+- Generated: `2026-06-02T19:21:36Z`
+- Current step: 3/3
+- Status: complete
+- Objective: Add tight, test-driven constraints to split evaluation and LTC runtime safety paths.
+- Completed: Wrote and ran 8 focused assertions across Hoeffding/LTC scopes; all pass. Remaining gap: the distilled Hoeffding copy was not updated because task scope requested only active module path.
+- Next action: Use GOALS/CURRENT_HANDOFF.md and this note as the handoff for next operator context.
+- Resume command: `pytest -q tests/test_hoeffding_gini_split.py tests/test_ltc.py`
+
+Technical Summary Review and Dev Notes: The gate now speaks in counts not crumbs; LTC keeps state only when asked and sleeps under tighter step caps.
+
+---
+
+## Step 3/3 — Sync distilled duplicate and finalize hardening handoff
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Harden Hoeffding-Gini and LTC safeguards
+- Generated: `2026-06-02T19:21:53Z`
+- Current step: 3/3
+- Status: complete
+- Objective: Add tight, test-driven constraints to split evaluation and LTC runtime safety paths.
+- Completed: Synchronized distilled/hoeffding_gini_split.py with the Counter-based split-path updates and kept targeted tests passing (8/8). Remaining gap: runtime_caps still absent in repo; values fall back to safe local defaults.
+- Next action: Use this handoff for next context; rerun pytest targets if touched again.
+- Resume command: `pytest -q tests/test_hoeffding_gini_split.py tests/test_ltc.py`
+
+Technical Summary Review and Dev Notes: Final track is set: counts-first split math and capped LTC stepping pass receipts, with distilled copy now matching the live path.
+
+---
+
+## Step 3/4 — Patch survivability caps and stage Talkie-only RunPod forge
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T19:27:21Z`
+- Current step: 3/4
+- Status: in_progress
+- Objective: Make the Bonsai 8B Q1_0 single-server two-slot shared/unified-KV topology durable, verified, and document the Needle x6 shared-server / rolling-window KV policy plus available Treelite assets; stage Talkie-only RunPod forge path without touching Dolphin.
+- Completed: Added ALGOS.runtime_caps, patched algo hot-loop hazards across GLiNER, Hoeffding, LTC, Omni, tri-algo, epistemic, diffusion, RETE, and pheromone with targeted tests; wrote GOALS/TALKIE_DOUBLE_SPARSE_RUNPOD_FORGE.md and scripts/runpod_talkie_forge_bootstrap.sh; started Talkie IT checkpoint download; Dolphin/Mixtral untouched.
+- Next action: Let Talkie rl-refined.pt finish downloading/checksum; then use RunPod bootstrap to get source custody and inspect Talkie architecture before any MoE/ReLU surgery.
+- Resume command: `.venv/bin/pytest -q tests/test_runtime_caps.py tests/test_talkie_runpod_forge_artifacts.py tests/test_gliner_zero_shot_extractor.py tests/test_ltc.py; ps -p $(cat 03_VAULT/models/talkie-lm/talkie-1930-13b-it/download.pid) -o pid,etime,stat,rss,cmd; tail -n 20 03_VAULT/models/talkie-lm/talkie-1930-13b-it/download.log`
+
+Technical Summary Review and Dev Notes: Pressure hull bolted on. Talkie is being hauled into the vault; Dolphin remains asleep in the swamp. The weird forge now has a recipe, not just sparks.
+
+---
+
+## Step 3/4 — Encode multi-model algorithmic routing truth
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T19:28:22Z`
+- Current step: 3/4
+- Status: in_progress
+- Objective: Make the Bonsai/Mamba/Needle/algo/Talkie lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Wrote GOALS/MULTI_MODEL_ALGORITHMIC_ROUTING_LEDGER.md: local fast stack can cooperate via refs/challenge packets; Talkie is RunPod/cloud/deep critic and not local always-resident RAM; zram/cgroup/pressure-hull rules preserved; Dolphin/Mixtral untouched.
+- Next action: Let Talkie source checkpoint finish; then run RunPod custody/bootstrap and inspect architecture before MoE/ReLU surgery.
+- Resume command: `sed -n "1,180p" GOALS/MULTI_MODEL_ALGORITHMIC_ROUTING_LEDGER.md; ps -p $(cat 03_VAULT/models/talkie-lm/talkie-1930-13b-it/download.pid) -o pid,etime,stat,rss,cmd`
+
+Technical Summary Review and Dev Notes: The choir gets a conductor. No one is stuffing the cathedral organ into the glovebox.
+
+---
+
+## Step 3/4 — Add all Treelites as deterministic route gates
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T19:28:47Z`
+- Current step: 3/4
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Updated GOALS/MULTI_MODEL_ALGORITHMIC_ROUTING_LEDGER.md with Treelite deterministic gate layer, inventory receipt paths, AHOY/router/dev-journey burrows, and route role.
+- Next action: Verify/load Treelite .tl and inspect AHOY .so validity before marking individual AHOY shared objects as executable gates.
+- Resume command: `grep -n "Treelite deterministic" -A40 GOALS/MULTI_MODEL_ALGORITHMIC_ROUTING_LEDGER.md; sed -n "1,80p" 05_OUTPUTS/model_runtime/TREELITE_WHERE_ARE_THEY.md`
+
+Technical Summary Review and Dev Notes: The tree goblins are not forgotten. They sit at the switchyard, not the storyteller throne.
+
+---
+
+## Step 3/4 — Prove Treelite footprint and local loadability
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T19:30:16Z`
+- Current step: 3/4
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Generated Treelite loadability receipt: all 103 .tl artifacts deserialize under .venv Treelite 4.7.0; 43/71 AHOY .so files are ELF-like and ctypes-load; total Treelite-ish footprint is 11.777 MiB, with .tl only 2.059 MiB and .so 6.625 MiB.
+- Next action: Wire loadable Treelite .tl/FIL-compatible gates into the algorithmic routing feature packet path; keep GPU/FIL residency as an explicit integration step, not assumed.
+- Resume command: `sed -n "1,120p" 05_OUTPUTS/model_runtime/TREELITE_LOADABILITY_SUMMARY.md; ps -p $(cat 03_VAULT/models/talkie-lm/talkie-1930-13b-it/download.pid) -o pid,etime,stat,rss,cmd`
+
+Technical Summary Review and Dev Notes: The favorite little trees fit in a thimble. They can ride the VRAM bus; FIL is the harness still to bolt on.
+
+---
+
+## Step 3/4 — Add bounded Edge Grail Treelite route switchyard
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T19:32:03Z`
+- Current step: 3/4
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Added scripts/edge_grail_treelite_router.py and tests/test_edge_grail_treelite_router.py. The route gate consumes bounded GO/JSON packets, strips raw body fields, embeds Treelite loadability summary, and emits FAST/CHECK/STREAM/DEEP/PANIC with Talkie allowed only for earned DEEP routes.
+- Next action: When Talkie source checkpoint finishes, checksum/source-receipt it; longer-term gap remains true Needle tensor-KV reuse and FIL/GPU Treelite backend integration.
+- Resume command: `scripts/edge_grail_treelite_router.py --packet "{\"event_id\":\"smoke\",\"input_hash\":\"abc\",\"operator_deep\":true}" | python3 -m json.tool; ps -p $(cat 03_VAULT/models/talkie-lm/talkie-1930-13b-it/download.pid) -o pid,etime,stat,rss,cmd`
+
+Technical Summary Review and Dev Notes: The little trees now sit in the switchyard with badges, not just a treasure map.
+
+---
+
+## Step 4/5 — Encode exact VRAM/CPU spinnable topology
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T19:35:15Z`
+- Current step: 4/5
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Encoded the exact operator topology in GOALS/MULTI_MODEL_ALGORITHMIC_ROUTING_LEDGER.md: Bonsai Q1_0 dual slots, Mamba IQ1_S with Q2 fallback, Needle x6 shared server truth, Treelite gate layer, four VRAM-candidate algos, CPU Ternary Bonsai Q2_0, Talkie RunPod forge lane, on-demand OCR/embed/extract/vision/Whisper/Piper lanes, style/accent packet, Tokio + Rig.rs orchestration, and VRAM spindown law.
+- Next action: Verify the router CLI regression and combined route/algo tests; then wire concrete service units/install steps for Whisper/Piper/OCR/embedding only after choosing exact model artifacts/voices.
+- Resume command: `.venv/bin/pytest -q tests/test_edge_grail_treelite_router.py tests/test_runtime_caps.py tests/test_talkie_runpod_forge_artifacts.py`
+
+Technical Summary Review and Dev Notes: Topology got bolted into the map: no fake always-resident dragon, just spinnable organs with receipts.
+
+---
+
+## Step 5/6 — Add Sheet Layer, aux admission, Indy boot/comms, and edge-loop proof
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T19:50:34Z`
+- Current step: 5/6
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Added and applied 06_SCHEMA/147_lucidota_sheet_layer.sql; added 04_RUNTIME/lucidota_sheet_manifest.json and scripts/luci_sheet.py; added auxiliary model admission manifest/CLI; added Indy_READs startup/comms manifest, systemd user service template, queue-only comms CLI, and LUCI speed probe; added scripts/luci_edge_loop_smoke.py and ./luci edge-loop-smoke proving sheet/admission/Treelite/Indy/speed loop with refs-not-bodies.
+- Next action: Let Talkie checkpoint finish, checksum/source-receipt it, then decide whether to install actual Indy user service and wire direct local chat socket/SSE; continue keeping external email/Signal sends approval-gated.
+- Resume command: `./luci edge-loop-smoke --receipt 05_OUTPUTS/runtime/edge_loop_smoke_latest.json --json | python3 -m json.tool; .venv/bin/pytest -q tests/test_lucidota_sheet_layer.py tests/test_aux_model_admission_manifest.py tests/test_indy_startup_comms_speed.py tests/test_luci_edge_loop_smoke.py`
+
+Technical Summary Review and Dev Notes: The spreadsheet goblin got promoted into the spine; Indy has a boot perch and an outbox leash; the smoke command proves the little OS reflex without waking the deep beast.
+
+---
+
+## Step 6/7 — Stage Talkie source custody and BOOK_READER_LORA RunPod pack
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T19:55:36Z`
+- Current step: 6/7
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Cloned official Talkie source to 01_REPOS/talkie and wrote 05_OUTPUTS/model_runtime/talkie_source_custody.json; counted Indy_READs library at 7 items (6 book files + 1 context pack); generated 04_RUNTIME/BOOK_READER_LORA chart/cards/adapter manifest with 55 cards; built 05_OUTPUTS/runpod/talkie_book_lora/talkie_book_lora_runpod_pack.tar.gz with Talkie bootstrap, source custody, book LoRA cards, adapter manifest, and training stub; Dolphin untouched.
+- Next action: Let Talkie rl-refined.pt finish downloading, checksum/source-receipt it, then use the RunPod pack for Talkie forge and BOOK_READER_LORA QLoRA/PEFT training/eval. Optional next local hardening: direct Indy local chat socket/SSE and exact Needle tensor-KV backend work.
+- Resume command: `.venv/bin/pytest -q tests/test_book_reader_lora_stage.py tests/test_runpod_talkie_book_lora_pack.py; python3 -m json.tool 05_OUTPUTS/runpod/talkie_book_lora/pack_receipt.json; wc -c 03_VAULT/models/talkie-lm/talkie-1930-13b-it/rl-refined.pt`
+
+Technical Summary Review and Dev Notes: Indy's book satchel is charted and carded; Talkie has papers; RunPod can now receive a tidy little crate instead of a cursed grocery bag.
+
+---
+
+## Step 6/7 — Book LoRA staging, routing manifest, and PostgREST sheet API probe
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T20:16:38Z`
+- Current step: 6/7
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: BOOK_READER_LORA is now real 500-token clean chunks: 1128 chunks, 5640 cards, local embedding rows written, and separate staged adapter manifests for Talkie, Bonsai8B Q1, and Bonsai8B Q2. Added ontology feasibility manifest for GO25/GCI_O_75/O414 plus Needle/Mamba truth labels. Repacked RunPod tarball with chunks/cards/embeddings/3 target manifests. Added integrated routing manifest with Tokio bounded pubsub fastlane, ABSURD slowlane, sheet-first routing, and refs-not-bodies. Started PostgREST from GOALS/root_rotor_postgrest.conf and expanded schemas to expose lucidota_sheet/lucidota_projection; sheet API probe PASS. Tests: 26 passed.
+- Next action: Let Talkie rl-refined.pt finish downloading, checksum/final custody it, then run RunPod bootstrap/training. Next local slice: ingest bridge from sheet tasks -> ABSURD/Tokio pubsub -> GO25/GCI-O/O414 packet receipts, plus Root-Rotor manuals/API/HTML finish from the audit.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_book_reader_lora_stage.py tests/test_runpod_talkie_book_lora_pack.py tests/test_luci_edge_loop_smoke.py tests/test_lucidota_sheet_layer.py tests/test_aux_model_admission_manifest.py tests/test_indy_startup_comms_speed.py tests/test_talkie_runpod_forge_artifacts.py tests/test_root_rotor_postgrest_control.py; wc -c 03_VAULT/models/talkie-lm/talkie-1930-13b-it/rl-refined.pt; python3 -m json.tool 04_RUNTIME/BOOK_READER_LORA/receipts/stage_receipt.json`
+
+Technical Summary Review and Dev Notes: The book satchel is no longer page-goblin soup: chunks, vectors, target adapters, and routing tracks are staked. Fastlane/slowlane signs are nailed to the trees; ABSURD gets the haunted trail, Tokio carries the buckets.
+
+---
+
+## Step 6/7 — Ingest route bridge: sheets to Tokio pubsub and ABSURD slowlane
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T20:19:30Z`
+- Current step: 6/7
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Added scripts/luci_ingest_route_bridge.py and luci ingest route-bridge. It reads bounded BOOK_READER_LORA chunks, writes body refs, uses next_work_batch sheet as first decision, routes through Treelite, emits GO25/GCI_O_75/O414 packet rows, emits Tokio bounded pubsub EventRefs, and sends only danger/contradiction/deep/PANIC items to ABSURD slowlane. Live smoke: ./luci ingest route-bridge --max-chunks 3 PASS, 3 chunks -> 9 GO packet rows -> 3 pubsub refs. Test gate: 27 passed. Talkie download still at 12056512557 bytes; disk 130G free.
+- Next action: Finish Talkie checkpoint download/custody, then RunPod train adapters. Next local coding slice: persist ingest-route bridge outputs into DB sheet/task receipts and Root-Rotor API/HTML/manual surfaces, then wire remaining audit red items into sheet-first work orders.
+- Resume command: `./luci ingest route-bridge --max-chunks 3 --json; .venv/bin/python -m pytest -q tests/test_luci_ingest_route_bridge.py tests/test_luci_edge_loop_smoke.py tests/test_book_reader_lora_stage.py tests/test_runpod_talkie_book_lora_pack.py tests/test_lucidota_sheet_layer.py tests/test_aux_model_admission_manifest.py tests/test_indy_startup_comms_speed.py tests/test_talkie_runpod_forge_artifacts.py tests/test_root_rotor_postgrest_control.py; wc -c 03_VAULT/models/talkie-lm/talkie-1930-13b-it/rl-refined.pt`
+
+Technical Summary Review and Dev Notes: The street is shitty, the spreadsheet is cute: refs move in Tokio buckets, ABSURD gets the cursed packets only when the trail smells wrong.
+
+---
+
+## Step 6/7 — RunPod-direct Talkie and saved KORPUS sheet-first ingest workflow
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T20:21:38Z`
+- Current step: 6/7
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Operator chose RunPod direct download for Talkie weight. Killed local resumable pull, removed 12GB partial rl-refined.pt, and set download_status.json to DEFERRED_TO_RUNPOD_DIRECT_DOWNLOAD_LOCAL_PARTIAL_REMOVED. Disk recovered to 141G free. Added 04_RUNTIME/korpus_sheet_first_ingest_workflow.json: inventory sheet -> quality sheet -> deterministic extract -> bounded algos -> Treelite route -> Tokio pubsub refs -> ABSURD slowlane -> LLM last resort, with receipts/body refs and existing script candidates. Added tests/test_korpus_sheet_first_ingest_workflow.py. Verification: 28 passed.
+- Next action: Use RunPod pack/bootstrap for Talkie checkpoint and adapter training; locally continue KORPUS actual ingest by turning the saved workflow into executable sheet tasks/DB rows and running bounded inventory/quality/extract/embed/promote batches.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_korpus_sheet_first_ingest_workflow.py tests/test_luci_ingest_route_bridge.py tests/test_luci_edge_loop_smoke.py tests/test_book_reader_lora_stage.py tests/test_runpod_talkie_book_lora_pack.py tests/test_lucidota_sheet_layer.py tests/test_aux_model_admission_manifest.py tests/test_indy_startup_comms_speed.py tests/test_talkie_runpod_forge_artifacts.py tests/test_root_rotor_postgrest_control.py; python3 -m json.tool 04_RUNTIME/korpus_sheet_first_ingest_workflow.json; python3 -m json.tool 03_VAULT/models/talkie-lm/talkie-1930-13b-it/download_status.json`
+
+Technical Summary Review and Dev Notes: RunPod gets the whale; the laptop keeps the map. KORPUS now has a sheet-first trailhead instead of a swamp chant.
+
+---
+
+## Step 7/8 — General workflow sheet-task registry seeded
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T20:26:29Z`
+- Current step: 7/8
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Corrected KORPUS-only narrowing. Added 04_RUNTIME/lucidota_workflow_registry.json covering KORPUS ingest, evidence ingest, graph ops, network analysis, pivot search, documents/forms, and workflow automation. Added scripts/lucidota_workflow_task_seed.py and luci ingest seed-workflow-tasks hook. Applied 7 workflow rows into lucidota_sheet.sheet_task; graph_writes_performed=false. Verification: tests/test_lucidota_workflow_registry_seed.py plus sheet/ingest smoke suite = 10 passed.
+- Next action: Run the next bounded executable slice: refresh sheet projections, show next_work_batch, then wire/run evidence or pivot-search workflow proof with EventRefs/receipts only.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_lucidota_workflow_registry_seed.py tests/test_korpus_sheet_first_ingest_workflow.py tests/test_luci_ingest_route_bridge.py tests/test_luci_edge_loop_smoke.py tests/test_lucidota_sheet_layer.py; ./luci ingest seed-workflow-tasks --json; psql lucidota_state -P pager=off -c "select target, task_class, priority_band, route_band, status, friction_score from lucidota_sheet.sheet_task where target like 'workflow.%' order by friction_score desc;"`
+
+Technical Summary Review and Dev Notes: Workflow is now a registry, not a swamp path. The sheet gremlin has seven doors and none of them carry raw bodies.
+
+---
+
+## Step 8/9 — RunPod Talkie pack train-ready; SSH key blocker isolated
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T20:31:46Z`
+- Current step: 8/9
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: RunPod direct TCP endpoint tested at root@213.192.6.98:40100. Both provided/available keys were rejected; generated dedicated ~/.ssh/id_ed25519 pubkey luci-runpod-20260602 and recorded runpod_ssh_access_status.json. Upgraded RunPod pack from stub to train-ready QLoRA launcher with TARGET=talkie/bonsai8b_q1/bonsai8b_q2, strict_go25.gbnf, strict_json.gbnf, deterministic_json_profile.json. Rebuilt tarball sha256 e9161c3b1d53c9bb0d68fdaf3bd849d8e7431c42d3a5110307016cf3eef3b340. Inventory: current Indy BOOKS stage has 7 chart entries/6 actual book files + ROOT414 context, 1128 chunks at 500 tokens, 4512 train cards, 1128 val cards, embeddings present. Broader candidate doc inventory saved with 2024 candidates, but current LoRA source remains LUCIDOTA/BOOKS. Verification: 7 passed.
+- Next action: Operator adds public key to RunPod authorized_keys, then scp pack over direct TCP, untar, run scripts/runpod_talkie_forge_bootstrap.sh, then launch TARGET=talkie/bonsai8b_q1/bonsai8b_q2 adapter jobs as compatible bases are confirmed.
+- Resume command: `ssh -p 40100 -i ~/.ssh/id_ed25519 root@213.192.6.98 "echo DIRECT_TCP_OK"; scp -P 40100 -i ~/.ssh/id_ed25519 05_OUTPUTS/runpod/talkie_book_lora/talkie_book_lora_runpod_pack.tar.gz root@213.192.6.98:/workspace/; ssh -p 40100 -i ~/.ssh/id_ed25519 root@213.192.6.98 "cd /workspace && tar -xzf talkie_book_lora_runpod_pack.tar.gz && cd talkie_book_lora_runpod_pack && bash scripts/runpod_talkie_forge_bootstrap.sh"`
+
+Technical Summary Review and Dev Notes: The pod door is real; the key teeth do not match yet. Pack now carries the forge tools, not a paper sword.
+
+---
+
+## Step 9/10 — RunPod web-terminal Talkie download bootstrap staged
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T20:33:36Z`
+- Current step: 9/10
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Retried direct RunPod SSH root@213.192.6.98:40100 with ~/.ssh/id_ed25519; still publickey denied. Added tested web-terminal bootstrap at 05_OUTPUTS/runpod/talkie_book_lora/RUNPOD_WEB_TERMINAL_PASTE.sh. It authorizes the local LUCI public key in /root/.ssh/authorized_keys and starts direct HuggingFace download of talkie-lm/talkie-1930-13b-it rl-refined.pt into /workspace/talkie_forge with talkie_source_custody.json receipt and no Dolphin/Mixtral touch. Verification: tests/test_runpod_web_terminal_bootstrap.py, tests/test_runpod_talkie_book_lora_pack.py, tests/test_book_reader_lora_stage.py = 5 passed.
+- Next action: Paste RUNPOD_WEB_TERMINAL_PASTE.sh into RunPod Web Terminal; after it authorizes the key, rerun direct SSH/SCP, upload the train-ready pack, then run the Talkie bootstrap/QLoRA jobs.
+- Resume command: `cat 05_OUTPUTS/runpod/talkie_book_lora/RUNPOD_WEB_TERMINAL_PASTE.sh; ssh -p 40100 -i ~/.ssh/id_ed25519 root@213.192.6.98 "tail -n 20 /workspace/talkie_forge/receipts/talkie_download.log || true; cat /workspace/talkie_forge/receipts/talkie_source_custody.json 2>/dev/null || true"`
+
+Technical Summary Review and Dev Notes: We cannot pick the pod lock, but we made the key and download chant pasteable. Tiny gremlin doorbell installed.
+
+---
+
+## Step 10/11 — RunPod controller hardened; authorization blocker proven
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T20:36:51Z`
+- Current step: 10/11
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Retested RunPod proxy and direct TCP using pod id bh5zizy4coj8a0 variants plus root/direct variants. All rejected. Verbose SSH with IdentitiesOnly proved the correct ~/.ssh/id_ed25519 key is offered and RunPod refuses it, so the blocker is not hostname/user syntax; it is missing authorized public key on the pod. Added scripts/runpod_talkie_control.py plan/probe/run controller with IdentitiesOnly, SCP upload, remote unpack/start, and receipt polling. Latest probe receipt is WAITING_FOR_AUTHORIZED_KEY. Verification: runpod control/web bootstrap/pack tests = 4 passed.
+- Next action: Authorize public key ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHIK1ZPtc3m7+7L1vH6H1ROFItLMmd8PhruDH9dRe2oh luci-runpod-20260602 in RunPod, or paste RUNPOD_WEB_TERMINAL_PASTE.sh into web terminal; then run python3 scripts/runpod_talkie_control.py run --json to upload pack and start/poll Talkie download.
+- Resume command: `python3 scripts/runpod_talkie_control.py probe --json; python3 scripts/runpod_talkie_control.py run --json; ssh -vvv -o BatchMode=yes -o IdentitiesOnly=yes -o PreferredAuthentications=publickey -p 40100 -i ~/.ssh/id_ed25519 root@213.192.6.98 "echo DIRECT_OK"`
+
+Technical Summary Review and Dev Notes: We tried the pod-id masks; the lock still wants the right key in its mouth. Controller is now a one-button gremlin once the door opens.
+
+---
+
+## Step 11/12 — Rolling 500-token shared-prefix KV/cache policy encoded
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T20:43:44Z`
+- Current step: 11/12
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Added 04_RUNTIME/edge_grail_kv_cache_policy.json and scripts/edge_grail_kv_cache_policy.py. Policy answers eviction question: rolling 500-token chunks with 64-token overlap and receipt-backed eviction, not blind flush every 500 and not unbounded history. It records Mamba as SSM-state not KV, Needle as 6-lane shared server/batched identical-prefix current truth, exact tensor KV de-dup as runner-extension target not proven, Bonsai as 2-slot kv-unified q8_0 K/V, and the 2550 MiB/1164 MiB VRAM ledger. Latest RunPod probe remains WAITING_FOR_AUTHORIZED_KEY. Verification: edge KV policy, RunPod control/bootstrap/pack, ingest route bridge = 7 passed; disk 141G free.
+- Next action: Once RunPod PUBLIC_KEY is accepted, run python3 scripts/runpod_talkie_control.py run --json to upload pack/start Talkie download; separately, next local runtime proof is to make Needle health/route receipts include edge_grail_kv_cache_policy hash and later benchmark true tensor KV de-dup if runner support is added.
+- Resume command: `python3 scripts/edge_grail_kv_cache_policy.py --json; python3 scripts/runpod_talkie_control.py probe --json; python3 scripts/runpod_talkie_control.py run --json; .venv/bin/python -m pytest -q tests/test_edge_grail_kv_cache_policy.py tests/test_runpod_talkie_control.py tests/test_runpod_web_terminal_bootstrap.py tests/test_runpod_talkie_book_lora_pack.py tests/test_luci_ingest_route_bridge.py`
+
+Technical Summary Review and Dev Notes: The cache answer is now a receipt, not a vibe. Rolling window keeps the cryptid fed without hoarding the whole forest.
+
+---
+
+## Step 12/13 — RunPod refused-key hard gate enforced
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T20:46:45Z`
+- Current step: 12/13
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Implemented hard gate in scripts/runpod_talkie_control.py: if latest receipt/status is WAITING_FOR_PUBLIC_KEY_AUTH, PUBLIC_KEY_AUTH_REQUIRED, or prior refused publickey state, probe/run return immediately without SSH/SCP. Payload includes ssh_attempted=false, scp_attempted=false, reason, exact next_required_action, retry policy, PUBLIC_KEY value, and secret examples. SSH allowed again only with --force-after-auth-change or an auth-material-changed receipt after refusal. Ran exactly requested test: tests/test_runpod_talkie_control.py = 4 passed. No SSH probe performed after gate patch except local no-network/gated controller return.
+- Next action: Set PUBLIC_KEY on runpod/pytorch or paste key into /root/.ssh/authorized_keys via web terminal/redeploy. After that, run python3 scripts/runpod_talkie_control.py --force-after-auth-change run --json once.
+- Resume command: `python3 scripts/runpod_talkie_control.py probe --json; .venv/bin/python -m pytest -q tests/test_runpod_talkie_control.py; python3 scripts/runpod_talkie_control.py --force-after-auth-change run --json`
+
+Technical Summary Review and Dev Notes: Refused correct key is now terminal state, not a maybe. The gremlin finally learned the locked door is a lock.
+
+---
+
+## Step 13/14 — Talkie weight downloaded on RunPod via Jupyter
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T20:56:52Z`
+- Current step: 13/14
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Used RunPod Jupyter proxy https://bh5zizy4coj8a0-8888.proxy.runpod.net with token supplied by operator. Uploaded talkie_book_lora_runpod_pack.tar.gz to /workspace/talkie_book_lora via Jupyter Contents API. Initial tar failed on ownership; restarted with tar --no-same-owner. Stopped heavyweight bootstrap and launched lean HuggingFace-only downloader. Remote custody PASS: /workspace/talkie_forge/models/talkie-lm__talkie-1930-13b-it/rl-refined.pt, size 26560686563, sha256 c6fd903b67ad312c7537095fa982b0e77735ccb689c8cfc774ca492694e70064, repo_sha 8033675be6360ae0127fa75f941c12d52064f1dc. Local receipts updated: 05_OUTPUTS/runpod/talkie_book_lora/remote_talkie_source_custody.json and 03_VAULT/models/talkie-lm/talkie-1930-13b-it/download_status.json status DOWNLOADED_ON_RUNPOD. Book LoRA work orders created by side agent: 04_RUNTIME/BOOK_READER_LORA/book_lora_work_orders.json for 7 chart entries/3 targets each; actual book files count remains 6 plus ROOT414 context pack.
+- Next action: Use Jupyter path to run architecture inspection / Talkie adapter feasibility next; train adapters only after confirming Talkie load path and compatible Bonsai bases. SSH remains optional/hard-gated; Jupyter is proven working.
+- Resume command: `cat 03_VAULT/models/talkie-lm/talkie-1930-13b-it/download_status.json; cat 05_OUTPUTS/runpod/talkie_book_lora/remote_talkie_source_custody.json; python3 -m json.tool 04_RUNTIME/BOOK_READER_LORA/book_lora_work_orders.json | head -120`
+
+Technical Summary Review and Dev Notes: The whale is on the pod. We used the window instead of fighting the locked door; swamp goblin approves.
+
+---
+
+## Step 13/14 — RunPod capacity snapshot
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T21:02:25Z`
+- Current step: 13/14
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Queried RunPod through Jupyter, not SSH. Capacity receipt written on pod at /workspace/talkie_forge/receipts/runpod_capacity_snapshot.json. GPU is NVIDIA RTX PRO 6000 Blackwell Server Edition with 97,887 MiB total VRAM, 0 MiB used, 97,252 MiB free at snapshot. /workspace is network volume with huge apparent capacity; pod root overlay is 70G with 68G free. Current /workspace use: talkie_forge 27G, talkie_book_lora 52M.
+- Next action: Keep heavyweight model surgery/training artifacts on /workspace RunPod. Download vocab.txt, inspect Talkie checkpoint, then build Talkie-specific MoE/LoRA wrappers against actual module names before training.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md; curl -s "https://bh5zizy4coj8a0-8888.proxy.runpod.net/api/contents/workspace/talkie_forge/receipts/runpod_capacity_snapshot.json?token=$JUPYTER_TOKEN"`
+
+Technical Summary Review and Dev Notes: Capacity is not the blocker; architecture and disk layout are. Bigfoot says do the whale but do not duplicate it four times blindly.
+
+---
+
+## Step 13/14 — RunPod Talkie live + orchestration plan
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T21:14:10Z`
+- Current step: 13/14
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Saved GOALS/RUNPOD_TALKIE_LORA_INGEST_MASTER_PLAN.md. RunPod Talkie readiness advanced: vocab downloaded, repo cloned, deep checkpoint inspection copied locally, and GPU load/forward smoke PASS copied to 05_OUTPUTS/runpod/talkie_book_lora/talkie_load_smoke.json. Smoke facts: bf16 model loaded on RTX PRO 6000 Blackwell in 97.552s; VRAM after load 25,361.2 MiB; forward 0.224s; logits shape [1, 65540]. MoE readiness manifest updated at 04_RUNTIME/TALKIE_MOE/talkie_moe_readiness_manifest.json. RunPod ingest accelerator manifest created at 04_RUNTIME/RUNPOD_ACCEL/runpod_ingest_embedding_accelerator.json and uploaded to /workspace/talkie_forge/receipts. Spark workers spawned: Darwin for artifact pull/import CLI, Noether for manuals/API/HTML, Popper for Indy_READs online manifest.
+- Next action: Let Spark workers finish; then integrate their files. Locally continue thin orchestration: add remaining workflow worker if agent slot opens, then stage remote embed worker and local artifact import path.
+- Resume command: `python3 -m json.tool 05_OUTPUTS/runpod/talkie_book_lora/talkie_load_smoke.json; python3 -m json.tool 04_RUNTIME/TALKIE_MOE/talkie_moe_readiness_manifest.json | head -160; cat GOALS/RUNPOD_TALKIE_LORA_INGEST_MASTER_PLAN.md`
+
+Technical Summary Review and Dev Notes: The whale boots. Not theory: Talkie made logits on the RunPod GPU. Mothman notes the next danger is uncontrolled disk duplication, not VRAM.
+
+---
+
+## Step 1/1 — Local Jupyter artifact pull + COPY/UPSERT plan mode
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RunPod Talkie LoRA Ingest Phase 2
+- Generated: `2026-06-02T21:14:55Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Build artifact pull/import skeleton for remote RunPod outputs and safe DB import planning.
+- Completed: Created scripts/runpod_artifact_pull_import.py (Jupyter pull + hash/size verification + dry-run import-plan) and tests/test_runpod_artifact_pull_import.py with mocked requests.
+- Next action: Continue Phase 2 runpod_ingest_embedding_accelerator lane with real remote artifact validation.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Mynx track stays clear: artifact pulls now write receipts first, and DB work is plan-only unless credentials are intentionally supplied.
+
+---
+
+## Step 13/14 — Fanout integration receipts
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T21:18:06Z`
+- Current step: 13/14
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Spark fanout integrated: Darwin added scripts/runpod_artifact_pull_import.py and mocked tests passing 5/5; Noether generated 4 manuals, 4 API specs, and 4 HTML dashboards under 05_OUTPUTS/runtime; Helmholtz added sheet-first RunPod artifact import workflow at 04_RUNTIME/workflows/runpod_artifact_import_workflow.json; Popper added Indy_READs/Ironclaw online manifest and status receipts. Fresh verification: pytest tests/test_runpod_artifact_pull_import.py passed 5/5; JSON validity passed for Talkie MoE, RunPod accelerator, workflow, Indy service/status; Talkie load smoke receipt says PASS; runtime outputs include 12 manual/API/html files and 9 files referencing required manifests. Master plan and key manifests uploaded to RunPod receipts.
+- Next action: Continue with thin orchestration: stage remote embed worker on RunPod, pull one artifact through scripts/runpod_artifact_pull_import.py, then wire sheet_task import receipt. Next agent slot should handle Talkie target-map/disk-guard or RunPod embed worker implementation.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_runpod_artifact_pull_import.py; python3 -m json.tool 05_OUTPUTS/runpod/talkie_book_lora/talkie_load_smoke.json; find 05_OUTPUTS/runtime/manuals 05_OUTPUTS/runtime/api 05_OUTPUTS/runtime/html -maxdepth 2 -type f | sort`
+
+Technical Summary Review and Dev Notes: Agents moved the scaffolding while the whale booted. Chupacabra says next bite is remote embed worker plus first artifact pull into the sheet spine.
+
+---
+
+## Step 14/14 — Implement RunPod stage embed worker CLI
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T21:19:35Z`
+- Current step: 14/14
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Added local plan for staging RunPod embed worker artifact upload + offline-safe local worker execution path; next implement full CLI and tests.
+- Next action: Run tests for scripts/runpod_stage_embed_worker.py and, if green, update manifest and handoff with final PASS.
+- Resume command: `pytest -q tests/test_runpod_stage_embed_worker.py`
+
+Technical Summary Review and Dev Notes: Operators kept the trail short: this step is a lean adapter, no DB writes, and proof receipts stay local-only.
+
+---
+
+## Step 14/14 — Implement RunPod embed worker staging CLI
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T21:20:17Z`
+- Current step: 14/14
+- Status: complete
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Created scripts/runpod_stage_embed_worker.py with build/stage/local-run modes, added mocked tests, and added optional runpod_embed_worker_manifest.json for remote worker staging in /workspace/lucidota_ingest_accel.
+- Next action: Run full related CI slice: .venv/bin/pytest -q tests/test_runpod_stage_embed_worker.py tests/test_runpod_artifact_pull_import.py
+- Resume command: `.venv/bin/pytest -q tests/test_runpod_stage_embed_worker.py`
+
+Technical Summary Review and Dev Notes: The trail is staged and receipt-first: offline tests now prove no network is required for deterministic behavior. Next, wire this into the broader RunPod pack handoff when ready.
+
+---
+
+## Step 1/3 — Create Talkie LoRA target-map
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Talkie target-map + disk guard
+- Generated: `2026-06-02T21:20:57Z`
+- Current step: 1/3
+- Status: in_progress
+- Objective: Define exact Talkie LoRA targets, gate bonsai map status, and set disk guard thresholds for 120GB exports.
+- Completed: Readiness evidence loaded from talkie_moe_readiness_manifest.json, deep_inspection target_key_counts, and load smoke receipts.
+- Next action: Write 04_RUNTIME/TALKIE_MOE/talkie_lora_target_map.json and continue.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The target names are clear; keep this adapter map strict and local-only.
+
+---
+
+## Step 2/3 — Create Talkie disk guard policy
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Talkie target-map + disk guard
+- Generated: `2026-06-02T21:21:10Z`
+- Current step: 2/3
+- Status: in_progress
+- Objective: Define exact Talkie LoRA targets, gate bonsai map status, and set disk guard thresholds for 120GB exports.
+- Completed: Created talkie_lora_target_map.json with exact Talkie targets and Bonsai pending base-compatibility markers.
+- Next action: Create an optional disk guard receipt and run JSON validation before final handoff.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: No engine swap required; the gate now encodes the real 120GB ceiling in machine terms.
+
+---
+
+## Step 3/3 — Validate JSON and produce handoff
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Talkie target-map + disk guard
+- Generated: `2026-06-02T21:21:14Z`
+- Current step: 3/3
+- Status: complete
+- Objective: Define exact Talkie LoRA targets, gate bonsai map status, and set disk guard thresholds for 120GB exports.
+- Completed: Created target map, disk guard, and disk guard receipt with explicit blocked/allowed thresholds; all JSON files validate via python -m json.tool.
+- Next action: Proceed with RunPod Talkie MoE implementation using these policy files; revisit if new disk policy required.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Trail is complete: exact modules set, and the 120GB guard stays conservative.
+
+---
+
+## Step 13/14 — RunPod embed lane first artifact
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T21:25:14Z`
+- Current step: 13/14
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Fixed Jupyter artifact puller to decode Contents API JSON envelopes; regression tests now pass 13/13 across runpod_artifact_pull_import and runpod_stage_embed_worker. Staged remote embed worker at /workspace/lucidota_ingest_accel/runpod_embed_worker.py. Ran worker against 1128 staged 500-token book chunks with 64d deterministic embeddings: remote receipt PASS, seen=1128, written=1128, failed=0, sha256=6a075ef32fa9981db1a6c5165b61ff57fff069b3605d6467932907d546178bd4. Pulled keyed JSONL locally with sha verification to 05_OUTPUTS/runpod/ingest_artifacts/chunk_embeddings_1128_keyed.jsonl; import-plan receipt PASS. Talkie target map and MoE disk guard were created: Talkie modules proven; Bonsai Q1/Q2 pending compatibility; full bf16 4x duplicate BLOCKED while pointerized/quantized paths ALLOWED.
+- Next action: Create local Postgres staging/import worker for the keyed RunPod embedding JSONL, then route through sheet_task/import workflow and graph promotion path. Next parallel workers: DB staging importer and graph-population audit/bridge.
+- Resume command: `python3 -m json.tool 05_OUTPUTS/runpod/ingest_artifacts/runpod_ingest_artifact_status.json; head -1 05_OUTPUTS/runpod/ingest_artifacts/chunk_embeddings_1128_keyed.jsonl; .venv/bin/python -m pytest -q tests/test_runpod_artifact_pull_import.py tests/test_runpod_stage_embed_worker.py`
+
+Technical Summary Review and Dev Notes: RunPod is now doing useful ingest work, not just holding the whale. Field note: blank chunk IDs were a swamp trap; chunk_ref now keys the rows.
+
+---
+
+## Step 13/14 — RunPod embed artifact into sheet/route spine
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T21:32:42Z`
+- Current step: 13/14
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Closed the RunPod ingest seam farther: added first-class sheet schema objects in 06_SCHEMA/147_lucidota_sheet_layer.sql for lucidota_scratch.runpod_chunk_embedding_stage and lucidota_projection.runpod_chunk_embedding_sheet; added sheet manifest entry; added workflow.runpod_artifact_import.embeddings to workflow registry. Applied schema to Postgres and seeded workflow tasks with --apply: 8 tasks inserted including RunPod artifact import. Fixed runpod_embedding_stage_import.py to emit embedding_json/jsonb plan instead of stale vector SQL. Relevant suite passed 27/27. RunPod generated keyed 1128-row embedding artifact, pulled locally with sha verification, imported into scratch table: 1128 rows, 1128 distinct chunk IDs, 0 blank. Full route bridge over 1128 chunks PASS: 3384 GO/GCI/O414 packet rows and 1128 Tokio EventRefs, refs-only body policy.
+- Next action: Next: graph promotion remains intentionally dry-run/hardened. Build deferred promotion packets from GO packets + embedding stage receipts, then decide whether to enable packet staging writes only, not canonical materialization. Also replace deterministic placeholder embeddings with configured GPU embedder/model when operator chooses provider.
+- Resume command: `python3 -m json.tool 05_OUTPUTS/runpod/ingest_artifacts/runpod_ingest_sheet_graph_status.json; psql "${DATABASE_URL:-postgresql:///lucidota_storage}" -Atc "select count(*), count(distinct chunk_id) from lucidota_scratch.runpod_chunk_embedding_stage"; wc -l 05_OUTPUTS/runtime/ingest_route_go_packets.jsonl 05_OUTPUTS/runtime/ingest_route_tokio_pubsub.jsonl`
+
+Technical Summary Review and Dev Notes: The bridge has teeth now: RunPod -> artifact -> local sheet stage -> workflow task -> GO packets. Sasquatch note: canonical graph is still behind the approval fence, correctly.
+
+---
+
+## Step 13/14 — Deferred graph promotion packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T21:35:32Z`
+- Current step: 13/14
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Added scripts/graph_deferred_promotion_packets.py and tests/test_graph_deferred_promotion_packets.py. Built 1128 deferred graph promotion packets from 3384 GO/GCI/O414 rows with refs-only body policy and RunPod embedding evidence refs. Graph promotion gate dry-run on first deferred packet allowed staging and performed zero DB/canonical graph writes. Receipts: 05_OUTPUTS/graph/deferred_promotion_packets_1128_receipt.json and 05_OUTPUTS/graph/deferred_graph_promotion_status.json; mirrored to RunPod /workspace/talkie_forge/receipts. Focused verification passed 29/29 across graph deferred packets, RunPod import/stage, sheet layer, workflow registry, and artifact puller tests.
+- Next action: Next safe mutation is optional graph_promotion_packet staging with --execute materialize=false for selected packets; canonical materialization remains fenced. In parallel, choose/enable real GPU embedding model provider on RunPod to replace deterministic placeholder embeddings.
+- Resume command: `python3 -m json.tool 05_OUTPUTS/graph/deferred_graph_promotion_status.json; wc -l 05_OUTPUTS/graph/deferred_promotion_packets_1128.jsonl; .venv/bin/python -m pytest -q tests/test_graph_deferred_promotion_packets.py tests/test_runpod_embedding_stage_import.py tests/test_lucidota_sheet_layer.py tests/test_lucidota_workflow_registry_seed.py tests/test_runpod_artifact_pull_import.py tests/test_runpod_stage_embed_worker.py`
+
+Technical Summary Review and Dev Notes: The graph fence now has a queue at the gate: 1128 packets, evidence-backed, no raw bodies, no canon writes. Little lake monster approves the staging dock.
+
+---
+
+## Step 14/14 — RunPod local sentence-transformers embeddings
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T21:46:05Z`
+- Current step: 14/14
+- Status: complete
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Updated scripts/runpod_stage_embed_worker.py and tests/test_runpod_stage_embed_worker.py to support local sentence-transformers mode (env-driven) with bounded-batch encode in both remote and local workflows, while preserving endpoint/deterministic fallback behavior and no DB writes. Added/verified build plan env metadata and local-model path/device propagation.
+- Next action: Run full related CI slice if needed: .venv/bin/pytest -q tests/test_runpod_stage_embed_worker.py tests/test_runpod_embedding_stage_import.py tests/test_runpod_artifact_pull_import.py
+- Resume command: `.venv/bin/pytest -q tests/test_runpod_stage_embed_worker.py && python3 scripts/runpod_stage_embed_worker.py --action build-script --json`
+
+Technical Summary Review and Dev Notes: Local embeddings now bite when RUNPOD_EMBED_LOCAL_MODEL is set, otherwise the old model/deterministic path remains intact. Small cryptid note: the worker now has a CUDA/CPU switchboard instead of a placeholder-only drift.
+
+---
+
+## Step 14/14 — RunPod local sentence-transformers embeddings
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T21:46:28Z`
+- Current step: 14/14
+- Status: complete
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Implemented env-driven local sentence-transformers mode in both local and remote worker paths, including bounded batching and explicit fallback rows when local load/encode fails. Preserved existing endpoint mode and deterministic fallback behavior, updated build plan metadata, and kept worker storage/write semantics unchanged (no DB writes).
+- Next action: Run relevant CI slice if needed and ship with the same command set: .venv/bin/pytest -q tests/test_runpod_stage_embed_worker.py tests/test_runpod_embedding_stage_import.py tests/test_runpod_artifact_pull_import.py.
+- Resume command: `.venv/bin/pytest -q tests/test_runpod_stage_embed_worker.py && .venv/bin/python -m pytest -q tests/test_runpod_stage_embed_worker.py`
+
+Technical Summary Review and Dev Notes: Remote and local runs now choose sentence_transformers when RUNPOD_EMBED_LOCAL_MODEL is set and keep endpoint/deterministic behavior as the fallback law. Field note: the model switchboard now respects auto/cuda if available.
+
+---
+
+## Step 14/15 — Stage all deferred graph packets and replace placeholder embeddings with real RunPod embeddings
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T21:51:37Z`
+- Current step: 14/15
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Patched graph deferred stager to use .venv/bin/python/--python-bin and --start-index; tests pass. Staged all 1128 deferred graph promotion packets through graph_promotion_gate execute/defer with materialize=false and canonical_graph_writes=false. Patched RunPod embed worker for RUNPOD_EMBED_LOCAL_MODEL/RUNPOD_EMBED_DEVICE sentence-transformers lane, installed sentence-transformers on RunPod, generated 1128 real 384d all-MiniLM-L6-v2 embeddings in 9.264s, pulled artifact, fixed sheet schema defaults/error column, and imported all 1128 real embeddings into lucidota_state sheet projection. Focused verification: 36 passed; remote worker compile PASS.
+- Next action: Run Treelite FIL/GPU residency proof on RunPod or issue blocked receipt; then stage LoRA training configs for Talkie plus Bonsai Q1/Q2 and keep graph materialization fenced until explicit operator-confirmed command envelope.
+- Resume command: `python3 -m json.tool 05_OUTPUTS/runtime/edge_grail_ingest_graph_real_embed_status.json; .venv/bin/python -m pytest -q tests/test_graph_deferred_promotion_stage.py tests/test_graph_deferred_promotion_packets.py tests/test_runpod_embedding_stage_import.py tests/test_lucidota_sheet_layer.py tests/test_lucidota_workflow_registry_seed.py tests/test_runpod_artifact_pull_import.py tests/test_runpod_stage_embed_worker.py`
+
+Technical Summary Review and Dev Notes: Graph gate is packed: 1128 refs-only packets queued, no canonical writes. RunPod stopped pretending: 1128 real 384d sentence-transformer embeddings are now in the sheet layer. The bog lantern is lit; next monster is Treelite FIL proof.
+
+---
+
+## Step 15/16 — Treelite FIL proof + Indy book/model inventory receipts
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T22:14:09Z`
+- Current step: 15/16
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: RunPod Treelite/FIL proof is receipt-backed: all 103 uploaded .tl artifacts loaded through cuML FIL and GPU inference passed 103/103 on RTX PRO 6000. Router truth flags read the all-TL receipt. Edge runtime status receipt now records Bonsai Q1/Q2, Mamba IQ1_S/Q2/Q3, Needle, Talkie RunPod load-smoke, real embeddings, and caveats. Indy_READs book inventory receipt records 6 actual book files + ROOT414 context pack, 1128 chunks, 4512 train cards, 1128 val cards, 1128 embeddings, and 3 target adapters per staged entry.
+- Next action: Implement smallest next wiring gap: executable sheet/PostgREST smoke or RunPod LoRA train launcher repair; keep graph materialization fenced and local 1650 full-load admission separate.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_edge_grail_treelite_router.py tests/test_bonsai_q1_shared_runtime.py tests/test_needle_shared_runtime.py tests/test_runpod_embedding_stage_import.py tests/test_lucidota_sheet_layer.py tests/test_runpod_stage_embed_worker.py tests/test_graph_deferred_promotion_stage.py tests/test_graph_deferred_promotion_packets.py tests/test_book_reader_lora_stage.py tests/test_runpod_talkie_book_lora_pack.py; python3 -m json.tool 05_OUTPUTS/runtime/edge_grail_runtime_status_latest.json; python3 -m json.tool 05_OUTPUTS/runtime/indy_reads_book_inventory_status_latest.json`
+
+Technical Summary Review and Dev Notes: The Treelite lantern is no longer hypothetical: 103/103 FIL GPU pass. Book forge is staged, not trained. Local disk has 141G free; enough to keep receipts moving, not enough to get sloppy with full checkpoints.
+
+---
+
+## Step 16/17 — Downloaded one-bit-class Mamba and missing model custody manifests verified
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T22:17:04Z`
+- Current step: 16/17
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Added red-green custody tests for Edge Grail model weights. Mamba one-bit-class IQ1_S weight is present and explicitly not overclaimed as literal Q1_0. Added authoritative model_source manifests for Bonsai 8B Q2_0 ternary and Needle 26M, including exact size/hash custody. Updated edge runtime status source_manifests to point to Bonsai Q1, Bonsai Q2, Mamba IQ1_S, Mamba Q2/Q3 fallback, and Needle manifests. Focused verification: 30 passed; JSON and py_compile valid.
+- Next action: Next hard gap is executable sheet/PostgREST smoke or RunPod LoRA trainer repair. Keep local 1650 full simultaneous residency and exact Needle tensor-KV pointer sharing marked unproven until receipt-backed.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_edge_grail_model_custody.py tests/test_edge_grail_treelite_router.py tests/test_bonsai_q1_shared_runtime.py tests/test_needle_shared_runtime.py tests/test_edge_grail_kv_cache_policy.py tests/test_runpod_embedding_stage_import.py tests/test_lucidota_sheet_layer.py tests/test_book_reader_lora_stage.py tests/test_runpod_talkie_book_lora_pack.py; python3 -m json.tool 05_OUTPUTS/runtime/edge_grail_runtime_status_latest.json`
+
+Technical Summary Review and Dev Notes: The requested one-bit-class Mamba weight is now ledgered with hard truth: IQ1_S exists, Q1_0 does not. Bonsai Q2 and Needle stopped being orphan blobs and now have custody cards. Small tracks, real spoor.
+
+---
+
+## Step 17/18 — KV/VRAM ledger corrected for IQ1_S Mamba and proven Treelite FIL
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T22:20:25Z`
+- Current step: 17/18
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Red-green updated the Edge Grail KV policy: it now records downloaded Mamba IQ1_S one-bit-class weight, explicitly rejects literal Q1_0 overclaiming, and flips Treelite GPU residency truth from stale unproven target to RunPod FIL-proven 103/103 .tl inference. The receipt now reports rolling 500-token window, Mamba IQ1_S downloaded true, literal Q1_0 downloaded false, Treelite GPU residency true, and current verified ledger 3210/3714 MiB with 504 MiB target headroom. Updated runtime status and EDGE_GRAIL_RUNTIME_LEDGER.md with the corrected math.
+- Next action: Next hard gap: either executable sheet/PostgREST smoke, RunPod LoRA trainer repair, or local GTX 1650 admission smoke. Keep exact Needle tensor-KV pointer sharing unproven until runner-level receipt exists.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_edge_grail_kv_cache_policy.py tests/test_edge_grail_model_custody.py tests/test_edge_grail_treelite_router.py tests/test_bonsai_q1_shared_runtime.py tests/test_needle_shared_runtime.py; python3 -m json.tool 05_OUTPUTS/runtime/edge_grail_kv_cache_policy_latest.json; python3 -m json.tool 05_OUTPUTS/runtime/edge_grail_runtime_status_latest.json`
+
+Technical Summary Review and Dev Notes: The old 900 MiB Mamba math is now marked target-only; the real little beast is IQ1_S at ~1560 MiB. Still fits, less swagger-room. Treelite has teeth now: 103/103 FIL pass.
+
+---
+
+## Step 18/19 — Local GTX 1650 Edge Grail admission gate added and run
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T22:23:20Z`
+- Current step: 18/19
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Added red-green local admission gate for the corrected Edge Grail IQ1_S ledger. New script reads KV/VRAM policy plus nvidia-smi telemetry and writes a no-start/no-kill receipt. Actual GTX 1650 telemetry: 4096 MiB total, 1264 MiB used, 2451 MiB free, 56C. Corrected loadout needs 3660 MiB free including 450 MiB reserve. Result: ADMISSIBLE_AFTER_SPINDOWN, not ADMISSIBLE_NOW. Runtime status and Edge Grail ledger now record this distinction. Verification: 32 passed; JSON and py_compile valid.
+- Next action: Next hard gap is exact Needle tensor-KV pointer sharing or RunPod LoRA trainer repair. Do not claim full local runtime admitted until VRAM users are spun down and admission is rerun as ADMISSIBLE_NOW or a live launcher receipt exists.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_edge_grail_local_admission.py tests/test_edge_grail_kv_cache_policy.py tests/test_edge_grail_model_custody.py tests/test_edge_grail_treelite_router.py tests/test_bonsai_q1_shared_runtime.py tests/test_needle_shared_runtime.py tests/test_runpod_embedding_stage_import.py tests/test_lucidota_sheet_layer.py tests/test_book_reader_lora_stage.py tests/test_runpod_talkie_book_lora_pack.py; python3 -m json.tool 05_OUTPUTS/runtime/edge_grail_local_admission_latest.json; python3 -m json.tool 05_OUTPUTS/runtime/edge_grail_runtime_status_latest.json`
+
+Technical Summary Review and Dev Notes: The 1650 says yes-but-clear-the-table-first. Fits the cave; current campfire smoke is occupying 1264 MiB. No models were killed, no models were started.
+
+---
+
+## Step 19/20 — Needle KV source probe and runner-extension boundary
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Operation Edge Grail Q1 Shared-KV Runtime
+- Generated: `2026-06-02T22:28:46Z`
+- Current step: 19/20
+- Status: in_progress
+- Objective: Make Bonsai/Mamba/Needle/algo/Talkie/Treelite/audio/OCR/sheet/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Added source-backed Needle KV probe and worker health metadata. Probe proves current one-process/six-lane Needle batching/shared weights and separate encode/decode methods, but records exact tensor pointer sharing as unproven. Receipt says prefix reuse is possible for identical full encoder input; different lane tools/tasks require a runner refactor separating immutable 500-token chunk prefix from lane conditioning. Runtime status and Edge Grail ledger updated. Verification: 19 passed; JSON and py_compile valid.
+- Next action: Next hard gap: implement the Needle shared-prefix runner patch or switch to RunPod LoRA trainer repair/sheet smoke. Do not mark full goal complete until exact Needle tensor reuse and/or local live launcher admission is receipt-backed.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_edge_grail_needle_kv_probe.py tests/test_needle_shared_runtime.py tests/test_edge_grail_local_admission.py tests/test_edge_grail_kv_cache_policy.py tests/test_edge_grail_model_custody.py tests/test_edge_grail_treelite_router.py tests/test_bonsai_q1_shared_runtime.py; python3 -m json.tool 05_OUTPUTS/runtime/needle_kv_probe_latest.json; python3 -m json.tool 05_OUTPUTS/runtime/edge_grail_runtime_status_latest.json`
+
+Technical Summary Review and Dev Notes: Needle is not llama.cpp KV; it is a JAX encoder-decoder. The reusable beast is encoder_out/enc_mask. Current six-mouth worker is real, exact prefix tensor reuse needs surgery.
+
+## Step 20/20 — Build sheet workflow spine dry-run receipt
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Edge Grail Sheet Workflow Spine (Worker B)
+- Generated: `2026-06-02T22:35:00Z`
+- Current step: 20/20
+- Status: completed
+- Objective: Create a spreadsheet-first workflow spine for ingest/evidence/graph/network/forms with dry-run/no-DB receipt proof.
+- Completed: Added `06_SCHEMA/148_lucidota_sheet_workflow_layer.sql` with schema/view/scratch/projection/receipt contracts, added `scripts/lucidota_sheet_workflow_smoke.py` dry-run route receipt emitter, added `tests/test_lucidota_sheet_workflow.py` and verified JSON output includes ingest/evidence/graph_ops/documents_forms/network_analysis SQL plan and order.
+- Next action: Run full pytest target when the local runner is available and keep `workflow registry` source of truth for route targets.
+- Resume command: `python3 scripts/lucidota_sheet_workflow_smoke.py --json && python3 -m pytest -q tests/test_lucidota_sheet_workflow.py`
+
+Technical Summary Review and Dev Notes: Sheet order now emits before model routes; the route lane writes receipts, not bodies, and stays constrained to bounded SQL plans.
+
+---
+
+## Step 20/20 — Indy_READs startup readiness checker and receipts
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Take Over LUCIDOTA Dev: Claw Promptflow Rust Indy
+- Generated: `2026-06-02T22:33:31Z`
+- Current step: 20/20
+- Status: running
+- Objective: Take over development: add/use vibe-delegate capability if available, get Promptflow up and running, finish migrations/Indy/Book-LoRA lanes cooperate through algorithmic routing while keeping local memory truth and Dolphin untouched.
+- Completed: Added scripts/indy_readiness_checker.py to do config-only startup/comms/response-helper readiness checks and wrote tests/test_indy_readiness_checker.py (2 PASS) for happy and blocked paths; generated receipt at 05_OUTPUTS/runtime/indy_readiness_status_latest.json.
+- Next action: Continue the Objective Edge Grail sequence: exact Needle shared-prefix runner patch or local live launcher admission repair remains the next receipt-backed lane.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_indy_readiness_checker.py; python3 -m json.tool 05_OUTPUTS/runtime/indy_readiness_status_latest.json; python3 scripts/indy_readiness_checker.py --json`
+
+Technical Summary Review and Dev Notes: The readiness spine now checks boot/service, book-count source-of-truth, comms controls, and response-helper flag without sending a byte. Notes stay local-only: no message side effects, no graph writes.
+
+---
+
+## Step 2/5 — Session 2 - MANUAL
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Take Over LUCIDOTA Dev: CLI Conductor Orchestration
+- Generated: `2026-06-03T00:15:47Z`
+- Current step: 2/5
+- Status: running
+- Objective: Continue the active LUCIDOTA orchestration run from the current repo state: reuse existing tools first, keep host-OS/no-Docker discipline, and complete the Session 2 manual plus later contradiction/hardening/launch artifacts for Indy_READs, IronClaw, RunPod, LoRA, Talkie, ML, and gate scripts.
+- Completed: Session 1 COOK already has a report in 05_OUTPUTS/vibe_orchestrations/2026-06-02T120000Z_session_run/; reuse scans found existing gate wrappers, RunPod import helper, Groq delegate, strict-admission, fast/slow lane, and Indy entrypoints; no new mutable artifacts created yet this turn.
+- Next action: Write 05_OUTPUTS/vibe_orchestrations/2026-06-02T120000Z_session_run/API_MANUAL.md from live docs and command help.
+- Resume command: `python3 scripts/goal_handoff.py check && sed -n "1,220p" 05_OUTPUTS/vibe_orchestrations/2026-06-02T120000Z_session_run/API_MANUAL.md`
+
+Technical Summary Review and Dev Notes: Tiny field note: the host gate reeds are already here; manual time now, not another invented bridge.
+
+---
+
+## Step 3/5 — Save model fabric admission sidecar and prompt stub
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Take Over LUCIDOTA Dev: CLI Conductor Orchestration
+- Generated: `2026-06-03T00:37:16Z`
+- Current step: 3/5
+- Status: running
+- Objective: Continue the active LUCIDOTA orchestration run from the current repo state: reuse existing tools first, keep host-OS/no-Docker discipline, and complete the Session 2 manual plus later contradiction/hardening/launch artifacts for Indy_READs, IronClaw, RunPod, LoRA, Talkie, ML, and gate scripts.
+- Completed: Created GOALS/MODEL_FABRIC_ADMISSION_SIDECAR.md verbatim from the operator prompt and appended the short model-fabric instruction block to /tmp/cli_takeover_prompt.txt.
+- Next action: Wire the model ledger source-of-truth into the conductor and verify local-vs-external admission behavior against the gate scripts.
+- Resume command: `python3 scripts/goal_handoff.py check && sed -n "1,220p" GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny field note: the ledger contract is now pinned; next we make the conductor ask the ledger before it asks the air.
+
+---
+
+## Step 0/5 — Run bootstrap
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: LUCIDOTA / INDY_READs CLI conductor orchestration
+- Generated: `2026-06-03T00:46:50Z`
+- Current step: 0/5
+- Status: running
+- Objective: Complete the bounded five-session orchestration for LUCIDOTA, INDY_READs, PERCYPHON, Doggystyle kernel, Krampus Express, and IronClaw with host-OS-only discipline, receipts, and launch gates.
+- Completed: Created run directory , backed up GOALS/CURRENT_HANDOFF.md and GOALS/GOAL_LOG.md, and wrote the Session Run RUN_MANIFEST.md.
+- Next action: Run Session 1 COOK to inspect repo state, services, DB, GPU, RunPod, LoRA, Talkie, ML, and Fastlane/Slowlane; then write the build map and work orders.
+- Resume command: `python3 scripts/goal_handoff.py check && sed -n "1,220p" GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Bootstrap sealed; the trail now hangs off the new run dir. Tiny spoor, clean boot.
+
+---
+
+## Step 0/5 — Run bootstrap
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: LUCIDOTA / INDY_READs CLI conductor orchestration
+- Generated: `2026-06-03T00:47:02Z`
+- Current step: 0/5
+- Status: running
+- Objective: Complete the bounded five-session orchestration for LUCIDOTA, INDY_READs, PERCYPHON, Doggystyle kernel, Krampus Express, and IronClaw with host-OS-only discipline, receipts, and launch gates.
+- Completed: Created run directory 05_OUTPUTS/vibe_orchestrations/2026-06-03T004623Z_cli_takeover_run, backed up GOALS/CURRENT_HANDOFF.md and GOALS/GOAL_LOG.md, and wrote the Session Run RUN_MANIFEST.md.
+- Next action: Run Session 1 COOK to inspect repo state, services, DB, GPU, RunPod, LoRA, Talkie, ML, and Fastlane/Slowlane; then write the build map and work orders.
+- Resume command: `python3 scripts/goal_handoff.py check && sed -n "1,220p" GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Bootstrap sealed; the trail now hangs off the new run dir. Tiny spoor, clean boot.
+
+---
+
+## Step 1/5 — RunPod SSH key blocker verification
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: LUCIDOTA / INDY_READs CLI conductor orchestration
+- Generated: `2026-06-03T01:01:43Z`
+- Current step: 1/5
+- Status: running
+- Objective: Complete the bounded five-session orchestration for LUCIDOTA, INDY_READs, PERCYPHON, Doggystyle kernel, Krampus Express, and IronClaw with host-OS-only discipline, receipts, and launch gates.
+- Completed: Retried proxy/direct SSH and recorded explicit key-auth failure: both bh5zizy4coj8a0-64412392@ssh.runpod.io and root@213.192.6.98:40100 reject offered ~/.ssh/id_ed25519; generated runpod_ssh_access_retry_receipt.json and refreshed runpod_talkie_control_latest.json as WAITING_FOR_PUBLIC_KEY_AUTH.
+- Next action: Paste RUNPOD_WEB_TERMINAL_PASTE.sh in web terminal to append LUCI key to /root/.ssh/authorized_keys, then rerun: python3 scripts/runpod_talkie_control.py probe --force-after-auth-change --json
+- Resume command: `python3 scripts/goal_handoff.py check && cat 05_OUTPUTS/runpod/talkie_book_lora/runpod_talkie_control_latest.json`
+
+Technical Summary Review and Dev Notes: SSH lane is blocked on authorized_key auth, not endpoint syntax. Web terminal repair remains the single untested unblock path. tiny field note: both direct and proxy signatures are denied, matching the same key gate.
+
+---
+
+## Step 2/5 — Queue session-1 work orders and refresh model-fabric receipts
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: LUCIDOTA / INDY_READs CLI conductor orchestration
+- Generated: `2026-06-03T01:11:40Z`
+- Current step: 2/5
+- Status: running
+- Objective: Complete the bounded five-session orchestration for LUCIDOTA, INDY_READs, PERCYPHON, Doggystyle kernel, Krampus Express, and IronClaw with host-OS-only discipline, receipts, and launch gates.
+- Completed: Queued 8 ABSURD session-1 work orders across RunPod, Talkie, LoRA, RiverML, Treelite/litetree, ingestion labels, model ledger, and manual canon. Added model_fabric_status/admit/open/call/release wrappers and wrote RUNPOD_BLOCKER_RECEIPT.json after probe still reported WAITING_FOR_PUBLIC_KEY_AUTH.
+- Next action: Paste RUNPOD_WEB_TERMINAL_PASTE.sh into the RunPod web terminal, then rerun python3 scripts/runpod_talkie_control.py probe --force-after-auth-change --json; if SSH_OK appears, run the upload/bootstrap lane immediately.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && python3 scripts/runpod_talkie_control.py probe --json && python3 scripts/model_fabric_status.py --json`
+
+Technical Summary Review and Dev Notes: Tiny field note: the local lanes are visible; the remote key gate is still the lone brittle tooth.
+
+---
+
+## Step 3/5 — Remote bootstrap advanced, conductor fanout and LoRA work orders queued
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: LUCIDOTA / INDY_READs CLI conductor orchestration
+- Generated: `2026-06-03T01:11:40Z`
+- Current step: 3/5
+- Status: running
+- Objective: Complete the bounded five-session orchestration for LUCIDOTA, INDY_READs, PERCYPHON, Doggystyle kernel, Krampus Express, and IronClaw with host-OS-only discipline, receipts, and launch gates.
+- Completed: RunPod/Talkie SSH is live, Talkie source custody PASS is confirmed on-pod, the detached bootstrap worker is advancing with a PASS custody receipt in the remote log, remote compact/start timeout receipts exist, UUID queue insertions now use real DB UUIDs via RETURNING job_uuid, and the conductor hierarchy fanout queued major-system packets plus LoRA/manual chunks.
+- Next action: Poll `/workspace/talkie_forge/receipts/lean_talkie_download.log` and `lean_talkie_download_start.json` until the bootstrap/download path yields a final success or failure receipt; if it stalls, inspect only the bootstrap worker and restart that worker only.
+- Resume command: `ssh -o BatchMode=yes -o IdentitiesOnly=yes -p 40100 -i ~/.ssh/id_ed25519 root@213.192.6.98 'tail -n 120 /workspace/talkie_forge/receipts/lean_talkie_download.log; cat /workspace/talkie_forge/receipts/lean_talkie_download_start.json'`
+
+Technical Summary Review and Dev Notes: Tiny field note: the remote key gate is gone; the bootstrap worker is now the tooth that bites, and the queue spine has real UUIDs again.
+
+---
+
+## Step 4/5 — Canonical manual set written and queue-verified
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: LUCIDOTA / INDY_READs CLI conductor orchestration
+- Generated: `2026-06-03T01:11:40Z`
+- Current step: 4/5
+- Status: running
+- Objective: Complete the bounded five-session orchestration for LUCIDOTA, INDY_READs, PERCYPHON, Doggystyle kernel, Krampus Express, and IronClaw with host-OS-only discipline, receipts, and launch gates.
+- Completed: Canonical manual set written to `00_PROJECT_BRAIN/ROOT_MANUAL.md`, `API_MANUAL.md`, `RUNTIME_MANUAL.md`, `CONTRADICTION_LEDGER.md`, `FINAL_LAUNCH_REPORT.md`, and `OPERATIONS_MANUAL.html`; manual canon queue inserted into ABSURD/Postgres; six worker jobs executed successfully; contradiction ledger now records live doc/runtime mismatches instead of hiding them.
+- Next action: Re-run the manual canon audit and keep training blocked until an artifact path, dataset manifest, config, hash, and smoke/eval receipt all exist.
+- Resume command: `.venv/bin/python scripts/absurd_queue_spine.py --action audit && find 00_PROJECT_BRAIN -maxdepth 1 -name '*MANUAL.md' -o -name 'CONTRADICTION_LEDGER.md' -o -name 'FINAL_LAUNCH_REPORT.md' -o -name 'OPERATIONS_MANUAL.html' | sort`
+
+Technical Summary Review and Dev Notes: Tiny field note: the manuals are now on the table; the ledger is honest enough to bite, and the queue spine stayed UUID-clean.
+
+---
+
+## Step 5/5 — Legacy docs demoted; final manual-canon receipt written
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: LUCIDOTA / INDY_READs CLI conductor orchestration
+- Generated: `2026-06-03T01:11:40Z`
+- Current step: 5/5
+- Status: running
+- Objective: Complete the bounded five-session orchestration for LUCIDOTA, INDY_READs, PERCYPHON, Doggystyle kernel, Krampus Express, and IronClaw with host-OS-only discipline, receipts, and launch gates.
+- Completed: Canonical manual set written to `00_PROJECT_BRAIN/ROOT_MANUAL.md`, `API_MANUAL.md`, `RUNTIME_MANUAL.md`, `CONTRADICTION_LEDGER.md`, `FINAL_LAUNCH_REPORT.md`, and `OPERATIONS_MANUAL.html`; all legacy runtime manual/API/HTML copies were demoted to explicit proof-hoard stubs; manual canon queue inserted into ABSURD/Postgres; six worker jobs executed successfully; final manual-canon receipt written.
+- Next action: Hold training on the exact blocker command until a compatible base model is supplied.
+- Resume command: `LUCIDOTA_LORA_BASE_MODEL=<compatible-hf-base-model> .venv/bin/python scripts/lucidota_indy_lora_train.py --manifest 04_RUNTIME/BOOK_READER_LORA/adapter_targets/talkie/adapter_manifest.json --json`
+
+Technical Summary Review and Dev Notes: Tiny field note: the canon is now singular on disk, the legacy stubs are clearly demoted, and the only honest remaining move is the training base-model input.
+
+---
+
+## Step 3/3 — Exact-target model acquisition, receipts, and first safe job
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RunPod exact model acquisition + MoE build lane
+- Generated: `2026-06-03T04:10:15Z`
+- Current step: 3/3
+- Status: complete
+- Objective: Resolve the exact Talkie and Prism ML targets on RunPod, quarantine nothing wrong, emit exact-target receipts, build MoE math/plan/queue, and start the first safe job.
+- Completed: Verified live Hugging Face metadata for talkie-lm/talkie-1930-13b-it, prism-ml/Bonsai-8B-gguf::Bonsai-8B-Q1_0.gguf, and prism-ml/Ternary-Bonsai-8B-gguf::Ternary-Bonsai-8B-Q2_0.gguf; materialized exact model dirs on RunPod via symlinks to already verified pod copies to avoid disk quota, cloned talkie GitHub, wrote RUNPOD_MODEL_TARGETS_EXACT.json, HF_MODEL_PULL_RECEIPT.json, WRONG_MODEL_QUARANTINE.json, TALKIE_4X_MOE_MATH.md, TALKIE_MOE_BUILD_PLAN.json, TALKIE_TRAINING_QUEUE.jsonl, RUNPOD_UPLOAD_RECEIPT.json, and FIRST_JOB_STARTED.json; local_assets is now symlinked for the staged scripts/manifests.
+- Next action: Use the queue to start Talkie adapter training only after the loader-proof gate is available; otherwise keep the GGUF Bonsai jobs blocked and the exact-target receipts as source of truth.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny field note: exact targets are pinned, the disk goblin was sidestepped with symlinks, and the first safe build job already stamped its receipt.
+
+---
+
+## Step 4/5 — Talkie PEFT smoke + first adapter launch
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RunPod exact model acquisition + MoE build lane
+- Generated: `2026-06-03T04:33:04Z`
+- Current step: 4/5
+- Status: running
+- Objective: Resolve the exact Talkie and Prism ML targets on RunPod, quarantine nothing wrong, emit exact-target receipts, build MoE math/plan/queue, and start the first safe job.
+- Completed: Verified live HF metadata for the exact Talkie and Prism targets; materialized exact model dirs on RunPod via symlinks to already verified pod copies; wrote RUNPOD_MODEL_TARGETS_EXACT.json, HF_MODEL_PULL_RECEIPT.json, WRONG_MODEL_QUARANTINE.json, TALKIE_4X_MOE_MATH.md, TALKIE_MOE_BUILD_PLAN.json, TALKIE_TRAINING_QUEUE.jsonl, RUNPOD_UPLOAD_RECEIPT.json, and first-job build receipt; built a clean venv with torch 2.8.0+cu128 plus peft/accelerate/transformers/tiktoken; patched Talkie generation compatibility; launched a real one-step Talkie LoRA training job on GPU and got PASS receipt at /workspace/lucidota_forge/receipts/talkie_adapter_train.json.
+- Next action: Continue with the staged queue: launch the book-reader six-book LoRA job next, while leaving the Bonsai GGUF jobs blocked until loader-proven trainability exists.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny field note: the Talkie smoke finally put boots on the GPU; the adapter wound got one real turn, and the next move is queue pressure, not more theory.
+
+---
+
+## Step 5/5 — Live Talkie adapter jobs launched
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RunPod exact model acquisition + MoE build lane
+- Generated: `2026-06-03T04:36:19Z`
+- Current step: 5/5
+- Status: running
+- Objective: Resolve the exact Talkie and Prism ML targets on RunPod, quarantine nothing wrong, emit exact-target receipts, build MoE math/plan/queue, and start the first safe job.
+- Completed: Talkie exact targets remain pinned and verified; the Talkie GitHub repo is cloned; the clean training venv is live with torch 2.8.0+cu128, peft, accelerate, transformers, and tiktoken; the Talkie PEFT feasibility smoke passed; two actual GPU adapter training jobs completed successfully with receipts: /workspace/lucidota_forge/receipts/talkie_adapter_train.json and /workspace/lucidota_forge/receipts/book_reader_six_book_lora.json; both used the exact talkie-lm/talkie-1930-13b-it checkpoint and the staged book-reader rows; shared-base adapter MoE remains the preferred path; Bonsai GGUF training remains blocked until loader-proof exists.
+- Next action: Either continue with more Talkie/book-reader adapter batches or keep pushing toward a loader-proven Bonsai trainability check; do not delete the exact-target receipts or the quarantine lane.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny field note: the GPU finally said yes twice; the wind is in the adapter sails now, while the Bonsai stones still need their loader oracle.
+
+# 2026-06-03T04:42:41Z — RunPod exact model acquisition + MoE build lane
+Save This Prompt, Pass on this Handoff:
+- Current step: 6/6
+- Status: running
+- Completed: Exact Talkie and Prism targets are pinned and verified from live Hugging Face metadata; the Talkie GitHub repo is cloned; the clean training venv is live with torch 2.8.0+cu128, peft, accelerate, transformers, datasets, bitsandbytes, safetensors, and tiktoken; the Talkie PEFT feasibility smoke passed; two earlier adapter training jobs completed successfully with receipts; queue dispatch and Bonsai trainability probe receipts exist; the exact six-book Talkie book-reader batch is now running; shared-base adapter MoE remains the preferred path unless measured fit says otherwise.
+- Next action: Poll the exact six-book Talkie run until it emits `/workspace/lucidota_forge/receipts/book_reader_six_book_exact_lora.json` or a blocker; then reconcile the queue and keep Bonsai blocked unless loader-proof appears.
+- Technical Summary Review and Dev Notes: Tiny field note: the exact six-book batch is in the swamp now; patience first, then the receipt.
+
+# 2026-06-03T04:52:00Z — RunPod exact model acquisition + MoE build lane
+Save This Prompt, Pass on this Handoff:
+- Current step: 6/6
+- Status: running
+- Completed: Exact Talkie and Prism targets are pinned and verified from live Hugging Face metadata; the Talkie GitHub repo is cloned; the clean training venv is live with torch 2.8.0+cu128, peft, accelerate, transformers, datasets, bitsandbytes, safetensors, and tiktoken; the Talkie PEFT feasibility smoke passed; the exact seven-sample Talkie book-reader batch now correctly uses six real books plus ROOT414 control, runs under the venv, and completed successfully with receipts at `/workspace/lucidota_forge/receipts/book_reader_six_book_exact_lora_v2.json` and `/workspace/lucidota_forge/receipts/book_reader_six_book_exact_lora_v3.json`; the queue dispatcher now resolves queue and receipt paths robustly and its local tests pass; the Bonsai probe was corrected back to the exact 8B ternary target family; shared-base adapter MoE remains the preferred path unless measured fit says otherwise.
+- Next action: Keep the Bonsai exact 8B targets blocked unless loader-proof trainability appears; optionally finish integrating the MoE build helper / probe edits if you want the local tree fully aligned, but do not regress the exact-target receipts.
+- Technical Summary Review and Dev Notes: Tiny field note: the exact batch is finally on-script and on-venv; the Bonsai stones still want a loader oracle before they turn into training lanes.
+
+# 2026-06-03T04:54:10Z — RunPod exact model acquisition + MoE build lane
+Save This Prompt, Pass on this Handoff:
+- Current step: 6/6
+- Status: running
+- Completed: Exact Talkie and Prism targets are pinned and verified from live Hugging Face metadata; the Talkie GitHub repo is cloned; the clean training venv is live with torch 2.8.0+cu128, peft, accelerate, transformers, datasets, bitsandbytes, safetensors, and tiktoken; the Talkie PEFT feasibility smoke passed; the exact seven-sample Talkie book-reader batch correctly uses six real books plus ROOT414 control and completed successfully with receipts at `/workspace/lucidota_forge/receipts/book_reader_six_book_exact_lora_v2.json` and `/workspace/lucidota_forge/receipts/book_reader_six_book_exact_lora_v3.json`; the queue dispatcher now resolves queue and receipt paths robustly and its local tests pass; the Bonsai probe is corrected back to the exact 8B ternary target family and its local tests pass; the MoE build helper now accepts argv/returns exit code and its local test passes; shared-base adapter MoE remains the preferred path unless measured fit says otherwise.
+- Next action: Keep the Bonsai exact 8B targets blocked unless loader-proof trainability appears; otherwise the local tree is now in a clean, resumable state with exact-target receipts and verified helpers.
+- Technical Summary Review and Dev Notes: Tiny field note: the exact batch is on-script and on-venv; the build helper finally has a proper face, and the Bonsai stones still want a loader oracle before they turn into training lanes.
+
+---
+
+## Step 6/6 — Validate queue dispatch and MoE build helpers
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: RunPod exact model acquisition + MoE build lane
+- Generated: `2026-06-03T05:18:21Z`
+- Current step: 6/6
+- Status: running
+- Objective: Resolve the exact Talkie and Prism ML targets on RunPod, quarantine nothing wrong, emit exact-target receipts, build MoE math/plan/queue, and start the first safe job.
+- Completed: Queue dispatcher smoke-verified locally: it skips existing receipt files, resolves receipt paths relative to the queue parent, and executes only missing jobs when asked. MoE build helper smoke-verified locally: it parses the exact 4x math sheet and emits the expected PASS receipt with full_4x_bf16_bytes=106242061768.
+- Next action: Keep the Bonsai exact 8B targets blocked unless loader-proof trainability appears; otherwise continue from the clean resumable state with exact-target receipts and verified helpers.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny field note: the queue path and MoE build helper both held up under direct smoke tests; the only remaining question is whether the Bonsai lane ever gets a loader oracle.
+
+# 2026-06-03T05:27:33Z — RunPod exact model acquisition + MoE build lane
+Save This Prompt, Pass on this Handoff:
+- Goal: RunPod exact model acquisition + MoE build lane
+- Current step: 7/7
+- Status: running
+- Objective: Resolve the exact Talkie and Prism ML targets on RunPod, quarantine nothing wrong, emit exact-target receipts, build MoE math/plan/queue, and start the first safe job.
+- Completed: Fixed the queue dispatcher default so it now resolves the real Talkie queue at `04_RUNTIME/RUNPOD_ACCEL/TALKIE_TRAINING_QUEUE.jsonl`; kept the relative-receipt resolver working; verified the queue and MoE build helpers with `pytest` (`tests/test_runpod_queue_dispatch.py`, `tests/test_talkie_moe_build.py`); and smoke-tested both scripts against the live repo queue/math files. The MoE build helper still emits the expected PASS receipt with `full_4x_bf16_bytes=106242061768`.
+- Next action: Keep the Bonsai exact 8B targets blocked unless loader-proof trainability appears; if the pod launches the queue later, it can now find the queue without a manual override.
+- Technical Summary Review and Dev Notes: Tiny field note: the queue path now points at the real runway, the MoE helper still coughs up the exact byte count, and the Bonsai stones remain blocked until loader proof exists.
+
+---
+
+## Step 1/1 — Save This Prompt, Pass on this Handoff:
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Continuation plane correction: GOALS only
+- Generated: `2026-06-04T00:01:43Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Remove session_handoff sprawl; keep Indy_READs and work-order continuation in GOALS/ABSURD.
+- Completed: Deleted the new scripts/session_handoff.py plane and 05_OUTPUTS/session_handoff folder; patched scripts/indy_reads.py to read GOALS/CURRENT_HANDOFF.md and GOALS/NEXT_GOAL_QUEUE.json only; preserved the existing GOALS->ABSURD bridge via scripts/goal_swarm_dispatch.py; validated with py_compile, GOALS check, goal_dev_control, and targeted pytest for the touched Indy_READs / GOALS surfaces.
+- Next action: Resume from GOALS/CURRENT_HANDOFF.md and the GOALS queue; run .venv/bin/python scripts/indy_reads.py chat when operator attention is needed.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny field note: the stray session plane got boxed up, and the GOALS trailhead is back in charge.
+
+---
+
+## Step 1/1 — Save This Prompt, Pass on this Handoff:
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Root-Rotor / IronClaw / Indy / KRAMPUS control pass
+- Generated: `2026-06-04T00:29:08Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Make LUCIDOTA continuously operable through existing GOALS + Root-Rotor + ABSURD + systemd surfaces.
+- Completed: Loaded and verified the canonical runtime spine SQL into the live DB, restored PostgREST to a peer-auth local process, kept the ABSURD wake-plane resident, restored Indy_READs heartbeats to ironclaw.daemon_heartbeats, added the KRAMPUS quarantine reingest queue and executed a no-delete move/reingest receipt, and validated the changed surfaces with py_compile plus 22 targeted tests.
+- Next action: Review the Root-Rotor red-team blocker manual_incomplete_draft_nodes and decide whether to continue the manual cleanup pass or accept the current partial coverage.
+- Resume command: `cd /home/mfspx/LUCIDOTA && .venv/bin/python scripts/root_rotor_red_team_audit.py --json`
+
+Technical Summary Review and Dev Notes: Tiny field note: the queue lizard is fed, the watcher is breathing, and the atlas still has draft moss.
+
+---
+
+## Step 2/2 — Runtime spine collapse progress
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Core kernel collapse & reuse mandate
+- Generated: `2026-06-04T00:32:01Z`
+- Current step: 2/2
+- Status: in_progress
+- Objective: Collapse runtime spine onto canonical 8, remove standalone runtime loop, and keep Indy/ABSURD on the live ledger.
+- Completed: Rewired the centralized ABSURD engine to import the pure Indy atomizers directly, confirmed scripts/luci_runtime.py is absent, and verified the Indy attention loop still writes heartbeats/judgments into ironclaw.
+- Next action: Review any remaining duplicate runtime references in docs/tests and continue tightening toward the canonical 8 only.
+- Resume command: `cd /home/mfspx/LUCIDOTA && .venv/bin/python -m pytest -q tests/test_indy_ops_atomize.py tests/test_absurd_queue_spine_contract.py tests/test_lucidota_indy_reads_watcher.py`
+
+Technical Summary Review and Dev Notes: Tiny field note: the spine is less haunted; the watcher still knows its own name.
+
+---
+
+## Step 3/3 — Kernel collapse verified
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Core kernel collapse & reuse mandate
+- Generated: `2026-06-04T00:33:54Z`
+- Current step: 3/3
+- Status: complete
+- Objective: Collapse runtime spine onto canonical 8, remove standalone runtime loop, and keep Indy/ABSURD on the live ledger.
+- Completed: Deleted the standalone runtime loop surface by keeping scripts/luci_runtime.py absent, centralized atomize handling into pure scripts/indy_ops.py helpers, wired scripts/absurd_queue_spine.py to import and execute intake.atomize_json / intake.atomize_csv directly, and kept Indy_READs writing heartbeats and judgments into ironclaw with the collaborative/autonomous dual-state gate preserved.
+- Next action: If the runtime spine changes again, rerun the core collapse regression tests and the Indy watcher contract tests.
+- Resume command: `cd /home/mfspx/LUCIDOTA && .venv/bin/python -m pytest -q tests/test_core_kernel_collapse.py tests/test_indy_ops_atomize.py tests/test_absurd_queue_spine_contract.py tests/test_lucidota_indy_reads_watcher.py`
+
+Technical Summary Review and Dev Notes: Tiny field note: the spine is quieter, and the watcher still has two moods.
+
+---
+
+## Step 1/1 — Audit answers encoded
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Root-Rotor manual reduction law audit
+- Generated: `2026-06-04T01:06:56Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Encode audited Q14-Q24 Root-Rotor execution decisions into existing GOALS surfaces without creating a new control plane.
+- Completed: Added Root-Rotor Manual Draft Reduction Law to GOALS/AGENT_ORCHESTRATION_POLICY.md; appended bounded smaller-model packet to GOALS/OPERATION_ROOT_ROTOR_SENDABLE_PROMPT.md; restored GOAL_PROMPTS Prompt 003 contract; added tests/test_root_rotor_manual_reduction_laws.py. Verified 20 targeted tests pass. PostgREST readiness true. Root-Rotor red-team remains FAIL on existing manual_incomplete_draft_nodes.
+- Next action: Run the smaller-model packet for exactly 200 Root-Rotor candidates using existing sidecar/apply paths; do not patch orchestration scripts; treat current review_required rows as migration/debt to needs_operator_label/deprecated/verified through gated staging.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_root_rotor_manual_reduction_laws.py tests/test_goal_handoff.py && .venv/bin/python scripts/root_rotor_red_team_audit.py --json`
+
+Technical Summary Review and Dev Notes: Tiny field note: the swamp got banks. Q14/Q18/Q23/Q24 are now hard-guarded in GOALS; red-team still sees 4308 draft nodes and 5 legacy review_required rows.
+
+---
+
+## Step 1/1 — Batch 001 blocked by exact-size source count
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Root-Rotor total migration Batch 001
+- Generated: `2026-06-04T01:19:36Z`
+- Current step: 1/1
+- Status: blocked
+- Objective: Execute the upgraded total migration driver until manual_incomplete_draft_nodes reaches zero or a receipt-backed blocker is proven.
+- Completed: Ran the exact Batch 001 command after adding CLI compatibility to the approved Root-Rotor staging script. The command wrote a blocker receipt because 01_REPOS/claudecode/src/services has 1 eligible manifest candidate, not the required exact 200. Validation still passes: 26 targeted tests. PostgREST readiness true. Red-team still reports manual_incomplete_draft_nodes/draft_nodes=4308.
+- Next action: Operator must either authorize a broader source path such as scripts/ for the next exact 200 batch, or authorize a partial claudecode final batch; strict prompt cannot continue because all 01_REPOS/claudecode/src has only 98 manifest candidates.
+- Resume command: `cat 05_OUTPUTS/root_rotor_manuals/batch_001/final_blocker_36b0aefc6317d79e.json`
+
+Technical Summary Review and Dev Notes: Tiny field note: the first claudecode services burrow contains one empty-ish tooth, not a 200-node nest. The blocker receipt is the honest trail marker.
+
+---
+
+## Step 1/1 — Prompt saved and blocker linked
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Root-Rotor total migration prompt preservation
+- Generated: `2026-06-04T01:22:09Z`
+- Current step: 1/1
+- Status: blocked
+- Objective: Save the upgraded total migration execution prompt as the active GOALS Root-Rotor prompt, preserving the Batch 001 blocker evidence and resume path.
+- Completed: Saved the full ROOT-ROTOR TOTAL MIGRATION EXECUTION PROMPT in GOALS/OPERATION_ROOT_ROTOR_SENDABLE_PROMPT.md under Active goal prompt: Root-Rotor total migration execution; added Prompt 004 pointer in GOALS/GOAL_PROMPTS.md; added/updated tests proving both the bounded smaller prompt and full total-migration prompt remain present. Current execution blocker remains receipt-backed: Batch 001 source 01_REPOS/claudecode/src/services has 1 eligible candidate, not exact 200.
+- Next action: To continue execution, authorize either the broader exact-200 source command from the blocker receipt or a partial claudecode final batch; then rerun validation and Root-Rotor red-team.
+- Resume command: `grep -n 'Active goal prompt: Root-Rotor total migration execution' GOALS/OPERATION_ROOT_ROTOR_SENDABLE_PROMPT.md && cat 05_OUTPUTS/root_rotor_manuals/batch_001/final_blocker_36b0aefc6317d79e.json`
+
+Technical Summary Review and Dev Notes: Tiny field note: the spell is pinned to the GOALS wall now; the burrow still only has one service-file tooth.
+
+---
+
+## Step 1/1 — Same exact-200 claudecode blocker verified
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Root-Rotor total migration blocked audit
+- Generated: `2026-06-04T01:23:59Z`
+- Current step: 1/1
+- Status: blocked
+- Objective: Preserve the total migration prompt and execute batches until the manual counter reaches zero or the exact blocker is receipt-proven.
+- Completed: Verified prompt markers in GOALS/OPERATION_ROOT_ROTOR_SENDABLE_PROMPT.md and Prompt 004 pointer in GOALS/GOAL_PROMPTS.md. Recomputed live manifest counts: services=1, commands=0, core=0, tools=0, all 01_REPOS/claudecode/src=98, below exact 200. Validation passes with 27 targeted tests; PostgREST readiness true; red-team still reports draft_nodes/manual_incomplete_draft_nodes=4308.
+- Next action: Cannot continue under the strict prompt without operator authorization for either broader source path scripts/ exact-200 or partial claudecode 98-node final batch.
+- Resume command: `cat 05_OUTPUTS/root_rotor_manuals/batch_001/blocked_audit_6682047907217182.json`
+
+Technical Summary Review and Dev Notes: Tiny field note: third pass, same burrow wall. The prompt is pinned; the exact-200 claudecode nest does not exist in the live manifest.
+
+---
+
+## Step 1/3 — Prompt saved, blocker superseded, Batch 001 staged
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Root-Rotor node-count Batch 001 repair
+- Generated: `2026-06-04T01:32:25Z`
+- Current step: 1/3
+- Status: in_progress
+- Objective: Repair the Root-Rotor migration job using candidate node rows only, supersede invalid file-count blocker state, stage exact 200-node Batch 001, and continue only through allowed staged/promotion paths.
+- Completed: Saved exact active Root-Rotor repair prompt; wrote supersession receipt for invalid_blocker_basis_file_count_used_instead_of_node_count; reverted the bad root_rotor_manual_queue.py file-count blocker patch; selected Batch 001 by node rows from lucidota_canon.bible_nodes. Batch 001 staged exactly 200 node payloads: 67 claudecode/rust core-source verified candidates and 133 generated-artifact cleanup deprecated candidates. No DB mutation/arbitrary DML performed. Mandatory validation passed: 21 tests. PostgREST readiness true. Red-team still reports draft_nodes/manual_incomplete_draft_nodes=4308 because Batch 001 is staged, not promoted.
+- Next action: Implement or run the approved promotion path for staged node decisions, or stage Batch 002 excluding already-staged node_ids if promotion remains gated. Do not use file-count blockers.
+- Resume command: `cat 05_OUTPUTS/root_rotor_manuals/batch_001_node_count_corrected/batch_001_execution_receipt_a01aba2dab0b8160.json && cat 05_OUTPUTS/root_rotor_manuals/batch_001/invalid_blocker_supersession_b4d66b6cc3a105fa.json && cat 05_OUTPUTS/root_rotor_manuals/batch_001/active_prompt_saved_345213538cb4f594.json && cat 05_OUTPUTS/root_rotor_manuals/red_team_audit_20260604T013209.216094Z.json`
+
+Technical Summary Review and Dev Notes: Tiny field note: the wrong ruler is snapped; the node row trail is now marked with 200 stones.
+
+---
+
+## Step 2/3 — Frankenbatch superseded; clean source and cleanup split
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Root-Rotor clean Batch 001 no-padding repair
+- Generated: `2026-06-04T01:36:07Z`
+- Current step: 2/3
+- Status: in_progress
+- Objective: Supersede the mixed Frankenbatch and stage Root-Rotor node migration work in coherent work classes only.
+- Completed: Superseded the mixed 67+133 Batch 001 receipt with reason invalid_mixed_batch_core_source_plus_generated_artifact_padding. Recomputed clean non-generated claudecode source inventory. Staged clean core-source Batch 001 as a coherent 165-node sub-batch with no generated padding. Staged generated/build/cache artifact cleanup separately: 1518 eligible, 200 staged deprecated in cleanup batch 001. Validation passed: 21 tests. PostGREST readiness true. No DB mutation/arbitrary DML/runtime orchestrator patching.
+- Next action: Either promote the clean 165-node staged core-source sub-batch through the approved promotion path, or stage the next coherent clean-source scope. Generated cleanup remains separate and must not be counted as core-source verification.
+- Resume command: `cat 05_OUTPUTS/root_rotor_manuals/batch_001_node_count_corrected/mixed_batch_superseded_a0e377ba55203d27.json && cat 05_OUTPUTS/root_rotor_manuals/batch_001_clean_core_source/batch_001_clean_core_source_receipt_36bed09c7cbdadbb.json && cat 05_OUTPUTS/root_rotor_manuals/generated_artifact_cleanup_batch_001/generated_cleanup_receipt_20f72de58b6eb3f7.json && cat 05_OUTPUTS/goals/goal_dev_control_20260604T013552Z.json && cat 05_OUTPUTS/root_rotor_manuals/red_team_audit_20260604T013552.340133Z.json`
+
+Technical Summary Review and Dev Notes: Tiny field note: no Frankenbatch now; source stones and build-cache bones sit in separate jars.
+
+---
+
+## Step 4/5 — Adapter and clean batch synchronized
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Matrix conduit + clean core-source Batch 001 + safe DBOS surface
+- Generated: `2026-06-04T01:57:15Z`
+- Current step: 4/5
+- Status: in_progress
+- Objective: Keep Phantom out of product root; make Indy Matrix conduit Python-first, stage clean Root-Rotor core-source node batch without generated padding, and expose a small safe PostgREST/API surface over the existing 518-table DB.
+- Completed: Phantom /flow hunks quarantined and reverted; scripts/indy_conduit_driver.py added as stateless Matrix conduit; 06_SCHEMA/20260604_indy_matrix_conduit.sql staged safe surfaces/RPCs; scripts/root_rotor_manual_queue.py now supports node-row --batch-size/--source/--output-dir mode; latest clean Batch 001 receipt is 05_OUTPUTS/root_rotor_manuals/batch_001_clean_core_source/batch_001_clean_core_source_receipt_518c4dce43acf270.json with 165 verified clean nodes and no generated padding; generated cleanup remains separate.
+- Next action: Run privileged DB promotion for 06_SCHEMA/20260604_indy_matrix_conduit.sql as an owner role with ironclaw/lucidota_ontology permissions, or keep it staged until the operator grants that route.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_indy_conduit_driver.py tests/test_root_rotor_manual_queue_clean_batch.py tests/test_root_rotor_manual_reduction_laws.py tests/test_goal_handoff.py tests/test_indy_reads_chat.py`
+
+Technical Summary Review and Dev Notes: Field note: the conduit is now Python/Postgres/ABSURD-shaped, not Phantom/TypeScript-shaped. Clean node batch is real rows, no Frankenpadding.
+
+---
+
+## Step 5/6 — Conduit and live routes checked
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy conduit + PostgREST smoke + clean staged state
+- Generated: `2026-06-04T02:02:10Z`
+- Current step: 5/6
+- Status: in_progress
+- Objective: Make Indy_READs talk to the live system through one Postgres plus PostgREST, keep canon/manual readable, and leave Root-Rotor cleanup as staged state only unless it blocks runtime.
+- Completed: scripts/indy_conduit_driver.py is a stateless Python Matrix/Conduit adapter with deterministic clean_text/entity extraction, dry-run receipts, and SQL targeting ironclaw.waking_dialogue_stream raw_text/clean_text/extracted_entities with processed_status queued. Broad schema/root-rotor code edits from the prior mixed prompt were removed from this narrowed transition. PostgREST readiness is true; canon/manual/history routes read live rows. Clean Root-Rotor staged receipt remains 05_OUTPUTS/root_rotor_manuals/batch_001_clean_core_source/batch_001_clean_core_source_receipt_518c4dce43acf270.json; generated cleanup remains separate.
+- Next action: Tighten PostgREST exposure: OpenAPI currently lists unsafe post/patch/delete methods on canon views/tables, so add read-only role/mask or safe wrapper exposure before claiming route masks clean.
+- Resume command: `.venv/bin/python -m py_compile scripts/indy_conduit_driver.py && .venv/bin/python -m pytest -q tests/test_indy_reads_chat.py tests/test_goal_handoff.py tests/test_root_rotor_manual_reduction_laws.py tests/test_indy_conduit_driver.py && .venv/bin/python scripts/root_rotor_postgrest_control.py status --check-readiness`
+
+Technical Summary Review and Dev Notes: Conduit is useful now as dry-run/approved-DB adapter. Live DB owner permissions still prevent this mfspx role from proving an ironclaw insert without an approved RPC/role.
+
+---
+
+## Step 6/6 — Indy_READs queued-row read contract named correctly
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy_READs conduit + PostgREST smoke + clean staged state
+- Generated: `2026-06-04T02:05:48Z`
+- Current step: 6/6
+- Status: in_progress
+- Objective: Make Indy_READs talk to the live system through one Postgres plus PostgREST, keep canon/manual readable, and leave Root-Rotor cleanup as staged state only unless it blocks runtime.
+- Completed: Corrected sloppy Indy shorthand to Indy_READs in the conduit contract. Added read_queued_dialogue_rows(conn, limit=20) in scripts/indy_conduit_driver.py so Indy_READs has a read-only path to queued ironclaw.waking_dialogue_stream rows, including raw_text, clean_text, extracted_entities, sender/room/event refs, and receipt_id. Direct conduit tests prove the read path is SELECT-only and bounded. Verification passed: py_compile, 31 pytest checks, PostgREST readiness true, and goal_dev_control PASS receipt 05_OUTPUTS/goals/goal_dev_control_20260604T020537Z.json.
+- Next action: Wire the Indy_READs chat/console loop to call the read-only queued dialogue fetch path once the active DB role has ironclaw read permission or an approved read RPC exists.
+- Resume command: `.venv/bin/python -m py_compile scripts/indy_conduit_driver.py && .venv/bin/python -m pytest -q tests/test_indy_reads_chat.py tests/test_goal_handoff.py tests/test_root_rotor_manual_reduction_laws.py tests/test_indy_conduit_driver.py && .venv/bin/python scripts/root_rotor_postgrest_control.py status --check-readiness`
+
+Technical Summary Review and Dev Notes: Name is Indy_READs. Not Indy. Read side now has a bounded contract; live role permissions still gate actual ironclaw table reads.
+
+---
+
+## Step 1/1 — Product surface usable smoke
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: LUCIDOTA product autobuild
+- Generated: `2026-06-04T02:25:20Z`
+- Current step: 1/1
+- Status: in_progress
+- Objective: Make Conduit, Indy_READs chat, /flow canvas, PostgREST/canon/manual, ingest status, learning loop smoke, and Rust migration next steps usable without Phantom takeover.
+- Completed: Added real LUCI-owned /flow visual canvas under 07_SURFACES/sidecars, wired ./luci /flow and luci flow open|ui|smoke, added luci_flow DB tables plus PostgREST-safe canon/manual/indy/flow views, verified Indy_READs chat can read queued Matrix conduit rows, and wrote Rust migration plan receipt.
+- Next action: Run ./luci flow ui --flow 04_RUNTIME/promptflow_smoke_flow --data 04_RUNTIME/promptflow_smoke_flow/data.jsonl --host 127.0.0.1 --port 8765 to keep building the visual canvas interactions.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_indy_conduit_driver.py tests/test_indy_reads_chat.py tests/test_luci_flow_app.py tests/test_luci_flow_wrapper.py tests/test_promptflow_eval_runner.py && ./luci flow ui --smoke --json`
+
+Technical Summary Review and Dev Notes: Indy_READs is live through the terminal queue panel. /flow is real local HTML/canvas, refs-only, no TypeScript, no Phantom root. PostgREST safe views need schema reload after new migrations; done by NOTIFY.
+
+---
+
+## Step 1/1 — Product surface usable smoke
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: LUCIDOTA product autobuild
+- Generated: `2026-06-04T02:27:59Z`
+- Current step: 1/1
+- Status: in_progress
+- Objective: Make Conduit, Indy_READs chat, /flow canvas, PostgREST/canon/manual, ingest status, learning loop smoke, and Rust migration next steps usable without Phantom takeover.
+- Completed: Added LUCI-owned /flow visual canvas under 07_SURFACES/sidecars, wired ./luci /flow and luci flow open|ui|smoke, added luci_flow DB tables plus PostgREST-safe canon/manual/indy/flow views, switched PostgREST anon role to lucidota_postgrest_anon, verified Indy_READs chat reads queued Matrix conduit rows, and wrote Rust migration plan receipt.
+- Next action: Run ./luci flow ui --flow 04_RUNTIME/promptflow_smoke_flow --data 04_RUNTIME/promptflow_smoke_flow/data.jsonl --host 127.0.0.1 --port 8765 to keep building canvas interactions.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_indy_conduit_driver.py tests/test_indy_reads_chat.py tests/test_luci_flow_app.py tests/test_luci_flow_wrapper.py tests/test_promptflow_eval_runner.py && ./luci flow ui --smoke --json`
+
+Technical Summary Review and Dev Notes: Indy_READs is live through the terminal queue panel. /flow is real local HTML/canvas, refs-only, no TypeScript, no Phantom root. PostgREST GET routes are live; direct mutation attempts against safe views return permission errors when carrying real updates.
+
+---
+
+## Step 1/2 — Conduit and live-state proof
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy conduit + PostgREST smoke
+- Generated: `2026-06-04T02:32:24Z`
+- Current step: 1/2
+- Status: in_progress
+- Objective: Make Indy_READs talk to the live system through one Postgres plus PostgREST, keep canon readable/versioned, and leave Root-Rotor cleanup as staged state unless it blocks runtime.
+- Completed: Inspected and verified scripts/indy_conduit_driver.py, direct conduit/chat tests, PostgREST readiness, canon/manual read routes, Indy_READs queued-row read path, and staged Root-Rotor receipts. Patched only the conduit chat-widget action/direct test to encode chat-platform-owned /flow surface semantics without product-root takeover wording.
+- Next action: Fix or replace unsafe OpenAPI method masks for the read-only canon/Indy routes without broad schema churn; actual PATCH guard already returns 401 but OpenAPI still advertises write methods.
+- Resume command: `.venv/bin/python -m py_compile scripts/indy_conduit_driver.py && .venv/bin/python -m pytest -q tests/test_indy_conduit_driver.py tests/test_indy_reads_chat.py tests/test_goal_handoff.py tests/test_root_rotor_manual_reduction_laws.py && .venv/bin/python scripts/root_rotor_postgrest_control.py status --check-readiness`
+
+Technical Summary Review and Dev Notes: Indy_READs can read raw_text and clean_text from ironclaw.waking_dialogue_stream. Root-Rotor clean-core and generated cleanup receipts are separate. PostgREST is live; route mask advertisement is the remaining gremlin.
+
+---
+
+## Step 2/2 — PostgREST route mask hardened
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy conduit + PostgREST smoke
+- Generated: `2026-06-04T02:35:53Z`
+- Current step: 2/2
+- Status: complete
+- Objective: Make Indy_READs talk to the live system through one Postgres plus PostgREST, keep canon readable/versioned, and leave Root-Rotor cleanup as staged state unless it blocks runtime.
+- Completed: Hardened PostgREST route masks by making canon/API safe views non-auto-updatable and revoking raw lucidota_canon table exposure from the PostgREST anon role. Live OpenAPI now has no unsafe non-RPC methods; selected canon/manual/Indy routes are GET-only and return 200. Indy_READs conduit py_compile and targeted tests pass; queued raw_text/clean_text read path is live; clean Root-Rotor staged receipts remain separate from generated cleanup.
+- Next action: Next build step: wire the active chat platform to call the existing conduit webhook/driver, using dry-run first and execute only through the approved ironclaw row contract.
+- Resume command: `.venv/bin/python -m py_compile scripts/indy_conduit_driver.py && .venv/bin/python -m pytest -q tests/test_indy_conduit_driver.py tests/test_indy_reads_chat.py tests/test_goal_handoff.py tests/test_root_rotor_manual_reduction_laws.py && .venv/bin/python scripts/root_rotor_postgrest_control.py status --check-readiness`
+
+Technical Summary Review and Dev Notes: Route-mask gremlin removed without systemd mutation or batch theater. RPCs remain GET/POST but are stable/immutable read functions; non-RPC mutation surfaces are gone from OpenAPI.
+
+---
+
+## Step 1/1 — Chat conduit hook wired and smoked
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active chat to Indy_READs conduit
+- Generated: `2026-06-04T04:02:21Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Wire the active luci/clawd operator chat surface to scripts/indy_conduit_driver.py so /indy messages can dry-run receipts first or execute through ironclaw.waking_dialogue_stream.
+- Completed: Added direct-import conduit hook to scripts/luci_operator.py, added importable process_event_payload in scripts/indy_conduit_driver.py, verified /indy dry-run receipt from ./luci and execute-mode queued row in ironclaw.waking_dialogue_stream visible to Indy_READs.
+- Next action: Next build step: add the outbound Matrix/send adapter only after operator chooses the active chat transport; keep inbound conduit row contract unchanged.
+- Resume command: `.venv/bin/python -m py_compile scripts/indy_conduit_driver.py scripts/luci_operator.py && .venv/bin/python -m pytest -q tests/test_indy_conduit_driver.py tests/test_indy_reads_chat.py tests/test_goal_handoff.py tests/test_luci_operator_indy_conduit.py && .venv/bin/python scripts/root_rotor_postgrest_control.py status --check-readiness`
+
+Technical Summary Review and Dev Notes: Indy_READs now sees luci operator /indy rows without a bot loop, Phantom takeover, systemd mutation, schema work, or Root-Rotor batch theater.
+
+---
+
+## Step 0/4 — Start refreshed handoff
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy_READs online chat loop
+- Generated: `2026-06-04T04:06:20Z`
+- Current step: 0/4
+- Status: running
+- Objective: Make Indy_READs actually online in chat: queued row in -> Indy sees it -> Indy response out -> receipt/log -> no RAM/PID disaster.
+- Completed: Read prior handoff and LUCIDOTA startup law; Dev Library scan report: 05_OUTPUTS/tickletrunk/tickletrunk_scan_20260604T040607Z.json.
+- Next action: Inspect Indy_READs/chat/conduit code and add targeted proof for response-out path with PID/RAM guard.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_indy_conduit_driver.py tests/test_indy_reads_chat.py tests/test_luci_operator_indy_conduit.py`
+
+Technical Summary Review and Dev Notes: Trailhead refreshed; now follow the row spoor instead of inventing a new beast.
+
+---
+
+## Step 1/4 — Inspect current conduit and runtime state
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy_READs online chat loop
+- Generated: `2026-06-04T04:08:29Z`
+- Current step: 1/4
+- Status: running
+- Objective: Make Indy_READs actually online in chat: queued row in -> Indy sees it -> Indy response out -> receipt/log -> no RAM/PID disaster.
+- Completed: Confirmed live DB table ironclaw.waking_dialogue_stream has queued matrix rows; current Indy_READs can read rows and record comments but outbound_matrix_send_performed remains false. PID/RAM check found two Indy watcher PIDs and existing llama servers, so this pass must avoid launching heavy services and add quiet queued response proof.
+- Next action: Write failing test for Indy response-out receipt/queue without network send, then patch the existing Indy_READs chat path.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_indy_reads_chat.py tests/test_indy_conduit_driver.py tests/test_luci_operator_indy_conduit.py`
+
+Technical Summary Review and Dev Notes: The row spoor is real; the missing tooth is a durable response-out packet, not another daemon.
+
+---
+
+## Step 2/4 — Patch response-out packet path
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy_READs online chat loop
+- Generated: `2026-06-04T04:11:45Z`
+- Current step: 2/4
+- Status: running
+- Objective: Make Indy_READs actually online in chat: queued row in -> Indy sees it -> Indy response out -> receipt/log -> no RAM/PID disaster.
+- Completed: Red/green for Indy response-out: added tests proving quiet operator chat outbox packets include PID/RAM guard and record_conduit_dialogue_response queues response-out while marking source rows done.
+- Next action: Run full focused conduit/operator test bundle, then live DB smoke queued row -> Indy sees -> response packet -> done status.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_indy_reads_chat.py tests/test_indy_conduit_driver.py tests/test_luci_operator_indy_conduit.py`
+
+Technical Summary Review and Dev Notes: The response is now a packet with teeth: local, receipt-backed, and not a surprise network critter.
+
+---
+
+## Step 3/4 — Verify online loop response-out
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy_READs online chat loop
+- Generated: `2026-06-04T04:14:58Z`
+- Current step: 3/4
+- Status: running
+- Objective: Make Indy_READs actually online in chat: queued row in -> Indy sees it -> Indy response out -> receipt/log -> no RAM/PID disaster.
+- Completed: Implemented zero-model Indy_READs chat --respond-once path, quiet operator response outbox packets, processed_status=done row marking, and receipts. Verified 30 focused tests pass; live DB smoke inserted a luci /indy row, Indy saw it, queued response indy_response:52ce05dd11f8a3d3, and marked row 0c307f73-b4b1-461c-8773-d64a147b76e6 done. CLI smoke responded to queued event away-smoke-20260604T020839Z and wrote receipt 05_OUTPUTS/indy_conduit/indy_reads_online_once_20260604T041420043268Z_0d17ab944a759aa8.json with model_calls_performed=false and heavy_model_launch_performed=false.
+- Next action: Address remaining online-loop hardening: duplicate Indy watcher PIDs/service ownership, route display in active chat/manual status, and decide whether response packets should be consumed by a sender adapter or remain operator-queued.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_indy_reads_chat.py tests/test_indy_conduit_driver.py tests/test_luci_operator_indy_conduit.py tests/test_indy_readiness_checker.py tests/test_indy_startup_comms_speed.py tests/test_lucidota_indy_reads_watcher.py && .venv/bin/python scripts/indy_reads.py chat --respond-once --json`
+
+Technical Summary Review and Dev Notes: The online loop now has a tiny non-model jaw. Still seeing two Indy watcher PIDs, so next pass should pick one keeper before more daemon teeth grow.
+
+---
+
+## Step 3/4 — Resume PID/RAM hardening
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy_READs online chat loop
+- Generated: `2026-06-04T04:16:19Z`
+- Current step: 3/4
+- Status: running
+- Objective: Make Indy_READs actually online in chat: queued row in -> Indy sees it -> Indy response out -> receipt/log -> no RAM/PID disaster.
+- Completed: Refreshed handoff/startup law and Dev Library search for Indy watcher/service single-instance work. Prior response-out proof remains: zero-model --respond-once, quiet outbox packets, and done-row marking.
+- Next action: Reproduce duplicate watcher PID state, then write a failing single-instance guard test before patching the startup/service contract.
+- Resume command: `.venv/bin/python -m pytest -q tests/test_indy_startup_comms_speed.py tests/test_systemd_control_surfaces.py tests/test_indy_reads_chat.py`
+
+Technical Summary Review and Dev Notes: Back on the watcher trail; count the living processes before touching the nest.
+
+---
+
+## Step 6/6 — DB/API response-out and systemd canonicalization verified
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy response-out loop
+- Generated: `2026-06-04T04:38:25Z`
+- Current step: 6/6
+- Status: complete
+- Objective: queued row in -> Indy sees it -> DB response identity -> PostgREST /indy_responses -> luci surfaces response; systemd canonical watcher only
+- Completed: Preflight script added and passes; /active_goal populated; /indy_responses added and visible; live smoke event $luci-133634bf0ff803b298398d3e40b5 produced response indy_response:00b3a5c64e94af41; receipt 05_OUTPUTS/indy_conduit/indy_reads_online_once_20260604T043705858768Z_82b42cfb97ad2e24.json; ./luci indy-response --json surfaces the PostgREST row; ironclaw-indy-reads.service enabled with one watcher PID 944702 and MemoryMax/TasksMax; 35 targeted tests passed.
+- Next action: Next session: start with .venv/bin/python scripts/codex_context_preflight.py, then query /indy_responses and continue from the live response row; add any remaining response receipt projection/audit refinements only if API truth shows a gap.
+- Resume command: `.venv/bin/python scripts/codex_context_preflight.py && ./luci indy-response --json && .venv/bin/python -m pytest -q tests/test_indy_reads_chat.py tests/test_luci_operator_indy_conduit.py tests/test_indy_startup_comms_speed.py tests/test_systemd_control_surfaces.py`
+
+Technical Summary Review and Dev Notes: DB/API spine is now the visible trail; JSONL remains compatibility export after DB identity. Tiny cryptid trap closed: zero-row response updates now fail instead of wearing a fake green hat.
+
+---
+
+## Step 0/1 — Start recursive fanout policy/docs lane
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: DB-backed test receipt gate recursion lane: recursive fanout policy
+- Generated: `2026-06-04T05:02:40Z`
+- Current step: 0/1
+- Status: running
+- Objective: Encode the bounded recursive fanout contract for Codex -> mini-orchestrator -> 2 Vibe + 2 Groq workers each -> best minimal bundle returned, without redoing the DB gate.
+- Completed: Read startup law, orchestration policy, handoff prompt, AGENTS guidance, and existing packet/router helpers; fanout gap confirmed in policy text.
+- Next action: Patch the smallest GOALS policy/handoff surfaces that encode the recursive fanout contract and route references.
+- Resume command: `git diff -- GOALS/AGENT_ORCHESTRATION_POLICY.md GOALS/GOAL_HANDOFF_PROMPT.md && python3 scripts/goal_handoff.py check`
+
+Technical Summary Review and Dev Notes: Trailhead set: packet and swarm bridge already exist, so this lane is contract wiring, not new machinery.
+
+---
+
+## Step 1/4 — Inspect existing packet and dispatch surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: DB-backed test receipt gate recursive fanout lane
+- Generated: `2026-06-04T05:02:41Z`
+- Current step: 1/4
+- Status: running
+- Objective: Add the smallest explicit recursive fanout orchestrator that emits 6 lanes with 2 Vibe + 2 Groq worker packets per lane using existing goal_agent_packet/goal_swarm_dispatch surfaces.
+- Completed: Read startup law files, scanned Dev Library, inspected goal_agent_packet.py, goal_swarm_dispatch.py, luci_delegate_slice.py, and existing recursive fanout test stub.
+- Next action: Implement a tiny fanout planner that builds queue-ready worker packets and reuses existing packet/dispatch scripts instead of inventing a daemon.
+- Resume command: `cd /home/mfspx/LUCIDOTA && python3 scripts/test_receipt_gate.py run --scope goals_fanout --watch scripts/recursive_fanout_orchestrator.py --watch tests/test_recursive_fanout_orchestrator.py -- python3 -m pytest -q tests/test_recursive_fanout_orchestrator.py`
+
+Technical Summary Review and Dev Notes: Trailhead fixed: existing packet and swarm bridges are enough; only the fanout tree is missing.
+
+---
+
+## Step 4/4 — Save This Prompt, Pass on this Handoff: finalize recursive fanout lane
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: DB-backed test receipt gate recursive fanout lane
+- Generated: `2026-06-04T05:05:28Z`
+- Current step: 4/4
+- Status: complete
+- Objective: Add the smallest explicit recursive fanout orchestrator that emits 6 lanes with 2 Vibe + 2 Groq worker packets per lane using existing goal_agent_packet/goal_swarm_dispatch surfaces.
+- Completed: Added scripts/recursive_fanout_orchestrator.py plus tests/test_recursive_fanout_orchestrator.py. Direct CLI receipt PASS at 05_OUTPUTS/goals/recursive_fanout_orchestrator_20260604T050447989023Z.json. Gated focused verification PASS: receipt_uuid bb5739ea-3a4e-406e-be8c-bd0c20afd829, 3 passed.
+- Next action: If desired, consume the emitted dispatch_cmd entries to enqueue actual lane workers; otherwise keep this as the explicit recursive fanout blueprint surface.
+- Resume command: `cd /home/mfspx/LUCIDOTA && .venv/bin/python scripts/recursive_fanout_orchestrator.py --json && .venv/bin/python scripts/test_receipt_gate.py run --scope goals_fanout --watch scripts/recursive_fanout_orchestrator.py --watch tests/test_recursive_fanout_orchestrator.py -- .venv/bin/python -m pytest -q tests/test_recursive_fanout_orchestrator.py`
+
+Technical Summary Review and Dev Notes: Small spine only: tree now names every lane, packet, and dispatch path. No daemon spoor; just explicit pawprints over the existing GOALS bridge.
+
+---
+
+## Step 1/1 — Finish recursive fanout policy/docs lane
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: DB-backed test receipt gate recursion lane: recursive fanout policy
+- Generated: `2026-06-04T05:05:36Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Encode the bounded recursive fanout contract for Codex -> mini-orchestrator -> 2 Vibe + 2 Groq workers each -> best minimal bundle returned, without redoing the DB gate.
+- Completed: Patched GOALS/AGENT_ORCHESTRATION_POLICY.md and GOALS/GOAL_HANDOFF_PROMPT.md to encode the recursive fanout contract; synced scripts/goal_handoff.py scaffold strings so regenerated GOALS docs keep the same contract. Verification passed: goal_handoff check ok; gated T0 py_compile receipt 0d487753-b0c0-48e2-9f9d-d5df52baa2a6; gated unit receipt 5ee76837-4a5b-47d2-8ff2-96c1f279a203 with 18 tests passed.
+- Next action: If another lane needs executable fanout packets beyond policy text, extend goal_agent_packet.py with explicit recursive fanout fields instead of adding a new helper.
+- Resume command: `git diff -- GOALS/AGENT_ORCHESTRATION_POLICY.md GOALS/GOAL_HANDOFF_PROMPT.md scripts/goal_handoff.py && .venv/bin/python scripts/goal_handoff.py check && .venv/bin/python -m pytest -q tests/test_goal_handoff.py`
+
+Technical Summary Review and Dev Notes: Contract wired, not bloated: the mini-orchestrator now has a named four-worker skeleton and a small bundle rule. Little tunnel beast stayed in bounds; existing packet and swarm bridges remain the route anchors.
+
+---
+
+## Step 0/5 — Live-state inspection and target lock
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: API shield + PostgREST prompt packet + Bytewax compact window repair
+- Generated: `2026-06-04T05:48:33Z`
+- Current step: 0/5
+- Status: running
+- Objective: Make prompt_api.cloud_packet and compact Bytewax windowing work through Postgres/PostgREST, wire wrappers to bounded RPC payloads, and add tests/ignores/receipts without stomping live Vibe work.
+- Completed: Read current handoff, scanned repo/services/routes, and identified existing Bytewax, Indy_READs, PostgREST, and wrapper surfaces.
+- Next action: Add SQL for prompt_api.cloud_packet and compact window storage, then wire bounded readers and tests.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && git diff -- 06_SCHEMA scripts tests GOALS/root_rotor_postgrest.conf`
+
+Technical Summary Review and Dev Notes: Tiny field-note: live routes are sparse; treat the DB like the steering wheel, not the cargo.
+
+---
+
+## Step 4/5 — Live route/permission repair and integration verification
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: API shield + PostgREST prompt packet + Bytewax compact window repair
+- Generated: `2026-06-04T06:11:49Z`
+- Current step: 4/5
+- Status: running
+- Objective: Make prompt_api.cloud_packet and compact Bytewax windowing work through Postgres/PostgREST, wire wrappers to bounded RPC payloads, and add tests/ignores/receipts without stomping live Vibe work.
+- Completed: Applied the prompt packet SQL fix, created DB-first Indy daemon/broker wrappers, patched the live /indy_queue permission gap, and verified the focused receipt-gated suite passes against live PostgREST.
+- Next action: Run one final lean verification pass, then hand off the remaining work order list and receipts.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && .venv/bin/python scripts/codex_context_preflight.py && git diff -- 06_SCHEMA scripts tests GOALS/root_rotor_postgrest.conf`
+
+Technical Summary Review and Dev Notes: Route hydra calmed: the queue front door is open again and the compact packet spine is behaving.
+
+---
+
+## Step 5/5 — Final handoff checkpoint and live registry proof
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: API shield + PostgREST prompt packet + Bytewax compact window repair
+- Generated: `2026-06-04T06:16:32Z`
+- Current step: 5/5
+- Status: running
+- Objective: Make prompt_api.cloud_packet and compact Bytewax windowing work through Postgres/PostgREST, wire wrappers to bounded RPC payloads, and add tests/ignores/receipts without stomping live Vibe work.
+- Completed: Verified live PostgREST routes for capability_registry, model_registry, provider_registry, workflow_registry, daemon_status, bytewax_compact_windows, indy_queue, and indy_responses; repaired live /indy_queue permissions; confirmed the bounded prompt packet RPC and compact-window path with a receipt-gated batch.
+- Next action: Continue the remaining orchestrator cleanup only if you want manual_current/canon_current/active_goal and the remaining safe manual surfaces fully opened.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && .venv/bin/python scripts/codex_context_preflight.py && curl -sS http://127.0.0.1:3000/model_registry?limit=1`
+
+Technical Summary Review and Dev Notes: Good-master spine is now visible; the conductor has live route cards, but some older manual windows are still curtained.
+
+---
+
+## Step 5/5 — Canon version route cleanup and final registry verification
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: API shield + PostgREST prompt packet + Bytewax compact window repair
+- Generated: `2026-06-04T06:18:16Z`
+- Current step: 5/5
+- Status: running
+- Objective: Make prompt_api.cloud_packet and compact Bytewax windowing work through Postgres/PostgREST, wire wrappers to bounded RPC payloads, and add tests/ignores/receipts without stomping live Vibe work.
+- Completed: Granted read access for canon_versions and re-verified the orchestrator/manual surface: manual_current, canon_current, canon_versions, active_goal, api_workflow_registry, flow_specs, capability_registry, model_registry, provider_registry, workflow_registry, daemon_status, bytewax_compact_windows, indy_queue, and indy_responses are now live over PostgREST.
+- Next action: If you want further surface hardening, continue with any remaining policy-only manuals; otherwise the current good-master stack is operational.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && .venv/bin/python scripts/codex_context_preflight.py && curl -sS http://127.0.0.1:3000/daemon_status?limit=1`
+
+Technical Summary Review and Dev Notes: Route cards are now readable; the conductor can see the lanes instead of guessing from file fog.
+
+---
+
+## Step 6/6 — Indy daemon front door now runs live
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: API shield + PostgREST prompt packet + Bytewax compact window repair
+- Generated: `2026-06-04T06:47:20Z`
+- Current step: 6/6
+- Status: running
+- Objective: Keep the live PostgREST/manual surface and Indy DB daemon aligned; retire BOOKS watcher authority, keep bounded prompt packets and compact windows working, and do not stomp live Vibe work.
+- Completed: Patched `scripts/indy_daemon.py` and `scripts/indy_runtime_broker.py` with repo-root import bootstraps, re-ran receipt-gated daemon/systemd tests, and restarted `ironclaw-indy-reads.service` so the live unit now runs `indy_daemon.py --loop --json --limit 25 --max-items 12 --interval 5`.
+- Next action: If anything else regresses, inspect the live daemon heartbeat and the queue/response route pair first; otherwise continue tightening the BOOKS retirement surface only if needed.
+- Resume command: `systemctl --user status ironclaw-indy-reads.service --no-pager && curl -sS http://127.0.0.1:3000/daemon_status?limit=1 && .venv/bin/python scripts/codex_context_preflight.py`
+
+Technical Summary Review and Dev Notes: The daemon’s front door finally points at the DB path; the old watcher is no longer the active unit, just a legacy shell-carried fossil.
+
+---
+
+## Step 7/8 — Ontology todo surface now live
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — ontology work compiler + todo surface
+- Generated: `2026-06-04T07:01:48Z`
+- Current step: 7/8
+- Status: running
+- Objective: Keep live PostgREST/manual truth, daemon front door, and DB-visible todo batches aligned; expose a fast operator todo path without BOOKS authority.
+- Completed: Applied 153_ontology_work_batch.sql, added scripts/ontology_work_compiler.py and scripts/luci_todo.py, wired luci/help/preflight/routes, and passed receipt-gated tests for todo surface + daemon E2E + registry audit.
+- Next action: If more progress is needed, expand the queued-row daemon proof or add the remaining registry/model roles.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && .venv/bin/python scripts/codex_context_preflight.py && .venv/bin/python scripts/luci_todo.py --json`
+
+Technical Summary Review and Dev Notes: Todo batches are visible now; the shell can show them without spelunking the filesystem.
+
+---
+
+## Step 8/8 — Skill layer aligned to repo authority stack
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, and root orchestration alignment
+- Generated: `2026-06-04T07:05:40Z`
+- Current step: 8/8
+- Status: running
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Updated superpowers skill docs to defer to repo-local authority (AGENTS.md, GOALS/*, live PostgREST/manual routes, service status, receipts); encoded the same rule into manual_current auth_expectations and verified it live.
+- Next action: Continue only if more root-orchestrator or queued-row proof remains; otherwise the live manual and skill layers are consistent.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && .venv/bin/python scripts/codex_context_preflight.py && .venv/bin/python scripts/luci_todo.py --json`
+
+Technical Summary Review and Dev Notes: Skills are helpers, not kings; the manual remains the boss. Clean little myth-shed.
+
+---
+
+## Step 9/10 — Skill policy surface and BOOKS retirement are live
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, and policy alignment
+- Generated: `2026-06-04T07:10:12Z`
+- Current step: 9/10
+- Status: running
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added /skill_policy_current as a DB-visible policy route, shortened the Superpowers skills to point at repo-local authority plus the DB policy surface, and deprecated the indy-reads-book-watch workflow entry while removing BOOKS write authority from the Indy READs service surface.
+- Next action: If continuing, finish any remaining root-orchestrator packaging or local model routing cleanup; otherwise the live manual/control surface is now consistent.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && .venv/bin/python scripts/codex_context_preflight.py && .venv/bin/python scripts/luci_todo.py --json`
+
+Technical Summary Review and Dev Notes: The authority stack is now explicit in both the manual and the skills: DB/manual first, skills second.
+
+---
+
+## Step 10/10 — Policy and retirement surfaces receipt-gated green
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, and policy alignment
+- Generated: `2026-06-04T07:11:21Z`
+- Current step: 10/10
+- Status: running
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Receipt-gated batch passed for skill policy, manual surface, registry routes, workflow retirement, and codex preflight. Live PostgREST now exposes /skill_policy_current, /todo_current, and a deprecated indy-reads-book-watch registry row while the skill cache points back to repo-local authority and the DB policy route.
+- Next action: If you continue, the remaining work is optional hardening or any additional root-orchestrator routing cleanup; the current live policy/manual alignment is proven.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && .venv/bin/python scripts/codex_context_preflight.py && .venv/bin/python scripts/luci_todo.py --json`
+
+Technical Summary Review and Dev Notes: Receipts are finally where the authority lives, not in the skill cache.
+
+---
+
+## Step 11/11 — Root orchestrator current packet is live
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, and policy alignment
+- Generated: `2026-06-04T07:18:22Z`
+- Current step: 11/11
+- Status: running
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added /root_orchestrator_current as a DB-visible status packet for sub-orchestrator routing, surfaced it through manual_current, and passed receipt-gated tests plus live readback. The packet shows current goal, route list, todo batch status, registry coverage, missing roles, and next sub-work packets.
+- Next action: Optional hardening only: wire the operator shell to call the new route directly if you want a dedicated command; otherwise the live manual already exposes it.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && .venv/bin/python scripts/codex_context_preflight.py && .venv/bin/python scripts/luci_todo.py --json`
+
+Technical Summary Review and Dev Notes: Root packet now exists where it should: DB first, shell second.
+
+---
+
+## Step 12/12 — Prompt ledger files live steering prompts and decomposes them into DB-linked work
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T08:21:37Z`
+- Current step: 12/12
+- Status: running
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Prompt ledger RPCs are live; current steering prompts from GOALS and this chat were filed into /prompts_filed and decomposed into linked work-order rows.
+- Next action: Optional hardening only: broaden capture to additional prompt artifacts and wire Chrono/Bytewax learning-loop telemetry if you want the next slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && .venv/bin/python scripts/codex_context_preflight.py && .venv/bin/python scripts/luci_todo.py --json`
+
+Technical Summary Review and Dev Notes: Prompt ledger now behaves like a real intake rail; tiny, sharp, and database-backed.
+
+---
+
+## Step 13/13 — CLI authority subprocess hardening is live
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T08:37:21Z`
+- Current step: 13/13
+- Status: running
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: cli_process_authority now starts new sessions, kills process groups on timeout, writes DB receipts, and is exposed through /cli_process_receipts plus luci cli-process-receipts; manual_current includes the new route.
+- Next action: Optional hardening only: continue capture breadth and learning-loop telemetry, or use the live CLI receipt surface for further wrapper proof.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && .venv/bin/python scripts/codex_context_preflight.py && .venv/bin/python scripts/luci_todo.py --json`
+
+Technical Summary Review and Dev Notes: Subprocess authority now follows the same DB-first rule as the rest of the machine. Tiny, sharp, less zombie-prone.
+
+---
+
+## Step 14/14 — File the final steering prompts and link them to DB work orders
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:04:42Z`
+- Current step: 14/14
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Filed the refactored Indy_READs / workflow / learning-loop steering prompt and the 414 ontology note into the DB prompt ledger, decomposed both into linked work-order rows, and verified live prompt counts and recent rows.
+- Next action: Use /prompt_recent, /prompt_work_order_links, and /prompt_catalog_status to inspect the new rows; then continue the workflow compiler and resource-control hardening slice if you want more tonight.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt ledger is live and now carries the new steering law plus the 414 parallelism note. No slur preserved; substance kept. Tiny, sharp, DB-backed.
+
+---
+
+## Step 15/15 — Model routing packet becomes a live DB/manual surface with real missing-role blockers
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:10:09Z`
+- Current step: 15/15
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added /model_routing_current, exposed actual local model/provider coverage and missing roles, wired it into /manual_current and LUCI help, and proved the route live with a receipt-gated batch.
+- Next action: Use /model_routing_current when routing work; the next useful slice is broader workflow/compiler drift cleanup and any missing local lanes the registry can actually support.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Model routing is now a concrete packet, not a guess. Missing roles are explicit blockers; 414 stays private and does not leak into the professional graph.
+
+---
+
+## Step 16/16 — Sheet current packet becomes a live DB/manual surface with spreadsheet-style operator work state
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:15:26Z`
+- Current step: 16/16
+- Status: running
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added /sheet_current, exposed live sheet task counts, active work, next batch, and case pressure, wired it into /manual_current and LUCI help, and proved the route live with a receipt-gated batch.
+- Next action: Use /sheet_current to inspect spreadsheet-style operator work; next useful slice is more workflow drift cleanup and any actual sheet/task promotion paths the DB already supports.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Sheet layer is now a current packet, not just a manifest. Curiosity is budgeted and receipt-backed.
+
+---
+
+## Step 17/17 — Workflow registry current packet is live and manual-visible
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:20:06Z`
+- Current step: 17/17
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added /workflow_current, exposed workflow counts, status/owner breakdown, active names, and basic-workflows visibility; wired it into /manual_current, LUCI help, codex preflight, and the registry route checks; receipt-gated proof passed.
+- Next action: Use /workflow_current to inspect repeated-task drift and promote any new recurring operator action into the workflow registry before touching new surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Workflow registry is now a current packet, not just raw rows. Basic workflows stay workflows; curiosity stays routed.
+
+---
+
+## Step 18/18 — Capability registry current packet is live and manual-visible
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:24:49Z`
+- Current step: 18/18
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added /capability_current, exposed capability counts, group breakdown, workflow mapping, and active capability rows; wired it into /manual_current, LUCI help, codex preflight, and registry route checks; receipt-gated proof passed.
+- Next action: Use /capability_current to inspect capability lanes and promote any repeated route/workflow pattern that deserves its own current packet or workflow row.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Capability registry is now a current packet. Active lanes are explicit, planned rows stay backlog, and workflow mapping is visible.
+
+---
+
+## Step 19/19 — Provider registry current packet is live and manual-visible
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:27:14Z`
+- Current step: 19/19
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added /provider_current, exposed provider counts, kind breakdown, active provider rows, and local/cloud routing notes; wired it into /manual_current, LUCI help, codex preflight, and the registry route checks; receipt-gated proof passed.
+- Next action: Use /provider_current to inspect provider-lane drift and compare provider coverage against model routing and workflow needs.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Provider registry is now a current packet. Local-before-cloud is explicit and active provider lanes are visible.
+
+---
+
+## Step 20/20 — Model registry current packet is live and manual-visible
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:29:25Z`
+- Current step: 20/20
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added /model_registry_current, exposed model counts, role breakdown, loadout coverage, and active model rows; wired it into /manual_current, LUCI help, codex preflight, and the registry route checks; receipt-gated proof passed.
+- Next action: Use /model_registry_current to inspect model-role/loadout drift, then compare it against /model_routing_current and /provider_current for missing local lanes.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Model registry is now a current packet. Role and loadout coverage are explicit and the model ledger is no longer just raw rows.
+
+---
+
+## Step 21/21 — Canon current packet is live and shell-visible
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:32:52Z`
+- Current step: 21/21
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added /canon_current shell/help access, surfaced the canon packet in /manual_current live_surface and command map, and receipt-gated the canon slice with shared surface regression tests.
+- Next action: Compare canon_current against the current packet surfaces and hunt the next missing shell-visible route or drift slice only if live truth proves it exists.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Canon is now directly operable from LUCI. The manual names it, the shell exposes it, and the packet is receipt-backed.
+
+---
+
+## Step 22/22 — Skill policy current packet is live and shell-visible
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:35:35Z`
+- Current step: 22/22
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added /skill_policy_current shell access, named the skill policy packet explicitly in /manual_current and LUCI help, and receipt-gated the policy slice with shared surface regression tests.
+- Next action: Compare skill_policy_current against canon/model/provider/workflow surfaces and look for the next missing shell-visible route or evidence-backed drift slice only.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Skill policy is now directly operable from LUCI. The manual names it, the shell exposes it, and the policy text stays DB-backed.
+
+---
+
+## Step 23/23 — Todo current and skill policy current are shell-visible
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:38:02Z`
+- Current step: 23/23
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added shell/current aliases for /todo_current and /skill_policy_current, updated help/manual/preflight coverage, and receipt-gated the shared surface regression set.
+- Next action: Re-scan the current-packet shell map for the next live gap, then patch the first remaining route that is API-visible but not shell-operable.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The shell now exposes todo and skill policy as current packets. Current routes remain live and manual-visible.
+
+---
+
+## Step 24/24 — Chrono current packet is shell-visible
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:40:07Z`
+- Current step: 24/24
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added /chrono_current shell access, kept chrono in the manual help map, and receipt-gated the chrono slice with shared shell/manual regression tests.
+- Next action: Re-scan remaining current packets and shell aliases for any route still only reachable by raw HTTP, then patch the next evidence-backed gap.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Chrono is directly operable from LUCI now. Prompt/work/history alignment is visible from the shell.
+
+---
+
+## Step 25/25 — Add active_goal shell alias and verify it live plus receipt-gate the shell surface
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:46:45Z`
+- Current step: 25/25
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci active goal shell access, fixed its JSON control flow, and receipt-gated the shell/help regression suite.
+- Next action: Scan for the next route still reachable only by raw HTTP, then patch that gap with the same DB-backed alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Active-goal shell alias is live; one JSON response now, no fallthrough. Loud governor warning surfaced, but the route itself is green.
+
+---
+
+## Step 26/26 — Add workflow registry shell alias and verify the API workflow registry surface live
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:52:05Z`
+- Current step: 26/26
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci workflow registry shell access for /api_workflow_registry, updated help/manual/preflight coverage, and receipt-gated the workflow-registry shell surface.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Reuse-first alias pattern held. The workflow registry now has a shell doorway; nothing structural changed in the DB, only the operator surface.
+
+---
+
+## Step 27/27 — Add daemon status shell alias and verify the live daemon heartbeat packet
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:54:18Z`
+- Current step: 27/27
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci daemon status shell access for /daemon_status, aligned the renderer to the live heartbeat row shape, and receipt-gated the daemon-status shell surface.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Daemon status is now a first-class operator doorway. The packet shape is heartbeat-oriented, not generic status-state, and the tests now match that truth.
+
+---
+
+## Step 28/28 — Add prompt ledger shell alias family and verify the live prompt ledger packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:56:04Z`
+- Current step: 28/28
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci prompt recent|filed|links|unlinked|catalog for the live prompt ledger routes, updated help/manual/preflight coverage, and receipt-gated the prompt-ledger shell surface.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt ledger is now shell-visible as a family. The routes stay DB-authoritative; the shell is just a clean doorway into the live packets.
+
+---
+
+## Step 29/29 — Add provider/capability registry shell aliases and verify the live registry packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T09:57:48Z`
+- Current step: 29/29
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci provider registry and luci capability registry for the live provider/capability registry routes, updated help/manual/preflight coverage, and receipt-gated the registry shell surfaces.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Registry surfaces are now shell-visible too. The provider and capability registries stay DB-authoritative; the shell just exposes them cleanly.
+
+---
+
+## Step 30/30 — Add indy queue, bytewax windows, and cloud packet shell aliases and verify the live packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:02:24Z`
+- Current step: 30/30
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci indy queue, luci bytewax windows, and luci cloud packet for the live Indy queue, Bytewax compact windows, and cloud packet RPC surfaces, then receipt-gated the shell/test batch.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This batch closed three more raw-HTTP-only gaps. The shell now reaches the queue/window/cloud packet surfaces without changing DB authority.
+
+---
+
+## Step 31/31 — Add book, ontology work, and canon versions shell aliases and verify the live packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:05:56Z`
+- Current step: 31/31
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci book, luci ontology work, and luci canon versions for the book/LoRA/training tables, ontology work tables, and canon versions route, then receipt-gated the shell surface.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Book rows are currently empty, but the alias is live and honest about that. Ontology and canon versions both return real packets.
+
+---
+
+## Step 32/32 — Add exact api workflow registry shell alias and verify the live workflow registry packet
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:07:22Z`
+- Current step: 32/32
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci api workflow registry as an exact-name alias for /api_workflow_registry, updated help/manual coverage, and receipt-gated the alias surface.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This closes the exact-route doorway for api_workflow_registry without changing the underlying DB route or registry behavior.
+
+---
+
+## Step 33/33 — Add explicit root orchestrator current shell alias and verify the live orchestrator packet
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:08:30Z`
+- Current step: 33/33
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci root orchestrator current as an exact-name alias for /root_orchestrator_current and receipt-gated the alias surface.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The root orchestrator packet now has an explicit current alias, and the test matches the actual packet keys rather than inventing a status field.
+
+---
+
+## Step 34/34 — Add exact prompt-ledger shell aliases and receipt-gate help surface
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:12:18Z`
+- Current step: 34/34
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added exact-name luci prompt recent/filed/links/unlinked/catalog aliases to the operator help surface and receipt-gated the updated help/test expectations.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt-ledger aliases now sit beside the family command; same routes, clearer cockpit. Tiny surface, no graph pollution.
+
+---
+
+## Step 35/35 — Add api test execution receipts shell alias and route catalog entry
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:17:19Z`
+- Current step: 35/35
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci api test execution receipts, wired the live API test execution receipts renderer, inserted the route catalog row, and receipt-gated the help/manual alias surface.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Receipt history is now shell-visible and manual-visible; the cockpit can see its own test receipts. Small doorway, real operator value.
+
+---
+
+## Step 36/36 — Add flow specs and flow receipts shell aliases plus route catalog entries
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:20:32Z`
+- Current step: 36/36
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci flow specs and luci flow receipts, wired the live flow renderer, inserted route catalog rows, and receipt-gated the help/manual alias surface.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Promptflow flow definitions and saved receipts are now discoverable from the cockpit; small family alias, real route visibility.
+
+---
+
+## Step 37/37 — Add api route catalog shell alias and route catalog self-entry
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:23:35Z`
+- Current step: 37/37
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci api route catalog, wired the live API route catalog renderer, inserted the self-route catalog row, and receipt-gated the help/manual alias surface.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The route catalog can now see itself. Small recursion, real cockpit value.
+
+---
+
+## Step 38/38 — Restore bible helper view grants and surface rpc subtree/sort-key/material
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:33:15Z`
+- Current step: 38/38
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Granted SELECT on api_bible_nodes for PostgREST, restored /manual_current and /rpc/get_subtree, and finished the rpc helper shell/test surface.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: bible-node view access was the real blocker; one grant fixed the cockpit and the rpc helper lane.
+
+---
+
+## Step 39/39 — Add bible node shell doorway and manual route coverage
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:36:01Z`
+- Current step: 39/39
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci bible nodes, surfaced api_bible_nodes in manual_current, and verified the live bible node packet plus route-list coverage.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the bible-node list was live already; the missing piece was the shell/manual doorway, now the cockpit can see it.
+
+---
+
+## Step 40/40 — Add bible manuals shell doorway and restore the bible manual list surface
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:38:07Z`
+- Current step: 40/40
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Granted SELECT on api_bible_manuals, surfaced luci bible manuals, and verified both bible manual and bible node cockpit routes live.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: api_bible_manuals was the missing read edge; now the cockpit can browse manuals and nodes from the DB again.
+
+---
+
+## Step 41/41 — Add bible route-catalog doorway and restore bible route-catalog read access
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:39:27Z`
+- Current step: 41/41
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Granted SELECT on api_bible_route_catalog, surfaced luci bible route catalog, and verified the bible route catalog plus manuals and nodes surfaces live.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the bible route catalog was the last missing bible-family read edge in this batch; the cockpit can now browse manuals, routes, and nodes.
+
+---
+
+## Step 42/42 — Add bible edges doorway and restore bible edge read access
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:41:52Z`
+- Current step: 42/42
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Granted SELECT on api_bible_edges, surfaced luci bible edges, inserted the bible edge route-catalog row, and verified the bible edges/manuels/nodes cockpit set live.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the bible family now covers manuals, route catalog, nodes, route catalog, and edges; the cockpit can browse the structure end to end.
+
+---
+
+## Step 43/43 — Add payload archive status to the manual cockpit summary
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:44:37Z`
+- Current step: 43/43
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Restored payload_archive_status and cli_process_receipts into manual_current.live_surface and verified the archive cockpit surface live.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the archive layer was already alive; this slice made the cockpit show the hot/cold retention truth again.
+
+---
+
+## Step 44/44 — Add luci openapi to surface the live PostgREST schema document
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:46:20Z`
+- Current step: 44/44
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added luci openapi, surfaced the live PostgREST schema doc, and verified the shell can inspect OpenAPI directly.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the lone OpenAPI mismatch was the root document itself; now the cockpit can inspect the schema doc too.
+
+---
+
+## Step 45/45 — Expose live root_law_docs alias and restore shell JSON output
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:52:22Z`
+- Current step: 45/45
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Created lucidota_canon.api_root_law_docs plus root_law_docs alias view, updated route catalog target, fixed luci root-law-docs JSON fallthrough, and verified GET /root_law_docs?limit=1 plus luci root-law-docs --json live with a receipt-gated PASS.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the catalog route was real but the actual path needed a root_law_docs alias; PostgREST cache reloaded cleanly after the alias view landed.
+
+---
+
+## Step 46/46 — Expose api_bible_subtree direct route and shell doorway
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:56:02Z`
+- Current step: 46/46
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Created lucidota_canon.api_bible_subtree as a recursive root_id-keyed subtree view, updated route catalog target, added luci bible subtree shell access, refreshed manual next-commands and preflight checks, and verified GET /api_bible_subtree?root_id=eq.1.0.0&limit=1 plus luci bible subtree --root-id 1.0.0 --json live with a receipt-gated PASS.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the route catalog already promised api_bible_subtree; the fix was to make the direct view real, then surface it in the cockpit and shell.
+
+---
+
+## Step 47/47 — Keep manual_current aligned with root-law docs and direct subtree routes
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T10:59:49Z`
+- Current step: 47/47
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Updated manual_current to surface root_law_docs and api_bible_subtree in route_list, live_surface, and next_commands; rewired api_bible_subtree to a root_id-filtered lateral subtree view so the cockpit smoke no longer times out; verified manual_current and both direct routes live with a receipt-gated PASS.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the first subtree view was too eager; swapping to a root-keyed lateral wrapper around get_subtree fixed the timeout without changing the route contract.
+
+---
+
+## Step 48/48 — Surface OpenAPI and root-law docs in the cockpit next-command rail
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:01:22Z`
+- Current step: 48/48
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Updated manual_current next_commands to include the root OpenAPI document, root-law docs packet, and direct bible subtree doorway; confirmed the cockpit rows render the new commands and receipt-gated the manual surface update.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the cockpit was already live; this slice made the next-command rail point directly at the root schema doc and docs packet so operator inspection is one hop shorter.
+
+---
+
+## Step 49/49 — Deduplicate luci openapi in the help surface
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:02:30Z`
+- Current step: 49/49
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Removed the duplicate luci openapi line from the help/manual command surface and verified luci --help only shows the OpenAPI doorway once; receipt-gated the cleanup PASS.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: a small help-surface duplication was clutter; pruning it kept the cockpit accurate without changing the live route contract.
+
+---
+
+## Step 50/50 — Surface ML brainstem commands in the cockpit next-command rail
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:03:35Z`
+- Current step: 50/50
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Updated manual_current next_commands to include the live model routing, model registry, and provider current commands alongside the existing OpenAPI/docs/subtree rails; verified the cockpit row and receipt-gated the manual update PASS.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the cockpit already had the model packets live; this slice made the next-command rail point at them so the operator can inspect the brainstem without hunting.
+
+---
+
+## Step 51/51 — Expand manual_current command rail for ML and registry surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:04:48Z`
+- Current step: 51/51
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Extended manual_current next_commands to include the key ML and registry shell doorways (provider registry, capability current, workflow current, api route catalog, api test execution receipts, canon current, canon versions) and verified the cockpit row plus a receipt-gated PASS.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the cockpit was already live; this slice tightened the operator command rail so the richest packets are one shell hop away.
+
+---
+
+## Step 52/52 — Add model-routing-blockers to the cockpit rail and restore the full manual_current surface
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:09:32Z`
+- Current step: 52/52
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Restored the latest manual_current definition after a brief regression, added the model-routing-blockers next-command rail, and verified the cockpit route list plus a receipt-gated PASS.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: keep the manual definition sourced from the latest canonical file; older migrations can regress the cockpit if re-applied blindly.
+
+---
+
+## Step 53/53 — Add a DB-visible model routing blockers packet and restore the manual cockpit route rail
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:13:24Z`
+- Current step: 53/53
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Created lucidota_canon.model_routing_blockers as a live PostgREST surface, restored manual_current to show it in route_list/live_surface/next_commands, fixed the packet id, and verified the surface with a receipt-gated PASS plus manual regression checks.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: blockers need their own DB-visible packet; CLI summaries are not enough when the operator wants the brainstem to be inspectable as a route.
+
+---
+
+## Step 54/54 — Make the model-routing blockers packet fully DB-visible and name it in the cockpit prose
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:14:13Z`
+- Current step: 54/54
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added lucidota_canon.model_routing_blockers as a live route, updated manual_current route_list/live_surface/next_commands and manual_source prose to name the blocker packet, and verified the surface with a receipt-gated pass plus manual/routing regression tests.
+- Next action: Scan for the next live route or current packet that is still raw-HTTP-only, then patch that gap with the same thin alias pattern.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the blocker packet had to be both a route and a named cockpit concept; route-only visibility was not enough for operator truth.
+
+---
+
+## Step 55/55 — Promote API and RPC alias routes so manual_current matches the live OpenAPI route map more closely
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:17:38Z`
+- Current step: 55/55
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added alias route-catalog rows for api_bible_* and rpc/* paths, widened manual_current route_list to include them, and verified the cockpit route list with receipt-gated and regression tests. The only live OpenAPI path still not reflected as a route_id is the bare root /.
+- Next action: Decide whether to add a root alias surface or move to the next live DB-visible gap; continue until blocked by a real service/API/test blocker.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: if a live path exists in OpenAPI but not in route_catalog, teach the catalog the alias instead of handwaving the gap.
+
+---
+
+## Step 56/56 — Teach the cockpit how to inspect the newly cataloged alias routes via live curl commands
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:21:24Z`
+- Current step: 56/56
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Expanded manual_current next_commands with live curl probes for api_bible_* routes and the RPC alias routes, fixed SQL quoting, and verified the manual/routing surfaces with receipt-gated and regression tests. The route list remains fully mirrored; the remaining OpenAPI-only roots are intentional alias/adapter gaps.
+- Next action: Scan for the next live DB-visible gap, or decide whether to add more operator command rails for the remaining non-shell alias routes.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: after the route-list is honest, next_commands should teach inspection of the alias routes too; otherwise the cockpit knows but cannot steer well.
+
+---
+
+## Step 57/57 — Add RPC alias shell commands for prompt filing and cloud packet inspection, then teach the manual to point at them
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:26:49Z`
+- Current step: 57/57
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Implemented luci rpc file-prompt/decompose-prompt/link-prompt/cloud-packet, expanded help/manual entries, taught manual_current next_commands to point at the alias routes, and verified the shell/manual/rpc surfaces with receipt-gated and regression tests.
+- Next action: Scan for the next live DB-visible gap or add any remaining useful alias command rails only if they materially improve operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: compact payload JSON is the right shape for the remaining RPC aliases; it keeps the shell from becoming a leaf prompt file dumper.
+
+---
+
+## Step 58/58 — Name the RPC alias packets in the cockpit prose so manual_current explains the new shell rails
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:29:19Z`
+- Current step: 58/58
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Updated manual_current prose to explicitly mention rpc alias packets, kept the new RPC shell rails and route aliases live, and verified the manual/rpc/help surfaces with receipt-gated and regression tests.
+- Next action: Scan for the next live DB-visible gap or the next cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: route truth is not enough; the manual has to explain the alias packets too, or the operator still has to infer the steering model.
+
+---
+
+## Step 59/59 — Add spaced model-routing aliases so the shell speaks the operator's phrasing
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:39:21Z`
+- Current step: 59/59
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added spaced model-routing aliases to the live shell/manual rails, refreshed the manual_current view in DB, and verified the shell/help/manual/model-routing surfaces with receipt-gated and regression tests.
+- Next action: Scan for the next live DB-visible gap or the next cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the operator says model routing out loud with spaces, so the shell should too; aliasing the phrasing is not fluff when it reduces friction on the hot path.
+
+---
+
+## Step 60/60 — Add a raw model_registry shell doorway for the actual registry rows
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:42:08Z`
+- Current step: 60/60
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added a raw model_registry shell doorway to expose actual registry rows, refreshed the manual_current view in DB, and verified the shell/help/manual/model_registry surfaces with receipt-gated and regression tests.
+- Next action: Scan for the next live DB-visible gap or the next cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the summary packet is useful, but the operator still needs the actual registry rows when they want to inspect the live loadout truth.
+
+---
+
+## Step 61/61 — Add a raw workflow_registry shell doorway for the actual workflow rows
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:44:15Z`
+- Current step: 61/61
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added a raw workflow_registry shell doorway to expose actual registry rows, refreshed the manual_current view in DB, and verified the shell/help/manual/workflow_registry surfaces with receipt-gated and regression tests.
+- Next action: Scan for the next live DB-visible gap or the next cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: the registry packet is useful, but the actual workflow rows are the authoritative source when the operator wants to inspect the working graph.
+
+---
+
+## Step 62/62 — Add raw provider and capability registry shell doorways
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:47:19Z`
+- Current step: 62/62
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added raw provider and capability registry shell doorways to expose actual registry rows, refreshed the manual_current view in DB, and verified the shell/help/manual/registry surfaces with receipt-gated and regression tests.
+- Next action: Scan for the next live DB-visible gap or the next cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: provider/capability raw rows are the live inventory truth, while the current packets remain the summary layer for steering.
+
+---
+
+## Step 63/63 — Add a raw API workflow registry shell doorway
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:49:25Z`
+- Current step: 63/63
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added a raw API workflow registry shell doorway to expose actual registry rows, refreshed the manual_current view in DB, and verified the shell/help/manual/API workflow registry surfaces with receipt-gated and regression tests.
+- Next action: Scan for the next live DB-visible gap or the next cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Technical Summary Review and Dev Notes: API workflow rows are the source-of-truth inventory for the API-facing orchestration graph, separate from the current packet summary.
+
+---
+
+## Step 64/64 — Add lora and training shell doorways for raw rows
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T11:59:30Z`
+- Current step: 64/64
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added direct LUCI shell doorways for /lora_candidate, /lora_adapter, and /training_job; refreshed manual_current in DB; verified help, live rows, and manual next-command coverage with receipt-gated tests.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: LoRA/training rows are now direct operator surfaces; empty book tables stay honest while the raw inventory endpoints remain reachable.
+
+---
+
+## Step 64/64 — Add lora and training shell doorways for raw rows
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:00:40Z`
+- Current step: 64/64
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added direct LUCI shell doorways for /lora_candidate, /lora_adapter, and /training_job; refreshed manual_current in DB; verified help, live rows, and manual next-command coverage with receipt-gated tests.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: LoRA/training rows are now direct operator surfaces; empty book tables stay honest while the raw inventory endpoints remain reachable.
+
+---
+
+## Step 65/65 — Add raw Bytewax windows shell doorway
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:03:06Z`
+- Current step: 65/65
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added direct LUCI shell doorway for raw Bytewax compact windows, refreshed manual_current in DB, and verified help, live rows, and manual next-command coverage with receipt-gated tests.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Bytewax raw is now surfaced alongside the current packet; the operator can inspect the live compact window rows without hand-written curl.
+
+---
+
+## Step 66/66 — Add raw prompt ledger shell doorway
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:04:56Z`
+- Current step: 66/66
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added direct LUCI shell doorway for raw prompt ledger rows, refreshed manual_current in DB, and verified help, live rows, and manual next-command coverage with receipt-gated tests.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt raw is now a live operator surface; the operator can inspect the raw prompt rows without hand-written curl.
+
+---
+
+## Step 67/67 — Add exact api family aliases for bytewax, book, and ontology surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:12:09Z`
+- Current step: 67/67
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added exact api-prefixed LUCI aliases for bytewax, book, ontology, root-law docs, and prompt surfaces; refreshed manual_current in DB; verified help, live rows, and manual next-command coverage with receipt-gated tests.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: API-family aliases now line up with the route map while reusing the same underlying packets and scripts.
+
+---
+
+## Step 68/68 — Add exact api cloud packet alias
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:14:15Z`
+- Current step: 68/68
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added an exact api-prefixed LUCI alias for cloud packet, refreshed manual_current in DB, and verified help, live rows, and manual next-command coverage with receipt-gated tests.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Cloud packet now has both the rpc and api family dial-in, so the operator can choose the phrasing without losing the same bounded packet.
+
+---
+
+## Step 69/69 — Refresh manual_current with api prompt catalog live next-command coverage
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:17:56Z`
+- Current step: 69/69
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Reapplied the manual view so the live cockpit now includes the api prompt catalog alias in next_commands and the narrow receipt-gated tests passed again.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt catalog alias was file-correct but DB-stale; reapply fixed the live packet cleanly.
+
+---
+
+## Step 70/70 — Add api family aliases for CLI receipts and payload archive status
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:20:33Z`
+- Current step: 70/70
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added api-family shell doorways for CLI process receipts and payload archive status, refreshed the live manual view, and verified the cockpit plus help surface with a receipt-gated batch.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Two live surfaces were already present; the new work was the api-family alias layer and DB manual refresh.
+
+---
+
+## Step 71/71 — Add api-family aliases for live operator current packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:23:46Z`
+- Current step: 71/71
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added api-family shell doorways for manual, goal, daemon, chrono, routing, registry, provider, capability, workflow, CLI receipts, and payload archive status; split the manual next-command array to stay within PostgreSQL argument limits; verified help and cockpit live with a receipt-gated batch.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Big alias batch was correct but hit jsonb_build_array argument ceiling; concatenated arrays fixed it cleanly.
+
+---
+
+## Step 72/72 — Add api-family aliases for Indy and Flow current packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:24:48Z`
+- Current step: 72/72
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added api-family shell doorways for Indy queue/responses and flow specs/receipts, refreshed the live manual view, and verified the cockpit plus help surface with a receipt-gated batch.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The remaining gaps are now narrower; the new api family rails reuse live direct commands and existing flow wrappers.
+
+---
+
+## Step 73/73 — Add api-family alias for todo current packet
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:25:52Z`
+- Current step: 73/73
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added api-family shell doorway for todo current, refreshed the live manual view, and verified help plus cockpit with a receipt-gated batch.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Todo current was the next obvious live packet missing the api dialect; now it is in the same command family as the rest.
+
+---
+
+## Step 74/74 — Add api-family aliases for provider and capability registries
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:26:48Z`
+- Current step: 74/74
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added api-family shell doorways for provider and capability registry surfaces, refreshed the live manual view, and verified help plus cockpit with a receipt-gated batch.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The remaining gaps are mostly lower-priority alias consistency now; the operator surface is converging.
+
+---
+
+## Step 75/75 — Add explicit api-family aliases for prompt packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:28:14Z`
+- Current step: 75/75
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added explicit api-family shell doorways for prompt recent/filed/links/unlinked, refreshed the live manual view, and verified help plus cockpit with a receipt-gated batch.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt packet aliases are now explicit rather than only grouped; the operator surface is easier to scan without losing the grouped mode.
+
+---
+
+## Step 76/76 — Add explicit api-family aliases for book and ontology packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:29:19Z`
+- Current step: 76/76
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added explicit api-family shell doorways for book source/scan/read-queue/note/candidate/adapter/training/receipt and ontology work batch/item, refreshed the live manual view, and verified help plus cockpit with a receipt-gated batch.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Grouped forms still exist; explicit aliases make the operator surface faster to scan and easier to script.
+
+---
+
+## Step 77/77 — Add explicit api-family aliases for RPC packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:30:24Z`
+- Current step: 77/77
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added explicit api-family shell doorways for RPC subtree/sort-key/material/cloud-packet/file-prompt/decompose-prompt/link-prompt, refreshed the live manual view, and verified help plus cockpit with a receipt-gated batch.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: RPC packets are now reachable through the api dialect as well, keeping operator muscle memory uniform.
+
+---
+
+## Step 78/78 — Add explicit raw api-family alias for model registry
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:32:43Z`
+- Current step: 78/78
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added explicit api-family shell doorway for model registry raw, refreshed the live manual view, and verified help plus cockpit with a receipt-gated batch.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: That was the last obvious raw registry omission in the explicit api dialect sweep.
+
+---
+
+## Step 79/79 — Add explicit api-family aliases for raw packet variants
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:34:42Z`
+- Current step: 79/79
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added explicit api-family shell doorways for raw prompt/book/ontology packet variants and the model registry raw packet, refreshed the live manual view, and verified help plus cockpit with a receipt-gated batch.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The explicit api dialect now covers both grouped and raw packet variants for the major live surfaces.
+
+---
+
+## Step 80/80 — Fix raw model registry dispatch path
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:36:36Z`
+- Current step: 80/80
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Fixed the model registry raw dispatch so luci model registry raw and api model registry raw now execute the live raw registry surface instead of passing a stray raw argument through, and verified both subprocess paths with a receipt-gated batch.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: That was an actual dispatch bug, not just surface wording; the raw registry path is now truly live.
+
+---
+
+## Step 81/81 — Add hyphenated api alias for root-law-docs
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:39:17Z`
+- Current step: 81/81
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added the hyphenated api root-law-docs alias, refreshed the live manual view, and verified help plus cockpit with a receipt-gated batch.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This closed the last explicit hyphenated api alias gap in the current sweep.
+
+---
+
+## Step 82/82 — Add root-law-docs alias and fix raw model registry dispatch
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:41:46Z`
+- Current step: 82/82
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added the hyphenated api root-law-docs alias and fixed the model registry raw dispatch so the raw registry path no longer swallows a stray raw token; reverified the live help and cockpit surfaces.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This was a small but real dispatch/alias cleanup, not just wording: raw model registry now behaves correctly and the hyphenated root-law docs alias is live.
+
+---
+
+## Step 83/83 — Route-shaped API aliases for book/prompt/bytewax
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:49:07Z`
+- Current step: 83/83
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added and verified the route-shaped API aliases for book read queue, prompts filed, prompt work-order links, prompt catalog status, and bytewax compact windows; manual_current now points at them and the live help/dispatch surfaces pass.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Small alias cleanup, but real: dispatch now handles the route-shaped spellings without falling through, and the live manual/help surfaces are back in sync.
+
+---
+
+## Step 84/84 — Manual cockpit structure for sub-orchestrators, blockers, and receipts
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:52:42Z`
+- Current step: 84/84
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: manual_current now surfaces top-level sub_orchestrators, blockers, and receipts packets in addition to the route map, live surface, commands, and retired surfaces; the live DB view was reapplied and verified.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This closes a real cockpit-quality gap: the live manual had the data but not the top-level sections. The view now exposes the sub-orchestrator packet, blocker packet, and receipts packet explicitly.
+
+---
+
+## Step 85/85 — Manual cockpit truth spine with db law, goal, sub-orchestrators, blockers, and receipts
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:53:46Z`
+- Current step: 85/85
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: manual_current now exposes top-level goal, db_law, sub_orchestrators, blockers, and receipts packets in addition to the existing route map and live surfaces; the DB view was reapplied and verified.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This makes the manual read like a cockpit again: the truth spine is explicit at top level instead of being buried only inside live_surface.
+
+---
+
+## Step 86/86 — Root orchestrator truth spine with db law, goal, sub-orchestrators, blockers, and receipts
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:56:40Z`
+- Current step: 86/86
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: root_orchestrator_current now surfaces top-level goal, db_law, sub_orchestrators, blockers, and receipts packets in addition to the existing route map and live surfaces; the dedicated truth-spine migration was applied and verified.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This makes the root-orchestrator packet itself match the operator-manual standard instead of hiding the truth spine only in live_surface.
+
+---
+
+## Step 87/87 — Root orchestrator next-steps and receipts surfaced at top level
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:57:26Z`
+- Current step: 87/87
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: root_orchestrator_current now exposes top-level goal, db_law, sub_orchestrators, blockers, and receipts packets plus direct receipt inspection commands in next_commands; the truth-spine migration was applied and verified.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This closes the root packet’s last obvious cockpit gap: the packet now exposes the truth spine and the concrete receipt inspection commands operators need next.
+
+---
+
+## Step 88/88 — Manual and root-orchestrator receipt rails aligned
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T12:59:25Z`
+- Current step: 88/88
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: manual_current now includes root orchestrator and direct receipt inspection commands in next_commands, while root_orchestrator_current remains truth-spined and receipt-backed; both packets were rechecked live.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The manual now points operators directly at the receipt rails and root-orchestrator command, which closes the next practical cockpit gap.
+
+---
+
+## Step 89/89 — Workflow current truth spine and operator next commands
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:00:51Z`
+- Current step: 89/89
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: workflow_current now exposes top-level goal, db_law, and next_commands alongside the workflow summary, active names, and status/owner breakdown; the live DB view was reapplied and verified.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This makes the workflow packet consistent with the other current surfaces: not just summary data, but an operator-readable truth spine and direct inspection commands.
+
+---
+
+## Step 90/90 — Current packet truth spines for model/provider/capability/routing
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:02:46Z`
+- Current step: 90/90
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: model_routing_current, provider_current, capability_current, and model_registry_current now surface top-level goal and db_law truth spines plus direct next_commands; the live DB views were reapplied and verified with receipt-gated tests.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This aligns the remaining core current packets with the manual/root/workflow truth-spine pattern instead of leaving them as summary-only rows.
+
+---
+
+## Step 91/91 — Active goal truth spine and current-packet symmetry
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:03:49Z`
+- Current step: 91/91
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: active_goal now exposes goal, db_law, and next_commands, bringing the remaining sparse core packet into the same operator-readable truth-spine pattern as the other current surfaces.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This closes the last obvious sparse packet gap in the core current-surface family without inventing new roles or bypassing the DB as truth.
+
+---
+
+## Step 92/92 — Workflow current help symmetry
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:04:50Z`
+- Current step: 92/92
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: workflow current now shows the full base-url help form in the LUCI help surface so the route is represented consistently with the other truth-spined current packets.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This is a help-surface symmetry fix, not a DB schema change, but it keeps the operator-facing command map honest.
+
+---
+
+## Step 93/93 — Canon current truth spine
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:06:03Z`
+- Current step: 93/93
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: canon_current now exposes goal, db_law, and next_commands alongside the canonical node row, bringing the last sparse core packet into the same operator-readable pattern as the other current surfaces.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This is the last obvious sparse current packet in the core set; the canon node packet now reads like an operator surface instead of a bare node record.
+
+---
+
+## Step 94/94 — API canon aliases and help symmetry
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:10:01Z`
+- Current step: 94/94
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added api canon current/versions aliases, wired the api dispatcher to canon current/versions, and aligned the help/manual surfaces so the operator can stay in the same command dialect.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Canon now has api-family aliases too; one more help-surface symmetry gap closed without touching the canon rows themselves.
+
+---
+
+## Step 95/95 — API canon aliases and help symmetry cleanup
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:10:30Z`
+- Current step: 95/95
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added api canon current/versions aliases, wired the api dispatcher to canon current/versions, and then trimmed the duplicate help-manual append path so the alias surface stays clean.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Canon aliases are live and the help payload stayed clean after removing the extra append path.
+
+---
+
+## Step 96/96 — API canon commands in manual next-commands
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:12:32Z`
+- Current step: 96/96
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added api canon current/versions to the live manual next-command rail, updated the help/manual builder and the DB-backed manual_current view, reapplied the view, and verified the new commands live with a receipt-gated test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The manual now teaches both canon spellings in the same command dialect; the view and help surface are back in sync.
+
+---
+
+## Step 97/97 — Manual canon versions live-surface gap
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:14:11Z`
+- Current step: 97/97
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added canon_versions to the DB-backed manual_current live_surface, taught the text renderer to show canon version rows, corrected the view to order by promoted_at, reapplied the view, and verified the live manual now surfaces canon_versions with a receipt-gated test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The manual now shows canon_current and canon_versions together, and the view uses the real canon_versions timestamp column instead of guessing updated_at.
+
+---
+
+## Step 98/98 — Root orchestrator canon and receipt rails
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:19:04Z`
+- Current step: 98/98
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Removed the root-orchestrator self-recursion, added canon_current and canon_versions to its live surface, and taught its next-command rail to include the root orchestrator command plus canon and receipt inspection commands; verified with a receipt-gated test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root orchestrator now shows canon packets and receipt rails without recursive self-reference.
+
+---
+
+## Step 99/99 — Root orchestrator queue and cloud packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:23:14Z`
+- Current step: 99/99
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added indy_queue, indy_responses, bytewax_compact_windows, and cloud_packet to the live root-orchestrator surface; taught its next-command rail to inspect those packets; re-applied the DB view; and verified the packet with a receipt-gated test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The root orchestrator packet now covers the queue/window/cloud lane instead of only the canon and receipt rails.
+
+---
+
+## Step 100/100 — Manual and root prose for queue/cloud lane
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:24:59Z`
+- Current step: 100/100
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Updated manual_current and root_orchestrator_current prose so both surfaces explicitly name the indy queue/response, bytewax window, and cloud packet lane; reapplied the DB views and verified the prose with a receipt-gated test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The packet lane is now named in the human-readable surfaces, not just present in JSON.
+
+---
+
+## Step 101/101 — Manual queue loop in work-order flow
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:26:04Z`
+- Current step: 101/101
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added queue_loop to manual_current work_order_flow so the operator workflow map explicitly includes indy_queue -> indy_responses -> bytewax_compact_windows -> cloud_packet, then reapplied the view and verified it with a receipt-gated test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The packet lane is now part of the manual workflow map, not only the prose surface.
+
+---
+
+## Step 102/102 — Prompt packet family now lives in manual_current and root_orchestrator_current
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:33:40Z`
+- Current step: 102/102
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Reapplied manual_current and root_orchestrator_current so both live surfaces now expose prompt_catalog_status, prompt_recent, prompts_filed, prompt_work_order_links, and prompt_unlinked in live_surface; verified with a receipt-gated test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt ledger packet family is now live in the core cockpit surfaces; this closes the last missing packet family noted in the current sweep.
+
+---
+
+## Step 103/103 — Root orchestrator now carries registry current summaries too
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:36:01Z`
+- Current step: 103/103
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Reapplied root_orchestrator_current and manual_current so the root cockpit now exposes model_registry_current, provider_current, workflow_current, capability_current, sheet_current, model_routing_current, and model_routing_blockers alongside the prompt packet family, then verified both live routes with a receipt-gated test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The root operator packet now aligns with the manual cockpit on the current registry summaries, not just the raw registries.
+
+---
+
+## Step 104/104 — Root orchestrator now carries receipt/archive summary surfaces too
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:38:14Z`
+- Current step: 104/104
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Reapplied root_orchestrator_current and manual_current so the root cockpit now exposes the registry current summaries, prompt packet family, and receipt/archive summaries in live_surface, then verified both live routes with a receipt-gated test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root cockpit now mirrors the manual cockpit more completely, including the receipt/archive summary surfaces the operator needs on the front door.
+
+---
+
+## Step 105/105 — Root route map expanded to include current summaries and receipt/archive routes
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:39:51Z`
+- Current step: 105/105
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Reapplied root_orchestrator_current and manual_current so the root route map now enumerates the current-summary routes, prompt packet family, and receipt/archive routes alongside the raw registries, then verified both live routes with a receipt-gated test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root cockpit route list now better matches the actual current-summary and receipt/archive capability exposed in live_surface.
+
+---
+
+## Step 106/106 — Root route map expanded to mirror the manual route family
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:41:03Z`
+- Current step: 106/106
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Reapplied root_orchestrator_current and manual_current so the root route map now enumerates the bible, RPC, current-summary, prompt, and receipt/archive route families alongside the raw registries, then verified both live routes with a receipt-gated test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root cockpit route list now mirrors the manual route family far more closely, reducing front-door blind spots for the operator.
+
+---
+
+## Step 107/107 — Root cockpit now carries the bible and receipt summary surfaces too
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:43:22Z`
+- Current step: 107/107
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Reapplied root_orchestrator_current and manual_current so the root cockpit now exposes the bible/helper family, chrono, receipts, blockers, and current-summary surfaces in live_surface, then verified both live routes with a receipt-gated test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root cockpit now shows the bible and receipt families directly instead of forcing the operator back to manual for those summaries.
+
+---
+
+## Step 108/108 — Root cockpit api alias rails expanded for current summary surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T13:50:02Z`
+- Current step: 108/108
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Reapplied root_orchestrator_current and manual_current so the root cockpit now exposes the api alias forms for model_registry_current, provider_current, workflow_current, capability_current, sheet_current, model_routing_current, and model_routing_blockers, then verified both live routes with a receipt-gated test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root operator surface now teaches the api alias forms for the main current summary packets, reducing command-dialect friction.
+
+---
+
+## Step 109/109 — Root and manual command rails now include payload archive, flow specs, flow receipts, and raw bytewax aliases
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:06:05Z`
+- Current step: 109/109
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Reapplied root_orchestrator_current and manual_current so both operator packets now expose payload archive, flow specs, flow receipts, and raw bytewax alias command rails. Verified live on both routes and receipt-gated the root/manual command-family gap tests.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Small cockpit cleanup. The live operator packets now agree on the queue/window/archive rail family, which reduces root/manual drift without introducing new surfaces.
+
+---
+
+## Step 111/111 — Root and manual command rails now include the raw book, prompt, ontology, and operator summary aliases
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:11:03Z`
+- Current step: 111/111
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Reapplied root_orchestrator_current and manual_current so both operator packets now expose the raw book, raw prompt, ontology item, and operator summary alias rails for the next command family cluster. Verified live on both routes and receipt-gated the paired root/manual test run.
+- Next action: Scan for the next live DB-visible gap or cockpit prose gap that materially improves operator steering.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The cockpit keeps growing in operator utility without losing DB truth. Root/manual now agree on another high-value command cluster, including raw row aliases for book and prompt intake.
+
+---
+
+## Step 112/112 — Root and manual next-commands are fully aligned; command rails now match exactly
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:14:30Z`
+- Current step: 112/112
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Reapplied root_orchestrator_current and manual_current so the two operator packets now have identical next_commands rails. Verified live parity on both routes and receipt-gated the final root/manual command-rail test run.
+- Next action: Decide whether to continue expanding the live_surface asymmetry or move to a different live DB-visible gap.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The command rail map is now aligned across manual and root. Root still intentionally carries a richer live_surface and route_list, but the operator command surface no longer drifts.
+
+---
+
+## Step 113/113 — Manual live_surface now includes route catalog, test receipts, cli receipts, flow specs, and canon status blobs
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:17:43Z`
+- Current step: 113/113
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Reapplied manual_current so its live_surface now includes the higher-value operator summary blobs for api_route_catalog, api_test_execution_receipts, cli_process_receipts, flow_specs, and canon_current. Verified the new fields live and receipt-gated the focused manual summary test.
+- Next action: Continue hunting the next meaningful DB-visible asymmetry, likely in the remaining summary blobs or a different live surface entirely.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Manual cockpit is getting richer without losing DB truth. The remaining asymmetry is now a narrower summary-blob mismatch, not a command-rail problem.
+
+---
+
+## Step 114/114 — Manual summary blob repair revalidated after the command-tail cleanup
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:27:16Z`
+- Current step: 114/114
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Restored the manual_current live_surface and kept the summary blob cluster stable after cleaning up the broken command-tail experiment. Verified the live manual packet still exposes api_route_catalog, api_test_execution_receipts, cli_process_receipts, flow_specs, and canon_current, and re-ran the receipt-gated manual summary test successfully.
+- Next action: Continue from the live surfaces and look for the next genuine DB-visible asymmetry instead of forcing more command-tail churn.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The manual packet is coherent again; the earlier command-tail experiment was rolled back to keep the surface parseable and verified.
+
+---
+
+## Step 115/115 — Manual command rail gets higher-value operator packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:33:34Z`
+- Current step: 115/115
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added a compact manual next_commands cluster for canon, route, receipt, registry, routing, prompt, and bible inspection; reapplied the view and verified the live packet plus receipt-gated manual test.
+- Next action: Compare the manual and root command rails again, then decide whether the next meaningful asymmetry is more manual summary blobs or a different live surface.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Manual stays parseable; this slice fixed the operator command rail without reopening the giant root-only rail experiment.
+
+---
+
+## Step 116/116 — Recovery stub restores root and manual live surfaces after root array overflow
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:46:20Z`
+- Current step: 116/116
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Recovered the live root orchestrator packet with a compact valid stub after the oversized command-array migration blew past PostgreSQL limits; restored manual_current against the recovered root dependency and revalidated both surfaces with receipt-gated tests.
+- Next action: Decide whether to harden the root stub into a fuller operator packet or continue from the now-live surfaces with the next meaningful DB-visible asymmetry.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This was a recovery slice after the root migration overflowed and dropped the views; the live DB is back, but the root packet is intentionally compact for now.
+
+---
+
+## Step 117/117 — Root recovery stub hardened with live summary blobs and manual restored against it
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:48:35Z`
+- Current step: 117/117
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Recovered the root orchestrator packet as a compact valid stub after the oversized command-array migration overflowed PostgreSQL, then hardened the stub with prompt/flow/payload/bytewax/cloud summary blobs and restored manual_current against the live root dependency. Revalidated both views with receipt-gated tests.
+- Next action: Decide whether to continue hardening the compact root stub with more summary blobs or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root is intentionally compact again but now carries more operator summary blobs; manual remains live and richer.
+
+---
+
+## Step 118/118 — Root route spine restored with route list and compact auth/workflow summary
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:49:51Z`
+- Current step: 118/118
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Hardened the recovered root orchestrator stub by restoring a real route_list/route_count, compact auth_expectations, and work_order_flow summary while preserving the live manual packet against it. Revalidated both views with receipt-gated tests.
+- Next action: Either continue hardening the compact root stub with more safe summary blobs or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root is still compact, but it now has a real route spine and operator summary fields again.
+
+---
+
+## Step 119/119 — Root route spine widened with compact operator routes and revalidated against manual
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:51:17Z`
+- Current step: 119/119
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Expanded the recovered root orchestrator stub from a bare recovery shell into a small but useful operator route spine, adding route_list/route_count coverage for the core current surfaces and revalidating both root and manual views with receipt-gated tests.
+- Next action: Either continue widening the compact root route spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root is still intentionally compact, but it now exposes the core current routes instead of just a skeleton list.
+
+---
+
+## Step 120/120 — Root route spine expanded with prompt, receipt, bytewax, queue, and book routes
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:52:45Z`
+- Current step: 120/120
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Expanded the compact recovered root orchestrator route spine to cover prompt, receipt, bytewax, queue, and book routes in addition to the core current surfaces, then revalidated both root and manual views with receipt-gated tests.
+- Next action: Either continue widening the compact root route spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now exposes a broader route spine without reopening the earlier oversized-array overflow path.
+
+---
+
+## Step 121/121 — Root summary spine hardened with canon, skill, prompt, and route catalog blobs
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:53:56Z`
+- Current step: 121/121
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Hardened the compact root orchestrator packet with additional summary blobs for api_route_catalog, canon_current, canon_versions, skill_policy_current, and prompt-ledger surfaces, then revalidated both root and manual views with receipt-gated tests.
+- Next action: Either continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root is still compact, but it now carries a more useful operator summary spine without re-triggering the array overflow.
+
+---
+
+## Step 122/122 — Root summary spine expanded with api aliases for bible, registry, and receipt surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:55:26Z`
+- Current step: 122/122
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Expanded the compact root orchestrator summary spine with compact api-alias blobs for bible, registry, receipt, queue, bytewax, cloud, and prompt-ledger surfaces, then revalidated both root and manual views with receipt-gated tests.
+- Next action: Either continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root stays compact but now carries many of the operator-facing api alias summary blobs too.
+
+---
+
+## Step 123/123 — Root summary spine widened with current registry blobs for models, providers, workflow, capability, and sheet
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T14:56:34Z`
+- Current step: 123/123
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Expanded the compact root orchestrator summary spine with compact current-registry blobs for model, provider, workflow, capability, sheet, and model-routing surfaces, then revalidated both root and manual views with receipt-gated tests.
+- Next action: Either continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root remains compact but now carries the current registry summary blobs the manual cockpit expects to see.
+
+---
+
+## Step 124/124 — Root summary spine book/lora/ontology cluster
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:05:03Z`
+- Current step: 124/124
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Rebuilt the root orchestrator summary spine with compact book, LoRA/training, and ontology work summary rows, then re-applied root and manual and receipt-gated the root/manual checks.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root survived the full reapply; live_surface now uses a row aggregator instead of the oversized jsonb_build_object call, with book/lora/ontology summaries restored.
+
+---
+
+## Step 125/125 — Root chrono and capability registry lift
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:09:47Z`
+- Current step: 125/125
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added chrono_current plus capability_registry to the root orchestrator summary spine, re-applied the live root/manual views, and receipt-gated the root/manual checks.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now carries chrono_current and capability_registry in live_surface and route list; manual stayed live through the reapply.
+
+---
+
+## Step 126/126 — Root current packets lift
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:15:19Z`
+- Current step: 126/126
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added direct current packets for model, provider, workflow, capability, sheet, model-routing, capability registry, chrono, Indy queue, and Indy responses to the root orchestrator summary spine, then re-applied root/manual and receipt-gated the checks.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root live_surface now mirrors more of the manual cockpit with direct current packets; manual remained live through the reapply.
+
+---
+
+## Step 127/127 — Root helper and ontology lane lift
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:18:51Z`
+- Current step: 127/127
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added the bible helper routes plus the selected_lanes and missing_executor_roles ontology fields to the root orchestrator summary spine, then re-applied root/manual and receipt-gated the checks.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now mirrors more of manual and the ontology packet; helper routes fn_bible_node_sort_key and get_subtree are route-visible too.
+
+---
+
+## Step 128/128 — Root direct receipts and routing lift
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:20:48Z`
+- Current step: 128/128
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added direct cli_process_receipts, flow_receipts, model_routing_current, and model_routing_blockers rows to the root orchestrator summary spine, then re-applied root/manual and receipt-gated the checks.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now mirrors more receipt and routing truth directly; manual stayed live through the reapply.
+
+---
+
+## Step 129/129 — Root route-list truth alignment
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:24:35Z`
+- Current step: 129/129
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Kept the root route-list assertions honest with the live catalog, then re-gated root/manual and confirmed both live surfaces still pass.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root still stays compact; I removed a false route-list symmetry assumption and kept the live truth clean.
+
+---
+
+## Step 130/130 — Root and manual registry truth lift
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:27:12Z`
+- Current step: 130/130
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added the direct bible helper functions and the root-style registry/current summary blobs to the live root/manual packets, then re-gated the live surfaces and confirmed they pass.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now surfaces fn_bible_node_sort_key and get_subtree directly; manual now mirrors the root-style current registry summary blobs.
+
+---
+
+## Step 131/131 — Root route list alignment v2
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:28:23Z`
+- Current step: 131/131
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Closed the remaining root/manual route-list asymmetry by adding capability_current and ontology work routes to root, then re-gated root/manual and confirmed both live surfaces pass.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Route lists are aligned again; manual-only root_orchestrator_current in live_surface is intentional, not a catalog bug.
+
+---
+
+## Step 132/132 — Manual registry surface lift
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:29:30Z`
+- Current step: 132/132
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Lifted the root-style registry, book, lora, training, ontology, and cloud summary blobs into manual_current live_surface, then re-gated root/manual and confirmed both pass.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Manual now carries the useful root-style current registry and evidence blobs instead of leaving them root-only.
+
+---
+
+## Step 133/133 — Manual capability registry lift
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:31:08Z`
+- Current step: 133/133
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added the missing capability_registry summary blob to manual_current live_surface, fixed the mislabeled registry alias, then re-gated root/manual and confirmed the live diff is clean.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Manual now carries the real capability_registry blob; route lists remain aligned and capability/current aliasing is now honest.
+
+---
+
+## Step 134/134 — Root next-command operator cluster
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:32:22Z`
+- Current step: 134/134
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Expanded the root command rail with the missing high-value prompt, receipt, canon, and route-catalog commands, then re-gated root/manual and confirmed both live surfaces pass.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now offers a more useful operator command cluster without losing compactness; manual remained live through the reapply.
+
+---
+
+## Step 135/135 — Root command rail expansion v2
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:34:05Z`
+- Current step: 135/135
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Expanded the root command rail with registry, queue, receipt, bytewax, skill policy, todo, book, ontology, and cloud packet commands, then re-gated root/manual and confirmed both live surfaces pass.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root next_commands is now meaningfully more useful for operator steering; manual stayed live through the reapply.
+
+---
+
+## Step 136/136 — Root command rail expansion v3
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:35:08Z`
+- Current step: 136/136
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Expanded the root command rail again with book, prompt raw, ontology, registry raw, and root-law commands, then re-gated root/manual and confirmed both live surfaces pass.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now exposes the more useful manual-style operational cluster; manual remained live through the reapply.
+
+---
+
+## Step 137/137 — Root command rail expansion v4
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:36:28Z`
+- Current step: 137/137
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Expanded the root command rail with raw prompt, book, and operator rails, then re-gated root/manual and confirmed both live surfaces pass.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root next_commands now covers the raw prompt/book/operator cluster too; manual remained live through the reapply.
+
+---
+
+## Step 138/138 — Root command rail expansion v5
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:37:56Z`
+- Current step: 138/138
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Expanded the root command rail with manual, chrono, payload, and ontology raw/operator rails, then re-gated root/manual and confirmed both live surfaces pass.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root next_commands now covers the missing manual-style operator rails as well; manual stayed live through the reapply.
+
+---
+
+## Step 139/139 — Root direct operator cluster
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:40:10Z`
+- Current step: 139/139
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Expanded the root command rail with the direct operator forms for openapi, payload/archive, model/provider/workflow/capability, and sheet current, then re-gated root/manual and confirmed both live surfaces pass.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now exposes the direct operator forms alongside the api variants, which is closer to the manual cockpit style.
+
+---
+
+## Step 140/140 — Root curl diagnostics cluster
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:43:33Z`
+- Current step: 140/140
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Converted the root command rail to a two-chunk form and added the live curl diagnostics for core surfaces, then re-gated root/manual and confirmed both live surfaces pass.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now teaches the same live curl diagnostics manual does, and the command rail is safely split under the function limit.
+
+---
+
+## Step 141/141 — Root diagnostics cluster v2
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:45:06Z`
+- Current step: 141/141
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added the missing live curl diagnostics and direct operator forms for the core surfaces, kept the root command rail under the JSON arg ceiling, then re-gated root/manual and confirmed both live surfaces pass.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now teaches the same live curl diagnostics and direct operators manual does, and the command rail is safely split under the function limit.
+
+---
+
+## Step 142/142 — Root RPC prompt cluster
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:46:51Z`
+- Current step: 142/142
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added the missing RPC prompt-filing commands to the root command rail, kept the command rail under the JSON arg ceiling, then re-gated root/manual and confirmed both live surfaces pass.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now teaches the RPC prompt filings that manual already did, and the command rail stayed within the argument ceiling after splitting.
+
+---
+
+## Step 143/143 — Root command rail bible cluster
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:52:01Z`
+- Current step: 143/143
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added the missing direct bible/ops command rails to root_orchestrator_current, reapplied the root/manual views, and receipt-gated the updated surface.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now teaches the missing bible/operator commands; no new blocker, just less alias drift.
+
+---
+
+## Step 144/144 — Root operator utility cluster
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:53:56Z`
+- Current step: 144/144
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added the missing operator utility commands to root_orchestrator_current, reapplied the root/manual views, and verified the updated live rail with a receipt-gated test run.
+- Next action: Continue widening the compact root summary spine in safe chunks or move to the next DB-visible asymmetry from the now-live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now surfaces the utility commands manual already knew; live parity improved again without changing the intentional root self-reference asymmetry.
+
+---
+
+## Step 145/145 — Root direct probe cluster
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:56:01Z`
+- Current step: 145/145
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added the remaining direct probe commands and surface probes to root_orchestrator_current, reapplied the root/manual views, and verified the live rails with a receipt-gated test run.
+- Next action: Keep widening the compact root summary spine only if a new concrete live asymmetry appears; otherwise move to another real DB-visible gap.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root now teaches the direct probes manual already knew; live parity improved again and the only live_surface asymmetry remains the intentional manual self-reference.
+
+---
+
+## Step 146/146 — Manual/root probe parity
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T15:57:01Z`
+- Current step: 146/146
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added the remaining root-only direct probe commands to manual_current, reapplied the manual view, and verified both command rails are aligned apart from the intentional manual self-reference asymmetry.
+- Next action: Keep widening the compact root summary spine only if a new concrete live asymmetry appears; otherwise move to another real DB-visible gap.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Manual now teaches the root direct probes too; command rails are parity-clean, and the only live_surface asymmetry remains the intentional root reference.
+
+---
+
+## Step 147/147 — Daemon status truth spine
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T16:01:15Z`
+- Current step: 147/147
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Lifted daemon_status into an operator packet with goal, db_law, and next_commands; updated the daemon renderer and verified the enriched surface with a receipt-gated test run.
+- Next action: Keep widening the compact root summary spine only if a new concrete live asymmetry appears; otherwise move to another real DB-visible gap.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Daemon status now shows the active goal and DB law directly; the heart-beat packet finally behaves like a cockpit packet instead of a raw list.
+
+---
+
+## Step 148/148 — Sheet and blocker truth spines
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T16:04:02Z`
+- Current step: 148/148
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Lifted sheet_current and model_routing_blockers into operator packets with goal, db_law, and next_commands, refreshed the live views, and receipt-gated the direct and embedded surfaces.
+- Next action: Keep widening the compact root summary spine only if a new concrete live asymmetry appears; otherwise move to another real DB-visible gap.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Spreadsheet packet and model-routing blocker packet now read like cockpit packets; root/manual embeds stayed aligned after the live view refresh.
+
+---
+
+## Step 149/149 — Todo truth spine (blocked on persist_batch placeholder mismatch)
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T16:09:00Z`
+- Current step: 149/149
+- Status: in_progress
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: todo_current was lifted into a cockpit packet with goal, db_law, and next_commands; root/manual embeds now carry the richer packet too.
+- Next action: Fix the placeholder mismatch in scripts/ontology_work_compiler.persist_batch, then rerun the todo receipt gate.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The DB lift is good; the remaining blocker is a Python insert placeholder count mismatch uncovered by the receipt-gated todo test run.
+
+---
+
+## Step 150/150 — Todo compiler placeholder mismatch fixed and verified
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T16:12:48Z`
+- Current step: 150/150
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Fixed the missing persist_batch SQL placeholder in scripts/ontology_work_compiler.py; the todo truth-spine receipt-gated test now passes and the live todo/manual/root packets remain truth-spined.
+- Next action: Continue with the next live DB-visible gap or operator surface asymmetry.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Placeholder mismatch was the real blocker; it is now fixed and receipt-verified. No new blocker.

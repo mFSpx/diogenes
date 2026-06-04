@@ -1,0 +1,11 @@
+[Unit]
+Description=Periodic Root-Rotor audit timer
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=1h
+Persistent=true
+Unit=lucidota-root-rotor-audit.service
+
+[Install]
+WantedBy=timers.target
