@@ -168,7 +168,7 @@ def live_openapi_paths() -> set[str]:
 
 
 def live_manual_current_text() -> str:
-    with urllib.request.urlopen(LIVE_BASE_URL + "/manual_current?limit=1", timeout=5) as resp:
+    with urllib.request.urlopen(LIVE_BASE_URL + "/manual_current?limit=1", timeout=15) as resp:
         payload = json.loads(resp.read().decode("utf-8"))
     return json.dumps(payload[0], sort_keys=True, ensure_ascii=False)
 

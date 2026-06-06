@@ -19,7 +19,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full
 ProtectHome=read-only
-ReadWritePaths=%h/LUCIDOTA/04_RUNTIME %h/LUCIDOTA/05_OUTPUTS
+ReadWritePaths=%h/LUCIDOTA/04_RUNTIME %h/LUCIDOTA/05_OUTPUTS %h/LUCIDOTA/BOOKS/.indy_reads
 
 [Install]
 WantedBy=default.target

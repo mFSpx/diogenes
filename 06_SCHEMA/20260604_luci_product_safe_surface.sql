@@ -40,20 +40,31 @@ CREATE TABLE IF NOT EXISTS lucidota_control.active_goal (
     updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-ALTER TABLE IF EXISTS ironclaw.waking_dialogue_stream
-    ADD COLUMN IF NOT EXISTS last_response_id text,
-    ADD COLUMN IF NOT EXISTS last_response_body text,
-    ADD COLUMN IF NOT EXISTS last_response_body_sha256 text,
-    ADD COLUMN IF NOT EXISTS response_queued_at timestamptz,
-    ADD COLUMN IF NOT EXISTS response_delivery_status text;
-
-CREATE INDEX IF NOT EXISTS ix_waking_dialogue_stream_last_response_id
-    ON ironclaw.waking_dialogue_stream (last_response_id)
-    WHERE last_response_id IS NOT NULL;
-
-CREATE OR REPLACE VIEW lucidota_canon.manual_current AS
-SELECT manual_id, manual_id::text AS title, node_count, last_updated_at AS max_updated_at
-FROM lucidota_canon.api_bible_manuals;
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname = 'ironclaw'
+          AND c.relname = 'waking_dialogue_stream'
+          AND pg_get_userbyid(c.relowner) = current_user
+    ) THEN
+        EXECUTE $sql$
+            ALTER TABLE IF EXISTS ironclaw.waking_dialogue_stream
+                ADD COLUMN IF NOT EXISTS last_response_id text,
+                ADD COLUMN IF NOT EXISTS last_response_body text,
+                ADD COLUMN IF NOT EXISTS last_response_body_sha256 text,
+                ADD COLUMN IF NOT EXISTS response_queued_at timestamptz,
+                ADD COLUMN IF NOT EXISTS response_delivery_status text
+        $sql$;
+        EXECUTE $sql$
+            CREATE INDEX IF NOT EXISTS ix_waking_dialogue_stream_last_response_id
+                ON ironclaw.waking_dialogue_stream (last_response_id)
+                WHERE last_response_id IS NOT NULL
+        $sql$;
+    END IF;
+END$$;
 
 CREATE OR REPLACE VIEW lucidota_canon.canon_current AS
 WITH goal_row AS (
@@ -79,169 +90,37 @@ SELECT
         'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; receipts prove the thing happened.'
     ) AS db_law,
     jsonb_build_array(
-        'curl -sS http://127.0.0.1:3000/canon_current?limit=1',
-        'curl -sS http://127.0.0.1:3000/canon_versions?limit=5',
-        './luci canon current --json',
-        './luci canon versions --json'
-    ) AS next_commands
-FROM lucidota_canon.bible_nodes
-WHERE valid_to IS NULL;
-
-CREATE OR REPLACE VIEW lucidota_canon.canon_versions AS
-SELECT
-    history_id::text AS version_id,
-    node_id,
-    manual_id,
-    version,
-    payload AS diff_from_previous,
-    hash_current AS content_hash,
-    archived_at AS promoted_at
-FROM lucidota_canon.bible_history;
-
-CREATE OR REPLACE VIEW lucidota_canon.indy_queue AS
-SELECT
-    id::text AS id,
-    received_at,
-    sender_id,
-    room_id,
-    event_id,
-    raw_text,
-    clean_text,
-    extracted_entities,
-    processed_status,
-    receipt_id,
-    created_at
-FROM ironclaw.waking_dialogue_stream
-WHERE comms_channel = 'matrix'
-  AND processed_status = 'queued';
-
-CREATE OR REPLACE VIEW lucidota_canon.indy_responses AS
-SELECT
-    id::text AS dialogue_id,
-    event_id,
-    sender_id,
-    room_id,
-    receipt_id,
-    last_response_id AS response_id,
-    last_response_body AS response_body,
-    last_response_body_sha256 AS response_body_sha256,
-    response_delivery_status,
-    response_queued_at,
-    processed_status,
-    created_at,
-    updated_at
-FROM ironclaw.waking_dialogue_stream
-WHERE comms_channel = 'matrix'
-  AND last_response_id IS NOT NULL;
-
-CREATE OR REPLACE VIEW lucidota_canon.flow_specs AS
-SELECT
-    flow_id,
-    name,
-    status,
-    flow_json,
-    nodes,
-    edges,
-    created_by,
-    receipt_id,
-    created_at,
-    updated_at
-FROM luci_flow.flow_spec;
-
-CREATE OR REPLACE VIEW lucidota_canon.flow_receipts AS
-SELECT
-    receipt_id,
-    flow_id,
-    action,
-    status,
-    output_path,
-    output_hash,
-    metrics,
-    created_at
-FROM luci_flow.flow_receipt;
-
-CREATE OR REPLACE VIEW lucidota_canon.active_goal AS
-SELECT
-    goal_id,
-    title,
-    status,
-    active_prompt_path,
-    active_prompt_hash,
-    current_handoff_path,
-    detail,
-    created_at,
-    updated_at,
-    jsonb_build_object(
-        'goal_id', goal_id,
-        'title', title,
-        'status', status,
-        'current_handoff_path', current_handoff_path
-    ) AS goal,
-    jsonb_build_object(
-        'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; receipts prove the thing happened.'
-    ) AS db_law,
+        'canon_current',
+        'canon_versions'
+    ) AS next_commands,
     jsonb_build_array(
-        'curl -sS http://127.0.0.1:3000/active_goal?limit=1',
-        'curl -sS http://127.0.0.1:3000/manual_current?limit=1',
-        './luci active goal --json',
-        './luci api active goal --json'
-    ) AS next_commands
-FROM lucidota_control.active_goal;
-
-GRANT USAGE ON SCHEMA luci_flow TO mfspx;
-GRANT SELECT, INSERT, UPDATE ON luci_flow.flow_spec, luci_flow.flow_receipt TO mfspx;
-GRANT SELECT, INSERT, UPDATE ON lucidota_control.active_goal TO mfspx;
-GRANT SELECT ON lucidota_canon.manual_current, lucidota_canon.canon_current, lucidota_canon.canon_versions,
-    lucidota_canon.indy_queue, lucidota_canon.indy_responses, lucidota_canon.flow_specs,
-    lucidota_canon.flow_receipts, lucidota_canon.active_goal TO mfspx;
-
--- Route-mask hardening: these PostgREST-facing views are read APIs, not write
--- surfaces. Keep them non-auto-updatable so OpenAPI does not advertise mutation
--- methods even when PostgreSQL would otherwise infer a simple-view write path.
-CREATE OR REPLACE VIEW lucidota_canon.api_bible_edges AS
-WITH rows AS (
-    SELECT edge_id, from_node_id, to_node_id, edge_kind, evidence, created_at
-    FROM lucidota_canon.bible_dependencies
-)
-SELECT * FROM rows;
-
-CREATE OR REPLACE VIEW lucidota_canon.api_bible_nodes AS
-WITH rows AS (
-    SELECT node_id, parent_id, node_sort_key, manual_id, title, payload, payload_format,
-        source_refs, evidence_hashes, dependencies, affects_nodes, status, version,
-        valid_from, valid_to, hash_current, previous_hash, created_at, updated_at
-    FROM lucidota_canon.bible_nodes
-    WHERE valid_to IS NULL
-)
-SELECT * FROM rows;
-
-CREATE OR REPLACE VIEW lucidota_canon.api_bible_route_catalog AS
-WITH rows AS (
-    SELECT route_id, method, path_pattern, description, target, sample_request,
-        sample_response, status, created_at, updated_at
-    FROM lucidota_canon.api_route_catalog
-)
-SELECT * FROM rows;
-
-CREATE OR REPLACE VIEW lucidota_canon.api_workflow_registry AS
-WITH rows AS (
-    SELECT workflow_id, workflow_name, verb, owner, phase, status, command, inputs,
-        outputs, input_object_types, output_object_types, deterministic_first,
-        llm_allowed, llm_required, allowed_models, validator_workflow_id,
-        receipt_type, promotion_policy, llm_allowed_reasons, ontology_tags,
-        notes, updated_at
-    FROM lucidota_control.workflow_registry
-)
-SELECT * FROM rows;
-
-CREATE OR REPLACE VIEW lucidota_canon.canon_current AS
-WITH rows AS (
-    SELECT node_id, parent_id, node_sort_key, manual_id, title, node_kind,
-        ontology_tags, status, version, hash_current, updated_at
-    FROM lucidota_canon.bible_nodes
-    WHERE valid_to IS NULL
-)
-SELECT * FROM rows;
+        'manual_current',
+        'root_orchestrator_current',
+        'daemon_status',
+        'capability_current',
+        'provider_current',
+        'workflow_current',
+        'model_registry_current',
+        'model_routing_current',
+        'model_routing_blockers',
+        'todo_current',
+        'canon_current',
+        'canon_versions',
+        'command_registry',
+        'surface_registry',
+        'renderer_registry',
+        'schema_owner_manifest',
+        'controller_grant',
+        'agent_thread_runtime'
+    ) AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack()
+    ) AS orchestration
+FROM lucidota_canon.bible_nodes
+CROSS JOIN goal_row
+WHERE valid_to IS NULL;
 
 CREATE OR REPLACE VIEW lucidota_canon.canon_versions AS
 WITH rows AS (
@@ -262,18 +141,6 @@ WITH rows AS (
 )
 SELECT * FROM rows;
 
-CREATE OR REPLACE VIEW lucidota_canon.indy_responses AS
-WITH rows AS (
-    SELECT id::text AS dialogue_id, event_id, sender_id, room_id, receipt_id,
-        last_response_id AS response_id, last_response_body AS response_body,
-        last_response_body_sha256 AS response_body_sha256,
-        response_delivery_status, response_queued_at, processed_status, created_at, updated_at
-    FROM ironclaw.waking_dialogue_stream
-    WHERE comms_channel = 'matrix'
-      AND last_response_id IS NOT NULL
-)
-SELECT * FROM rows;
-
 CREATE OR REPLACE VIEW lucidota_canon.flow_specs AS
 WITH rows AS (
     SELECT flow_id, name, status, flow_json, nodes, edges, created_by,
@@ -287,14 +154,6 @@ WITH rows AS (
     SELECT receipt_id, flow_id, action, status, output_path, output_hash,
         metrics, created_at
     FROM luci_flow.flow_receipt
-)
-SELECT * FROM rows;
-
-CREATE OR REPLACE VIEW lucidota_canon.active_goal AS
-WITH rows AS (
-    SELECT goal_id, title, status, active_prompt_path, active_prompt_hash,
-        current_handoff_path, detail, created_at, updated_at
-    FROM lucidota_control.active_goal
 )
 SELECT * FROM rows;
 
@@ -330,7 +189,28 @@ WITH rows AS (
         m.benchmark_status,
         m.notes,
         m.created_at,
-        m.updated_at
+        m.updated_at,
+        (
+            SELECT jsonb_build_object(
+                'decision', d.decision,
+                'status', CASE d.decision
+                    WHEN 'allow' THEN 'operational'
+                    WHEN 'defer' THEN 'partial'
+                    WHEN 'reject' THEN 'blocked'
+                    ELSE 'unknown'
+                END,
+                'observed_free_mb', d.observed_free_mb,
+                'observed_used_mb', d.observed_used_mb,
+                'estimated_required_mb', d.estimated_required_mb,
+                'headroom_mb', d.headroom_mb,
+                'rationale', d.rationale,
+                'created_at', d.created_at
+            )
+            FROM lucidota_runtime.load_governor_decision d
+            WHERE d.loadout_id = l.loadout_id
+            ORDER BY d.created_at DESC
+            LIMIT 1
+        ) AS load_governor_status
     FROM lucidota_runtime.resident_loadout l
     JOIN lucidota_runtime.resident_loadout_slot s ON s.loadout_id = l.loadout_id
     JOIN lucidota_runtime.model_candidate m ON m.model_id = s.model_id
@@ -399,7 +279,56 @@ SELECT
     lf.fact_key AS status_fact_key,
     lf.fact_value AS status_fact_value,
     lf.evidence_refs AS status_fact_evidence_refs,
-    lf.derived_at AS status_fact_derived_at
+    lf.derived_at AS status_fact_derived_at,
+    (
+        SELECT jsonb_build_object(
+            'goal_id', ag.goal_id,
+            'title', ag.title,
+            'status', ag.status,
+            'current_handoff_path', ag.current_handoff_path
+        )
+        FROM lucidota_canon.active_goal ag
+        LIMIT 1
+    ) AS goal,
+    jsonb_build_object(
+        'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; receipts prove the thing happened.'
+    ) AS db_law,
+    jsonb_build_array('daemon_status') AS next_commands,
+    jsonb_build_array(
+        'manual_current',
+        'active_goal',
+        'daemon_status',
+        'api_daemon_status',
+        'root_orchestrator_current',
+        'payload_archive_status',
+        'cli_process_receipts',
+        'capability_current',
+        'capability_registry',
+        'model_registry',
+        'model_registry_current',
+        'provider_registry',
+        'provider_current',
+        'workflow_registry',
+        'workflow_current',
+        'model_routing_current',
+        'model_routing_blockers',
+        'sheet_current',
+        'skill_policy_current',
+        'todo_current',
+        'schema_owner_manifest',
+        'surface_registry',
+        'renderer_registry',
+        'command_registry',
+        'controller_grant',
+        'agent_thread_runtime'
+    ) AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'daemon_name', hb.daemon_name,
+        'heartbeat_kind', hb.heartbeat_kind
+    ) AS orchestration
 FROM latest_heartbeats hb
 LEFT JOIN latest_facts lf
     ON lf.subsystem = hb.daemon_name
@@ -419,10 +348,28 @@ GRANT SELECT ON
     lucidota_canon.indy_queue,
     lucidota_canon.indy_responses,
     lucidota_canon.model_registry,
+    lucidota_canon.model_registry_current,
     lucidota_canon.provider_registry,
     lucidota_canon.workflow_registry,
     lucidota_canon.daemon_status,
+    lucidota_canon.root_orchestrator_current,
+    lucidota_canon.capability_current,
     lucidota_canon.flow_specs,
     lucidota_canon.flow_receipts,
-    lucidota_canon.active_goal
+    lucidota_canon.active_goal,
+    lucidota_canon.controller_grant,
+    lucidota_canon.agent_thread_runtime,
+    lucidota_canon.prompts_filed,
+    lucidota_canon.prompt_work_order_links,
+    lucidota_canon.prompt_recent,
+    lucidota_canon.prompt_unlinked,
+    lucidota_canon.prompt_catalog_status,
+    lucidota_canon.percyphon_current,
+    lucidota_canon.percyphon_village_matrix,
+    lucidota_canon.elastic_shape_current,
+    lucidota_canon.indy_attention_pressure_current,
+    lucidota_canon.shape_residuals_current
 TO lucidota_postgrest_anon;
+
+-- Keep the PostgREST anon reader aligned with the live current-surface bundle.
+GRANT SELECT ON ALL TABLES IN SCHEMA lucidota_canon TO lucidota_postgrest_anon;

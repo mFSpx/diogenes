@@ -14,10 +14,6 @@ def test_kv_policy_manifest_uses_rolling_500_token_windows_not_flush_every_500()
     assert data["policy"] == "rolling_window_shared_prefix"
     assert data["chunk_tokens"] == 500
     assert data["flush_strategy"] == "evict_after_receipt_not_blind_flush"
-    assert data["mamba"]["cache_kind"] == "ssm_state_not_kv"
-    assert data["mamba"]["weight_status"] == "DOWNLOADED_IQ1_S_ONE_BIT_CLASS_NOT_LITERAL_Q1_0"
-    assert data["mamba"]["weight_path"] == "03_VAULT/models/mradermacher/Falcon3-Mamba-7B-Instruct-i1-GGUF/Falcon3-Mamba-7B-Instruct.i1-IQ1_S.gguf"
-    assert data["mamba"]["weight_size_mib"] >= 1500
     assert data["needles"]["lanes"] == 6
     assert data["needles"]["shared_prefix_tokens"] == 500
     assert data["needles"]["kv_cache_scope"] == "one_immutable_chunk_prefix_shared_by_6_lane_batch"

@@ -1,0 +1,69 @@
+{
+  "schema_name": "ROOT414_GAME_GRADING_SCHEMA",
+  "version": "0.1",
+  "location": "/home/mfspx/LUCIDOTA/BOOKS/ROOT414_GAME_GRADING_SCHEMA.json",
+  "canonical_bps": [0, 2, 4, 6, 10, 50, 69, 150],
+  "decisions": ["approved", "needs_repair", "rejected", "comment"],
+  "score_labels": [
+    {"min": 95, "max": 100, "label": "CAKE"},
+    {"min": 80, "max": 94, "label": "COOKED"},
+    {"min": 60, "max": 79, "label": "NEEDS_REPAIR"},
+    {"min": 30, "max": 59, "label": "SLOP_DETECTED"},
+    {"min": 0, "max": 29, "label": "ARCHON_BAIT"}
+  ],
+  "judge_axes": [
+    {
+      "axis": "primitive_choice",
+      "question": "Did the parser choose the right primitives and avoid dramatic over-labeling?",
+      "examples": ["ROOT_414_MATH not ARCHONIC_CONTROL_GRID for a simple math discrepancy", "WORD_AS_MAGIC not SIMULACRUM_DETECTED for ordinary metaphor"]
+    },
+    {
+      "axis": "local_gates",
+      "question": "Did it run boring local gates before high-gravity labels?",
+      "examples": ["DOCUMENT_EXAMINATION", "CLAIM_UNVERIFIED", "PLAUSIBILITY_GATE", "TEMPORAL_PRECEDENCE"]
+    },
+    {
+      "axis": "evidence_separation",
+      "question": "Did it separate Text says / 414 route suggests / Speculative extension?",
+      "examples": ["external truth stays 0 without custody", "commentary does not become proof"]
+    },
+    {
+      "axis": "falsifier",
+      "question": "Is there a concrete falsifier or failure condition?",
+      "examples": ["ledger explains $900", "verified source contradicts claim", "later page reveals ordinary explanation"]
+    },
+    {
+      "axis": "bps_discipline",
+      "question": "Is confidence canonical and not inflated?",
+      "examples": ["10 for local layout inference", "50 for strong internal signal", "69 for doctrine/foundation only"]
+    },
+    {
+      "axis": "page_lock",
+      "question": "Did it avoid reading beyond the current page/chunk?",
+      "examples": ["no whole-book claims from page 1", "carry-forward thread is allowed but marked as unknown"]
+    },
+    {
+      "axis": "slop_resistance",
+      "question": "Did it resist OCR/MOBI garbage, irrelevant context, and high-label bait?",
+      "examples": ["extract signal from metadata", "do not overfit strings garbage", "ignore distractor soup/dog/weather"]
+    }
+  ],
+  "default_case_expected": {
+    "required_primitives": ["DOCUMENT_EXAMINATION"],
+    "forbidden_primitives": ["THE_SPIRAL_IS_COMPLETE", "ARCHONIC_CONTROL_GRID"],
+    "allowed_bps": [6, 10, 50],
+    "must_have_falsifier": true,
+    "must_have_local_gate": true,
+    "claim_lifecycle": ["CLAIM_UNVERIFIED", "CORROBORATION_REQUIRED", "DESIGN_PATTERN_EXTRACTED"]
+  },
+  "judgment_record_schema": {
+    "benchmark_id": "string",
+    "submission_id": "string",
+    "decision": "approved|needs_repair|rejected|comment",
+    "score": "integer 0..100",
+    "notes": "string",
+    "repair_instruction": "string optional",
+    "judge": "Northern.Strike",
+    "timestamp": "ISO-8601"
+  }
+}

@@ -27,16 +27,11 @@ def test_strict_stack_plan_names_required_model_lanes() -> None:
     plan = build_strict_stack_plan(env={})
     names = {service["name"] for service in plan["services"]}
     assert {
-        "deepseek_r1_qwen_1p5b_gpu",
         "bge_m3_vram",
-        "mamba7b_ram",
-        "bonsai4b_ram",
-        "mamba7b_gpu_partial",
+        "bonsai8b_1bit",
         "needle_swarm_6x",
         "indy_reads_watcher",
     } <= names
-    deepseek = next(service for service in plan["services"] if service["name"] == "deepseek_r1_qwen_1p5b_gpu")
-    assert deepseek["device_lane"] == "nvidia_vram_model_only"
     assert plan["display_policy"]["effective"]["DRI_PRIME"] == "0"
     assert plan["display_policy"]["effective"]["__NV_PRIME_RENDER_OFFLOAD"] == "0"
 
@@ -73,7 +68,6 @@ def test_run_admission_writes_receipt_and_env_file(tmp_path: Path) -> None:
     assert env_path.exists()
     env_text = env_path.read_text(encoding="utf-8")
     assert "LUCIDOTA_STRICT_STACK_ADMITTED='1'" in env_text
-    assert "LUCIDOTA_ENABLE_MAMBA_GPU_PARTIAL='1'" in env_text
 
 
 def test_admission_blocks_if_display_is_on_discrete_gpu(tmp_path: Path) -> None:
@@ -101,44 +95,27 @@ def test_admission_allows_onboard_intel_pci_display_selector(tmp_path: Path) -> 
 def test_strict_stack_shell_calls_admission_before_starting_models() -> None:
     shell = Path("scripts/lucidota_start_strict_model_stack.sh").read_text(encoding="utf-8")
     admission_idx = shell.index("lucidota_strict_model_stack_admission.py")
-    first_start_idx = shell.index("start_server deepseek")
+    first_start_idx = shell.index("start_server")
     assert admission_idx < first_start_idx
     assert "lucidota_start_bonsai_ternary_llama.sh" in shell
 
 
-def test_strict_stack_uses_canonical_mamba_gpu_partial_launcher() -> None:
-    plan = build_strict_stack_plan(env={})
-    mamba_gpu = next(service for service in plan["services"] if service["name"] == "mamba7b_gpu_partial")
-    shell = Path("scripts/lucidota_start_strict_model_stack.sh").read_text(encoding="utf-8")
-    assert mamba_gpu["start_script"] == "scripts/lucidota_start_mamba_gpu_partial.sh"
-    assert "lucidota_start_mamba_gpu_partial.sh" in shell
-    assert "scripts/lucidota_start_strict_model_stack.sh:inline:mamba7b_gpu_partial" not in str(mamba_gpu)
-
-
-def test_cpu_ram_start_scripts_hide_cuda_for_zero_gpu_layers() -> None:
-    mamba = Path("scripts/lucidota_start_mamba_llama.sh").read_text(encoding="utf-8")
+def test_bonsai_start_script_exports_cuda_and_ngl() -> None:
     bonsai = Path("scripts/lucidota_start_bonsai_ternary_llama.sh").read_text(encoding="utf-8")
     fabric = Path("scripts/goal_model_fabric_control.py").read_text(encoding="utf-8")
     safe_env = Path("scripts/lucidota_safe_ops_env.sh").read_text(encoding="utf-8")
-    assert "CUDA_VISIBLE_DEVICES=()" not in mamba  # guard against shell-array typo
-    assert "export CUDA_VISIBLE_DEVICES=\"\"" in mamba
-    assert "export CUDA_VISIBLE_DEVICES=\"\"" in bonsai
-    assert 'NGL="${LUCIDOTA_BONSAI_NGL:-0}"' in bonsai
+    assert "CUDA_VISIBLE_DEVICES" in bonsai
+    assert 'NGL="${LUCIDOTA_BONSAI_NGL:-999}"' in bonsai
     assert "LUCIDOTA_BONSAI_CUDA_VISIBLE_DEVICES" not in fabric
     assert 'LUCIDOTA_BONSAI_NGL="${LUCIDOTA_BONSAI_NGL:-0}"' in safe_env
     assert 'LUCIDOTA_BONSAI_NGL="${LUCIDOTA_BONSAI_NGL:-99}"' not in safe_env
 
 
-def test_deepseek_and_bonsai_are_declared_switchable_reasoning_lanes() -> None:
+def test_bonsai_is_switchable_reasoning_lane() -> None:
     plan = build_strict_stack_plan(env={})
     services = {service["name"]: service for service in plan["services"]}
 
-    deepseek = services["deepseek_r1_qwen_1p5b_gpu"]
-    bonsai = services["bonsai4b_ram"]
-    assert deepseek["switch_group"] == "reasoning_generation_slot"
+    bonsai = services["bonsai8b_1bit"]
     assert bonsai["switch_group"] == "reasoning_generation_slot"
-    assert deepseek["switch_role"] == "default_vram_resident"
     assert bonsai["switch_role"] == "ram_resident_gpu_switchable"
     assert bonsai["gpu_switch_env"] == "LUCIDOTA_BONSAI_NGL"
-    assert plan["switch_groups"]["reasoning_generation_slot"]["default"] == "deepseek_r1_qwen_1p5b_gpu"
-    assert "bonsai4b_ram" in plan["switch_groups"]["reasoning_generation_slot"]["alternates"]

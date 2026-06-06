@@ -9,7 +9,7 @@ WorkingDirectory=%h/LUCIDOTA
 Environment=DATABASE_URL=postgresql:///lucidota_state
 Environment=ABSURD_SYSTEM_DATABASE_URL=postgresql:///lucidota_state
 ExecStart=%h/LUCIDOTA/.venv/bin/python %h/LUCIDOTA/scripts/absurd_queue_spine.py --action wake-plane --execute --queue control
-Restart=on-failure
+Restart=always
 RestartSec=2
 TimeoutStopSec=20
 KillSignal=SIGINT

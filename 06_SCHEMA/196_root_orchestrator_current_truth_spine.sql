@@ -1,9 +1,10 @@
--- Root orchestrator current truth-spine lift.
--- Append top-level goal, db law, sub-orchestrators, blockers, and receipts without touching manual_current.
+-- Root orchestrator truth-spine lift.
+-- Expose the packet shape as a separate alias so this file can be applied
+-- without trying to remove columns from the live root_orchestrator_current view.
 
 BEGIN;
 
-CREATE OR REPLACE VIEW lucidota_canon.root_orchestrator_current AS
+CREATE OR REPLACE VIEW lucidota_canon.root_orchestrator_current_truth_spine AS
 WITH live_routes AS (
     SELECT jsonb_agg(
         jsonb_build_object(
@@ -184,21 +185,43 @@ SELECT
         'sub_orchestrators', sub_orchestrator_rows.sub_orchestrators
     ) AS live_surface,
     jsonb_build_array(
-        'curl -sS http://127.0.0.1:3000/root_orchestrator_current?limit=1',
-        'curl -sS http://127.0.0.1:3000/manual_current?limit=1',
-        'curl -sS http://127.0.0.1:3000/todo_current?limit=5',
-        'curl -sS http://127.0.0.1:3000/model_registry?limit=20',
-        'curl -sS http://127.0.0.1:3000/cli_process_receipts?limit=3',
-        'curl -sS http://127.0.0.1:3000/flow_receipts?limit=3',
-        'curl -sS http://127.0.0.1:3000/api_test_execution_receipts?limit=3',
-        './luci root orchestrator current --json',
-        './luci api cli process receipts --json',
-        './luci api flow receipts --json',
-        './luci api test execution receipts --json',
-        '.venv/bin/python scripts/ontology_work_compiler.py --json --text "<operator objective>"',
-        '.venv/bin/python scripts/indy_runtime_broker.py snapshot --json',
-        '.venv/bin/python scripts/test_receipt_gate.py run --scope policy_and_retirement -- .venv/bin/python -m pytest -q tests/test_skill_policy_current_surface.py tests/test_indy_book_ops_schema.py tests/test_manual_current_surface.py tests/test_orchestrator_registry_routes.py'
+        'root_orchestrator_current',
+        'cli_process_receipts',
+        'flow_receipts',
+        'api_test_execution_receipts',
+        'ontology_work_compiler',
+        'indy_runtime_broker_snapshot',
+        'policy_and_retirement_receipt_gate'
     ) AS next_commands,
+    jsonb_build_array(
+        'manual_current',
+        'root_orchestrator_current',
+        'daemon_status',
+        'capability_current',
+        'capability_registry',
+        'model_registry',
+        'model_registry_current',
+        'provider_registry',
+        'provider_current',
+        'workflow_registry',
+        'workflow_current',
+        'model_routing_current',
+        'model_routing_blockers',
+        'skill_policy_current',
+        'todo_current',
+        'command_registry',
+        'surface_registry',
+        'renderer_registry',
+        'schema_owner_manifest',
+        'controller_grant',
+        'agent_thread_runtime'
+    ) AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'provider_secret_isolation', 'load through an explicit quarantine file or environment loader owned by the operator; no raw keys in chat, docs, SQL, or receipts'
+    ) AS orchestration,
     jsonb_build_array(
         'BOOKS folder watcher authority',
         'hand-written manual slop',
@@ -234,8 +257,8 @@ LEFT JOIN todo_top ON true;
 
 GRANT SELECT, INSERT, UPDATE ON lucidota_control.skill_policy TO mfspx;
 GRANT SELECT ON lucidota_canon.skill_policy_current TO mfspx;
-GRANT SELECT ON lucidota_canon.root_orchestrator_current TO mfspx;
-GRANT SELECT ON lucidota_canon.skill_policy_current, lucidota_canon.root_orchestrator_current TO lucidota_postgrest_anon;
+GRANT SELECT ON lucidota_canon.root_orchestrator_current_truth_spine TO mfspx;
+GRANT SELECT ON lucidota_canon.skill_policy_current, lucidota_canon.root_orchestrator_current_truth_spine TO lucidota_postgrest_anon;
 GRANT SELECT ON lucidota_canon.manual_current, lucidota_canon.api_route_catalog TO lucidota_postgrest_anon;
 
 NOTIFY pgrst, 'reload schema';

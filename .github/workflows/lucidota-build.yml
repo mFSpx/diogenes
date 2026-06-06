@@ -121,8 +121,10 @@ jobs:
           .venv/bin/pip install pytest pytest-cov pytest-xdist
           .venv/bin/pip install -e 01_REPOS/doggystyle
 
-      - name: Install DBOS kernel dependencies
+      - name: Legacy DBOS provenance dependency check
+        if: ${{ github.event_name == 'workflow_dispatch' && (inputs.target == 'dbos' || inputs.target == 'legacy') }}
         run: |
+          echo "DBOS is legacy/provenance in current LUCIDOTA CI; not a core runtime dependency."
           cd 01_REPOS/doggystyle
           python -m venv .venv
           .venv/bin/pip install -e .[test]
@@ -146,7 +148,7 @@ jobs:
           .venv/bin/python scripts/lucidota_runtime_smoke.py
           .venv/bin/python scripts/lucidota_kernel_api_smoke.py
           .venv/bin/python scripts/lucidota_model_artifact_readiness.py
-          .venv/bin/python scripts/lucidota_dbos_smoke.py
+          echo "Skipping DBOS smoke: DBOS is legacy/provenance, not current core runtime truth."
 
       - name: Upload test results
         if: always()
@@ -248,10 +250,11 @@ jobs:
           retention-days: 7
 
   # ===========================================================================
-  # Docker Build (Phantom)
+  # Legacy Docker Provenance (Phantom)
   # ===========================================================================
-  build-docker:
+  legacy-docker-provenance:
     needs: [build-config, build-core]
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.target == 'docker' || inputs.target == 'legacy') }}
     runs-on: ubuntu-latest
     
     steps:
@@ -286,7 +289,7 @@ jobs:
   # Full System Integration Test
   # ===========================================================================
   integration-test:
-    needs: [build-core, build-cuda, build-rust, build-docker]
+    needs: [build-core, build-rust]
     if: ${{ github.event_name != 'pull_request' || github.base_ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     
@@ -326,7 +329,7 @@ jobs:
           # Run a subset of the full check_diogenes.sh for CI
           .venv/bin/python scripts/lucidota_runtime_smoke.py
           .venv/bin/python scripts/lucidota_kernel_api_smoke.py
-          .venv/bin/python scripts/lucidota_dbos_smoke.py
+          echo "Skipping DBOS smoke: DBOS is legacy/provenance, not current core runtime truth."
           .venv/bin/python scripts/lucidota_model_governor_smoke.py
 
   # ===========================================================================
@@ -345,7 +348,7 @@ jobs:
         run: |
           echo "Deployment would happen here"
           # Add actual deployment commands
-          # e.g., kubectl apply, docker stack deploy, etc.
+          # Current core runtime deploy target is service/process/PostgREST rails; Docker is legacy/provenance unless explicitly dispatched.
 
   # ===========================================================================
   # Documentation and Reports

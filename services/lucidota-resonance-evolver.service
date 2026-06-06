@@ -1,0 +1,24 @@
+[Unit]
+Description=LUCIDOTA resonance evolver runtime daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/LUCIDOTA/01_REPOS/lucidota_resonance
+Environment=DATABASE_URL=postgresql:///lucidota_state
+Environment=LUCIDOTA_RESONANCE_SYNTHETIC=1
+Environment=LUCIDOTA_RESONANCE_JSONL_OUT=%h/LUCIDOTA/05_OUTPUTS/resonance_evolution_runtime.jsonl
+ExecStart=%h/LUCIDOTA/01_REPOS/lucidota_resonance/target/debug/lucidota_resonance_evolver --synthetic
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=20
+KillSignal=SIGINT
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=%h/LUCIDOTA/04_RUNTIME %h/LUCIDOTA/05_OUTPUTS %h/LUCIDOTA/01_REPOS/lucidota_resonance/target
+
+[Install]
+WantedBy=default.target

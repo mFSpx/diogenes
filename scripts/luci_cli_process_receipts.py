@@ -52,7 +52,10 @@ def main() -> int:
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--limit", type=int, default=5)
     args = ap.parse_args()
-    rows = fetch_json(args.base_url, f"cli_process_receipts?order=received_at.desc&limit={args.limit}")
+    rows = fetch_json(
+        args.base_url,
+        f"cli_process_receipts?select=*,next_command_refs,orchestration&order=received_at.desc&limit={args.limit}",
+    )
     if args.json:
         print(json.dumps(rows, sort_keys=True, ensure_ascii=False))
     else:

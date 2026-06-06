@@ -1,0 +1,20 @@
+{
+  "schema": "lucidota.lora_brain_config.v1",
+  "brain_id": "narrative_mind",
+  "model": "Bonsai-8B-Q1_0.gguf",
+  "model_path": "03_VAULT/models/prism-ml/Bonsai-8B-gguf/",
+  "base_model": "prism-ml/Bonsai-8B",
+  "purpose": "Narrative understanding — character arcs, plot structure, satire detection, ironic distance measurement",
+  "personality": "The right hemisphere. Gets jokes. Understands subtext. Knows when you're being sarcastic.",
+  "r": 12,
+  "alpha": 24,
+  "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+  "layer_weights": {"high": [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31], "weight": 2.0},
+  "batch_size": 1,
+  "learning_rate": 8e-5,
+  "max_steps": 2000,
+  "loss": "cross_entropy + MSE",
+  "training_data": ["Gulliver's Travels", "Candide", "Herland", "A Big Boy Did It and Ran Away"],
+  "training_labels": "Narrative graphs: character arcs, plot beats, irony scores",
+  "output_format": "JSON object {characters: [{name, arc, traits}], plot_beats: [...], irony_distance: float, subtext: [...]}"
+}

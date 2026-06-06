@@ -17,6 +17,8 @@ def test_fanout_plan_builds_six_lanes_with_exactly_two_vibe_and_two_groq_workers
         assert sum(1 for w in workers if w["family"] == "groq") == 2
         assert lane["spawn_contract"]["worker_count"] == 4
         assert lane["spawn_contract"]["selection_rule"] == "choose_best_minimal_bundle"
+        assert lane["orchestration"]["mode"] == "sub_orchestrator"
+        assert lane["orchestration"]["sub_orchestrator_priority"] == ["live_truth_surfaces", "deterministic_local_checks", "thin_packets", "local", "indy_reads", "codex", "vibe", "groq", "broader_cloud"]
 
 
 def test_workers_reuse_existing_packet_and_dispatch_surfaces() -> None:

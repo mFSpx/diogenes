@@ -9,6 +9,8 @@ import urllib.parse
 import urllib.request
 from typing import Any
 
+from provider_secret_quarantine import provider_secret_status_json
+
 DEFAULT_BASE_URL = "http://127.0.0.1:3000"
 
 
@@ -26,6 +28,15 @@ def render(rows: list[dict[str, Any]]) -> str:
         lines.append("- no provider registry packet yet")
         return "\n".join(lines) + "\n"
     row = rows[0]
+    row["secret_status"] = provider_secret_status_json()["status"]
+    if "controller_grant" not in row:
+        grant_rows = fetch_json(DEFAULT_BASE_URL, "controller_grant", {"grant_key": "eq.default_local_operator"})
+        if grant_rows:
+            row["controller_grant"] = grant_rows[0]
+    if "agent_thread_runtime" not in row:
+        thread_rows = fetch_json(DEFAULT_BASE_URL, "agent_thread_runtime", {"thread_key": "eq.root_operator_thread"})
+        if thread_rows:
+            row["agent_thread_runtime"] = thread_rows[0]
     summary = row.get("provider_summary") or {}
     lines.append(
         f"- packet {row.get('provider_packet_id')} :: providers={summary.get('provider_count')} "
@@ -43,6 +54,39 @@ def render(rows: list[dict[str, Any]]) -> str:
         lines.append("  routing_notes:")
         for key, value in routing_notes.items():
             lines.append(f"    {key}: {value}")
+    secret_status = row.get("secret_status") or {}
+    if secret_status:
+        lines.append(f"  secret_status={json.dumps(secret_status, sort_keys=True)}")
+    controller_grant = row.get("controller_grant") or {}
+    if controller_grant:
+        lines.append(
+            "  controller_grant="
+            + json.dumps(
+                {
+                    "grant_key": controller_grant.get("grant_key"),
+                    "status": controller_grant.get("effective_status") or controller_grant.get("status"),
+                    "max_parallel_threads": controller_grant.get("max_parallel_threads"),
+                    "max_spend": controller_grant.get("max_spend"),
+                    "receipt_uuid": controller_grant.get("receipt_uuid"),
+                },
+                sort_keys=True,
+            )
+        )
+    agent_thread_runtime = row.get("agent_thread_runtime") or {}
+    if agent_thread_runtime:
+        lines.append(
+            "  agent_thread_runtime="
+            + json.dumps(
+                {
+                    "thread_key": agent_thread_runtime.get("thread_key"),
+                    "runtime_kind": agent_thread_runtime.get("runtime_kind"),
+                    "thread_owner": agent_thread_runtime.get("thread_owner"),
+                    "budget_scope": agent_thread_runtime.get("budget_scope"),
+                    "receipt_uuid": agent_thread_runtime.get("receipt_uuid"),
+                },
+                sort_keys=True,
+            )
+        )
     active_rows = row.get("active_providers") or []
     if active_rows:
         lines.append("  active_providers:")
@@ -62,6 +106,14 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=5)
     args = ap.parse_args()
     rows = fetch_json(args.base_url, f"provider_current?order=refreshed_at.desc&limit={args.limit}")
+    if rows:
+        rows[0]["secret_status"] = provider_secret_status_json()["status"]
+        grant_rows = fetch_json(args.base_url, "controller_grant", {"grant_key": "eq.default_local_operator"})
+        if grant_rows:
+            rows[0]["controller_grant"] = grant_rows[0]
+        thread_rows = fetch_json(args.base_url, "agent_thread_runtime", {"thread_key": "eq.root_operator_thread"})
+        if thread_rows:
+            rows[0]["agent_thread_runtime"] = thread_rows[0]
     if args.json:
         print(json.dumps(rows, sort_keys=True, ensure_ascii=False))
     else:

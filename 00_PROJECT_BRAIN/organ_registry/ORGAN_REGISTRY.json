@@ -15359,28 +15359,10 @@
    "next_action": "candidate OCR/layout lane (CPU)"
   },
   {
-   "organ": "falcon3-mamba-7b-gguf",
-   "path": "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/",
-   "type": "embedding_model",
-   "purpose": "generation (Mamba SSM cortex) via llama.cpp",
-   "inputs": "prompt",
-   "outputs": "text",
-   "db_tables": [],
-   "graph_safety": "read_only",
-   "deps": [
-    "llama.cpp"
-   ],
-   "runtime_status": "on_disk",
-   "classification": "active",
-   "clay_or_iron": "python_clay",
-   "wired": "luci",
-   "next_action": "resident SSM lane :8081/:8083"
-  },
-  {
    "organ": "deepseek-r1-1.5b-gguf",
    "path": "03_VAULT/models/bartowski/DeepSeek-R1-Distill-Qwen-1.5B-GGUF/",
    "type": "embedding_model",
-   "purpose": "small reasoning generation",
+   "purpose": "small reasoning generation (on disk, not on hot path)",
    "inputs": "prompt",
    "outputs": "text",
    "db_tables": [],
@@ -15389,10 +15371,10 @@
     "llama.cpp"
    ],
    "runtime_status": "on_disk",
-   "classification": "active",
+   "classification": "reference",
    "clay_or_iron": "python_clay",
    "wired": "standalone",
-   "next_action": "swappable small lane"
+   "next_action": "manual use only; not loaded at launch"
   },
   {
    "organ": "ingest_tools_missing",

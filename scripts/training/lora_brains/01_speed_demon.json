@@ -1,0 +1,19 @@
+{
+  "schema": "lucidota.lora_brain_config.v1",
+  "brain_id": "speed_demon",
+  "model": "mamba-1.4b-hf-Q2_K.gguf",
+  "model_path": "03_VAULT/models/mamba-1.4b/",
+  "base_model": "state-spaces/mamba-1.4b-hf",
+  "purpose": "Fast tactical routing — ABBA³ heuristic prediction, real-time text classification under 50ms",
+  "personality": "The reflex arc. No deep thought, just instant categorical judgment. Fight or flight for text.",
+  "r": 16,
+  "alpha": 32,
+  "target_modules": ["in_proj", "out_proj", "x_proj", "dt_proj"],
+  "batch_size": 4,
+  "learning_rate": 0.0002,
+  "max_steps": 1000,
+  "loss": "MSE",
+  "training_data": ["The Art of War", "Common Sense", "Communist Manifesto"],
+  "training_labels": "ABBA³ heuristic vectors (urgency, category, complexity)",
+  "output_format": "4-dim float vector [urgency, category_id, complexity, certainty]"
+}

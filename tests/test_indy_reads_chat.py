@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+import types
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +32,38 @@ class _Cursor:
 class _Conn:
     def __init__(self):
         self.cursor_obj = _Cursor()
+        self.committed = False
+
+    def cursor(self):
+        return self.cursor_obj
+
+    def commit(self):
+        self.committed = True
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+
+class _WarningCursor:
+    def __init__(self):
+        self.executed: list[tuple[str, tuple | None]] = []
+
+    def execute(self, sql, params=None):
+        self.executed.append((sql, params))
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+
+class _WarningConn:
+    def __init__(self):
+        self.cursor_obj = _WarningCursor()
         self.committed = False
 
     def cursor(self):
@@ -83,6 +116,25 @@ def test_enqueue_goal_work_order_writes_absurd_queue_job(monkeypatch):
     assert conn.committed is True
     assert any("absurd_queue_job" in sql for sql, _ in conn.cursor_obj.executed)
     assert any("absurd_queue_event" in sql for sql, _ in conn.cursor_obj.executed)
+
+
+def test_emit_startup_warning_once_writes_local_warning_and_db_row(monkeypatch, tmp_path: Path):
+    conn = _WarningConn()
+    fake_psycopg = types.SimpleNamespace(connect=lambda dsn: conn)
+    monkeypatch.setattr(indy_reads, "psycopg", fake_psycopg)
+    monkeypatch.setattr(indy_reads, "INDY_CONDUIT_RECEIPT_DIR", tmp_path)
+    monkeypatch.setattr(indy_reads, "_STARTUP_WARNING_EMITTED", False)
+
+    first = indy_reads.emit_startup_warning_once("psycopg bootstrap used repo venv")
+    second = indy_reads.emit_startup_warning_once("psycopg bootstrap used repo venv")
+
+    warning_path = tmp_path / "indy_startup_warnings.jsonl"
+    assert first["emitted"] is True
+    assert second["emitted"] is False
+    assert warning_path.exists()
+    assert len(warning_path.read_text(encoding="utf-8").splitlines()) == 1
+    assert conn.committed is True
+    assert any("INSERT INTO ironclaw.waking_dialogue_stream" in sql for sql, _ in conn.cursor_obj.executed)
 
 
 def test_load_queued_conduit_dialogue_reads_matrix_rows_for_indy_reads(monkeypatch):
@@ -427,3 +479,153 @@ def test_parse_conduit_response_command_selects_queued_row():
     assert row == {"id": "two"}
     assert reply == "hello there"
     assert error == ""
+
+
+def test_parse_orchestration_intent_command_sets_cloud_provider_and_model(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(indy_reads, "INDY_ORCHESTRATION_INTENT_PATH", tmp_path / "indy_reads_orchestration_intent.json", raising=False)
+    intent, error = indy_reads.parse_orchestration_intent_command("route groq llama-3.3-70b-versatile orchestration")
+
+    assert error == ""
+    assert intent is not None
+    assert intent["provider_key"] == "groq"
+    assert intent["provider_kind"] == "cloud_provider"
+    assert intent["model_id"] == "llama-3.3-70b-versatile"
+    assert intent["takeover_mode"] is False
+    assert intent["fallback_provider_key"] == "local_model"
+    assert intent["fallback_model_id"] == "bonsai_q1_0"
+    saved = json.loads((tmp_path / "indy_reads_orchestration_intent.json").read_text(encoding="utf-8"))
+    assert saved["provider_key"] == "groq"
+    assert "orchestration-only" in indy_reads.current_orchestration_intent_summary(saved)
+
+
+def test_parse_orchestration_intent_command_infers_provider_from_model_name(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(indy_reads, "INDY_ORCHESTRATION_INTENT_PATH", tmp_path / "indy_reads_orchestration_intent.json", raising=False)
+    intent, error = indy_reads.parse_orchestration_intent_command("switch to gemini-2.5-flash model")
+
+    assert error == ""
+    assert intent is not None
+    assert intent["provider_key"] == "gemini"
+    assert intent["provider_kind"] == "cloud_provider"
+    assert intent["model_id"] == "gemini-2.5-flash"
+    assert intent["takeover_mode"] is False
+
+
+def test_queue_indy_directive_message_writes_directive_outbox(tmp_path: Path, monkeypatch) -> None:
+    outbox = tmp_path / "indy_directives.jsonl"
+    intent = {
+        "provider_key": "groq",
+        "provider_kind": "cloud_provider",
+        "model_id": "llama-3.3-70b-versatile",
+        "takeover_mode": False,
+        "fallback_model_id": "bonsai_q1_0",
+    }
+
+    result = indy_reads.queue_indy_directive_message(
+        "Hello, Indy_READs, it's Northern.Strike, how are you tonight?",
+        intent=intent,
+        outbox=outbox,
+    )
+
+    assert result["ok"] is True
+    assert result["delivery_status"] == "QUEUED_FOR_INDY_RUNTIME"
+    assert outbox.exists()
+    packet = json.loads(outbox.read_text(encoding="utf-8").strip())
+    assert packet["schema"] == "lucidota.indy_reads.indy_directive.v1"
+    assert packet["target_path"] == "indy_runtime_control_surface"
+    assert packet["intent"]["provider_key"] == "groq"
+    assert "Northern.Strike" in packet["body"]
+
+
+def test_queue_indy_chat_message_builds_matrix_like_payload(tmp_path: Path, monkeypatch) -> None:
+    receipts = tmp_path / "receipts"
+    monkeypatch.setattr(indy_reads, "INDY_CONDUIT_RECEIPT_DIR", receipts, raising=False)
+
+    class _DialogueCursor:
+        def __init__(self):
+            self.executed: list[tuple[str, tuple | None]] = []
+
+        def execute(self, sql, params=None):
+            self.executed.append((sql, params))
+
+        def fetchone(self):
+            return ("dialogue-uuid-1",)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class _DialogueConn:
+        def __init__(self):
+            self.cursor_obj = _DialogueCursor()
+            self.committed = False
+
+        def cursor(self):
+            return self.cursor_obj
+
+        def commit(self):
+            self.committed = True
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    conn = _DialogueConn()
+    monkeypatch.setattr(indy_reads.psycopg, "connect", lambda dsn: conn)
+
+    result = indy_reads.queue_indy_chat_message("Hello Indy!")
+
+    assert result["ok"] is True
+    assert result["executed"] is True
+    assert any("ironclaw.waking_dialogue_stream" in sql for sql, _ in conn.cursor_obj.executed)
+    assert result["dialogue_row"]["sender_id"] == "Northern.Strike"
+    assert result["dialogue_row"]["clean_text"] == "Hello Indy!"
+
+
+def test_save_orchestration_intent_persists_db_surface(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(indy_reads, "INDY_ORCHESTRATION_INTENT_PATH", tmp_path / "indy_reads_orchestration_intent.json", raising=False)
+    calls: list[tuple[str, tuple]] = []
+    monkeypatch.setattr(indy_reads, "execute_sql", lambda sql, params=(): calls.append((sql, params)) or True)
+
+    intent = indy_reads.save_orchestration_intent(
+        {
+            "provider_key": "groq",
+            "provider_kind": "cloud_provider",
+            "model_id": "llama-3.3-70b-versatile",
+            "takeover_mode": False,
+        }
+    )
+
+    assert intent["provider_key"] == "groq"
+    assert calls, "expected DB persistence call"
+    sql, params = calls[0]
+    assert "indy_reads_orchestration_intent_state" in sql
+    assert params[0] == "INDY_READs"
+    assert params[1] == "groq"
+    assert params[2] == "cloud_provider"
+
+
+def test_load_queued_indy_directives_reads_tail_of_jsonl(tmp_path: Path, monkeypatch) -> None:
+    outbox = tmp_path / "indy_directives.jsonl"
+    outbox.write_text(
+        "\n".join(
+            [
+                json.dumps({"body": "one", "route": "a"}),
+                json.dumps({"body": "two", "route": "b"}),
+                json.dumps({"body": "three", "route": "c"}),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(indy_reads, "INDY_DIRECTIVE_OUTBOX", outbox, raising=False)
+
+    rows = indy_reads.load_queued_indy_directives(limit=2)
+
+    assert [row["body"] for row in rows] == ["two", "three"]
+    rendered = indy_reads.format_indy_directive_row(rows[-1], 1)
+    assert "indy_orchestration_directive" not in rendered
+    assert "three" in rendered

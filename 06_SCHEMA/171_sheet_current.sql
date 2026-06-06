@@ -83,10 +83,38 @@ SELECT
         'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; receipts prove the thing happened.'
     ) AS db_law,
     jsonb_build_array(
-        'curl -sS http://127.0.0.1:3000/sheet_current?limit=1',
-        './luci sheet current --json',
-        './luci api sheet current --json'
-    ) AS next_commands
+        'sheet_current'
+    ) AS next_commands,
+    jsonb_build_array(
+        'manual_current',
+        'root_orchestrator_current',
+        'daemon_status',
+        'api_daemon_status',
+        'capability_current',
+        'provider_current',
+        'workflow_current',
+        'model_registry_current',
+        'model_routing_current',
+        'model_routing_blockers',
+        'sheet_current',
+        'api_sheet_current',
+        'todo_current',
+        'skill_policy_current',
+        'command_registry',
+        'surface_registry',
+        'renderer_registry',
+        'schema_owner_manifest',
+        'controller_grant',
+        'agent_thread_runtime'
+    ) AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'sheet_task_count', task_rows.sheet_task_count,
+        'open_count', task_rows.open_count,
+        'running_count', task_rows.running_count
+    ) AS orchestration
 FROM task_rows
 CROSS JOIN pressure_rows
 CROSS JOIN active_rows

@@ -5,12 +5,15 @@ import json
 import os
 import subprocess
 import sys
+import urllib.error
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from model_runner_stub import run_stub_model  # noqa: E402
+from gemini_chat_cli import execute_gemini_with_key_fallback  # noqa: E402
+from model_runner_cli import run_bonsai_chain  # noqa: E402
 
 
 def test_stub_runner_rejects_non_stub_backend_to_avoid_fake_inference_claim() -> None:
@@ -118,6 +121,68 @@ def test_cloud_chat_dry_runs_do_not_require_api_keys() -> None:
     assert cohere_payload["mode"] == "dry_run"
     assert cohere_payload["execute_performed"] is False
     assert cohere_payload["status"] == "PASS"
+
+
+def test_gemini_chat_dry_run_is_available_without_api_key() -> None:
+    gemini = subprocess.run(
+        [
+            sys.executable,
+            "scripts/model_runner_cli.py",
+            "gemini-chat",
+            "--prompt",
+            "ping",
+            "--max-tokens",
+            "8",
+            "--json",
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        timeout=5,
+        env={k: v for k, v in os.environ.items() if "GEMINI_API_KEY" not in k and "GOOGLE_API_KEY" not in k},
+    )
+    assert gemini.returncode == 0, gemini.stderr
+    gemini_payload = next(json.loads(line) for line in gemini.stdout.splitlines() if line.startswith("{"))
+    assert gemini_payload["mode"] == "dry_run"
+    assert gemini_payload["execute_performed"] is False
+    assert gemini_payload["status"] == "PASS"
+    assert gemini_payload["provider"] == "gemini"
+    assert gemini_payload["model"] == "gemini-2.5-flash"
+
+
+def test_gemini_chat_execute_falls_back_to_second_key_on_quota_error() -> None:
+    calls: list[str] = []
+
+    def fake_call(base_url, key, model, request_payload, timeout):
+        calls.append(key)
+        if len(calls) == 1:
+            raise urllib.error.HTTPError(
+                url=base_url,
+                code=429,
+                msg="quota exhausted",
+                hdrs=None,
+                fp=None,
+            )
+        return {
+            "responseId": "ok",
+            "candidates": [{"content": {"role": "model", "parts": [{"text": "ok"}]}}],
+        }
+
+    response, key_env_used, blockers, error_body, attempt_blockers = execute_gemini_with_key_fallback(
+        base_url="https://generativelanguage.googleapis.com/v1beta",
+        model="gemini-2.5-flash",
+        request_payload={"model": "gemini-2.5-flash", "contents": [{"role": "user", "parts": [{"text": "ping"}]}]},
+        timeout=5.0,
+        key_candidates=[("GEMINI_API_KEY", "billing-key"), ("GOOGLE_API_KEY", "free-key")],
+        call_fn=fake_call,
+    )
+
+    assert response["responseId"] == "ok"
+    assert key_env_used == "GOOGLE_API_KEY"
+    assert blockers == []
+    assert error_body == ""
+    assert attempt_blockers == ["gemini_http_error:429"]
+    assert calls == ["billing-key", "free-key"]
 
 
 def test_cloud_chat_receipts_expose_exact_model_request_text_by_default() -> None:
@@ -239,3 +304,31 @@ def test_response_extractors_fallback_to_reasoning_when_content_is_empty() -> No
     local_spec = {"kind": "llama.cpp"}
     local_response = {"choices": [{"message": {"content": "", "reasoning_content": "raw local reasoning"}}]}
     assert response_text(local_spec, local_response) == "raw local reasoning"
+
+
+def test_bonsai_chain_routes_through_bonsai_needles_bonsai_order() -> None:
+    calls: list[tuple[str, bool, str]] = []
+
+    def fake_probe_lane(*, lane: str, prompt: str, system: str = "", execute: bool = False, **_: object) -> dict:
+        calls.append((lane, execute, prompt))
+        return {
+            "status": "PASS",
+            "lane": lane,
+            "execute_performed": execute,
+            "report_path": f"05_OUTPUTS/model_invocations/fake_{lane}.json",
+            "text": f"{lane}:{prompt}",
+        }
+
+    payload = run_bonsai_chain(
+        prompt="route this",
+        system="system seed",
+        execute=False,
+        lane_runner=fake_probe_lane,
+    )
+
+    assert payload["status"] == "PASS"
+    assert payload["lane_sequence"] == ["bonsai_q1_0", "needle_0", "needle_1", "needle_2", "needle_3", "needle_4", "needle_5", "bonsai_q1_0"]
+    assert [lane for lane, _, _ in calls] == payload["lane_sequence"]
+    assert payload["needle_stage_count"] == 6
+    assert payload["final_lane"] == "bonsai_q1_0"
+    assert payload["merge_strategy"] == "deterministic_needle_digest"

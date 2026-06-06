@@ -47,6 +47,8 @@ Before writing a new tool, script, workflow, schema, model hook, scraper, plugin
 4. leave sovereign originals intact unless the operator names the exact target,
 5. harden the production copy through contracts/tests/receipts.
 
+For persistent build/race work, also read `lucidota_control.active_operation_mode`, `lucidota_canon.manual_current`, `lucidota_canon.root_orchestrator_current`, and `lucidota_canon.workload_audit_current` before inventing new control flow.
+
 If the thing probably already exists, do not rebuild it from scratch just because it feels faster in the moment; learn the existing artifact first, then reuse or extend it.
 
 ## 5. Promotion Path

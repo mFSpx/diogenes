@@ -14,16 +14,26 @@ daemon_rows AS (
     FROM lucidota_canon.daemon_status d
 ),
 model_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(m) ORDER BY m.model_id), '[]'::jsonb) AS model_registry
-    FROM lucidota_canon.model_registry m
+    SELECT jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.model_registry),
+        'latest_updated_at', (SELECT max(updated_at) FROM lucidota_canon.model_registry),
+        'model_refs', COALESCE((SELECT jsonb_agg(model_id ORDER BY updated_at DESC) FROM (SELECT model_id, updated_at FROM lucidota_canon.model_registry ORDER BY updated_at DESC LIMIT 15) m), '[]'::jsonb)
+    ) AS model_registry
 ),
 provider_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY p.provider_key), '[]'::jsonb) AS provider_registry
-    FROM lucidota_canon.provider_registry p
+    SELECT jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.provider_registry),
+        'active_count', (SELECT count(*) FILTER (WHERE active) FROM lucidota_canon.provider_registry),
+        'provider_refs', COALESCE((SELECT jsonb_agg(provider_key ORDER BY provider_key ASC) FROM (SELECT provider_key FROM lucidota_canon.provider_registry ORDER BY provider_key ASC LIMIT 15) p), '[]'::jsonb)
+    ) AS provider_registry
 ),
 workflow_rows AS (
     SELECT COALESCE(jsonb_agg(to_jsonb(w) ORDER BY w.workflow_id), '[]'::jsonb) AS workflow_registry
     FROM lucidota_canon.workflow_registry w
+),
+command_rows AS (
+    SELECT COALESCE(jsonb_agg(to_jsonb(c) ORDER BY c.command_id), '[]'::jsonb) AS command_registry
+    FROM lucidota_canon.command_registry c
 ),
 chrono_rows AS (
     SELECT COALESCE(jsonb_agg(to_jsonb(c) ORDER BY c.refreshed_at DESC), '[]'::jsonb) AS chrono_current
@@ -34,13 +44,33 @@ chrono_rows AS (
     ) c
 ),
 capability_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(c) ORDER BY c.capability_key), '[]'::jsonb) AS capability_registry
-    FROM (
-        SELECT *
-        FROM lucidota_canon.capability_registry
-        ORDER BY capability_key
-        LIMIT 5
-    ) c
+    SELECT jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.capability_registry),
+        'latest_updated_at', (SELECT max(updated_at) FROM lucidota_canon.capability_registry),
+        'capability_refs', COALESCE((SELECT jsonb_agg(capability_key ORDER BY updated_at DESC) FROM (SELECT capability_key, updated_at FROM lucidota_canon.capability_registry ORDER BY updated_at DESC LIMIT 15) c), '[]'::jsonb)
+    ) AS capability_registry
+),
+indy_rows AS (
+    SELECT jsonb_build_object(
+        'self_model_count', (SELECT count(*) FROM lucidota_canon.indy_reads_self_model),
+        'llmwiki_entry_count', (SELECT count(*) FROM lucidota_canon.indy_reads_llmwiki_entry),
+        'hunch_log_count', (SELECT count(*) FROM lucidota_canon.indy_reads_hunch_log),
+        'learning_queue_count', (SELECT count(*) FROM lucidota_canon.indy_reads_learning_queue),
+        'system_map_count', (SELECT count(*) FROM lucidota_canon.indy_reads_system_map),
+        'mistake_ledger_count', (SELECT count(*) FROM lucidota_canon.indy_reads_mistake_ledger),
+        'research_source_count', (SELECT count(*) FROM lucidota_canon.indy_reads_research_source),
+        'metacognition_current_count', (SELECT count(*) FROM lucidota_canon.indy_reads_metacognition_current),
+        'route_refs', jsonb_build_array(
+            'indy_reads_self_model',
+            'indy_reads_llmwiki_entry',
+            'indy_reads_hunch_log',
+            'indy_reads_learning_queue',
+            'indy_reads_system_map',
+            'indy_reads_mistake_ledger',
+            'indy_reads_research_source',
+            'indy_reads_metacognition_current'
+        )
+    ) AS indy_reads_runtime
 ),
 indy_queue_rows AS (
     SELECT COALESCE(jsonb_agg(to_jsonb(iq) ORDER BY iq.received_at DESC), '[]'::jsonb) AS indy_queue
@@ -119,9 +149,59 @@ sub_orchestrators_rows AS (
     FROM (
         SELECT route_id, method, path_pattern, description, target, status
         FROM lucidota_canon.api_route_catalog
-        WHERE route_id IN ('manual_current', 'canon_current', 'active_goal', 'daemon_status', 'model_registry_current', 'provider_current', 'workflow_current', 'model_routing_current', 'model_routing_blockers', 'sheet_current', 'skill_policy_current', 'todo_current', 'api_route_catalog', 'root_orchestrator_current', '/', 'canon_versions', 'capability_current')
+        WHERE route_id IN ('manual_current', 'canon_current', 'active_goal', 'active_operation_mode', 'daemon_status', 'model_registry_current', 'provider_current', 'workflow_current', 'model_routing_current', 'model_routing_blockers', 'sheet_current', 'skill_policy_current', 'todo_current', 'schema_owner_manifest', 'surface_registry', 'renderer_registry', 'controller_grant', 'agent_thread_runtime', 'api_route_catalog', 'root_orchestrator_current', '/', 'canon_versions', 'capability_current', 'workload_audit_current', 'workload_audit_telemetry_current', 'indy_reads_self_model', 'indy_reads_llmwiki_entry', 'indy_reads_hunch_log', 'indy_reads_learning_queue', 'indy_reads_system_map', 'indy_reads_mistake_ledger', 'indy_reads_research_source', 'indy_reads_metacognition_current')
         ORDER BY route_id
     ) r
+),
+sub_orchestrator_threads_rows AS (
+    SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY t.thread_key), '[]'::jsonb) AS sub_orchestrator_threads
+    FROM (
+        SELECT
+            thread_key,
+            parent_thread_key,
+            controller_grant_key,
+            thread_owner,
+            runtime_kind,
+            status,
+            env_identity,
+            budget_scope,
+            receipt_gate,
+            detail,
+            created_at,
+            updated_at
+        FROM lucidota_canon.agent_thread_runtime
+        WHERE status = 'active'
+        ORDER BY
+            CASE WHEN thread_key = 'root_operator_thread' THEN 0 ELSE 1 END,
+            thread_key
+    ) t
+),
+sub_orchestrator_grants_rows AS (
+    SELECT COALESCE(jsonb_agg(to_jsonb(g) ORDER BY g.grant_key), '[]'::jsonb) AS sub_orchestrator_grants
+    FROM (
+        SELECT DISTINCT
+            g.grant_key,
+            g.grant_uuid,
+            g.controller_name,
+            g.controller_kind,
+            g.effective_status,
+            g.status,
+            g.allowed_envs,
+            g.allowed_routes,
+            g.allowed_commands,
+            g.allowed_models,
+            g.max_parallel_threads,
+            g.max_spend,
+            g.receipt_uuid,
+            g.detail,
+            g.created_at,
+            g.updated_at
+        FROM lucidota_canon.controller_grant g
+        JOIN lucidota_canon.agent_thread_runtime t
+          ON t.controller_grant_key = g.grant_key
+        WHERE t.status = 'active'
+        ORDER BY g.grant_key
+    ) g
 ),
 route_rows AS (
     SELECT
@@ -154,9 +234,20 @@ route_rows AS (
         'chrono_current',
         'model_routing_current',
         'model_routing_blockers',
+        'workload_audit_current',
+        'workload_audit_ledger',
+        'provider_call_receipt',
+        'model_invocation_receipt',
+        'agent_work_receipt',
+        'unproven_work_debt',
         'sheet_current',
         'skill_policy_current',
         'todo_current',
+        'schema_owner_manifest',
+        'surface_registry',
+        'renderer_registry',
+        'controller_grant',
+        'agent_thread_runtime',
         'api_route_catalog',
         'prompt_recent',
         'prompts_filed',
@@ -189,17 +280,10 @@ route_rows AS (
         'nodes',
         'route_catalog',
         'subtree',
-        'rpc/cloud_packet',
-        'rpc/decompose_prompt_to_work_orders',
-        'rpc/file_prompt',
         'rpc/fn_bible_node_material',
         'rpc/fn_bible_node_sort_key',
         'rpc/get_subtree',
-        'rpc/link_prompt_work_order',
-        'decompose_prompt_to_work_orders',
-        'file_prompt',
         'fn_bible_node_material',
-        'link_prompt_work_order',
         'book_source',
         'book_scan',
         'book_read_queue',
@@ -335,14 +419,36 @@ ontology_item_rows AS (
 live_surface_rows AS (
     SELECT 1 AS ord, 'current_goal'::text AS key, goal_row.current_goal AS value FROM goal_row
     UNION ALL SELECT 2 AS ord, 'daemon_status'::text AS key, daemon_rows.daemon_status AS value FROM daemon_rows
+    UNION ALL SELECT 2.1 AS ord, 'active_operation_mode'::text AS key, COALESCE((SELECT to_jsonb(aom) FROM lucidota_control.active_operation_mode aom LIMIT 1), '{}'::jsonb) AS value
     UNION ALL SELECT 3 AS ord, 'model_registry'::text AS key, model_rows.model_registry AS value FROM model_rows
     UNION ALL SELECT 4 AS ord, 'provider_registry'::text AS key, provider_rows.provider_registry AS value FROM provider_rows
-    UNION ALL SELECT 5 AS ord, 'workflow_registry'::text AS key, workflow_rows.workflow_registry AS value FROM workflow_rows
-    UNION ALL SELECT 6 AS ord, 'todo_current'::text AS key, todo_rows.todo_current AS value FROM todo_rows
+    UNION ALL SELECT 5 AS ord, 'workflow_registry'::text AS key, jsonb_build_object(
+        'workflow_count', (SELECT count(*) FROM lucidota_canon.workflow_registry),
+        'active_count', (SELECT count(*) FILTER (WHERE status = 'active') FROM lucidota_canon.workflow_registry),
+        'latest_updated_at', (SELECT max(updated_at) FROM lucidota_canon.workflow_registry),
+        'workflow_refs', COALESCE((SELECT jsonb_agg(workflow_name ORDER BY workflow_name) FROM (SELECT workflow_name FROM lucidota_canon.workflow_registry ORDER BY workflow_name LIMIT 25) wr), '[]'::jsonb)
+    ) AS value FROM workflow_rows
+    UNION ALL SELECT 6 AS ord, 'command_registry'::text AS key, command_rows.command_registry AS value FROM command_rows
+    UNION ALL SELECT 6.1 AS ord, 'todo_current'::text AS key, todo_rows.todo_current AS value FROM todo_rows
     UNION ALL SELECT 7 AS ord, 'sub_orchestrators'::text AS key, sub_orchestrators_rows.sub_orchestrators AS value FROM sub_orchestrators_rows
+    UNION ALL SELECT 7.1 AS ord, 'sub_orchestrator_threads'::text AS key, sub_orchestrator_threads_rows.sub_orchestrator_threads AS value FROM sub_orchestrator_threads_rows
+    UNION ALL SELECT 7.2 AS ord, 'sub_orchestrator_grants'::text AS key, sub_orchestrator_grants_rows.sub_orchestrator_grants AS value FROM sub_orchestrator_grants_rows
+    UNION ALL SELECT 7.3 AS ord, 'orchestration'::text AS key, jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack()
+    ) AS value
     UNION ALL SELECT 8 AS ord, 'api_route_catalog'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(arc) ORDER BY arc.route_id ASC) FROM (SELECT * FROM lucidota_canon.api_route_catalog ORDER BY route_id ASC LIMIT 20) arc), '[]'::jsonb) AS value
-    UNION ALL SELECT 9 AS ord, 'canon_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(cn) ORDER BY cn.updated_at DESC) FROM lucidota_canon.canon_current cn), '[]'::jsonb) AS value
-    UNION ALL SELECT 10 AS ord, 'canon_versions'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(cv) ORDER BY cv.promoted_at DESC) FROM lucidota_canon.canon_versions cv), '[]'::jsonb) AS value
+    UNION ALL SELECT 9 AS ord, 'canon_current'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.canon_current),
+        'latest_updated_at', (SELECT max(updated_at) FROM lucidota_canon.canon_current),
+        'node_refs', COALESCE((SELECT jsonb_agg(cn.node_id ORDER BY cn.updated_at DESC) FROM (SELECT node_id, updated_at FROM lucidota_canon.canon_current ORDER BY updated_at DESC LIMIT 25) cn), '[]'::jsonb)
+    ) AS value
+    UNION ALL SELECT 10 AS ord, 'canon_versions'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.canon_versions),
+        'latest_promoted_at', (SELECT max(promoted_at) FROM lucidota_canon.canon_versions),
+        'version_refs', COALESCE((SELECT jsonb_agg(cv.version_id ORDER BY cv.promoted_at DESC) FROM (SELECT version_id, promoted_at FROM lucidota_canon.canon_versions ORDER BY promoted_at DESC LIMIT 25) cv), '[]'::jsonb)
+    ) AS value
     UNION ALL SELECT 11 AS ord, 'skill_policy_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(sp) ORDER BY sp.updated_at DESC) FROM lucidota_canon.skill_policy_current sp), '[]'::jsonb) AS value
     UNION ALL SELECT 12 AS ord, 'chrono_current'::text AS key, chrono_rows.chrono_current AS value FROM chrono_rows
     UNION ALL SELECT 12.1 AS ord, 'fn_bible_node_sort_key'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(sk) ORDER BY sk) FROM (SELECT lucidota_canon.fn_bible_node_sort_key('4.9511.0') AS sk) s), '[]'::jsonb) AS value
@@ -354,7 +460,11 @@ live_surface_rows AS (
     UNION ALL SELECT 17 AS ord, 'api_bible_subtree'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(bs) ORDER BY bs.node_sort_key ASC) FROM (SELECT * FROM lucidota_canon.api_bible_subtree WHERE root_id = '1.0.0' ORDER BY node_sort_key ASC LIMIT 5) bs), '[]'::jsonb) AS value
     UNION ALL SELECT 18 AS ord, 'api_root_law_docs'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(rl) ORDER BY rl.refreshed_at DESC) FROM lucidota_canon.api_root_law_docs rl), '[]'::jsonb) AS value
     UNION ALL SELECT 19 AS ord, 'root_law_docs'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(rl) ORDER BY rl.refreshed_at DESC) FROM lucidota_canon.root_law_docs rl), '[]'::jsonb) AS value
-    UNION ALL SELECT 20 AS ord, 'api_workflow_registry'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(wr) ORDER BY wr.workflow_id ASC) FROM (SELECT * FROM lucidota_canon.workflow_registry ORDER BY workflow_id ASC LIMIT 5) wr), '[]'::jsonb) AS value
+    UNION ALL SELECT 20 AS ord, 'api_workflow_registry'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.workflow_registry),
+        'latest_updated_at', (SELECT max(updated_at) FROM lucidota_canon.workflow_registry),
+        'workflow_refs', COALESCE((SELECT jsonb_agg(workflow_name ORDER BY workflow_name) FROM (SELECT workflow_name FROM lucidota_canon.workflow_registry ORDER BY workflow_name LIMIT 25) wr), '[]'::jsonb)
+    ) AS value
     UNION ALL SELECT 21 AS ord, 'api_capability_registry'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(cr) ORDER BY cr.capability_key ASC) FROM (SELECT * FROM lucidota_canon.capability_registry ORDER BY capability_key ASC LIMIT 5) cr), '[]'::jsonb) AS value
     UNION ALL SELECT 22 AS ord, 'api_provider_registry'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(pr) ORDER BY pr.provider_key ASC) FROM (SELECT * FROM lucidota_canon.provider_registry ORDER BY provider_key ASC LIMIT 5) pr), '[]'::jsonb) AS value
     UNION ALL SELECT 23 AS ord, 'api_model_registry_raw'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(m) ORDER BY m.model_id ASC) FROM (SELECT * FROM lucidota_canon.model_registry ORDER BY model_id ASC LIMIT 5) m), '[]'::jsonb) AS value
@@ -365,17 +475,61 @@ live_surface_rows AS (
     UNION ALL SELECT 28 AS ord, 'cli_process_receipts'::text AS key, cli_rows.cli_process_receipts AS value FROM cli_rows
     UNION ALL SELECT 29 AS ord, 'flow_receipts'::text AS key, flow_receipt_rows.flow_receipts AS value FROM flow_receipt_rows
     UNION ALL SELECT 30 AS ord, 'api_test_execution_receipts'::text AS key, test_receipt_rows.api_test_execution_receipts AS value FROM test_receipt_rows
-    UNION ALL SELECT 31 AS ord, 'api_model_registry_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(mc) ORDER BY mc.refreshed_at DESC) FROM lucidota_canon.model_registry_current mc), '[]'::jsonb) AS value
-    UNION ALL SELECT 32 AS ord, 'api_provider_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(pc) ORDER BY pc.refreshed_at DESC) FROM lucidota_canon.provider_current pc), '[]'::jsonb) AS value
-    UNION ALL SELECT 33 AS ord, 'api_workflow_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(wc) ORDER BY wc.refreshed_at DESC) FROM lucidota_canon.workflow_current wc), '[]'::jsonb) AS value
-    UNION ALL SELECT 34 AS ord, 'api_capability_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(cc) ORDER BY cc.refreshed_at DESC) FROM lucidota_canon.capability_current cc), '[]'::jsonb) AS value
-    UNION ALL SELECT 35 AS ord, 'api_sheet_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(sc) ORDER BY sc.refreshed_at DESC) FROM lucidota_canon.sheet_current sc), '[]'::jsonb) AS value
-    UNION ALL SELECT 36 AS ord, 'api_model_routing_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(mr) ORDER BY mr.refreshed_at DESC) FROM lucidota_canon.model_routing_current mr), '[]'::jsonb) AS value
-    UNION ALL SELECT 37 AS ord, 'api_model_routing_blockers'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(mrb) ORDER BY mrb.refreshed_at DESC) FROM lucidota_canon.model_routing_blockers mrb), '[]'::jsonb) AS value
-    UNION ALL SELECT 38 AS ord, 'model_registry_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(mc) ORDER BY mc.refreshed_at DESC) FROM lucidota_canon.model_registry_current mc), '[]'::jsonb) AS value
-    UNION ALL SELECT 39 AS ord, 'provider_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(pc) ORDER BY pc.refreshed_at DESC) FROM lucidota_canon.provider_current pc), '[]'::jsonb) AS value
-    UNION ALL SELECT 40 AS ord, 'workflow_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(wc) ORDER BY wc.refreshed_at DESC) FROM lucidota_canon.workflow_current wc), '[]'::jsonb) AS value
-    UNION ALL SELECT 41 AS ord, 'capability_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(cc) ORDER BY cc.refreshed_at DESC) FROM lucidota_canon.capability_current cc), '[]'::jsonb) AS value
+    UNION ALL SELECT 31 AS ord, 'api_model_registry_current'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.model_registry_current),
+        'latest_refreshed_at', (SELECT max(refreshed_at) FROM lucidota_canon.model_registry_current),
+        'packet_refs', COALESCE((SELECT jsonb_agg(model_packet_id ORDER BY refreshed_at DESC) FROM (SELECT model_packet_id, refreshed_at FROM lucidota_canon.model_registry_current ORDER BY refreshed_at DESC LIMIT 10) mc), '[]'::jsonb)
+    ) AS value
+    UNION ALL SELECT 32 AS ord, 'api_provider_current'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.provider_current),
+        'latest_refreshed_at', (SELECT max(refreshed_at) FROM lucidota_canon.provider_current),
+        'packet_refs', COALESCE((SELECT jsonb_agg(provider_packet_id ORDER BY refreshed_at DESC) FROM (SELECT provider_packet_id, refreshed_at FROM lucidota_canon.provider_current ORDER BY refreshed_at DESC LIMIT 10) pc), '[]'::jsonb)
+    ) AS value
+    UNION ALL SELECT 33 AS ord, 'api_workflow_current'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.workflow_current),
+        'latest_refreshed_at', (SELECT max(refreshed_at) FROM lucidota_canon.workflow_current),
+        'packet_refs', COALESCE((SELECT jsonb_agg(workflow_packet_id ORDER BY refreshed_at DESC) FROM (SELECT workflow_packet_id, refreshed_at FROM lucidota_canon.workflow_current ORDER BY refreshed_at DESC LIMIT 10) wc), '[]'::jsonb)
+    ) AS value
+    UNION ALL SELECT 34 AS ord, 'api_capability_current'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.capability_current),
+        'latest_refreshed_at', (SELECT max(refreshed_at) FROM lucidota_canon.capability_current),
+        'packet_refs', COALESCE((SELECT jsonb_agg(capability_packet_id ORDER BY refreshed_at DESC) FROM (SELECT capability_packet_id, refreshed_at FROM lucidota_canon.capability_current ORDER BY refreshed_at DESC LIMIT 10) cc), '[]'::jsonb)
+    ) AS value
+    UNION ALL SELECT 35 AS ord, 'api_sheet_current'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.sheet_current),
+        'latest_refreshed_at', (SELECT max(refreshed_at) FROM lucidota_canon.sheet_current),
+        'packet_refs', COALESCE((SELECT jsonb_agg(sheet_packet_id ORDER BY refreshed_at DESC) FROM (SELECT sheet_packet_id, refreshed_at FROM lucidota_canon.sheet_current ORDER BY refreshed_at DESC LIMIT 10) sc), '[]'::jsonb)
+    ) AS value
+    UNION ALL SELECT 36 AS ord, 'api_model_routing_current'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.model_routing_current),
+        'latest_refreshed_at', (SELECT max(refreshed_at) FROM lucidota_canon.model_routing_current),
+        'packet_refs', COALESCE((SELECT jsonb_agg(routing_packet_id ORDER BY refreshed_at DESC) FROM (SELECT routing_packet_id, refreshed_at FROM lucidota_canon.model_routing_current ORDER BY refreshed_at DESC LIMIT 10) mr), '[]'::jsonb)
+    ) AS value
+    UNION ALL SELECT 37 AS ord, 'api_model_routing_blockers'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.model_routing_blockers),
+        'latest_refreshed_at', (SELECT max(refreshed_at) FROM lucidota_canon.model_routing_blockers),
+        'packet_refs', COALESCE((SELECT jsonb_agg(routing_packet_id ORDER BY refreshed_at DESC) FROM (SELECT routing_packet_id, refreshed_at FROM lucidota_canon.model_routing_blockers ORDER BY refreshed_at DESC LIMIT 10) mrb), '[]'::jsonb)
+    ) AS value
+    UNION ALL SELECT 38 AS ord, 'model_registry_current'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.model_registry_current),
+        'latest_refreshed_at', (SELECT max(refreshed_at) FROM lucidota_canon.model_registry_current),
+        'packet_refs', COALESCE((SELECT jsonb_agg(model_packet_id ORDER BY refreshed_at DESC) FROM (SELECT model_packet_id, refreshed_at FROM lucidota_canon.model_registry_current ORDER BY refreshed_at DESC LIMIT 10) mc), '[]'::jsonb)
+    ) AS value
+    UNION ALL SELECT 39 AS ord, 'provider_current'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.provider_current),
+        'latest_refreshed_at', (SELECT max(refreshed_at) FROM lucidota_canon.provider_current),
+        'packet_refs', COALESCE((SELECT jsonb_agg(provider_packet_id ORDER BY refreshed_at DESC) FROM (SELECT provider_packet_id, refreshed_at FROM lucidota_canon.provider_current ORDER BY refreshed_at DESC LIMIT 10) pc), '[]'::jsonb)
+    ) AS value
+    UNION ALL SELECT 40 AS ord, 'workflow_current'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.workflow_current),
+        'latest_refreshed_at', (SELECT max(refreshed_at) FROM lucidota_canon.workflow_current),
+        'packet_refs', COALESCE((SELECT jsonb_agg(workflow_packet_id ORDER BY refreshed_at DESC) FROM (SELECT workflow_packet_id, refreshed_at FROM lucidota_canon.workflow_current ORDER BY refreshed_at DESC LIMIT 10) wc), '[]'::jsonb)
+    ) AS value
+    UNION ALL SELECT 41 AS ord, 'capability_current'::text AS key, jsonb_build_object(
+        'count', (SELECT count(*) FROM lucidota_canon.capability_current),
+        'latest_refreshed_at', (SELECT max(refreshed_at) FROM lucidota_canon.capability_current),
+        'packet_refs', COALESCE((SELECT jsonb_agg(capability_packet_id ORDER BY refreshed_at DESC) FROM (SELECT capability_packet_id, refreshed_at FROM lucidota_canon.capability_current ORDER BY refreshed_at DESC LIMIT 10) cc), '[]'::jsonb)
+    ) AS value
     UNION ALL SELECT 42 AS ord, 'sheet_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(sc) ORDER BY sc.refreshed_at DESC) FROM lucidota_canon.sheet_current sc), '[]'::jsonb) AS value
     UNION ALL SELECT 43 AS ord, 'capability_registry'::text AS key, capability_rows.capability_registry AS value FROM capability_rows
     UNION ALL SELECT 44 AS ord, 'chrono_current'::text AS key, chrono_rows.chrono_current AS value FROM chrono_rows
@@ -404,6 +558,17 @@ live_surface_rows AS (
     UNION ALL SELECT 67 AS ord, 'cloud_packet'::text AS key, cloud_packet_rows.cloud_packet AS value FROM cloud_packet_rows
     UNION ALL SELECT 68 AS ord, 'model_routing_current'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(mr) ORDER BY mr.refreshed_at DESC) FROM lucidota_canon.model_routing_current mr), '[]'::jsonb) AS value
     UNION ALL SELECT 69 AS ord, 'model_routing_blockers'::text AS key, COALESCE((SELECT jsonb_agg(to_jsonb(mrb) ORDER BY mrb.refreshed_at DESC) FROM lucidota_canon.model_routing_blockers mrb), '[]'::jsonb) AS value
+    UNION ALL SELECT 69.1 AS ord, 'workload_audit_current'::text AS key, COALESCE((SELECT to_jsonb(wac) FROM lucidota_canon.workload_audit_current wac LIMIT 1), '{}'::jsonb) AS value
+    UNION ALL SELECT 69.2 AS ord, 'workload_audit_telemetry_current'::text AS key, COALESCE((SELECT to_jsonb(wat) FROM lucidota_canon.workload_audit_telemetry_current wat LIMIT 1), '{}'::jsonb) AS value
+    UNION ALL SELECT 69.3 AS ord, 'indy_reads_runtime'::text AS key, COALESCE((SELECT to_jsonb(ir) FROM indy_rows ir), '{}'::jsonb) AS value FROM indy_rows
+    UNION ALL SELECT 69.31 AS ord, 'indy_reads_self_model'::text AS key, jsonb_build_object('route_ref', 'indy_reads_self_model', 'count', COALESCE(((SELECT indy_reads_runtime->>'self_model_count' FROM indy_rows LIMIT 1))::int, 0)) AS value FROM indy_rows
+    UNION ALL SELECT 69.32 AS ord, 'indy_reads_llmwiki_entry'::text AS key, jsonb_build_object('route_ref', 'indy_reads_llmwiki_entry', 'count', COALESCE(((SELECT indy_reads_runtime->>'llmwiki_entry_count' FROM indy_rows LIMIT 1))::int, 0)) AS value FROM indy_rows
+    UNION ALL SELECT 69.33 AS ord, 'indy_reads_hunch_log'::text AS key, jsonb_build_object('route_ref', 'indy_reads_hunch_log', 'count', COALESCE(((SELECT indy_reads_runtime->>'hunch_log_count' FROM indy_rows LIMIT 1))::int, 0)) AS value FROM indy_rows
+    UNION ALL SELECT 69.34 AS ord, 'indy_reads_learning_queue'::text AS key, jsonb_build_object('route_ref', 'indy_reads_learning_queue', 'count', COALESCE(((SELECT indy_reads_runtime->>'learning_queue_count' FROM indy_rows LIMIT 1))::int, 0)) AS value FROM indy_rows
+    UNION ALL SELECT 69.35 AS ord, 'indy_reads_system_map'::text AS key, jsonb_build_object('route_ref', 'indy_reads_system_map', 'count', COALESCE(((SELECT indy_reads_runtime->>'system_map_count' FROM indy_rows LIMIT 1))::int, 0)) AS value FROM indy_rows
+    UNION ALL SELECT 69.36 AS ord, 'indy_reads_mistake_ledger'::text AS key, jsonb_build_object('route_ref', 'indy_reads_mistake_ledger', 'count', COALESCE(((SELECT indy_reads_runtime->>'mistake_ledger_count' FROM indy_rows LIMIT 1))::int, 0)) AS value FROM indy_rows
+    UNION ALL SELECT 69.37 AS ord, 'indy_reads_research_source'::text AS key, jsonb_build_object('route_ref', 'indy_reads_research_source', 'count', COALESCE(((SELECT indy_reads_runtime->>'research_source_count' FROM indy_rows LIMIT 1))::int, 0)) AS value FROM indy_rows
+    UNION ALL SELECT 69.38 AS ord, 'indy_reads_metacognition_current'::text AS key, jsonb_build_object('route_ref', 'indy_reads_metacognition_current', 'count', COALESCE(((SELECT indy_reads_runtime->>'metacognition_current_count' FROM indy_rows LIMIT 1))::int, 0)) AS value FROM indy_rows
     UNION ALL SELECT 70 AS ord, 'blockers'::text AS key, jsonb_build_object(
                                     'model_routing_blockers', COALESCE((SELECT jsonb_agg(to_jsonb(mrb) ORDER BY mrb.refreshed_at DESC) FROM lucidota_canon.model_routing_blockers mrb), '[]'::jsonb)
                                 ) AS value
@@ -423,7 +588,7 @@ SELECT
     jsonb_build_object(
         'read_surface', 'PostgREST safe views and RPCs only',
         'write_surface', 'DB work orders and receipts only',
-        'manual_source', 'live route catalog + daemon status + current goal + registries + receipts + queue/window/cloud packet',
+        'manual_source', 'live route catalog + daemon status + current goal + active operation mode + workload telemetry + registries + receipts + queue/window/cloud packet',
         'root_orchestrator', 'DB-visible sub-orchestrator status packet; no new daemon or hidden control plane'
     ) AS auth_expectations,
     jsonb_build_object(
@@ -433,182 +598,144 @@ SELECT
         'queue_loop', 'indy_queue -> indy_responses -> bytewax_compact_windows -> cloud_packet',
         'prompt_loop', 'prompt_recent -> prompts_filed -> prompt_work_order_links -> prompt_unlinked -> prompt_catalog_status'
     ) AS work_order_flow,
-    (
-        jsonb_build_array(
-            './luci root orchestrator current --json',
-            './luci openapi --json',
-            './luci payload-archive-status --json',
-            './luci model-routing-current --json',
-            './luci model-routing-blockers --json',
-            './luci model registry --json',
-            './luci model registry current --json',
-            './luci model registry raw --json',
-            './luci provider current --json',
-            './luci provider registry --json',
-            './luci provider registry raw --json',
-            './luci workflow current --json',
-            './luci workflow registry raw --json',
-            './luci capability current --json',
-            './luci capability registry --json',
-            './luci capability registry raw --json',
-            './luci sheet current --json',
-            './luci api root orchestrator current --json',
-            './luci api manual current --json',
-            './luci api active goal --json',
-            './luci api daemon status --json',
-            './luci api route catalog --json',
-            './luci api test execution receipts --json',
-            './luci api prompt catalog status --json',
-            './luci api prompt filed --json',
-            './luci api prompt links --json',
-            './luci api prompt raw recent --json',
-            './luci api prompt raw filed --json',
-            './luci api prompt raw links --json',
-            './luci api prompt raw unlinked --json',
-            './luci api prompt raw catalog --json',
-            './luci api root orchestrator current --json',
-            './luci api manual current --json',
-            './luci api chrono current --json',
-            './luci api prompt recent --json',
-            './luci api prompts filed --json',
-            './luci api prompt work-order links --json',
-            './luci api prompt unlinked --json',
-            './luci api prompt catalog --json',
-            './luci api root law docs --json',
-            './luci api canon current --json',
-            './luci api canon versions --json',
-            './luci api bible edges --json',
-            './luci api bible manuals --json',
-            './luci api bible nodes --manual-id RUNTIME_GOVERNOR --json',
-            './luci api bible route catalog --json',
-            './luci api bible subtree --root-id 1.0.0 --json',
-            './luci api model registry current --json',
-            './luci api model registry raw --json',
-            './luci api provider current --json',
-            './luci api provider registry --json',
-            './luci api workflow current --json',
-            './luci api workflow registry raw --json',
-            './luci api capability current --json',
-            './luci api capability registry --json',
-            './luci api capability registry raw --json',
-            './luci api sheet current --json',
-            './luci root-law-docs --json',
-            './luci skill policy current --json',
-            './luci todo current --json',
-            'curl -sS http://127.0.0.1:3000/manual_current?limit=1',
-            'curl -sS http://127.0.0.1:3000/root_orchestrator_current?limit=1',
-            'curl -sS http://127.0.0.1:3000/canon_current?limit=1',
-            'curl -sS http://127.0.0.1:3000/active_goal?limit=1',
-            'curl -sS http://127.0.0.1:3000/capability_registry?limit=1',
-            'curl -sS http://127.0.0.1:3000/model_registry?limit=1',
-            'curl -sS http://127.0.0.1:3000/provider_registry?limit=1',
-            'curl -sS http://127.0.0.1:3000/workflow_registry?limit=1',
-            'curl -sS http://127.0.0.1:3000/daemon_status?limit=5',
-            'curl -sS http://127.0.0.1:3000/indy_queue?limit=5',
-            'curl -sS http://127.0.0.1:3000/indy_responses?limit=5',
-            'curl -sS http://127.0.0.1:3000/bytewax_compact_windows?limit=5'
-        )
-        ||
-        jsonb_build_array(
-            './luci api model routing current --json',
-            './luci api model routing blockers --json',
-            './luci model routing current --json',
-            './luci model routing blockers --json',
-            './luci api indy queue --json',
-            './luci api indy responses --json',
-            './luci api bytewax windows --json',
-            './luci bytewax raw windows --json',
-            './luci api cli process receipts --json',
-            './luci api flow receipts --json',
-            './luci api flow specs --json',
-            './luci api skill policy current --json',
-            './luci api todo current --json',
-            './luci api cloud packet --work-order-id 00000000-0000-0000-0000-000000000000 --json',
-            './luci api book source --json',
-            './luci api book scan --json',
-            './luci api book read-queue --json',
-            './luci api book note --json',
-            './luci api book receipt --json',
-            './luci api book adapter --json',
-            './luci api book candidate --json',
-            './luci api book training --json',
-            './luci api book raw source --json',
-            './luci api book raw scan --json',
-            './luci api book raw read-queue --json',
-            './luci api book raw note --json',
-            './luci api book raw receipt --json',
-            './luci api book raw adapter --json',
-            './luci api book raw candidate --json',
-            './luci api book raw training --json',
-            './luci api book read queue --json',
-            './luci api bytewax compact windows --json',
-            './luci api bytewax raw windows --json',
-            '.venv/bin/python scripts/indy_daemon.py --once --json',
-            '.venv/bin/python scripts/indy_runtime_broker.py snapshot --json',
-            '.venv/bin/python scripts/luci_todo.py --json',
-            '.venv/bin/python scripts/ontology_work_compiler.py --json --text "<objective text>"',
-            '.venv/bin/python scripts/ontology_work_compiler.py --json --text "<operator objective>"',
-            '.venv/bin/python scripts/prompt_ledger_capture.py --json',
-            '.venv/bin/python scripts/test_receipt_gate.py run --scope policy_and_retirement -- .venv/bin/python -m pytest -q tests/test_skill_policy_current_surface.py tests/test_indy_book_ops_schema.py tests/test_manual_current_surface.py tests/test_orchestrator_registry_routes.py',
-            'curl -sS -X POST http://127.0.0.1:3000/rpc/cloud_packet -H ''content-type: application/json'' -d ''{"work_order_id":"...","max_chars":256,"max_items":1,"task_type":"...","target_model":"...","include_raw_bodies":false}''',
-            'curl -sS -X POST http://127.0.0.1:3000/rpc/decompose_prompt_to_work_orders -H ''content-type: application/json'' -d ''{"prompt_id":"..."}''',
-            'curl -sS -X POST http://127.0.0.1:3000/rpc/file_prompt -H ''content-type: application/json'' -d ''{"source":"...","raw_prompt_text":"..."}''',
-            'curl -sS -X POST http://127.0.0.1:3000/rpc/link_prompt_work_order -H ''content-type: application/json'' -d ''{"p_prompt_id":"...","p_work_order_uuid":"..."}''',
-            'curl -sS http://127.0.0.1:3000/',
-            'curl -sS http://127.0.0.1:3000/api_bible_edges?limit=5',
-            'curl -sS http://127.0.0.1:3000/api_bible_manuals?limit=5',
-            'curl -sS http://127.0.0.1:3000/api_bible_nodes?manual_id=eq.RUNTIME_GOVERNOR&order=node_sort_key.asc&limit=5',
-            'curl -sS http://127.0.0.1:3000/api_bible_route_catalog?limit=5',
-            'curl -sS http://127.0.0.1:3000/api_bible_subtree?root_id=eq.1.0.0&limit=5',
-            'curl -sS http://127.0.0.1:3000/api_root_law_docs?limit=1',
-            'curl -sS http://127.0.0.1:3000/api_route_catalog?limit=1',
-            'curl -sS http://127.0.0.1:3000/api_test_execution_receipts?limit=1',
-            'curl -sS http://127.0.0.1:3000/api_test_execution_receipts?limit=3',
-            'curl -sS http://127.0.0.1:3000/canon_versions?limit=5',
-            'curl -sS http://127.0.0.1:3000/capability_current?limit=1',
-            'curl -sS http://127.0.0.1:3000/chrono_current?limit=1',
-            'curl -sS http://127.0.0.1:3000/cli_process_receipts?limit=3',
-            'curl -sS http://127.0.0.1:3000/flow_receipts?limit=1',
-            'curl -sS http://127.0.0.1:3000/flow_receipts?limit=3',
-            'curl -sS http://127.0.0.1:3000/flow_specs?limit=1',
-            'curl -sS http://127.0.0.1:3000/model_registry?limit=20',
-            'curl -sS http://127.0.0.1:3000/model_registry_current?limit=1',
-            'curl -sS http://127.0.0.1:3000/model_routing_blockers?limit=1',
-            'curl -sS http://127.0.0.1:3000/model_routing_current?limit=1',
-            'curl -sS http://127.0.0.1:3000/payload_archive_status?limit=6',
-            'curl -sS http://127.0.0.1:3000/prompt_catalog_status?limit=1',
-            'curl -sS http://127.0.0.1:3000/prompt_recent?limit=5',
-            'curl -sS http://127.0.0.1:3000/provider_current?limit=1',
-            'curl -sS http://127.0.0.1:3000/sheet_current?limit=1',
-            'curl -sS http://127.0.0.1:3000/skill_policy_current?limit=1',
-            'curl -sS http://127.0.0.1:3000/todo_current?limit=5',
-            'curl -sS http://127.0.0.1:3000/workflow_current?limit=1',
-            './luci api ontology work batch --json',
-            './luci api ontology work item --json',
-            './luci api prompt recent --json',
-            './luci api prompt catalog status --json',
-            './luci api root-law-docs --json',
-            './luci api payload archive status --json',
-            './luci api model registry raw --json',
-            './luci api provider registry --json',
-            './luci api provider registry raw --json',
-            './luci api workflow registry raw --json',
-            './luci api capability registry raw --json',
-            './luci api book adapter --json',
-            './luci api book candidate --json',
-            './luci api book training --json',
-            './luci api ontology work raw batch --json',
-            './luci api ontology work raw item --json',
-            './luci prompt recent --json',
-            './luci prompt catalog status --json',
-            './luci flow specs --json',
-            './luci flow receipts --json',
-            './luci api rpc cloud-packet --work-order-id 00000000-0000-0000-0000-000000000000 --json',
-            './luci api rpc decompose-prompt --payload-json {"prompt_id":"..."} --json',
-            './luci api rpc file-prompt --payload-json {"source":"codex","raw_prompt_text":"..."} --json',
-            './luci api rpc link-prompt --payload-json {"p_prompt_id":"...","p_work_order_uuid":"..."} --json'
-        )
+    jsonb_build_array(
+        'manual_current',
+        'root_orchestrator_current',
+        'active_goal',
+        'daemon_status',
+        'capability_current',
+        'capability_registry',
+        'command_registry',
+        'schema_owner_manifest',
+        'surface_registry',
+        'renderer_registry',
+        'controller_grant',
+        'agent_thread_runtime',
+        'model_registry',
+        'model_registry_current',
+        'model_routing_current',
+        'model_routing_blockers',
+        'active_operation_mode',
+        'workload_audit_current',
+        'workload_audit_telemetry_current',
+        'workload_audit_ledger',
+        'provider_current',
+        'provider_registry',
+        'workflow_current',
+        'workflow_registry',
+        'sheet_current',
+        'skill_policy_current',
+        'todo_current',
+        'prompt_catalog_status',
+        'prompt_recent',
+        'prompts_filed',
+        'prompt_work_order_links',
+        'prompt_unlinked',
+        'prompts_filed',
+        'payload_archive_status',
+        'bytewax_compact_windows',
+        'indy_queue',
+        'indy_responses',
+        'cli_process_receipts',
+        'flow_receipts',
+        'flow_specs',
+        'api_route_catalog',
+        'api_root_law_docs',
+        'api_test_execution_receipts',
+        'api_bible_route_catalog',
+        'api_bible_subtree',
+        'api_bible_edges',
+        'api_bible_manuals',
+        'api_bible_nodes',
+        'api_bible_edges',
+        'api_bible_manuals',
+        'api_bible_nodes',
+        'canon_current',
+        'canon_versions',
+        'cloud_packet',
+        'decompose_prompt_to_work_orders',
+        'file_prompt',
+        'link_prompt_work_order',
+        'workload_audit_current',
+        'workload_audit_ledger',
+        'indy_reads_self_model',
+        'indy_reads_llmwiki_entry',
+        'indy_reads_hunch_log',
+        'indy_reads_learning_queue',
+        'indy_reads_system_map',
+        'indy_reads_mistake_ledger',
+        'indy_reads_research_source',
+        'indy_reads_metacognition_current'
     ) AS next_commands,
+    jsonb_build_array(
+        'manual_current',
+        'root_orchestrator_current',
+        'canon_current',
+        'active_goal',
+        'daemon_status',
+        'capability_current',
+        'capability_registry',
+        'model_registry_current',
+        'model_registry',
+        'provider_current',
+        'provider_registry',
+        'active_operation_mode',
+        'workload_audit_telemetry_current',
+        'workflow_current',
+        'workflow_registry',
+        'sheet_current',
+        'prompt_catalog_status',
+        'prompt_recent',
+        'flow_specs',
+        'flow_receipts',
+        'api_test_execution_receipts',
+        'skill_policy_current',
+        'todo_current',
+        'prompts_filed',
+        'prompt_work_order_links',
+        'prompt_unlinked',
+        'payload_archive_status',
+        'bytewax_compact_windows',
+        'indy_queue',
+        'indy_responses',
+        'model_routing_current',
+        'model_routing_blockers',
+        'api_route_catalog',
+        'api_bible_route_catalog',
+        'api_bible_subtree',
+        'api_bible_edges',
+        'api_bible_manuals',
+        'api_bible_nodes',
+        'canon_versions',
+        'api_root_law_docs',
+        'cloud_packet',
+        'decompose_prompt_to_work_orders',
+        'file_prompt',
+        'link_prompt_work_order',
+        'cli_process_receipts',
+        'schema_owner_manifest',
+        'surface_registry',
+        'renderer_registry',
+        'command_registry',
+        'controller_grant',
+        'agent_thread_runtime',
+        'workload_audit_current',
+        'workload_audit_ledger',
+        'provider_call_receipt',
+        'model_invocation_receipt',
+        'agent_work_receipt',
+        'unproven_work_debt',
+        'indy_reads_self_model',
+        'indy_reads_llmwiki_entry',
+        'indy_reads_hunch_log',
+        'indy_reads_learning_queue',
+        'indy_reads_system_map',
+        'indy_reads_mistake_ledger',
+        'indy_reads_research_source',
+        'indy_reads_metacognition_current',
+        'sub_orchestrator_threads',
+        'sub_orchestrator_grants'
+    ) AS next_command_refs,
     jsonb_build_array(
         'BOOKS folder watcher authority',
         'hand-written manual slop',
@@ -619,7 +746,18 @@ SELECT
     jsonb_build_object(
         'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; Rust-worthy code becomes Rust only after contract, tests, and A/B receipt.'
     ) AS db_law,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'provider_secret_isolation', 'load through an explicit quarantine file or environment loader owned by the operator; no raw keys in chat, docs, SQL, or receipts',
+        'selected_lanes', COALESCE((SELECT selected_lanes FROM ontology_focus_rows), '[]'::jsonb),
+        'sub_orchestrator_threads', sub_orchestrator_threads_rows.sub_orchestrator_threads,
+        'sub_orchestrator_grants', sub_orchestrator_grants_rows.sub_orchestrator_grants
+    ) AS orchestration,
     sub_orchestrators_rows.sub_orchestrators AS sub_orchestrators,
+    sub_orchestrator_threads_rows.sub_orchestrator_threads AS sub_orchestrator_threads,
+    sub_orchestrator_grants_rows.sub_orchestrator_grants AS sub_orchestrator_grants,
     jsonb_build_object(
         'model_routing_blockers', COALESCE((SELECT jsonb_agg(to_jsonb(mrb) ORDER BY mrb.refreshed_at DESC) FROM lucidota_canon.model_routing_blockers mrb), '[]'::jsonb)
     ) AS blockers,
@@ -633,6 +771,7 @@ CROSS JOIN daemon_rows
 CROSS JOIN model_rows
 CROSS JOIN provider_rows
 CROSS JOIN workflow_rows
+CROSS JOIN command_rows
 CROSS JOIN chrono_rows
 CROSS JOIN capability_rows
 CROSS JOIN todo_rows
@@ -643,6 +782,8 @@ CROSS JOIN payload_rows
 CROSS JOIN bytewax_rows
 CROSS JOIN cloud_packet_rows
 CROSS JOIN sub_orchestrators_rows
+CROSS JOIN sub_orchestrator_threads_rows
+CROSS JOIN sub_orchestrator_grants_rows
 CROSS JOIN cli_rows
 CROSS JOIN flow_receipt_rows
 CROSS JOIN test_receipt_rows

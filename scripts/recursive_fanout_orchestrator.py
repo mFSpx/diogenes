@@ -25,6 +25,7 @@ LANE_TOPICS = [
     "receipt_surface",
     "verification_surface",
 ]
+SUB_ORCHESTRATOR_PRIORITY = ["live_truth_surfaces", "deterministic_local_checks", "thin_packets", "local", "indy_reads", "codex", "vibe", "groq", "broader_cloud"]
 WORKER_SPECS = [
     ("vibe", "code_patch", "simple"),
     ("vibe", "test_patch", "simple"),
@@ -128,6 +129,7 @@ def build_lane(*, lane_index: int, topic: str) -> dict[str, Any]:
         "mini_orchestrator_id": f"mini_orchestrator_{lane_index:02d}",
         "lane_id": f"lane_{lane_index:02d}",
         "topic": topic,
+        "orchestration": {"mode": "sub_orchestrator", "sub_orchestrator_priority": SUB_ORCHESTRATOR_PRIORITY, "lane_owner": f"mini_orchestrator_{lane_index:02d}"},
         "spawn_contract": {
             "worker_count": 4,
             "family_counts": {"vibe": 2, "groq": 2},

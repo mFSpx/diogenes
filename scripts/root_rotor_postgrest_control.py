@@ -302,6 +302,64 @@ def stop(
     return stop_postgrest(pid_path=pid_path, log_path=log_path, grace_seconds=grace_seconds)
 
 
+def restart_postgrest(
+    *,
+    conf_path: Path = DEFAULT_CONFIG,
+    pid_path: Path = DEFAULT_PID_FILE,
+    log_path: Path = DEFAULT_LOG_FILE,
+    wait_for_ready: bool = False,
+    readiness_timeout: float = 30.0,
+    readiness_poll: float = 0.25,
+    request_get: Callable[..., Any] = requests.get,
+) -> dict[str, Any]:
+    stop_report = stop_postgrest(pid_path=pid_path, log_path=log_path)
+    start_report = start_postgrest(
+        conf_path=conf_path,
+        pid_path=pid_path,
+        log_path=log_path,
+        wait_for_ready=wait_for_ready,
+        readiness_timeout=readiness_timeout,
+        readiness_poll=readiness_poll,
+        request_get=request_get,
+    )
+    status_report = build_status(
+        conf_path=conf_path,
+        pid_path=pid_path,
+        log_path=log_path,
+        check_readiness=wait_for_ready,
+        request_get=request_get,
+    )
+    return {
+        "schema": "lucidota.root_rotor.postgrest.control.v1",
+        "generated_at": now(),
+        "action": "restart",
+        "stop": stop_report,
+        "start": start_report,
+        "status": status_report,
+    }
+
+
+def restart(
+    *,
+    conf_path: Path = DEFAULT_CONFIG,
+    pid_path: Path = DEFAULT_PID_FILE,
+    log_path: Path = DEFAULT_LOG_FILE,
+    wait_for_ready: bool = False,
+    readiness_timeout: float = 30.0,
+    readiness_poll: float = 0.25,
+    request_get: Callable[..., Any] = requests.get,
+) -> dict[str, Any]:
+    return restart_postgrest(
+        conf_path=conf_path,
+        pid_path=pid_path,
+        log_path=log_path,
+        wait_for_ready=wait_for_ready,
+        readiness_timeout=readiness_timeout,
+        readiness_poll=readiness_poll,
+        request_get=request_get,
+    )
+
+
 def status(
     *,
     conf_path: Path = DEFAULT_CONFIG,
@@ -336,7 +394,7 @@ def readiness(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Root-Rotor PostgREST control wrapper")
-    parser.add_argument("command", choices=("start", "stop", "status", "readiness"))
+    parser.add_argument("command", choices=("start", "stop", "restart", "status", "readiness"))
     parser.add_argument("--conf", default=str(DEFAULT_CONFIG))
     parser.add_argument("--pid", default=str(DEFAULT_PID_FILE))
     parser.add_argument("--log", default=str(DEFAULT_LOG_FILE))
@@ -360,6 +418,15 @@ def main() -> int:
         )
     elif args.command == "stop":
         report = stop_postgrest(pid_path=pid_path, log_path=log_path)
+    elif args.command == "restart":
+        report = restart_postgrest(
+            conf_path=conf_path,
+            pid_path=pid_path,
+            log_path=log_path,
+            wait_for_ready=args.check_readiness,
+            readiness_timeout=args.wait,
+            readiness_poll=args.poll,
+        )
     elif args.command == "readiness":
         report = wait_for_readiness(conf_path=conf_path, timeout_seconds=args.wait, poll_seconds=args.poll)
     else:

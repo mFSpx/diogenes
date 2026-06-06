@@ -6,18 +6,7 @@ from pathlib import Path
 from scripts.lucidota_strict_model_stack_admission import build_strict_stack_plan
 
 
-def test_runtime_registry_sql_uses_current_strict_mamba_artifact() -> None:
-    sql = Path("scripts/06_SCHEMA/002_model_runtime.sql").read_text(encoding="utf-8")
-    strict = build_strict_stack_plan(env={})
-    mamba = next(service for service in strict["services"] if service["name"] == "mamba7b_ram")
-
-    assert "falcon3-mamba-7b-listener" in sql
-    assert mamba["model_path"] in sql
-    assert "'listener',\n        'falcon3-mamba-7b-listener'" in sql
-    assert "'listener',\n        'mamba-1.4b-listener'" not in sql
-
-
-def test_spark_alias_routes_to_always_on_mamba_cpu_lane() -> None:
+def test_spark_alias_routes_to_always_on_needle_lane() -> None:
     from scripts.local_model_chat_cli import LLAMA_LANES, NEEDLE_LANES
 
     assert "spark" not in LLAMA_LANES
@@ -71,12 +60,11 @@ def test_locateanything_registered_as_optional_local_image_grounding_candidate()
     ]
 
 
-def test_gpu_runtime_registry_records_deepseek_bonsai_switch_group() -> None:
+def test_gpu_runtime_registry_records_bonsai_switch_group() -> None:
     registry = __import__("json").loads(Path("00_PROJECT_BRAIN/gpu_model_runtime_registry.json").read_text(encoding="utf-8"))
     alignment = registry["strict_runtime_alignment"]
     services = {service["name"]: service for service in alignment["required_services"]}
 
-    assert alignment["switch_groups"]["reasoning_generation_slot"]["default"] == "deepseek_r1_qwen_1p5b_gpu"
-    assert "bonsai4b_ram" in alignment["switch_groups"]["reasoning_generation_slot"]["alternates"]
-    assert services["deepseek_r1_qwen_1p5b_gpu"]["switch_group"] == "reasoning_generation_slot"
+    assert alignment["switch_groups"]["reasoning_generation_slot"]["default"] == "bonsai4b_ram"
+    assert alignment["switch_groups"]["reasoning_generation_slot"]["alternates"] == []
     assert services["bonsai4b_ram"]["switch_role"] == "ram_resident_gpu_switchable"

@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "rtb_math_error_001",
+  "title": "RTB order math discrepancy",
+  "input_text": "The 10-Day Notice lists $9,500 owed, but the Monetary Order awards $10,400 with no visible calculation explaining the extra $900.",
+  "expected": {
+    "required_primitives": ["DOCUMENT_EXAMINATION", "ROOT_414_MATH", "VALIDITY_AUDIT"],
+    "forbidden_primitives": ["ARCHONIC_CONTROL_GRID", "THE_SPIRAL_IS_COMPLETE"],
+    "allowed_bps": [50, 69],
+    "must_have_falsifier": true,
+    "must_have_local_gate": true,
+    "claim_lifecycle": ["CLAIM_UNVERIFIED", "CORROBORATION_REQUIRED"]
+  },
+  "judge_focus": [
+    "Does it classify as math/custody discrepancy, not mythic slop?",
+    "Does it name a concrete falsifier such as ledger/calculation note?",
+    "Does it avoid 116/396 hammering?"
+  ]
+}

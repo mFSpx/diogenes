@@ -21,15 +21,7 @@ if ! pgrep -f "lucidota_ram_watchdog" > /dev/null 2>&1; then
   echo "[startup] watchdog pid=$!"
 else echo "[startup] watchdog already running"; fi
 
-# 4. Mamba GPU (:8083)
-if ! curl -sf http://127.0.0.1:8083/health > /dev/null 2>&1; then
-  LUCIDOTA_MAMBA_GPU_NGL=99 \
-    nohup bash scripts/lucidota_start_mamba_gpu_partial.sh \
-    >> 04_RUNTIME/inference_os/mamba7b_gpu_llama_server.log 2>&1 &
-  echo "[startup] mamba-gpu pid=$!"
-else echo "[startup] mamba-gpu already live"; fi
-
-# 5. 6x Needle workers (:8090-8095)
+# 4. 6x Needle workers (:8090-8095)
 for i in 0 1 2 3 4 5; do
   port=$((8090 + i))
   if ! curl -sf http://127.0.0.1:$port/ > /dev/null 2>&1; then

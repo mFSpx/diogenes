@@ -17,6 +17,9 @@ BASE_COMMANDS = [
     {"command": "luci openapi [--json] [--base-url URL]", "purpose": "show the live PostgREST OpenAPI document at /"},
     {"command": "luci manual | luci /manual", "purpose": "show live manual volumes from /manual_current"},
     {"command": "luci manual current [--json] [--base-url URL]", "purpose": "show the live manual packet from /manual_current"},
+    {"command": "luci manual capsule [--json] [--base-url URL]", "purpose": "show the on-demand manual capsule from /root_law_docs"},
+    {"command": "luci doctor [--json] [--base-url URL]", "purpose": "show the live operator doctor surface"},
+    {"command": "luci status [--json] [--base-url URL]", "purpose": "show the live operator status surface"},
     {"command": "luci active goal [--json] [--base-url URL]", "purpose": "show the live active goal packet from /active_goal"},
     {"command": "luci root orchestrator current [--json] [--base-url URL]", "purpose": "show the live root orchestrator packet from /root_orchestrator_current"},
     {"command": "luci todo", "purpose": "show the live ontology todo batch from /todo_current"},
@@ -34,6 +37,7 @@ BASE_COMMANDS = [
     {"command": "luci model registry raw [--json] [--base-url URL]", "purpose": "show the raw model registry rows from /model_registry"},
     {"command": "luci model registry current [--json] [--base-url URL]", "purpose": "show the live model registry packet from /model_registry_current"},
     {"command": "luci capability current [--json] [--base-url URL]", "purpose": "show the live capability packet from /capability_current"},
+    {"command": "luci capability list [--json] [--base-url URL]", "purpose": "show the live capability list surface"},
     {"command": "luci capability registry [--json] [--base-url URL]", "purpose": "show the live capability registry packet from /capability_registry"},
     {"command": "luci capability registry raw [--json] [--base-url URL]", "purpose": "show the raw capability registry rows from /capability_registry"},
     {"command": "luci provider current [--json] [--base-url URL]", "purpose": "show the live provider packet from /provider_current"},
@@ -113,6 +117,10 @@ BASE_COMMANDS = [
     {"command": "luci api cloud packet --work-order-id ID [--json] [--base-url URL]", "purpose": "request a bounded cloud packet from /rpc/cloud_packet"},
     {"command": "luci api cli process receipts [--json] [--base-url URL]", "purpose": "show the live CLI authority receipts from /cli_process_receipts"},
     {"command": "luci api payload archive status [--json] [--base-url URL]", "purpose": "show the cold payload archive status packet from /payload_archive_status"},
+    {"command": "luci elastic shape <current|latest|residuals|pressure> [--json] [--base-url URL]", "purpose": "show the runtime elastic shape packets from /elastic_shape_current, /elastic_shape_latest, /shape_residuals_current, and /indy_attention_pressure_current"},
+    {"command": "luci elastic shape emit --artifact-uuid UUID [--signal TOKEN=VALUE]... [--json] [--base-url URL]", "purpose": "emit and persist a runtime elastic shape receipt plus residuals"},
+    {"command": "luci percyphon <current|matrix> [--json] [--base-url URL]", "purpose": "show the runtime Percyphon village packets from /percyphon_current and /percyphon_village_matrix"},
+    {"command": "luci percyphon emit [--seed SEED] [--villager VALUE]... [--fluid-slots N] [--json] [--no-write-db]", "purpose": "emit a runtime Percyphon scaffold receipt and optionally write it to lucidota_go.percyphon_village"},
     {"command": "luci api bytewax windows [--json] [--base-url URL]", "purpose": "show the live Bytewax compact windows packet from /bytewax_compact_windows"},
     {"command": "luci api bytewax compact windows [--json] [--base-url URL]", "purpose": "show the live Bytewax compact windows packet from /bytewax_compact_windows"},
     {"command": "luci api bytewax raw windows [--json] [--base-url URL]", "purpose": "show the raw Bytewax compact windows rows from /bytewax_compact_windows"},
@@ -191,6 +199,12 @@ def build_commands(api_routes: list[str]) -> list[dict[str, str]]:
                 "purpose": "show the live root-orchestrator manual from /root_law_docs",
             }
         )
+        commands.append(
+            {
+                "command": "luci manual capsule [--json] [--base-url URL]",
+                "purpose": "show the on-demand manual capsule from /root_law_docs",
+            }
+        )
     if "/root_orchestrator_current" in api_routes:
         commands.append(
             {
@@ -203,6 +217,20 @@ def build_commands(api_routes: list[str]) -> list[dict[str, str]]:
             {
                 "command": "luci manual current [--json] [--base-url URL]",
                 "purpose": "show the live manual packet from /manual_current",
+            }
+        )
+    if any(route in api_routes for route in ("/percyphon_current", "/percyphon_village_matrix")):
+        commands.append(
+            {
+                "command": "luci percyphon <current|matrix> [--json] [--base-url URL]",
+                "purpose": "show the runtime Percyphon village packets from /percyphon_current and /percyphon_village_matrix",
+            }
+        )
+    if "/capability_registry" in api_routes:
+        commands.append(
+            {
+                "command": "luci capability list [--json] [--base-url URL]",
+                "purpose": "show the live capability list surface",
             }
         )
     if "/active_goal" in api_routes:
@@ -681,15 +709,60 @@ def fetch_json(base_url: str, path: str, query: dict[str, str] | None = None) ->
         return False, {"error": f"{type(exc).__name__}: {exc}"}, url
 
 
+def dedupe_refs(*groups: list[Any]) -> list[str]:
+    refs: list[str] = []
+    seen: set[str] = set()
+    for group in groups:
+        for ref in group:
+            ref_text = str(ref)
+            if ref_text and ref_text not in seen:
+                seen.add(ref_text)
+                refs.append(ref_text)
+    return refs
+
+
 def build_payload(mode: str, base_url: str) -> dict[str, Any]:
     api_ok, openapi, openapi_url = fetch_json(base_url, "")
     manual_ok, manuals, manual_url = fetch_json(base_url, "manual_current", {"order": "manual_id.asc"})
-    cli_ok, cli_rows, cli_url = fetch_json(base_url, "cli_process_receipts", {"order": "received_at.desc", "limit": "1"})
+    root_ok, root_rows, root_url = fetch_json(
+        base_url,
+        "root_orchestrator_current",
+        {"select": "orchestrator_id,title,route_list,next_command_refs,orchestration,live_surface", "limit": "1"},
+    )
+    cli_ok, cli_rows, cli_url = fetch_json(
+        base_url,
+        "cli_process_receipts",
+        {"select": "*,next_command_refs", "order": "received_at.desc", "limit": "1"},
+    )
     payload_ok, payload_rows, payload_url = fetch_json(base_url, "payload_archive_status", {"order": "source_table.asc,payload_kind.asc", "limit": "20"})
     paths = sorted((openapi or {}).get("paths", {}).keys()) if api_ok and isinstance(openapi, dict) else []
     manual_rows = manuals if manual_ok and isinstance(manuals, list) else []
+    manual_row = manual_rows[0] if manual_rows and isinstance(manual_rows[0], dict) else {}
+    root_rows_list = root_rows if root_ok and isinstance(root_rows, list) else []
+    root_row = root_rows_list[0] if root_rows_list and isinstance(root_rows_list[0], dict) else {}
+    summary_row = manual_row or root_row
+    summary_source = "manual_current" if manual_row else ("root_orchestrator_current" if root_row else "")
+    summary_live_surface = summary_row.get("live_surface") if isinstance(summary_row.get("live_surface"), dict) else {}
     cli_receipts = cli_rows if cli_ok and isinstance(cli_rows, list) else []
     payload_archives = payload_rows if payload_ok and isinstance(payload_rows, list) else []
+    route_refs = summary_row.get("route_refs") or [
+        str(route.get("route_id"))
+        for route in (summary_row.get("route_list") or [])
+        if isinstance(route, dict) and route.get("route_id")
+    ]
+    surface_refs = summary_row.get("surface_refs") or list(route_refs)
+    renderer_refs = summary_row.get("renderer_refs") or ["renderer_registry", "command_registry"]
+    capability_refs = summary_row.get("capability_refs") or [
+        str(cap.get("capability_key"))
+        for cap_packet in (summary_live_surface.get("capability_current") or [])
+        if isinstance(cap_packet, dict)
+        for cap in (cap_packet.get("active_capabilities") or [])
+        if isinstance(cap, dict) and cap.get("capability_key")
+    ]
+    next_command_refs = dedupe_refs(
+        summary_row.get("next_command_refs") or [],
+        [*route_refs, *surface_refs, *renderer_refs, *capability_refs],
+    )
     return {
         "schema": "lucidota.luci.help_manual.v1",
         "generated_at": now(),
@@ -699,12 +772,32 @@ def build_payload(mode: str, base_url: str) -> dict[str, Any]:
         "api_status": "ok" if api_ok and manual_ok else "degraded",
         "openapi_url": openapi_url,
         "manual_current_url": manual_url,
+        "root_orchestrator_current_url": root_url,
         "manuals": manual_rows,
+        "manual_summary": {
+            "summary_source": summary_source,
+            "manual_id": summary_row.get("manual_id"),
+            "orchestrator_id": summary_row.get("orchestrator_id"),
+            "title": summary_row.get("title"),
+            "node_count": summary_row.get("node_count"),
+            "route_count": summary_row.get("route_count"),
+            "max_updated_at": summary_row.get("max_updated_at"),
+            "route_refs": route_refs,
+            "surface_refs": surface_refs,
+            "renderer_refs": renderer_refs,
+            "capability_refs": capability_refs,
+            "next_command_refs": next_command_refs,
+        },
         "api_routes": paths,
         "cli_process_receipts_url": cli_url,
         "cli_process_receipts": cli_receipts,
         "payload_archive_status_url": payload_url,
         "payload_archive_status": payload_archives,
+        "next_command_refs": next_command_refs,
+        "route_refs": route_refs,
+        "surface_refs": surface_refs,
+        "renderer_refs": renderer_refs,
+        "capability_refs": capability_refs,
         "commands": build_commands(paths),
         "forbidden_detours": ["Phantom takeover", "Root-Rotor detour", "loose JSON queue authority"],
     }
@@ -723,8 +816,12 @@ def render_text(payload: dict[str, Any]) -> str:
         lines.append(f"- {row['command']} :: {row['purpose']}")
     lines.extend(["", "Manual volumes from /manual_current:"])
     if payload["manuals"]:
+        summary = payload.get("manual_summary") if isinstance(payload.get("manual_summary"), dict) else {}
+        summary_label = summary.get("manual_id") or summary.get("orchestrator_id")
+        lines.append(
+            f"- {summary_label} :: {summary.get('title')} nodes={summary.get('node_count') or summary.get('route_count')} updated={summary.get('max_updated_at')}"
+        )
         row = payload["manuals"][0]
-        lines.append(f"- {row.get('manual_id')} :: {row.get('title')} nodes={row.get('node_count')} updated={row.get('max_updated_at')}")
         route_list = row.get("route_list") if isinstance(row, dict) else None
         if isinstance(route_list, list) and route_list:
             lines.append("  Routes:")
@@ -733,6 +830,21 @@ def render_text(payload: dict[str, Any]) -> str:
                     f"  - {route.get('method')} {route.get('path_pattern')} :: {route.get('description')} "
                     f"[{route.get('status')}]"
                 )
+        route_refs = summary.get("route_refs") if isinstance(summary, dict) else None
+        if isinstance(route_refs, list) and route_refs:
+            lines.append(f"  Route refs: {', '.join(str(ref) for ref in route_refs[:16])}")
+        capability_refs = summary.get("capability_refs") if isinstance(summary, dict) else None
+        if isinstance(capability_refs, list) and capability_refs:
+            lines.append(f"  Capability refs: {', '.join(str(ref) for ref in capability_refs[:16])}")
+        surface_refs = summary.get("surface_refs") if isinstance(summary, dict) else None
+        if isinstance(surface_refs, list) and surface_refs:
+            lines.append(f"  Surface refs: {', '.join(str(ref) for ref in surface_refs[:16])}")
+        renderer_refs = summary.get("renderer_refs") if isinstance(summary, dict) else None
+        if isinstance(renderer_refs, list) and renderer_refs:
+            lines.append(f"  Renderer refs: {', '.join(str(ref) for ref in renderer_refs[:16])}")
+        next_command_refs = summary.get("next_command_refs") if isinstance(summary, dict) else None
+        if isinstance(next_command_refs, list) and next_command_refs:
+            lines.append(f"  Next command refs: {', '.join(str(ref) for ref in next_command_refs[:16])}")
         live_surface = row.get("live_surface") if isinstance(row, dict) else None
         if isinstance(live_surface, dict):
             bible_nodes = live_surface.get("api_bible_nodes") or []
@@ -768,6 +880,12 @@ def render_text(payload: dict[str, Any]) -> str:
             lines.append("  Next commands:")
             for cmd in next_commands[:8]:
                 lines.append(f"  - {cmd}")
+        packet_next_command_refs = row.get("next_command_refs") if isinstance(row, dict) else None
+        if isinstance(packet_next_command_refs, list) and packet_next_command_refs:
+            lines.append(
+                "  Packet next command refs: "
+                + ", ".join(str(ref) for ref in packet_next_command_refs[:16])
+            )
     cli_rows = payload.get("cli_process_receipts") if isinstance(payload, dict) else None
     if isinstance(cli_rows, list) and cli_rows:
         row = cli_rows[0]

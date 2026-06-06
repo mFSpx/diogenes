@@ -1,0 +1,20 @@
+{
+  "schema": "lucidota.lora_brain_config.v1",
+  "brain_id": "pattern_seer",
+  "model": "RWKV-5-world-500M",
+  "model_path": "TO_DOWNLOAD: 03_VAULT/models/rwkv-500m/",
+  "base_model": "BlinkDL/rwkv-5-world-500m",
+  "purpose": "Stylistic pattern detection — author attribution, rhetorical device recognition, sentence rhythm analysis",
+  "personality": "The ear. Hears the music in language. Knows Machiavelli from Mill by the rhythm alone.",
+  "r": 16,
+  "alpha": 32,
+  "target_modules": ["time_mix_k", "time_mix_v", "time_mix_r", "channel_mix_k", "channel_mix_v", "channel_mix_r", "receptance", "key", "value", "gate"],
+  "batch_size": 4,
+  "learning_rate": 0.0002,
+  "max_steps": 1500,
+  "loss": "cross_entropy + contrastive",
+  "training_data": ["The Prince", "A Vindication of the Rights of Woman", "One Day Everyone Will Have Always Been Against This", "A Death in Malta"],
+  "training_labels": "Author labels (4-way classification) + style embedding similarity",
+  "output_format": "Tuple (author_id, style_embedding_vector)",
+  "notes": "Contrastive loss pulls same-author embeddings together, pushes different-author apart."
+}

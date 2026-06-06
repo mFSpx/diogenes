@@ -84,3 +84,31 @@ def test_cli_payload_retention_archives_cli_receipt_tails_and_exposes_status(tmp
     assert isinstance(rows, list)
     assert rows
     assert rows[0]["source_table"] == "lucidota_control.cli_process_receipt"
+    assert "next_command_refs" in rows[0]
+    assert isinstance(rows[0]["next_command_refs"], list) and rows[0]["next_command_refs"]
+    assert "manual_current" in rows[0]["next_command_refs"]
+    assert "root_orchestrator_current" in rows[0]["next_command_refs"]
+    assert "daemon_status" in rows[0]["next_command_refs"]
+    assert "cli_process_receipts" in rows[0]["next_command_refs"]
+    assert "command_registry" in rows[0]["next_command_refs"]
+    assert isinstance(rows[0].get("orchestration"), dict)
+    assert rows[0]["orchestration"]["mode"] == "sub_orchestrator"
+
+
+def test_cli_payload_archive_render_shows_next_refs():
+    from scripts.luci_payload_archive import render
+
+    out = render(
+        [
+            {
+                "source_table": "lucidota_control.cli_process_receipt",
+                "payload_kind": "stdout_tail",
+                "archive_count": 2,
+                "archived_bytes": 42,
+                "archived_chars": 99,
+                "latest_archived_at": "2026-06-04T00:00:00Z",
+                "next_command_refs": ["manual_current", "root_orchestrator_current"],
+            }
+        ]
+    )
+    assert "next_command_refs=manual_current, root_orchestrator_current" in out

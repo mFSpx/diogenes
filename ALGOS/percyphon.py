@@ -162,3 +162,89 @@ def procedural_entity_generator(villagers, psyche_wrath_velocity=0.0, psyche_for
 
 def villager_scaffold(seed: str) -> dict:
     return procedural_entity_generator([seed], fluid_slots=100)
+
+
+def _matrix_terms(villagers: Sequence[str] | None, column_count: int) -> list[str]:
+    terms = [str(v).strip() for v in (villagers or []) if str(v).strip()]
+    if not terms:
+        terms = ["lucidota-villager-baseline"]
+    if len(terms) >= column_count:
+        return terms[:column_count]
+    out = list(terms)
+    while len(out) < column_count:
+        out.extend(terms)
+    return out[:column_count]
+
+
+def _matrix_row_label(row_index: int) -> tuple[str, str]:
+    if row_index <= 28:
+        return f"identity_trunk_{row_index:03d}", "identity_trunk"
+    if row_index <= 128:
+        return f"procedural_engine_{row_index - 28:03d}", "procedural_engine"
+    return "interlock_summary", "interlock_summary"
+
+
+def procedural_matrix_generator(
+    villagers: Sequence[str] | None,
+    *,
+    row_count: int = 129,
+    column_count: int = 5000,
+    source: str = "Runtime",
+) -> dict[str, Any]:
+    """Deterministic Percyphon matrix snapshot.
+
+    Shape contract:
+      - rows 1..28: identity trunk
+      - rows 29..128: procedural engine bands
+      - row 129: interlock summary / pressure seal
+      - columns 1..5000: villager souls / vUUID coordinate axis
+
+    Storage contract:
+      - each row owns a JSON array of 5000 compact cell tokens
+      - the token stream is deterministic and hash-derived
+      - this is advisory geometry, not canonical truth
+    """
+    if row_count != 129:
+        raise ValueError("Percyphon matrix row_count must be 129")
+    if column_count != 5000:
+        raise ValueError("Percyphon matrix column_count must be 5000")
+
+    seed_terms = _matrix_terms(villagers, column_count)
+    seed = "|".join(seed_terms[:5000]) or "lucidota-villager-baseline"
+    matrix_uuid = _uuid_from_sha256(f"percyphon-matrix:{seed}")
+    rows: list[dict[str, Any]] = []
+
+    for row_index in range(1, row_count + 1):
+        row_label, row_kind = _matrix_row_label(row_index)
+        row_seed = f"{seed}:{row_index}:{row_kind}"
+        cells: list[str] = []
+        for column_index in range(1, column_count + 1):
+            term = seed_terms[column_index - 1]
+            cell_hash = _sha256_hex(f"{row_seed}:{column_index}:{term}")
+            cells.append(f"{term}:{cell_hash[:12]}")
+        rows.append(
+            {
+                "matrix_uuid": matrix_uuid,
+                "row_index": row_index,
+                "row_label": row_label,
+                "row_kind": row_kind,
+                "column_count": column_count,
+                "cells": cells,
+                "source": source,
+                "seed": seed,
+                "authority": "procedural_scaffold_candidate_not_truth",
+                "zero_vram": True,
+            }
+        )
+
+    return {
+        "schema": "lucidota.percyphon.matrix.v1",
+        "zero_vram": True,
+        "source": source,
+        "seed": seed,
+        "matrix_uuid": matrix_uuid,
+        "row_count": row_count,
+        "column_count": column_count,
+        "authority": "procedural_scaffold_candidate_not_truth",
+        "rows": rows,
+    }

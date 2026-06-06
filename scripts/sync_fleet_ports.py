@@ -5,9 +5,7 @@ import psycopg2
 
 PORT_MAP = {
     8080: "llama_primary",
-    8081: "mamba_ram",
     8082: "bonsai_ternary",
-    8083: "mamba_gpu",
     8101: "bge_fleet",
 }
 

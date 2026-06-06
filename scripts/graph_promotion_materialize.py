@@ -6,6 +6,16 @@ This is the promotion path, not a direct graph-write shortcut:
 - runs graph_promotion_preflight with materialize_requested=true
 - sets SET LOCAL lucidota.graph_promotion_path='on' inside one transaction
 - writes graph_item + graph_journal + materialization receipt
+
+MUTATION CLASS: materializer (authority_gate)
+AUTHORIZED: This IS the governed promotion gate for node items. The INSERT
+at line 287 (lucidota_go.graph_item) and line 304 (lucidota_go.graph_journal)
+are protected by:
+  1. SET LOCAL lucidota.graph_promotion_path='on' (line 278)
+  2. Full preflight validation (command envelope, evidence refs, term registry)
+  3. The 044_graph_promotion_policy_roles.sql schema gate
+  4. graph_promotion_packet + graph_promotion_decision written first
+This is the single authorized gate for node graph materialization.
 """
 from __future__ import annotations
 

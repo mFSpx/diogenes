@@ -693,6 +693,12 @@ def cmd_graph_promote(args: argparse.Namespace) -> int:
 
 
 def cmd_direct_graph_write_check(args: argparse.Namespace) -> int:
+    # MUTATION CLASS: read_only (blocker check)
+    # AUTHORIZED: This deliberately attempts a direct INSERT to verify the
+    # graph write block is working. Any INSERT is immediately rolled back.
+    # Purpose is diagnostic -- testing the gate, not bypassing it.
+    # If the write succeeds (blocked=False), the function returns exit code 7
+    # to signal test failure.
     report = {"action": "direct_graph_write_blocker_check", "blocked": False, "error": None, "blockers": []}
     try:
         with connect(storage_url(args)) as conn:

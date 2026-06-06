@@ -66,20 +66,6 @@ def build_strict_stack_plan(*, root: Path = ROOT, env: dict[str, str] | None = N
     prism_llama = root / "01_REPOS" / "prismml_llama.cpp" / "build-cuda" / "bin" / "llama-server"
     services = [
         {
-            "name": "deepseek_r1_qwen_1p5b_gpu",
-            "role": "coder/reasoning additive lane",
-            "port": 8080,
-            "start_script": "scripts/lucidota_start_deepseek_llama.sh",
-            "launcher": str(llama_cuda),
-            "model_path": "03_VAULT/models/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
-            "device_lane": "nvidia_vram_model_only",
-            "requested_vram_mb": _env_int(env, "LUCIDOTA_DEEPSEEK_VRAM_MB", 1500),
-            "required": True,
-            "switch_group": "reasoning_generation_slot",
-            "switch_role": "default_vram_resident",
-            "switchable_with": ["bonsai8b_1bit"],
-        },
-        {
             "name": "bge_m3_vram",
             "role": "embedding",
             "port": 8101,
@@ -89,17 +75,6 @@ def build_strict_stack_plan(*, root: Path = ROOT, env: dict[str, str] | None = N
             "device_lane": "nvidia_vram_embedding",
             "requested_vram_mb": _env_int(env, "LUCIDOTA_BGE_VRAM_MB", 0),
             "required": False,
-        },
-        {
-            "name": "mamba7b_ram",
-            "role": "CPU/RAM SSM long-context/db-watch lane",
-            "port": 8081,
-            "start_script": "scripts/lucidota_start_mamba_llama.sh",
-            "launcher": str(llama_cuda),
-            "model_path": "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
-            "device_lane": "system_ram_cpu",
-            "requested_vram_mb": 0,
-            "required": True,
         },
         {
             "name": "bonsai8b_1bit",
@@ -115,17 +90,6 @@ def build_strict_stack_plan(*, root: Path = ROOT, env: dict[str, str] | None = N
             "switch_role": "ram_resident_gpu_switchable",
             "alternate_device_lane": "nvidia_vram_model_only",
             "gpu_switch_env": "LUCIDOTA_BONSAI_NGL",
-        },
-        {
-            "name": "mamba7b_gpu_partial",
-            "role": "preemptible partial-VRAM planner lane",
-            "port": 8083,
-            "start_script": "scripts/lucidota_start_mamba_gpu_partial.sh",
-            "launcher": str(llama_cuda),
-            "model_path": "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
-            "device_lane": "nvidia_vram_model_only_preemptible",
-            "requested_vram_mb": _env_int(env, "LUCIDOTA_MAMBA_GPU_PARTIAL_VRAM_MB", 1200),
-            "required": False,
         },
         {
             "name": "needle_swarm_6x",
@@ -169,13 +133,7 @@ def build_strict_stack_plan(*, root: Path = ROOT, env: dict[str, str] | None = N
             "gate_script": "scripts/diogenes_memory_gate.py",
         },
         "services": services,
-        "switch_groups": {
-            "reasoning_generation_slot": {
-                "default": "deepseek_r1_qwen_1p5b_gpu",
-                "alternates": ["bonsai8b_1bit"],
-                "policy": "only admitted resident lane is exposed as active; Bonsai defaults to the 8B Q2_0 GGUF lane and can request the 1-bit fallback with LUCIDOTA_BONSAI_VARIANT=q1_0.",
-            }
-        },
+        "switch_groups": {},
         "external_rule": "LLMs are bounded processing lanes; deterministic graph/DB/math remain the controller.",
     }
 
@@ -269,9 +227,6 @@ def evaluate_admission(
     if missing_required:
         blockers.append("required_model_stack_file_missing")
 
-    optional_gpu_requested = [s for s in plan.get("services", []) if str(s.get("device_lane", "")).endswith("preemptible") and int(s.get("requested_vram_mb") or 0) > 0]
-    enable_mamba_gpu_partial = "1" if not any(b in blockers for b in ["strict_stack_vram_budget_exceeded", "display_not_forced_to_onboard_gpu"]) and optional_gpu_requested else "0"
-
     return {
         "schema": "lucidota.strict_model_stack.admission.v1",
         "generated_at": utc_now(),
@@ -290,7 +245,6 @@ def evaluate_admission(
         },
         "env": {
             "LUCIDOTA_STRICT_STACK_ADMITTED": "1" if not blockers else "0",
-            "LUCIDOTA_ENABLE_MAMBA_GPU_PARTIAL": enable_mamba_gpu_partial,
             "DRI_PRIME": "0",
             "__NV_PRIME_RENDER_OFFLOAD": "0",
         },

@@ -33,6 +33,18 @@ MAX_SOURCE_EXCERPT = 12000
 ROLE_ORDER = ("router", "classifier", "summarizer", "embedder", "reranker", "thinker", "watcher", "treelite_gate")
 
 
+def sql_placeholder_count(sql: str) -> int:
+    return sql.count("%s")
+
+
+def execute_with_bind_guard(cur: Any, sql: str, params: tuple[Any, ...] | list[Any]) -> None:
+    placeholder_count = sql_placeholder_count(sql)
+    bind_count = len(params)
+    if placeholder_count != bind_count:
+        raise ValueError(f"sql_bind_mismatch placeholder_count={placeholder_count} bind_count={bind_count}")
+    cur.execute(sql, params)
+
+
 def now_z() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
@@ -448,7 +460,8 @@ def persist_batch(batch_payload: dict[str, Any], *, base_url: str = indy_runtime
     batch = batch_payload["batch"]
     items = batch_payload["items"]
     with psycopg.connect(db_url, connect_timeout=5) as conn, conn.cursor() as cur:
-        cur.execute(
+        execute_with_bind_guard(
+            cur,
             """
             INSERT INTO lucidota_control.ontology_work_batch
               (batch_key, source_ref, source_kind, source_hash, source_excerpt, objective_summary, subsystem,
@@ -511,9 +524,10 @@ def persist_batch(batch_payload: dict[str, Any], *, base_url: str = indy_runtime
             ),
         )
         batch_uuid = cur.fetchone()[0]
-        cur.execute("DELETE FROM lucidota_control.ontology_work_item WHERE batch_uuid = %s::uuid", (batch_uuid,))
+        execute_with_bind_guard(cur, "DELETE FROM lucidota_control.ontology_work_item WHERE batch_uuid = %s::uuid", (batch_uuid,))
         for item in items:
-            cur.execute(
+            execute_with_bind_guard(
+                cur,
                 """
                 INSERT INTO lucidota_control.ontology_work_item
                   (batch_uuid, item_rank, planner_group, work_kind, workflow_name, subsystem, ontology_tags, dependency_edges,

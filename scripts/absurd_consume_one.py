@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Consume one ABSURD queue job with kernel-authorization enforcement.
 
-This is the ABSURD/Postgres successor to the legacy DBOS consume-one worker.
-It claims exactly one queued row, validates kernel authorization before handler
-execution, writes job/event/dead-letter receipts, and never mutates canonical
-graph tables.
+Usage:
+  python3 scripts/absurd_consume_one.py [--queue-name <name>] [--execute] [--json]
+  python3 scripts/absurd_consume_one.py [--listen] [--execute]
+
+Exit codes: 0=consumed/ok, 1=no job or handler failure, 2=config/args error.
 """
 from __future__ import annotations
 
@@ -36,6 +37,7 @@ DB_URL = (
 LISTEN_CHANNEL = "lucidota_queue_wakeup"
 
 ALLOWED_EXTERNAL_COMMANDS = {
+    # consume_one-specific commands
     "scripts/chrono_queue_event_bridge.py",
     "scripts/document_claim_packet_worker.py",
     "scripts/tracer_claim_packet_bridge_dry_run.py",
@@ -44,6 +46,7 @@ ALLOWED_EXTERNAL_COMMANDS = {
     "scripts/graph_promotion_gate.py",
     "scripts/spine_krampus_worker.py",
     "scripts/absurd_river_worker.py",
+    # shared commands (synced with absurd_queue_spine.py)
     "scripts/lucidota_model_turbine_overseer.py",
     "scripts/goal_agent_packet.py",
     "scripts/goal_dev_control.py",
@@ -54,6 +57,12 @@ ALLOWED_EXTERNAL_COMMANDS = {
     "scripts/model_runner_cli.py",
     "scripts/language_router.py",
     "scripts/lucidota_usecase_proof.py",
+    "scripts/manual_canon_worker.py",
+    "scripts/session_handoff.py",
+    "scripts/indy_reads.py",
+    "scripts/krampuschewing_master_index.py",
+    "scripts/krampuschewing_quarantine_triage.py",
+    "scripts/vibe_sequencer.py",
 }
 
 
@@ -118,7 +127,9 @@ def handle(payload: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
         command = payload.get("command")
         if not isinstance(command, list) or len(command) < 2:
             return False, {"error": "external_command_requires_command_list"}
-        if command[0] not in {"python3", "/usr/bin/python3", sys.executable} or str(command[1]) not in ALLOWED_EXTERNAL_COMMANDS:
+        # resolves .venv/bin/python -> /usr/bin/python3 so string comparison works for venv paths too
+        interpreter_paths = {"python3", "/usr/bin/python3", sys.executable, str(ROOT / ".venv" / "bin" / "python"), str(ROOT / ".venv" / "bin" / "python3")}
+        if str(Path(command[0]).resolve()) not in interpreter_paths or str(command[1]) not in ALLOWED_EXTERNAL_COMMANDS:
             return False, {"error": "external_command_not_allowlisted", "command": command[:2]}
         script = ROOT / str(command[1])
         if not script.exists() or not script.is_file():
@@ -319,10 +330,15 @@ def consume(args: argparse.Namespace) -> int:
     report.update(action_report)
     write_report("execute", report)
     if ok:
-        print(f"JOB_UUID={report.get('job_uuid')}")
-        print(f"STATUS={report.get('status')}")
+        if args.json:
+            print(json.dumps({"job_processed": True, "job_uuid": report.get("job_uuid"), "status": report.get("status"), "report_path": report.get("report_path", "")}, sort_keys=True))
+        print(f"JOB_UUID={report.get('job_uuid')}", file=sys.stderr if args.json else sys.stdout)
+        print(f"STATUS={report.get('status')}", file=sys.stderr if args.json else sys.stdout)
         return 0
-    return 2
+    # Operational failure: no job or handler error (exit 1, not 2)
+    if args.json:
+        print(json.dumps({"job_processed": report.get("job_processed", False), "blockers": report.get("blockers", []), "status": report.get("status", "failed"), "report_path": report.get("report_path", "")}, sort_keys=True))
+    return 1
 
 
 def main() -> int:
@@ -332,6 +348,7 @@ def main() -> int:
     parser.add_argument("--worker-id", default="absurd-consume-one")
     parser.add_argument("--listen", action="store_true")
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--json", action="store_true", help="Emit structured JSON report to stdout.")
     args = parser.parse_args()
     if args.listen and args.execute:
         asyncio.run(wake_plane_loop(args))

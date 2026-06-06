@@ -75,7 +75,6 @@ def call_forge(claim: str) -> str | None:
         req = urllib.request.Request(
             "http://127.0.0.1:9000/v1/chat/completions",
             json.dumps({
-                "model": "Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
                 "system": (
                     "Extract the primary GO-25 entity term from this text. "
                     "Reply with ONLY one term from: ENTITY GROUP EVENT EVIDENCE CLAIM SOURCE GRIP SNARE LIE GHOST WITNESS"

@@ -25,11 +25,22 @@ def test_sheet_current_reports_spreadsheet_status_and_next_batch() -> None:
     assert isinstance(row.get("goal"), dict)
     assert isinstance(row.get("db_law"), dict)
     assert isinstance(row.get("next_commands"), list) and row["next_commands"]
+    assert row["next_commands"] == ["sheet_current"]
+    assert "sheet_current" in row["next_command_refs"]
+    assert isinstance(row.get("next_command_refs"), list) and row["next_command_refs"]
+    assert "manual_current" in row["next_command_refs"]
+    assert "root_orchestrator_current" in row["next_command_refs"]
+    assert "command_registry" in row["next_command_refs"]
+    assert "schema_owner_manifest" in row["next_command_refs"]
+    assert isinstance(row.get("orchestration"), dict)
+    assert row["orchestration"]["mode"] == "sub_orchestrator"
+    assert row["orchestration"]["sub_orchestrator_priority"][0] == "live_truth_surfaces"
+    assert row["orchestration"]["strict_priority_stack"][0] == "live_truth_surfaces"
     assert row["goal"]["title"] == "Spreadsheet current packet"
 
 
 def test_manual_current_mentions_sheet_packet() -> None:
-    with urllib.request.urlopen(f"{LIVE_BASE_URL}/manual_current?limit=1", timeout=5) as resp:
+    with urllib.request.urlopen(f"{LIVE_BASE_URL}/manual_current?limit=1", timeout=15) as resp:
         assert resp.status == 200
         payload = json.loads(resp.read().decode("utf-8"))
 

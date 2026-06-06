@@ -205,6 +205,13 @@ Observed decision:
 - `headroom_mb`: 248
 - `estimated_required_mb`: 3336
 
+Current resident loadout posture:
+
+- `loadout_id`: gtx1650-special-forces-v0
+- `status`: partial
+- `decision`: defer
+- `why`: the resident governor reports the bundle needs more VRAM headroom than the box currently has available.
+
 ## Talkie custody
 
 Local custody receipt:

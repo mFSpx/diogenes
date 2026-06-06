@@ -13,7 +13,7 @@
       "path": "03_VAULT/models/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
       "size_bytes": 1117320800,
       "kind": "gguf",
-      "runtime_status": "active_strict_stack"
+      "runtime_status": "on_disk_passive"
     },
     {
       "path": "03_VAULT/models/mamba-1.4b-hf-Q2_K.gguf",
@@ -24,12 +24,6 @@
     {
       "path": "03_VAULT/models/prism-ml/Ternary-Bonsai-4B-gguf/Ternary-Bonsai-4B-Q2_0.gguf",
       "size_bytes": 1074969344,
-      "kind": "gguf",
-      "runtime_status": "active_strict_stack"
-    },
-    {
-      "path": "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
-      "size_bytes": 2565011808,
       "kind": "gguf",
       "runtime_status": "active_strict_stack"
     },
@@ -66,34 +60,13 @@
     "source": "scripts/lucidota_strict_model_stack_admission.py",
     "verified_by": "tests/test_model_runtime_registry_alignment.py",
     "active_model_paths": [
-      "03_VAULT/models/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
       "03_VAULT/models/needle/needle.pkl",
       "03_VAULT/models/prism-ml/Ternary-Bonsai-4B-gguf/Ternary-Bonsai-4B-Q2_0.gguf",
-      "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
       "04_RUNTIME/models/bge-m3-q8_0.gguf"
     ],
     "required_services": [
       {
-        "name": "deepseek_r1_qwen_1p5b_gpu",
-        "model_path": "03_VAULT/models/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
-        "port": 8080,
-        "required": true,
-        "device_lane": "nvidia_vram_model_only",
-        "switch_group": "reasoning_generation_slot",
-        "switch_role": "default_vram_resident",
-        "switchable_with": [
-          "bonsai4b_ram"
-        ]
-      },
-      {
-        "name": "mamba7b_ram",
-        "model_path": "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
-        "port": 8081,
-        "required": true,
-        "device_lane": "system_ram_cpu"
-      },
-      {
-        "name": "bonsai4b_ram",
+        "name": "bonsai8b_1bit",
         "model_path": "03_VAULT/models/prism-ml/Ternary-Bonsai-4B-gguf/Ternary-Bonsai-4B-Q2_0.gguf",
         "port": 8082,
         "required": true,
@@ -102,13 +75,6 @@
         "switch_role": "ram_resident_gpu_switchable",
         "alternate_device_lane": "nvidia_vram_model_only",
         "gpu_switch_env": "LUCIDOTA_BONSAI_NGL"
-      },
-      {
-        "name": "mamba7b_gpu_partial",
-        "model_path": "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
-        "port": 8083,
-        "required": false,
-        "device_lane": "nvidia_vram_model_only_preemptible"
       },
       {
         "name": "needle_swarm_6x",
@@ -134,13 +100,10 @@
     ],
     "spark_alias": "needle_0",
     "legacy_mamba_1_4b_status": "reference_only_not_active_loadout",
-    "mamba_gpu_partial_status": "optional_preemptible",
     "switch_groups": {
       "reasoning_generation_slot": {
-        "default": "deepseek_r1_qwen_1p5b_gpu",
-        "alternates": [
-          "bonsai4b_ram"
-        ],
+        "default": "bonsai8b_1bit",
+        "alternates": [],
         "policy": "only admitted resident lane is exposed as active; Bonsai remains CPU/RAM unless LUCIDOTA_BONSAI_NGL requests a GPU switch."
       }
     }

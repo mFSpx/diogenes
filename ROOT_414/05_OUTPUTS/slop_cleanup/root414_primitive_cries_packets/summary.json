@@ -1,0 +1,50 @@
+{
+  "generated_at_utc": "2026-05-23T08:25:36.585242+00:00",
+  "source": "05_OUTPUTS/root414_primitive_cries_packets.jsonl",
+  "size_bytes": 240538,
+  "row_count": 72,
+  "keys": [
+    "claim_lifecycle",
+    "confidence_bps",
+    "evidence_units",
+    "falsifier",
+    "flags",
+    "hitl_status",
+    "indy_note",
+    "packet_id",
+    "parser_name",
+    "raw_text_anchor",
+    "rejected_routes",
+    "river_note",
+    "routes",
+    "source_id",
+    "ternary_state",
+    "timestamp"
+  ],
+  "status_top": [],
+  "schema_top": [],
+  "hash_status_top": [],
+  "suffix_top": [],
+  "claim_lifecycle_top": [
+    {
+      "value": "CLAIM_UNVERIFIED",
+      "count": 72
+    }
+  ],
+  "hitl_status_top": [
+    {
+      "value": "pending",
+      "count": 72
+    }
+  ],
+  "route_len_top": [
+    {
+      "value": "1",
+      "count": 72
+    }
+  ],
+  "phase_records_len_top": [],
+  "order_top": [],
+  "target_key_top": [],
+  "error_top": []
+}

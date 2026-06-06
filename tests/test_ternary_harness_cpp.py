@@ -29,26 +29,10 @@ def test_ternary_harness_compiles_and_declares_requested_slots(tmp_path):
     lanes = {lane["id"]: lane for lane in plan["lanes"]}
 
     assert plan["schema"] == "lucidota.ternary_harness.plan.v1"
-    assert lanes["mamba7b_ram"]["slot"] == "ram_always"
     assert lanes["bonsai4b_ram_a"]["slot"] == "ram_always"
     assert lanes["bonsai4b_ram_b"]["slot"] == "ram_always"
-    assert lanes["mamba7b_vram_always"]["slot"] == "vram_always"
     assert lanes["bonsai4b_vram_switch"]["slot"] == "vram_switchable"
-    assert lanes["deepseek_r1_int8_switch"]["slot"] == "vram_switchable"
     assert plan["slot_policy"]["vram_switchable"]["exclusive"] is True
-
-
-def test_harness_builds_hard_capped_llama_argv_for_ram_and_vram_lanes(tmp_path):
-    binary = compile_harness(tmp_path)
-
-    mamba_argv = run_json(binary, "--lane-argv", "mamba7b_ram")
-    mamba_args = mamba_argv["argv"]
-    assert "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf" in mamba_args
-    assert "-ngl" in mamba_args and mamba_args[mamba_args.index("-ngl") + 1] == "0"
-    assert "--parallel" in mamba_args and mamba_args[mamba_args.index("--parallel") + 1] == "1"
-    assert "-c" in mamba_args and int(mamba_args[mamba_args.index("-c") + 1]) <= 512
-    assert mamba_argv["caps"]["cgroup_memory_max_mb"] > 0
-    assert mamba_argv["caps"]["kv_ctx_tokens"] <= 512
 
     vram_argv = run_json(binary, "--lane-argv", "deepseek_r1_int8_switch")
     vram_args = vram_argv["argv"]

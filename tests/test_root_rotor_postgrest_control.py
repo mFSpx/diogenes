@@ -136,6 +136,43 @@ def test_stop_terminates_pid_and_removes_pidfile(tmp_path) -> None:
     assert proc.poll() is not None
 
 
+def test_restart_stops_starts_and_returns_status(tmp_path, monkeypatch) -> None:
+    conf = tmp_path / "root_rotor_postgrest.conf"
+    pid_path = tmp_path / "04_RUNTIME/root_rotor_postgrest.pid"
+    log_path = tmp_path / "04_RUNTIME/root_rotor_postgrest.log"
+    write_conf(conf)
+    calls: list[str] = []
+
+    monkeypatch.setattr(
+        control,
+        "stop_postgrest",
+        lambda **_kwargs: calls.append("stop") or {"action": "stop", "pid": 123, "signal_sent": True},
+    )
+    monkeypatch.setattr(
+        control,
+        "start_postgrest",
+        lambda **_kwargs: calls.append("start") or {"action": "start", "pid_started": 456},
+    )
+    monkeypatch.setattr(
+        control,
+        "build_status",
+        lambda **_kwargs: calls.append("status") or {"action": "status", "pid": 456, "pid_alive": True},
+    )
+
+    result = control.restart_postgrest(
+        conf_path=conf,
+        pid_path=pid_path,
+        log_path=log_path,
+        wait_for_ready=False,
+    )
+
+    assert calls == ["stop", "start", "status"]
+    assert result["action"] == "restart"
+    assert result["stop"]["action"] == "stop"
+    assert result["start"]["action"] == "start"
+    assert result["status"]["pid_alive"] is True
+
+
 def test_main_supports_status_json_output(tmp_path) -> None:
     conf = tmp_path / "root_rotor_postgrest.conf"
     write_conf(conf)

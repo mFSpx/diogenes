@@ -19,12 +19,40 @@ SELECT
         'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; receipts prove the thing happened.'
     ) AS db_law,
     jsonb_build_array(
-        'curl -sS http://127.0.0.1:3000/model_routing_blockers?limit=1',
-        './luci model routing blockers --json',
-        './luci api model routing blockers --json'
-    ) AS next_commands
+        'model_routing_blockers'
+    ) AS next_commands,
+    jsonb_build_array(
+        'manual_current',
+        'root_orchestrator_current',
+        'daemon_status',
+        'capability_current',
+        'provider_current',
+        'model_registry_current',
+        'model_routing_current',
+        'sheet_current',
+        'todo_current',
+        'command_registry',
+        'surface_registry',
+        'renderer_registry',
+        'schema_owner_manifest',
+        'controller_grant',
+        'agent_thread_runtime',
+        'model_routing_current'
+    ) AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'missing_role_count', jsonb_array_length(mr.missing_roles),
+        'honestly_skipped_role_count', jsonb_array_length(mr.honestly_skipped_roles),
+        'routing_packet_id', 'model_routing_blockers'
+    ) AS orchestration,
+    mr.honestly_skipped_roles,
+    jsonb_array_length(mr.honestly_skipped_roles) AS honestly_skipped_role_count,
+    mr.role_admission_decisions
 FROM lucidota_canon.model_routing_current mr
-WHERE jsonb_array_length(mr.missing_roles) > 0;
+WHERE jsonb_array_length(mr.missing_roles) > 0
+   OR jsonb_array_length(mr.honestly_skipped_roles) > 0;
 
 INSERT INTO lucidota_canon.api_route_catalog (
     route_id, method, path_pattern, description, target, sample_request, sample_response, status

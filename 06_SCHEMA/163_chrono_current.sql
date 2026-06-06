@@ -120,7 +120,38 @@ SELECT
         'prompt_catalog_status', 'use /prompt_catalog_status for ledger counts',
         'bytewax_compact_windows', 'use /bytewax_compact_windows for compact stream-state rows',
         'manual_current', 'use /manual_current for current operator manual and route map'
-    ) AS inspection_notes
+    ) AS inspection_notes,
+    jsonb_build_array(
+        'manual_current',
+        'root_orchestrator_current',
+        'daemon_status',
+        'capability_current',
+        'capability_registry',
+        'model_registry',
+        'model_registry_current',
+        'provider_registry',
+        'provider_current',
+        'workflow_registry',
+        'workflow_current',
+        'model_routing_current',
+        'model_routing_blockers',
+        'skill_policy_current',
+        'todo_current',
+        'command_registry',
+        'surface_registry',
+        'renderer_registry',
+        'schema_owner_manifest',
+        'controller_grant',
+        'agent_thread_runtime'
+    ) AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'prompt_count', pr.prompt_count,
+        'work_order_count', wr.work_order_count,
+        'river_run_count', rv.river_run_count
+    ) AS orchestration
 FROM prompt_rows pr
 CROSS JOIN work_rows wr
 CROSS JOIN receipt_rows rr

@@ -7,10 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "05_OUTPUTS" / "model_runtime"
 STACK = {
-    "deepseek_r1_qwen_1p5b_gpu": (8080, "coder", "DeepSeek Qwen 1.5B GPU"),
-    "mamba7b_ram": (8081, "db_watch", "Falcon3 Mamba 7B RAM"),
     "bonsai8b_1bit": (8082, "review", "Ternary Bonsai 8B 1-bit GGUF"),
-    "mamba7b_gpu_partial": (8083, "planner", "Falcon3 Mamba 7B partial VRAM"),
     "needle_0": (8090, "router", "Needle"),
     "needle_1": (8091, "router", "Needle"),
     "needle_2": (8092, "router", "Needle"),
@@ -70,10 +67,6 @@ def parse_model_json(raw: str):
 
 def enforce(r: dict) -> list[dict]:
     acts = []
-    if r["gpu_free"] < int(os.environ.get("LUCIDOTA_VRAM_RESERVE_MB", "768")):
-        pid = (ROOT / "04_RUNTIME/inference_os/mamba7b_gpu.pid").read_text().strip() if (ROOT / "04_RUNTIME/inference_os/mamba7b_gpu.pid").exists() else ""
-        if pid:
-            subprocess.run(["kill", pid], check=False); acts.append({"kill": pid, "why": "gpu_free_below_reserve", "target": "mamba7b_gpu_partial"})
     if r["ram_available"] < 1800 or r["swap_used"] > 6500:
         acts.append({"defer": "new_model_loads", "why": "ram_or_swap_guard"})
     return acts

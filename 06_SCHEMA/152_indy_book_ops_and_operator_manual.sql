@@ -426,6 +426,9 @@ ON CONFLICT (route_id) DO UPDATE SET
     status = EXCLUDED.status,
     updated_at = now();
 
+DO $$
+BEGIN
+    EXECUTE $view$
 CREATE OR REPLACE VIEW lucidota_canon.manual_current AS
 WITH live_routes AS (
     SELECT jsonb_agg(
@@ -442,34 +445,109 @@ WITH live_routes AS (
     count(*) AS route_count
     FROM lucidota_canon.api_route_catalog
     WHERE route_id IN (
-        'manual_current', 'canon_current', 'canon_versions', 'active_goal', 'api_workflow_registry',
-        'capability_registry', 'model_registry', 'provider_registry', 'workflow_registry',
+        'manual_current', 'canon_current', 'canon_versions', 'active_goal', 'active_operation_mode', 'workload_audit_current', 'workload_audit_telemetry_current', 'workload_audit_ledger', 'api_workflow_registry',
+        'capability_registry', 'capability_current', 'model_registry', 'model_registry_current', 'model_routing_current', 'model_routing_blockers',
+        'provider_registry', 'provider_current', 'workflow_registry', 'workflow_current',
+        'skill_policy_current', 'root_orchestrator_current', 'chrono_current',
+        'api_root_law_docs', 'api_bible_edges', 'api_bible_manuals', 'api_bible_nodes', 'api_bible_route_catalog', 'api_bible_subtree', 'fn_bible_node_sort_key', 'agent_thread_runtime',
+        'indy_reads_self_model', 'indy_reads_llmwiki_entry', 'indy_reads_hunch_log', 'indy_reads_learning_queue', 'indy_reads_system_map', 'indy_reads_mistake_ledger', 'indy_reads_research_source', 'indy_reads_metacognition_current',
+        'indy_reads_target_model_loadout_current', 'indy_reads_vram_coprocessor_fabric_current',
+        'decompose_prompt_to_work_orders', 'file_prompt', 'link_prompt_work_order',
+        'prompt_recent', 'prompts_filed', 'prompt_work_order_links', 'prompt_unlinked', 'prompt_catalog_status',
         'daemon_status', 'bytewax_compact_windows', 'indy_queue', 'indy_responses',
-        'cloud_packet', 'book_source', 'book_scan', 'book_read_queue', 'book_note',
+        'cloud_packet', 'cli_process_receipts', 'payload_archive_status',
+        'book_source', 'book_scan', 'book_read_queue', 'book_note',
         'lora_candidate', 'lora_adapter', 'training_job', 'book_receipt'
     )
 ),
 goal_row AS (
-    SELECT to_jsonb(g) AS current_goal
+    SELECT jsonb_build_object(
+        'goal_id', g.goal_id,
+        'title', g.title,
+        'status', g.status,
+        'current_handoff_path', g.current_handoff_path,
+        'updated_at', g.updated_at
+    ) AS current_goal
     FROM lucidota_canon.active_goal g
     ORDER BY updated_at DESC
     LIMIT 1
 ),
 daemon_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(d) ORDER BY d.daemon_name), '[]'::jsonb) AS daemon_status
+    SELECT COALESCE(jsonb_agg(to_jsonb(d.*) ORDER BY d.daemon_name), '[]'::jsonb) AS daemon_status
     FROM lucidota_canon.daemon_status d
 ),
-model_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(m) ORDER BY m.model_id), '[]'::jsonb) AS model_registry
-    FROM lucidota_canon.model_registry m
+route_refs AS (
+    SELECT COALESCE(jsonb_agg(route_id ORDER BY route_id), '[]'::jsonb)
+        || jsonb_build_array('sub_orchestrator_threads', 'sub_orchestrator_grants', 'indy_daemon_once', 'indy_runtime_broker_snapshot') AS route_refs
+    FROM lucidota_canon.api_route_catalog
+    WHERE route_id IN (
+        'manual_current', 'canon_current', 'canon_versions', 'active_goal', 'active_operation_mode', 'workload_audit_current', 'workload_audit_telemetry_current', 'workload_audit_ledger', 'api_workflow_registry',
+        'capability_registry', 'capability_current', 'model_registry', 'model_registry_current',
+        'provider_registry', 'provider_current', 'workflow_registry', 'workflow_current',
+        'skill_policy_current', 'root_orchestrator_current', 'chrono_current',
+        'api_root_law_docs', 'api_bible_edges', 'api_bible_manuals', 'api_bible_nodes', 'api_bible_route_catalog', 'api_bible_subtree', 'fn_bible_node_sort_key', 'agent_thread_runtime',
+        'daemon_status', 'api_daemon_status', 'bytewax_compact_windows', 'indy_queue', 'indy_responses',
+        'workload_audit_current', 'workload_audit_ledger', 'provider_call_receipt', 'model_invocation_receipt', 'agent_work_receipt', 'unproven_work_debt',
+        'cloud_packet', 'book_source', 'book_scan', 'book_read_queue', 'book_note',
+        'lora_candidate', 'lora_adapter', 'training_job', 'book_receipt',
+        'indy_reads_self_model', 'indy_reads_llmwiki_entry', 'indy_reads_hunch_log', 'indy_reads_learning_queue', 'indy_reads_system_map', 'indy_reads_mistake_ledger', 'indy_reads_research_source', 'indy_reads_metacognition_current',
+        'indy_reads_target_model_loadout_current', 'indy_reads_vram_coprocessor_fabric_current',
+        'ontology_work_batch', 'ontology_work_item', 'todo_current',
+        'chrono_current',
+        'prompts_filed', 'prompt_work_order_links',
+        'prompt_recent', 'prompt_unlinked', 'prompt_catalog_status',
+        'file_prompt', 'link_prompt_work_order', 'decompose_prompt_to_work_orders',
+        'cli_process_receipts', 'payload_archive_status', 'api_root_law_docs', 'capability_current',
+        'api_test_execution_receipts', 'flow_receipts', 'flow_specs',
+        'api_bible_edges', 'api_bible_manuals', 'api_bible_nodes', 'api_bible_route_catalog',
+        'api_bible_subtree', 'fn_bible_node_sort_key', 'fn_bible_node_material',
+        'command_registry', 'schema_owner_manifest',
+        'surface_registry', 'renderer_registry', 'controller_grant', 'agent_thread_runtime',
+        'workload_audit_current', 'workload_audit_ledger', 'provider_call_receipt', 'model_invocation_receipt', 'agent_work_receipt', 'unproven_work_debt',
+        'model_registry_current', 'model_routing_current', 'model_routing_blockers', 'sheet_current', 'api_sheet_current', 'api_model_routing_blockers', 'api_route_catalog', 'api_daemon_status', 'api_active_goal', 'api_canon_current', 'api_canon_versions',
+        'nodes', 'manuals', 'route_catalog', 'edges', 'get_subtree'
+    )
 ),
-provider_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY p.provider_key), '[]'::jsonb) AS provider_registry
-    FROM lucidota_canon.provider_registry p
-),
-workflow_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(w) ORDER BY w.workflow_id), '[]'::jsonb) AS workflow_registry
-    FROM lucidota_canon.workflow_registry w
+counts AS (
+    SELECT
+        (SELECT count(*) FROM lucidota_canon.model_registry) AS model_registry_count,
+        (SELECT count(*) FROM lucidota_canon.provider_registry) AS provider_registry_count,
+        (SELECT count(*) FROM lucidota_canon.workflow_registry) AS workflow_registry_count,
+        (SELECT count(*) FROM lucidota_canon.skill_policy_current) AS skill_policy_current_count,
+        (SELECT count(*) FROM lucidota_canon.chrono_current) AS chrono_current_count,
+        (SELECT count(*) FROM lucidota_canon.payload_archive_status) AS payload_archive_status_count,
+        (SELECT count(*) FROM lucidota_canon.todo_current) AS todo_current_count,
+        (SELECT count(*) FROM lucidota_canon.canon_current) AS canon_current_count,
+        (SELECT count(*) FROM lucidota_canon.canon_versions) AS canon_versions_count,
+        (SELECT count(*) FROM lucidota_canon.command_registry) AS command_registry_count,
+        (SELECT count(*) FROM lucidota_canon.schema_owner_manifest) AS schema_owner_manifest_count,
+        (SELECT count(*) FROM lucidota_canon.surface_registry) AS surface_registry_count,
+        (SELECT count(*) FROM lucidota_canon.renderer_registry) AS renderer_registry_count,
+        (SELECT count(*) FROM lucidota_canon.controller_grant) AS controller_grant_count,
+        (SELECT count(*) FROM lucidota_canon.agent_thread_runtime) AS agent_thread_runtime_count,
+        (SELECT count(*) FROM lucidota_canon.root_law_docs) AS root_law_docs_count,
+        (SELECT count(*) FROM lucidota_canon.api_root_law_docs) AS api_root_law_docs_count,
+        (SELECT count(*) FROM lucidota_canon.api_route_catalog) AS api_route_catalog_count,
+        (SELECT count(*) FROM lucidota_canon.api_test_execution_receipts) AS api_test_execution_receipts_count,
+        (SELECT count(*) FROM lucidota_canon.cli_process_receipts) AS cli_process_receipts_count,
+        (SELECT count(*) FROM lucidota_canon.flow_receipts) AS flow_receipts_count,
+        (SELECT count(*) FROM lucidota_canon.bytewax_compact_windows) AS bytewax_compact_windows_count,
+        (SELECT count(*) FROM lucidota_canon.workload_audit_ledger) AS workload_audit_ledger_count,
+        (SELECT count(*) FROM lucidota_canon.workload_audit_current) AS workload_audit_current_count,
+        (SELECT count(*) FROM lucidota_canon.workload_audit_telemetry_current) AS workload_audit_telemetry_current_count,
+        (SELECT count(*) FROM lucidota_canon.provider_call_receipt) AS provider_call_receipt_count,
+        (SELECT count(*) FROM lucidota_canon.model_invocation_receipt) AS model_invocation_receipt_count,
+        (SELECT count(*) FROM lucidota_canon.agent_work_receipt) AS agent_work_receipt_count,
+        (SELECT count(*) FROM lucidota_canon.unproven_work_debt) AS unproven_work_debt_count,
+        (SELECT count(*) FROM lucidota_control.active_operation_mode) AS active_operation_mode_count,
+        (SELECT count(*) FROM lucidota_canon.flow_specs) AS flow_specs_count,
+        (SELECT count(*) FROM lucidota_canon.model_registry_current) AS model_registry_current_count,
+        (SELECT count(*) FROM lucidota_canon.provider_current) AS provider_current_count,
+        (SELECT count(*) FROM lucidota_canon.workflow_current) AS workflow_current_count,
+        (SELECT count(*) FROM lucidota_canon.capability_current) AS capability_current_count,
+        (SELECT count(*) FROM lucidota_canon.sheet_current) AS sheet_current_count,
+        (SELECT count(*) FROM lucidota_canon.model_routing_current) AS model_routing_current_count,
+        (SELECT count(*) FROM lucidota_canon.model_routing_blockers) AS model_routing_blockers_count
 )
 SELECT
     'LUCIDOTA_OPERATOR_MANUAL'::text AS manual_id,
@@ -481,39 +559,142 @@ SELECT
         'read_surface', 'PostgREST safe views and RPCs only',
         'write_surface', 'DB work orders and receipts only',
         'legacy_book_watcher', 'retired as authority',
-        'manual_source', 'live route catalog + daemon status + current goal'
+        'skill_layers', 'execution aids only',
+        'manual_source', 'live route catalog + daemon status + current goal + active operation mode + workload telemetry + skill policy + capability registry + provider registry + workflow current packet + sub-orchestrators packet + Indy_READs exocortex packets + receipts packet + model routing blockers packet + rpc alias packets + queue + bytewax'
     ) AS auth_expectations,
     jsonb_build_object(
         'book_ingest', 'book_source -> book_scan -> book_read_queue -> book_note -> lora_candidate -> lora_adapter -> training_job -> book_receipt',
         'indy_loop', 'queued row -> /indy_queue -> indy_daemon once/loop -> /indy_responses or receipt row',
+        'queue_loop', 'indy_queue -> indy_responses -> bytewax_compact_windows -> cloud_packet',
         'mamba_role', 'DB queue/receipt/window watcher only; no BOOKS filesystem authority'
     ) AS work_order_flow,
     jsonb_build_object(
         'current_goal', goal_row.current_goal,
         'daemon_status', daemon_rows.daemon_status,
-        'model_registry', model_rows.model_registry,
-        'provider_registry', provider_rows.provider_registry,
-        'workflow_registry', workflow_rows.workflow_registry
+        'model_registry', jsonb_build_object('route_ref', 'model_registry', 'count', counts.model_registry_count),
+        'provider_registry', jsonb_build_object('route_ref', 'provider_registry', 'count', counts.provider_registry_count),
+        'workflow_registry', jsonb_build_object('route_ref', 'workflow_registry', 'count', counts.workflow_registry_count),
+        'root_orchestrator_current', jsonb_build_object('route_ref', 'root_orchestrator_current'),
+        'skill_policy_current', jsonb_build_object('route_ref', 'skill_policy_current', 'count', counts.skill_policy_current_count),
+        'model_registry_current', jsonb_build_object('route_ref', 'model_registry_current', 'count', counts.model_registry_current_count),
+        'model_routing_current', COALESCE((SELECT jsonb_agg(to_jsonb(mrc) ORDER BY mrc.refreshed_at DESC) FROM lucidota_canon.model_routing_current mrc), '[]'::jsonb),
+        'model_routing_blockers', COALESCE((SELECT jsonb_agg(to_jsonb(mrb) ORDER BY mrb.refreshed_at DESC) FROM lucidota_canon.model_routing_blockers mrb), '[]'::jsonb),
+        'provider_current', jsonb_build_object('route_ref', 'provider_current', 'count', counts.provider_current_count),
+        'workflow_current', jsonb_build_object('route_ref', 'workflow_current', 'count', counts.workflow_current_count),
+        'capability_current', jsonb_build_object('route_ref', 'capability_current', 'count', counts.capability_current_count),
+        'root_orchestrator_current', jsonb_build_array(jsonb_build_object('route_ref', 'root_orchestrator_current', 'orchestrator_id', 'ROOT_ORCHESTRATOR_CURRENT', 'status', 'active')),
+        'sub_orchestrator_threads', jsonb_build_array(jsonb_build_object('route_ref', 'agent_thread_runtime', 'count', counts.agent_thread_runtime_count)),
+        'sub_orchestrator_grants', jsonb_build_array(jsonb_build_object('route_ref', 'controller_grant', 'count', counts.controller_grant_count)),
+        'chrono_current', jsonb_build_object('route_ref', 'chrono_current', 'count', counts.chrono_current_count),
+        'payload_archive_status', jsonb_build_object('route_ref', 'payload_archive_status', 'count', counts.payload_archive_status_count),
+        'todo_current', jsonb_build_object('route_ref', 'todo_current', 'count', counts.todo_current_count),
+        'canon_current', jsonb_build_object('route_ref', 'canon_current', 'count', counts.canon_current_count),
+        'canon_versions', jsonb_build_object('route_ref', 'canon_versions', 'count', counts.canon_versions_count),
+        'command_registry', jsonb_build_object('route_ref', 'command_registry', 'count', counts.command_registry_count),
+        'schema_owner_manifest', jsonb_build_object('route_ref', 'schema_owner_manifest', 'count', counts.schema_owner_manifest_count),
+        'surface_registry', jsonb_build_object('route_ref', 'surface_registry', 'count', counts.surface_registry_count),
+        'renderer_registry', jsonb_build_object('route_ref', 'renderer_registry', 'count', counts.renderer_registry_count),
+        'controller_grant', jsonb_build_object('route_ref', 'controller_grant', 'count', counts.controller_grant_count),
+        'agent_thread_runtime', jsonb_build_object('route_ref', 'agent_thread_runtime', 'count', counts.agent_thread_runtime_count),
+        'root_law_docs', jsonb_build_object('route_ref', 'root_law_docs', 'count', counts.root_law_docs_count),
+        'api_root_law_docs', jsonb_build_object('route_ref', 'api_root_law_docs', 'count', counts.api_root_law_docs_count),
+        'api_route_catalog', jsonb_build_object('route_ref', 'api_route_catalog', 'count', counts.api_route_catalog_count),
+        'api_test_execution_receipts', jsonb_build_object('route_ref', 'api_test_execution_receipts', 'count', counts.api_test_execution_receipts_count),
+        'cli_process_receipts', jsonb_build_object('route_ref', 'cli_process_receipts', 'count', counts.cli_process_receipts_count),
+        'api_flow_receipts', jsonb_build_object('route_ref', 'api_flow_receipts', 'count', counts.flow_receipts_count),
+        'api_bytewax_windows', jsonb_build_object('route_ref', 'api_bytewax_windows', 'count', counts.bytewax_compact_windows_count),
+        'workload_audit_ledger', jsonb_build_object('route_ref', 'workload_audit_ledger', 'count', counts.workload_audit_ledger_count),
+        'workload_audit_current', jsonb_build_object('route_ref', 'workload_audit_current', 'count', counts.workload_audit_current_count),
+        'workload_audit_telemetry_current', COALESCE((SELECT to_jsonb(watc) FROM lucidota_canon.workload_audit_telemetry_current watc LIMIT 1), '{}'::jsonb),
+        'indy_reads_runtime', jsonb_build_object(
+            'route_refs', jsonb_build_array(
+                'indy_reads_self_model',
+                'indy_reads_llmwiki_entry',
+                'indy_reads_hunch_log',
+                'indy_reads_learning_queue',
+                'indy_reads_system_map',
+                'indy_reads_mistake_ledger',
+                'indy_reads_research_source',
+                'indy_reads_metacognition_current',
+                'indy_reads_target_model_loadout_current',
+                'indy_reads_vram_coprocessor_fabric_current'
+            ),
+            'count', 10
+        ),
+        'provider_call_receipt', jsonb_build_object('route_ref', 'provider_call_receipt', 'count', counts.provider_call_receipt_count),
+        'model_invocation_receipt', jsonb_build_object('route_ref', 'model_invocation_receipt', 'count', counts.model_invocation_receipt_count),
+        'agent_work_receipt', jsonb_build_object('route_ref', 'agent_work_receipt', 'count', counts.agent_work_receipt_count),
+        'unproven_work_debt', jsonb_build_object('route_ref', 'unproven_work_debt', 'count', counts.unproven_work_debt_count),
+        'active_operation_mode', COALESCE((SELECT to_jsonb(aom) FROM lucidota_control.active_operation_mode aom LIMIT 1), '{}'::jsonb),
+        'flow_specs', jsonb_build_object('route_ref', 'flow_specs', 'count', counts.flow_specs_count),
+        'orchestration', jsonb_build_object(
+            'mode', 'sub_orchestrator',
+            'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+            'strict_priority_stack', lucidota_control.live_truth_priority_stack()
+        )
     ) AS live_surface,
     jsonb_build_array(
-        'curl -sS http://127.0.0.1:3000/manual_current?limit=1',
-        'curl -sS http://127.0.0.1:3000/daemon_status?limit=1',
-        '.venv/bin/python scripts/indy_daemon.py --once --json',
-        '.venv/bin/python scripts/indy_runtime_broker.py snapshot --json',
-        '.venv/bin/python scripts/luci_help_manual.py manual --json'
+        'manual_current',
+        'daemon_status',
+        'root_orchestrator_current',
+        'model_registry_current',
+        'model_routing_current',
+        'model_routing_blockers',
+        'workload_audit_current',
+        'workload_audit_ledger',
+        'indy_queue',
+        'indy_responses',
+        'api_route_catalog',
+        'indy_daemon_once',
+        'indy_runtime_broker_snapshot',
+        'manual_current'
     ) AS next_commands,
+    route_refs.route_refs AS next_command_refs,
     jsonb_build_array(
         'BOOKS folder watcher authority',
         'hand-written manual slop',
         'raw corpus prompts',
         'unbounded whole-table dumps'
-    ) AS retired_surfaces
+    ) AS retired_surfaces,
+    route_refs.route_refs,
+    route_refs.route_refs AS surface_refs,
+    jsonb_build_array('renderer_registry', 'command_registry') AS renderer_refs,
+    jsonb_build_array('capability_current', 'capability_registry') AS capability_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'provider_secret_isolation', 'load through an explicit quarantine file or environment loader owned by the operator; no raw keys in chat, docs, SQL, or receipts'
+    ) AS orchestration,
+    jsonb_build_array(
+        jsonb_build_object('route_ref', 'root_orchestrator_current', 'role', 'root_orchestrator', 'status', 'active')
+    ) AS sub_orchestrators,
+    jsonb_build_array(
+        jsonb_build_object('thread_ref', 'agent_thread_runtime', 'status', 'active')
+    ) AS sub_orchestrator_threads,
+    jsonb_build_array(
+        jsonb_build_object('grant_ref', 'controller_grant', 'status', 'active')
+    ) AS sub_orchestrator_grants,
+    jsonb_build_object(
+        'count', counts.model_routing_blockers_count,
+        'route_ref', 'model_routing_blockers'
+    ) AS blockers,
+    jsonb_build_object(
+        'cli_process_receipts', true,
+        'flow_receipts', true,
+        'api_test_execution_receipts', true
+    ) AS receipts,
+    goal_row.current_goal AS goal,
+    jsonb_build_object(
+        'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; receipts prove the thing happened.'
+    ) AS db_law
 FROM live_routes
 CROSS JOIN daemon_rows
-CROSS JOIN model_rows
-CROSS JOIN provider_rows
-CROSS JOIN workflow_rows
+CROSS JOIN route_refs
+CROSS JOIN counts
 LEFT JOIN goal_row ON true;
+$view$;
+END$$;
 
 GRANT USAGE ON SCHEMA lucidota_indy TO mfspx;
 GRANT SELECT, INSERT, UPDATE ON lucidota_indy.book_scan, lucidota_indy.book_read_queue, lucidota_indy.book_note,

@@ -45,9 +45,9 @@ owner_rows AS (
     ) o
 ),
 active_workflow_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(w) ORDER BY w.workflow_name), '[]'::jsonb) AS active_workflows
+    SELECT COALESCE(jsonb_agg(workflow_name ORDER BY workflow_name), '[]'::jsonb) AS active_workflows
     FROM (
-        SELECT *
+        SELECT workflow_name
         FROM lucidota_canon.workflow_registry
         WHERE status = 'active'
         ORDER BY workflow_name
@@ -81,14 +81,35 @@ SELECT
         'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; receipts prove the thing happened.'
     ) AS db_law,
     jsonb_build_array(
-        'curl -sS http://127.0.0.1:3000/workflow_current?limit=1',
-        'curl -sS http://127.0.0.1:3000/workflow_registry?limit=5',
-        'curl -sS http://127.0.0.1:3000/api_workflow_registry?limit=5',
-        './luci workflow current --json',
-        './luci workflow registry --json',
-        './luci api workflow registry --json',
-        './luci api workflow registry raw --json'
-    ) AS next_commands
+        'workflow_current',
+        'workflow_registry',
+        'api_workflow_registry'
+    ) AS next_commands,
+    jsonb_build_array(
+        'manual_current',
+        'root_orchestrator_current',
+        'daemon_status',
+        'capability_current',
+        'provider_current',
+        'model_registry_current',
+        'model_routing_current',
+        'model_routing_blockers',
+        'sheet_current',
+        'todo_current',
+        'command_registry',
+        'surface_registry',
+        'renderer_registry',
+        'schema_owner_manifest',
+        'controller_grant',
+        'agent_thread_runtime',
+        'workflow_registry'
+    ) AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'active_workflows', active_workflow_rows.active_workflows
+    ) AS orchestration
 FROM workflow_rows
 CROSS JOIN goal_row
 CROSS JOIN status_rows

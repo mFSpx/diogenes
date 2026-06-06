@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """Canonical LUCIDOTA status ledger maintainer.
 
+Usage:
+  python3 scripts/lucidota_status_ledger.py --check [--json]
+  python3 scripts/lucidota_status_ledger.py --init [--render-html]
+  python3 scripts/lucidota_status_ledger.py --set <name> --status <s> --progress <n> --executed <yes|no> [--json]
+
+Exit codes: 0=success/check-ok, 1=check-failed, 2=config/args error.
+
 Hard law:
 If it exists, it is listed.
 If it ran, it has evidence.
@@ -385,6 +392,7 @@ def main() -> int:
     parser.add_argument("--next")
     parser.add_argument("--blocker", default=None)
     parser.add_argument("--set-next-from-target-report")
+    parser.add_argument("--json", action="store_true", help="Emit structured JSON to stdout.")
     args = parser.parse_args()
 
     if args.init:
@@ -394,7 +402,10 @@ def main() -> int:
     if args.set_name:
         missing = [flag for flag in ("status", "progress", "executed") if getattr(args, flag) is None]
         if missing:
-            print(f"missing required --set fields: {', '.join(missing)}", file=sys.stderr)
+            msg = f"missing required --set fields: {', '.join(missing)} (attempted: --set {args.set_name}) -- fix: provide all of --status, --progress, --executed"
+            print(f"ERROR {msg}", file=sys.stderr)
+            if args.json:
+                print(json.dumps({"status": "ERROR", "error": msg, "exit_code": 2}, sort_keys=True))
             return 2
         set_entry(args)
     if args.render_html and not args.init:
@@ -406,7 +417,11 @@ def main() -> int:
         if errors:
             for error in errors:
                 print(f"CHECK_FAIL {error}", file=sys.stderr)
+            if args.json:
+                print(json.dumps({"status": "FAIL", "errors": errors}, sort_keys=True))
             return 1
+        if args.json:
+            print(json.dumps({"status": "PASS", "errors": []}, sort_keys=True))
         print("CHECK_OK status ledger valid")
     if not any([args.init, args.set_name, args.render_html, args.check, args.set_next_from_target_report]):
         parser.print_help()

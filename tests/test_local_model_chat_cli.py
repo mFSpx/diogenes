@@ -18,14 +18,14 @@ def test_local_llama_execute_receipt_measures_tokens(tmp_path, monkeypatch):
         local_chat,
         "post_json",
         lambda url, payload, timeout: {
-            "choices": [{"message": {"content": "ok from mamba"}}],
-            "model": "Falcon3-Mamba-7B-Instruct-Q2_K.gguf",
+            "choices": [{"message": {"content": "ok from deepseek"}}],
+            "model": "DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
             "usage": {"prompt_tokens": 5, "completion_tokens": 3, "total_tokens": 8},
         },
     )
 
     receipt = local_chat.probe_lane(
-        lane="mamba_gpu",
+        lane="deepseek",
         prompt="prove tokens",
         system="be terse",
         max_tokens=8,

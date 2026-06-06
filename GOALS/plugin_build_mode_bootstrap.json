@@ -1,5 +1,21 @@
 {
   "adapter_registry": {
+    "bonsai_chain": {
+      "dry_run_cmd": "python3 scripts/model_runner_cli.py bonsai-chain --prompt ping --json",
+      "endpoint": "luci model bonsai-chain --prompt @PROMPT",
+      "env_key_names": [],
+      "execute_cmd": "python3 scripts/model_runner_cli.py bonsai-chain --prompt @PROMPT --json --execute",
+      "expected_receipt_glob": "05_OUTPUTS/model_invocations/model_runner_bonsai_chain_*.json",
+      "invoke_cmd": "python3 scripts/model_runner_cli.py bonsai-chain --prompt @PROMPT --json --execute",
+      "provider_type": "local",
+      "safety_limits": [
+        "explicit_start",
+        "shared_kv_chain",
+        "deterministic_needle_digest"
+      ],
+      "selection_rule": "Explicit Bonsai 1 -> Needles -> Bonsai 2 pathing lane; use when the task asks for Bonsai/MambaGraph/Needles chain routing.",
+      "stop_or_rollback_cmd": "none"
+    },
     "cohere": {
       "dry_run_cmd": "python3 scripts/model_runner_cli.py cohere-chat --prompt ping --max-tokens 8 --json",
       "endpoint": "https://api.cohere.com/v2/chat",
@@ -14,6 +30,22 @@
         "dry_run_default",
         "secret_values_forbidden"
       ],
+      "stop_or_rollback_cmd": "none"
+    },
+    "gemini": {
+      "dry_run_cmd": "python3 scripts/model_runner_cli.py gemini-chat --prompt ping --max-tokens 8 --json",
+      "endpoint": "https://generativelanguage.googleapis.com/v1beta/models",
+      "env_key_names": [
+        "GEMINI_API_KEY"
+      ],
+      "execute_cmd": "python3 scripts/model_runner_cli.py gemini-chat --prompt @PROMPT --max-tokens 256 --json --execute",
+      "expected_receipt_glob": "05_OUTPUTS/model_invocations/gemini_chat_*.json",
+      "provider_type": "cloud",
+      "safety_limits": [
+        "dry_run_default",
+        "secret_values_forbidden"
+      ],
+      "selection_rule": "Active Gemini chat lane; use when Gemini or Google API key is present and the task is cloud-appropriate.",
       "stop_or_rollback_cmd": "none"
     },
     "groq": {
@@ -43,12 +75,12 @@
     },
     "llama_cpp_heavy": {
       "dry_run_cmd": "python3 scripts/goal_model_fabric_control.py status --json && bash -lc \"source scripts/lucidota_safe_ops_env.sh; python3 scripts/lucidota_strict_model_stack_admission.py --json\"",
-      "endpoint": "OpenAI-compatible llama.cpp servers on 8080-8083 when explicitly launched",
+      "endpoint": "OpenAI-compatible llama.cpp servers on 8082 when explicitly launched",
       "env_key_names": [],
-      "execute_cmd": "python3 scripts/goal_model_fabric_control.py start --target mamba_cpu --target bonsai --wait 45 --json  # add --target deepseek only when GPU lane is explicitly desired",
-      "expected_invocation_receipt_glob": "05_OUTPUTS/model_invocations/local_model_chat_{deepseek,mamba_cpu,bonsai,mamba_gpu}_execute_*.json",
+      "execute_cmd": "python3 scripts/goal_model_fabric_control.py start --target bonsai --wait 45 --json",
+      "expected_invocation_receipt_glob": "05_OUTPUTS/model_invocations/local_model_chat_{deepseek,bonsai}_execute_*.json",
       "expected_receipt_glob": "05_OUTPUTS/goals/goal_model_fabric_control_*.json",
-      "invoke_cmd": "python3 scripts/model_runner_cli.py local-chat --lane mamba_gpu --prompt @PROMPT --max-tokens 64 --json --execute  # lane can be deepseek|mamba_cpu|bonsai|mamba_gpu",
+      "invoke_cmd": "python3 scripts/model_runner_cli.py local-chat --lane bonsai --prompt @PROMPT --max-tokens 64 --json --execute  # lane can be deepseek|bonsai",
       "provider_type": "local",
       "safety_limits": [
         "explicit_start",
@@ -58,6 +90,22 @@
         "status_after_start"
       ],
       "stop_or_rollback_cmd": "python3 scripts/goal_model_fabric_control.py stop --target heavy"
+    },
+    "llxprt_code": {
+      "dry_run_cmd": "cd 01_REPOS/llxprt-code && npx @vybestack/llxprt-code --version",
+      "endpoint": "local CLI npm package/binary for terminal coding",
+      "env_key_names": [],
+      "execute_cmd": "cd 01_REPOS/llxprt-code && npx @vybestack/llxprt-code --profile-load local -- \"@TASK\"",
+      "expected_receipt_glob": "05_OUTPUTS/goals/agent_llxprt_code_*.json",
+      "provider_type": "agent_cli",
+      "safety_limits": [
+        "no_implicit_install",
+        "no_secret_write",
+        "single_prompt",
+        "evidence_receipt_required"
+      ],
+      "stop_or_rollback_cmd": "none",
+      "upstream_repo": "https://github.com/vybestack/llxprt-code"
     },
     "needle_swarm_6x": {
       "dry_run_cmd": "python3 scripts/goal_model_fabric_control.py status --json",
@@ -73,22 +121,6 @@
         "explicit_start"
       ],
       "stop_or_rollback_cmd": "python3 scripts/goal_model_fabric_control.py stop --target needles"
-    },
-    "llxprt_code": {
-      "upstream_repo": "https://github.com/vybestack/llxprt-code",
-      "dry_run_cmd": "cd 01_REPOS/llxprt-code && npx @vybestack/llxprt-code --version",
-      "endpoint": "local CLI npm package/binary for terminal coding",
-      "env_key_names": [],
-      "execute_cmd": "cd 01_REPOS/llxprt-code && npx @vybestack/llxprt-code --profile-load local -- \"@TASK\"",
-      "expected_receipt_glob": "05_OUTPUTS/goals/agent_llxprt_code_*.json",
-      "provider_type": "agent_cli",
-      "safety_limits": [
-        "no_implicit_install",
-        "no_secret_write",
-        "single_prompt",
-        "evidence_receipt_required"
-      ],
-      "stop_or_rollback_cmd": "none"
     }
   },
   "agent_packet_exporter": {
@@ -108,6 +140,13 @@
       "default_mode": "dry_run",
       "env": "COHERE_API_KEY or CO_API_KEY",
       "name": "cohere"
+    },
+    {
+      "adapter": "scripts/model_runner_cli.py gemini-chat",
+      "default_mode": "execute",
+      "env": "GEMINI_API_KEY or GOOGLE_API_KEY",
+      "name": "gemini",
+      "notes": "active Gemini chat lane through model_runner_cli gemini-chat"
     }
   ],
   "code_budget": {
@@ -151,10 +190,7 @@
     "local_deepseek_execute_current": "05_OUTPUTS/model_invocations/local_model_chat_deepseek_execute_20260526T191641067444Z.json",
     "local_generation_current": "05_OUTPUTS/goals/goal3_current_local_generation_smoke_20260526T042643Z.json",
     "local_generation_smoke": "05_OUTPUTS/goals/goal3_local_generation_smoke_20260526T015559Z.json",
-    "local_mamba_cpu_execute_current": "05_OUTPUTS/model_invocations/local_model_chat_mamba_cpu_execute_20260526T191655393582Z.json",
-    "local_mamba_gpu_execute_current": "05_OUTPUTS/model_invocations/local_model_chat_mamba_gpu_execute_20260526T191746663431Z.json",
     "local_needle_execute_current_glob": "05_OUTPUTS/model_invocations/local_model_chat_needle_*_execute_20260526T191*.json",
-    "mamba_gpu_generation_current": "05_OUTPUTS/goals/goal3_mamba_gpu_generation_smoke_20260526T042837Z.json",
     "model_fabric_live": "05_OUTPUTS/goals/goal3_model_fabric_live_20260526T015103Z.json",
     "model_fabric_status_after_local_probes": "05_OUTPUTS/goals/goal_model_fabric_control_20260526T192322Z.json",
     "model_fabric_status_current": "05_OUTPUTS/goals/goal_model_fabric_control_20260526T042920Z.json",
@@ -213,22 +249,10 @@
       "start": "scripts/lucidota_start_needle_swarm.sh"
     },
     {
-      "name": "mamba7b_ram",
-      "port": 8081,
-      "risk": "medium_cpu_ram",
-      "start": "scripts/lucidota_start_mamba_llama.sh"
-    },
-    {
       "name": "bonsai4b_ram",
       "port": 8082,
       "risk": "medium_cpu_ram",
       "start": "scripts/lucidota_start_bonsai_ternary_llama.sh"
-    },
-    {
-      "name": "deepseek_r1_qwen_1p5b_gpu",
-      "port": 8080,
-      "risk": "vram",
-      "start": "scripts/lucidota_start_deepseek_llama.sh"
     }
   ],
   "mode": "codex_first_byo_llm",
@@ -240,7 +264,7 @@
     "stop_optional": "python3 scripts/goal_model_fabric_control.py stop --target optional"
   },
   "model_fabric_start_control": {
-    "command": "python3 scripts/goal_model_fabric_control.py start --target <needles|mamba_cpu|bonsai|deepseek> --wait <seconds> --json",
+    "command": "python3 scripts/goal_model_fabric_control.py start --target <needles|bonsai> --wait <seconds> --json",
     "receipt": "05_OUTPUTS/goals/goal_model_fabric_control_*.json",
     "rule": "explicit start only; status receipt after start; no resident GOALS daemon"
   },

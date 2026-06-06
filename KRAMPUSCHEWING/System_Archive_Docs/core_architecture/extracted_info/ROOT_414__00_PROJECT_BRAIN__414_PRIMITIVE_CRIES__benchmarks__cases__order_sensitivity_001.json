@@ -1,0 +1,17 @@
+{
+  "benchmark_id": "order_sensitivity_001",
+  "title": "Temporal order matters",
+  "input_text": "At 9:00 AM the tenant sent the repair request. At 9:30 AM the landlord texted that no request had been received. At 9:45 AM the landlord replied to the original 9:00 AM email thread.",
+  "expected": {
+    "required_primitives": ["DOCUMENT_EXAMINATION", "TEMPORAL_PRECEDENCE", "DIRECTION_OF_CAUSALITY", "CHAIN_OF_CUSTODY"],
+    "forbidden_primitives": ["ARCHONIC_CONTROL_GRID", "THE_SPIRAL_IS_COMPLETE"],
+    "allowed_bps": [50, 69],
+    "must_have_falsifier": true,
+    "must_have_local_gate": true,
+    "claim_lifecycle": ["CLAIM_UNVERIFIED", "CORROBORATION_REQUIRED"]
+  },
+  "judge_focus": [
+    "Does it preserve event order?",
+    "Does it identify contradiction without overclaiming intent?"
+  ]
+}

@@ -22,7 +22,7 @@ def test_swarm_usage_ledger_aggregates_local_groq_cohere_and_main(tmp_path):
         {
             "schema": "lucidota.model_invocation.local_chat.v1",
             "provider": "local",
-            "lane": "mamba_gpu",
+            "lane": "bonsai",
             "status": "PASS",
             "token_accounting": {"total_tokens": 8, "source": "provider_usage"},
         },

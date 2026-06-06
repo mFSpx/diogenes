@@ -117,7 +117,7 @@ BEGIN
     END;
 
     acceptance_test := CASE
-        WHEN subsystem = 'manual_api' THEN 'curl the live route and verify the prompt ledger packet reflects the current API truth.'
+        WHEN subsystem = 'manual_api' THEN 'read the live route and verify the prompt ledger packet reflects the current API truth.'
         WHEN subsystem = 'book_ops' THEN 'verify book/LoRA rows are visible through PostgREST and preserve receipts.'
         WHEN subsystem = 'indy_daemon' THEN 'run the daemon once and verify queue/status/response rows transition.'
         WHEN subsystem = 'model_orchestration' THEN 'query model_registry/provider_registry and expose missing roles as blockers.'
@@ -239,7 +239,16 @@ SELECT
     p.source_path,
     p.received_at_basis,
     p.received_at_confidence,
-    p.detail,
+    CASE
+        WHEN p.detail->>'acceptance_test' = 'read the live route and verify the prompt ledger packet reflects the current API truth.' THEN
+            jsonb_set(
+                p.detail,
+                '{acceptance_test}',
+                to_jsonb('read the live route and verify the prompt ledger packet reflects the current API truth.'::text),
+                true
+            )
+        ELSE p.detail
+    END AS detail,
     p.created_at,
     p.updated_at,
     cardinality(p.linked_work_order_uuid) AS linked_work_order_count,
@@ -323,7 +332,34 @@ SELECT
     pc.linked_count,
     pc.latest_received_at,
     pc.latest_updated_at,
-    rc.prompt_route_count
+    rc.prompt_route_count,
+    jsonb_build_object(
+        'goal', jsonb_build_object(
+            'goal_id', 'prompt-ledger-catalog',
+            'title', 'Keep the prompt ledger, filing flow, and prompt surface current.',
+            'status', 'current'
+        ),
+        'db_law', jsonb_build_object(
+            'truth', 'Postgres/PostgREST is truth for the prompt ledger surface.',
+            'route_gate', '/prompt_catalog_status',
+            'receipt_gate', 'receipt-backed prompt filing and manual refresh'
+        ),
+        'next_commands', jsonb_build_array(
+            'prompt_catalog_status',
+            'prompt_recent',
+            'prompts_filed',
+            'prompt_work_order_links',
+            'prompt_unlinked'
+        ),
+        'next_command_refs', jsonb_build_array(
+            'prompt_catalog_status',
+            'prompt_recent',
+            'prompts_filed',
+            'prompt_work_order_links',
+            'prompt_unlinked',
+            'api_prompt_catalog_status'
+        )
+    ) AS packet
 FROM prompt_counts pc
 CROSS JOIN route_counts rc;
 
@@ -806,9 +842,6 @@ AS $$
     );
 $$;
 
-DROP FUNCTION IF EXISTS prompt_api.cloud_packet(uuid, integer, integer, text, text, boolean);
-DROP FUNCTION IF EXISTS lucidota_canon.cloud_packet(uuid, integer, integer, text, text, boolean);
-
 CREATE OR REPLACE FUNCTION prompt_api.cloud_packet(
     work_order_id uuid,
     max_chars integer DEFAULT 8000,
@@ -1085,154 +1118,6 @@ ON CONFLICT (route_id) DO UPDATE SET
     status = EXCLUDED.status,
     updated_at = now();
 
-CREATE OR REPLACE VIEW lucidota_canon.manual_current AS
-WITH live_routes AS (
-    SELECT jsonb_agg(
-        jsonb_build_object(
-            'route_id', route_id,
-            'method', method,
-            'path_pattern', path_pattern,
-            'description', description,
-            'target', target,
-            'status', status
-        )
-        ORDER BY route_id
-    ) AS route_list,
-    count(*) AS route_count
-    FROM lucidota_canon.api_route_catalog
-    WHERE route_id IN (
-        'manual_current', 'canon_current', 'canon_versions', 'active_goal', 'api_workflow_registry',
-        'capability_registry', 'model_registry', 'provider_registry', 'workflow_registry',
-        'daemon_status', 'bytewax_compact_windows', 'indy_queue', 'indy_responses',
-        'cloud_packet', 'book_source', 'book_scan', 'book_read_queue', 'book_note',
-        'lora_candidate', 'lora_adapter', 'training_job', 'book_receipt',
-        'ontology_work_batch', 'ontology_work_item', 'todo_current', 'skill_policy_current',
-        'root_orchestrator_current', 'prompts_filed', 'prompt_work_order_links',
-        'prompt_recent', 'prompt_unlinked', 'prompt_catalog_status',
-        'file_prompt', 'link_prompt_work_order', 'decompose_prompt_to_work_orders'
-    )
-),
-goal_row AS (
-    SELECT to_jsonb(g) AS current_goal
-    FROM lucidota_canon.active_goal g
-    ORDER BY updated_at DESC
-    LIMIT 1
-),
-daemon_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(d) ORDER BY d.daemon_name), '[]'::jsonb) AS daemon_status
-    FROM lucidota_canon.daemon_status d
-),
-model_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(m) ORDER BY m.model_id), '[]'::jsonb) AS model_registry
-    FROM lucidota_canon.model_registry m
-),
-provider_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY p.provider_key), '[]'::jsonb) AS provider_registry
-    FROM lucidota_canon.provider_registry p
-),
-workflow_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(w) ORDER BY w.workflow_id), '[]'::jsonb) AS workflow_registry
-    FROM lucidota_canon.workflow_registry w
-),
-todo_rows AS (
-    SELECT COALESCE(
-        jsonb_agg(to_jsonb(t) ORDER BY t.created_at DESC),
-        '[]'::jsonb
-    ) AS todo_current
-    FROM (
-        SELECT *
-        FROM lucidota_canon.todo_current
-        WHERE status IN ('ready', 'queued', 'running')
-        ORDER BY created_at DESC
-        LIMIT 5
-    ) t
-),
-skill_policy_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY p.updated_at DESC), '[]'::jsonb) AS skill_policy_current
-    FROM lucidota_canon.skill_policy_current p
-),
-root_orchestrator_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY r.max_updated_at DESC), '[]'::jsonb) AS root_orchestrator_current
-    FROM lucidota_canon.root_orchestrator_current r
-),
-prompt_status_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY p.refreshed_at DESC), '[]'::jsonb) AS prompt_catalog_status
-    FROM lucidota_canon.prompt_catalog_status p
-),
-prompt_recent_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY p.received_at DESC), '[]'::jsonb) AS prompt_recent
-    FROM (
-        SELECT *
-        FROM lucidota_canon.prompt_recent
-        LIMIT 5
-    ) p
-)
-SELECT
-    'LUCIDOTA_OPERATOR_MANUAL'::text AS manual_id,
-    'LUCIDOTA Operator Manual'::text AS title,
-    live_routes.route_count AS node_count,
-    now() AS max_updated_at,
-    live_routes.route_list,
-    jsonb_build_object(
-        'read_surface', 'PostgREST safe views and RPCs only',
-        'write_surface', 'DB work orders and receipts only',
-        'legacy_book_watcher', 'retired as authority',
-        'skill_layers', 'execution aids only; live PostgREST/manual truth and GOALS handoffs win; prompt filing law is DB-backed and preserves raw text',
-        'skill_policy_surface', 'DB-backed policy current route; live policy text wins over file-only policy snippets',
-        'prompt_filing', 'file_prompt -> prompt ledger row -> prompt_work_order_links -> prompt_recent / prompt_unlinked -> prompt_catalog_status',
-        'manual_source', 'live route catalog + daemon status + current goal + current todo batches + root orchestrator surface + prompt ledger'
-    ) AS auth_expectations,
-    jsonb_build_object(
-        'book_ingest', 'book_source -> book_scan -> book_read_queue -> book_note -> lora_candidate -> lora_adapter -> training_job -> book_receipt',
-        'indy_loop', 'queued row -> /indy_queue -> indy_daemon once/loop -> /indy_responses or receipt row',
-        'mamba_role', 'DB queue/receipt/window watcher only; no BOOKS filesystem authority',
-        'ontology_loop', 'messy operator text -> ontology_work_batch -> ontology_work_item -> executable route plan',
-        'skill_policy', 'skill_policy_current -> operator-readable alignment policy -> manual surface',
-        'root_orchestrator', 'root_orchestrator_current -> sub-orchestrator packets -> receipts -> manual update',
-        'prompt_filing', 'operator or assistant prompt -> prompt ledger -> explicit linked work-order UUID or explicit unlinked reason'
-    ) AS work_order_flow,
-    jsonb_build_object(
-        'current_goal', goal_row.current_goal,
-        'daemon_status', daemon_rows.daemon_status,
-        'model_registry', model_rows.model_registry,
-        'provider_registry', provider_rows.provider_registry,
-        'workflow_registry', workflow_rows.workflow_registry,
-        'todo_current', todo_rows.todo_current,
-        'skill_policy_current', skill_policy_rows.skill_policy_current,
-        'root_orchestrator_current', root_orchestrator_rows.root_orchestrator_current,
-        'prompt_catalog_status', prompt_status_rows.prompt_catalog_status,
-        'prompt_recent', prompt_recent_rows.prompt_recent
-    ) AS live_surface,
-    jsonb_build_array(
-        'curl -sS http://127.0.0.1:3000/manual_current?limit=1',
-        'curl -sS http://127.0.0.1:3000/root_orchestrator_current?limit=1',
-        'curl -sS http://127.0.0.1:3000/todo_current?limit=5',
-        'curl -sS http://127.0.0.1:3000/skill_policy_current?limit=1',
-        'curl -sS http://127.0.0.1:3000/prompt_catalog_status?limit=1',
-        'curl -sS http://127.0.0.1:3000/prompt_recent?limit=5',
-        '.venv/bin/python scripts/ontology_work_compiler.py --json --text "<objective text>"',
-        '.venv/bin/python scripts/indy_daemon.py --once --json',
-        '.venv/bin/python scripts/indy_runtime_broker.py snapshot --json',
-        '.venv/bin/python scripts/prompt_ledger_capture.py --json'
-    ) AS next_commands,
-    jsonb_build_array(
-        'BOOKS folder watcher authority',
-        'hand-written manual slop',
-        'raw corpus prompts',
-        'unbounded whole-table dumps'
-    ) AS retired_surfaces
-FROM live_routes
-CROSS JOIN goal_row
-CROSS JOIN daemon_rows
-CROSS JOIN model_rows
-CROSS JOIN provider_rows
-CROSS JOIN workflow_rows
-CROSS JOIN todo_rows
-CROSS JOIN skill_policy_rows
-CROSS JOIN root_orchestrator_rows
-CROSS JOIN prompt_status_rows
-CROSS JOIN prompt_recent_rows;
-
 GRANT USAGE ON SCHEMA prompt_api TO mfspx, lucidota_postgrest_anon;
 GRANT SELECT, INSERT, UPDATE ON lucidota_control.prompt_record, lucidota_control.prompt_work_order_link TO mfspx;
 GRANT SELECT ON lucidota_canon.prompts_filed, lucidota_canon.prompt_work_order_links,
@@ -1246,6 +1131,6 @@ GRANT EXECUTE ON FUNCTION
 TO lucidota_postgrest_anon, mfspx;
 GRANT SELECT ON lucidota_canon.prompts_filed, lucidota_canon.prompt_work_order_links,
     lucidota_canon.prompt_recent, lucidota_canon.prompt_unlinked, lucidota_canon.prompt_catalog_status,
-    lucidota_canon.manual_current, lucidota_canon.api_route_catalog TO lucidota_postgrest_anon;
+    lucidota_canon.api_route_catalog TO lucidota_postgrest_anon;
 
 COMMIT;

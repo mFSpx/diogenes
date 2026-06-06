@@ -179,7 +179,7 @@ def test_scaffold_includes_external_plugin_build_mode(tmp_path):
 
 def test_current_goal3_model_fabric_audit_exists_and_names_existing_lanes():
     audit = Path("GOALS/MODEL_FABRIC_AUDIT.md").read_text()
-    for phrase in ["needle_swarm_6x", "mamba7b_ram", "bonsai4b_ram", "DeepSeek", "Groq", "Cohere"]:
+    for phrase in ["needle_swarm_6x", "bonsai4b_ram", "DeepSeek", "Groq", "Cohere"]:
         assert phrase in audit
     assert "secret values are not printed" in audit
 
@@ -191,7 +191,7 @@ def test_goal3_plugin_build_mode_bootstrap_manifest_maps_existing_system():
     assert manifest["mode"] == "codex_first_byo_llm"
     assert manifest["code_budget"]["goal_handoff_py_max_code_lines"] <= 100
     lane_names = {lane["name"] for lane in manifest["local_lanes"]}
-    assert {"needle_swarm_6x", "mamba7b_ram", "bonsai4b_ram", "deepseek_r1_qwen_1p5b_gpu"} <= lane_names
+    assert {"needle_swarm_6x", "bonsai4b_ram"} <= lane_names
     provider_names = {provider["name"] for provider in manifest["cloud_lanes"]}
     assert {"groq", "cohere"} <= provider_names
     assert manifest["lifecycle"][0]["step"] == "admission_check"

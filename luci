@@ -74,6 +74,10 @@ Usage
   luci openapi [--json] [--base-url URL]
   luci manual|/manual [--json] [--base-url URL]
   luci manual current [--json] [--base-url URL]
+  luci manual capsule [--json] [--base-url URL]
+  luci doctor [--json] [--base-url URL]
+  luci status [--json] [--base-url URL]
+  luci check-reality [--json]
   luci active goal [--json] [--base-url URL]
   luci todo [--json] [--base-url URL]
   luci todo current [--json] [--base-url URL]
@@ -90,6 +94,7 @@ Usage
   luci model registry raw [--json] [--base-url URL]
   luci model registry current [--json] [--base-url URL]
   luci capability current [--json] [--base-url URL]
+  luci capability list [--json] [--base-url URL]
   luci capability registry [--json] [--base-url URL]
   luci capability registry raw [--json] [--base-url URL]
   luci provider current [--json] [--base-url URL]
@@ -172,6 +177,10 @@ Usage
   luci api cloud packet --work-order-id ID [--json] [--base-url URL]
   luci api cli process receipts [--json] [--base-url URL]
   luci api payload archive status [--json] [--base-url URL]
+  luci elastic shape <current|latest|residuals|pressure> [--json] [--base-url URL]
+  luci elastic shape emit --artifact-uuid UUID [--signal TOKEN=VALUE]... [--json] [--base-url URL]
+  luci percyphon <current|matrix> [--json] [--base-url URL]
+  luci percyphon emit [--seed SEED] [--source SOURCE] [--villager VALUE]... [--fluid-slots N] [--json] [--no-write-db]
   luci api bytewax windows [--json] [--base-url URL]
   luci api bytewax raw windows [--json] [--base-url URL]
   luci api book <source|scan|read-queue|note|candidate|adapter|training|receipt> [--json] [--base-url URL]
@@ -234,6 +243,7 @@ Usage
   luci source --text "read the live world" [--json]
   luci delegate --kind review --text "ask Groq/Vibes to review this"
   luci provider groq-chat --prompt "ask a provider lane"
+  luci model bonsai-chain --prompt "route through Bonsai/Needles/Bonsai"
   luci model admission [--run-diogenes-gate]
   luci status
   luci model-governor
@@ -336,10 +346,26 @@ case "$1" in
     shift
     exec "$PY" "$ROOT/scripts/luci_help_manual.py" help "$@"
     ;;
+  doctor|/doctor)
+    shift
+    exec "$PY" "$ROOT/scripts/luci_doctor.py" "$@"
+    ;;
+  check-reality|/check-reality)
+    shift
+    exec "$PY" "$ROOT/scripts/luci_check_reality.py" "$@"
+    ;;
+  status|/status)
+    shift
+    exec "$PY" "$ROOT/scripts/luci_status.py" "$@"
+    ;;
   manual|/manual)
     shift
     if [[ "${1:-}" == "current" ]]; then
       shift
+    fi
+    if [[ "${1:-}" == "capsule" ]]; then
+      shift
+      exec "$0" root-law-docs "$@"
     fi
     exec "$PY" "$ROOT/scripts/luci_help_manual.py" manual "$@"
     ;;
@@ -481,6 +507,7 @@ if route_present:
         raise SystemExit(2)
     if json_out:
         print(json.dumps({"ok": True, "status": "FOUND", "source_url": route_url, "rows": rows}, sort_keys=True, ensure_ascii=False))
+        raise SystemExit(0)
     else:
         first = rows[0] if isinstance(rows, list) and rows else {}
         print(f"ROUTE=/root_orchestrator_current")
@@ -578,6 +605,7 @@ if route_present:
         raise SystemExit(2)
     if json_out:
         print(json.dumps({"ok": True, "status": "FOUND", "source_url": route_url, "rows": rows}, sort_keys=True, ensure_ascii=False))
+        raise SystemExit(0)
     else:
         first = rows[0] if isinstance(rows, list) and rows else {}
         print(f"ROUTE=/model_routing_current")
@@ -693,6 +721,10 @@ PY
     if [[ "${1:-}" == "current" ]]; then
       shift
     fi
+    if [[ "${1:-}" == "list" ]]; then
+      shift
+      exec "$PY" "$ROOT/scripts/luci_capability_list.py" "$@"
+    fi
     if [[ "${1:-}" == "registry" ]]; then
       shift
       if [[ "${1:-}" == "raw" ]]; then
@@ -765,6 +797,25 @@ PY
   payload-archive-status|/payload-archive-status)
     shift
     exec "$PY" "$ROOT/scripts/luci_payload_archive.py" "$@"
+    ;;
+  elastic|elastic-shape|elastic_shape)
+    shift
+    if [[ "${1:-}" == "shape" ]]; then
+      shift
+    fi
+    if [[ "${1:-}" == "emit" ]]; then
+      shift
+      exec "$PY" "$ROOT/scripts/luci_elastic_shape_emit.py" "$@"
+    fi
+    exec "$PY" "$ROOT/scripts/luci_elastic_shape.py" "$@"
+    ;;
+  percyphon|percyphon-ai|villager)
+    shift
+    if [[ "${1:-}" == "emit" ]]; then
+      shift
+      exec "$PY" "$ROOT/scripts/luci_percyphon_emit.py" "$@"
+    fi
+    exec "$PY" "$ROOT/scripts/luci_percyphon.py" "$@"
     ;;
   root-law-docs|root-law|root-manual)
     shift
@@ -1163,6 +1214,10 @@ PY
       fi
       exec "$PY" "$ROOT/scripts/luci_model_registry_raw.py" "$@"
     fi
+    if [[ "${1:-}" == "fabric" ]]; then
+      shift
+      exec "$PY" "$ROOT/scripts/goal_model_fabric_orchestrate.py" "$@"
+    fi
     if [[ "${1:-}" == "routing" ]]; then
       shift
       case "${1:-}" in
@@ -1179,6 +1234,10 @@ PY
           exit 2
           ;;
       esac
+    fi
+    if [[ "${1:-}" == "bonsai-chain" ]]; then
+      shift
+      exec "$PY" "$ROOT/scripts/model_runner_cli.py" bonsai-chain "$@"
     fi
     run_luci_engine model "$@"
     ;;
@@ -1216,6 +1275,9 @@ PY
     ;;
   workflow|workflow-current)
     shift
+    if [[ "${1:-}" == "current" ]]; then
+      shift
+    fi
     if [[ "${1:-}" == "registry" ]]; then
       shift
       if [[ "${1:-}" == "raw" ]]; then
@@ -1308,6 +1370,7 @@ if route_present:
         raise SystemExit(2)
     if json_out:
         print(json.dumps({"ok": True, "status": "FOUND", "source_url": route_url, "rows": rows}, sort_keys=True, ensure_ascii=False))
+        raise SystemExit(0)
     else:
         first = rows[0] if isinstance(rows, list) and rows else {}
         print(f"ROUTE=/workflow_current")

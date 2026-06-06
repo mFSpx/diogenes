@@ -76,7 +76,7 @@ if scan_db.exists():
 patternalysis = (ROOT/"05_OUTPUTS/groq_scanner/patternalysis.md").exists()
 
 # ---- model fabric ----
-LANES = {"deepseek":8080,"mamba_ram":8081,"bonsai":8082,"mamba_gpu":8083,
+LANES = {"deepseek":8080,"bonsai":8082,
          "needle0":8090,"needle1":8091,"needle2":8092,"needle3":8093,"needle4":8094,"needle5":8095,
          "embed1":8101,"embed2":8102,"embed3":8103,"embed4":8104}
 lane_up = {n: health(p) for n, p in LANES.items()}

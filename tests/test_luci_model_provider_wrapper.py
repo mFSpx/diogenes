@@ -76,3 +76,30 @@ def test_luci_shell_wrapper_model_provider_same_run_id_is_idempotent():
     assert payload_same_a["db_write"]["work_receipt_uuid"] != payload_diff_run["db_write"]["work_receipt_uuid"]
     assert payload_same_a["visible_response"]["work_order_id"] == payload_same_a["db_write"]["work_order_uuid"]
     assert payload_same_a["visible_response"]["work_receipt_id"] == payload_same_a["db_write"]["work_receipt_uuid"]
+
+
+def test_luci_shell_wrapper_exposes_bonsai_chain_front_door():
+    proc = subprocess.run(
+        [
+            str(ROOT / "luci"),
+            "model",
+            "bonsai-chain",
+            "--prompt",
+            "route this",
+            "--json",
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    payload = json.loads(proc.stdout)
+    assert payload["schema"] == "lucidota.model_invocation.bonsai_chain.v1"
+    assert payload["status"] == "PASS"
+    assert payload["final_lane"] == "bonsai_q1_0"
+    assert payload["lane_sequence"] == ["bonsai_q1_0", "needle_0", "needle_1", "needle_2", "needle_3", "needle_4", "needle_5", "bonsai_q1_0"]
+    assert payload["needle_stage_count"] == 6
+    assert payload["report_path"]
+    assert "RECEIPT_PATH=" not in proc.stdout
+    assert proc.stderr == "" or proc.stderr.strip()

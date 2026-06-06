@@ -138,6 +138,67 @@ def ensure_schema_objects(cur: Any) -> None:
           WHERE status IN ('queued','leased','running')
         """
     )
+    cur.execute(
+        """
+        INSERT INTO lucidota_control.absurd_queue(queue_name, owner_subsystem, status, notes)
+        VALUES ('luci_operator', 'luci', 'active', 'LUCI operator runtime closure work loop queue')
+        ON CONFLICT (queue_name) DO NOTHING
+        """
+    )
+    cur.execute(
+        """
+        INSERT INTO lucidota_control.worker(worker_id, actor_class, runtime_kind, host_id, lane_id, active_mode)
+        VALUES ('luci_attempt_engine', 'luci', 'python_worker', coalesce(inet_server_addr()::text, 'local'), 'luci_operator', 'idle')
+        ON CONFLICT (worker_id) DO UPDATE
+          SET active_mode='idle', updated_at=now()
+        """
+    )
+
+
+def seed_queue_job(cur: Any, job: dict[str, Any]) -> tuple[dict[str, Any], bool]:
+    inserted = cur.execute(
+        """
+        INSERT INTO lucidota_control.absurd_queue_job
+          (job_uuid, queue_name, workflow_name, job_kind, idempotency_key, payload, status, priority, attempt_count, max_attempts)
+        VALUES (%s::uuid, %s, %s, %s, %s, %s::jsonb, 'queued', %s, %s, %s)
+        ON CONFLICT (queue_name, idempotency_key) DO NOTHING
+        RETURNING job_uuid::text
+        """,
+        (
+            job["job_uuid"],
+            job["queue_name"],
+            job["workflow_name"],
+            job["job_kind"],
+            job["idempotency_key"],
+            json.dumps(job["payload"]),
+            job["priority"],
+            job["attempt_count"],
+            job["max_attempts"],
+        ),
+    ).fetchone()
+    row = cur.execute(
+        """
+        SELECT job_uuid::text, queue_name, workflow_name, job_kind, idempotency_key, payload, status::text,
+               priority, attempt_count, max_attempts, result
+        FROM lucidota_control.absurd_queue_job
+        WHERE queue_name=%s AND idempotency_key=%s
+        FOR UPDATE
+        """,
+        (job["queue_name"], job["idempotency_key"]),
+    ).fetchone()
+    return dict(row), bool(inserted)
+
+
+def count_dead_letters(cur: Any, job_uuid: str) -> int:
+    row = cur.execute(
+        """
+        SELECT count(*)::int AS count
+        FROM lucidota_control.absurd_queue_dead_letter
+        WHERE job_uuid=%s::uuid
+        """,
+        (job_uuid,),
+    ).fetchone()
+    return int(row["count"] if isinstance(row, dict) else row[0])
 
 
 def record_attempt(cur: Any, job: dict[str, Any], attempt: dict[str, Any], observation: dict[str, Any], score: dict[str, Any], *, receipt_path: str) -> dict[str, str]:
@@ -199,28 +260,109 @@ def record_attempt(cur: Any, job: dict[str, Any], attempt: dict[str, Any], obser
     ).fetchone()
     if receipt_lookup:
         receipt_uuid = receipt_lookup["work_receipt_uuid"] if isinstance(receipt_lookup, dict) else receipt_lookup[0]
-        return {"event_id": event_id, "raw_artifact_uuid": raw_uuid, "work_order_uuid": work_order_uuid, "work_receipt_uuid": receipt_uuid}
-
-    receipt_row = cur.execute(
+    else:
+        receipt_row = cur.execute(
+            """
+            INSERT INTO lucidota_control.work_receipt(event_id, work_order_uuid, receipt_path, receipt_sha256, verdict, cost, gain, artifact_refs, canonical_graph_writes_performed, graph_write_mode, detail)
+            VALUES (%s, %s::uuid, %s, %s, %s, %s::jsonb, %s::jsonb, %s::jsonb, false, 'staged_only', %s::jsonb)
+            RETURNING work_receipt_uuid::text
+            """,
+            (
+                event_id,
+                work_order_uuid,
+                receipt_path,
+                sha256_text(stable_json({"event_id": event_id, "job_uuid": str(job["job_uuid"])})),
+                score["verdict"],
+                json.dumps({"expected_cost": score["cost"]}),
+                json.dumps({"gain": score["gain"], "score": score["score"]}),
+                json.dumps([raw_ref]),
+                json.dumps({"attempt_kind": attempt["attempt_kind"], "observation": observation}),
+            ),
+        ).fetchone()
+        receipt_uuid = receipt_row["work_receipt_uuid"] if isinstance(receipt_row, dict) else receipt_row[0]
+    attempt_lookup = cur.execute(
         """
-        INSERT INTO lucidota_control.work_receipt(event_id, work_order_uuid, receipt_path, receipt_sha256, verdict, cost, gain, artifact_refs, canonical_graph_writes_performed, graph_write_mode, detail)
-        VALUES (%s, %s::uuid, %s, %s, %s, %s::jsonb, %s::jsonb, %s::jsonb, false, 'staged_only', %s::jsonb)
-        RETURNING work_receipt_uuid::text
+        SELECT attempt_uuid::text
+        FROM lucidota_control.work_order_attempt
+        WHERE work_order_uuid=%s::uuid
+          AND worker_id='luci_attempt_engine'
+          AND receipt_uuid=%s::uuid
+        LIMIT 1
         """,
-        (
-            event_id,
-            work_order_uuid,
-            receipt_path,
-            sha256_text(stable_json({"event_id": event_id, "job_uuid": str(job["job_uuid"])})),
-            score["verdict"],
-            json.dumps({"expected_cost": score["cost"]}),
-            json.dumps({"gain": score["gain"], "score": score["score"]}),
-            json.dumps([raw_ref]),
-            json.dumps({"attempt_kind": attempt["attempt_kind"], "observation": observation}),
-        ),
+        (work_order_uuid, receipt_uuid),
     ).fetchone()
-    receipt_uuid = receipt_row["work_receipt_uuid"] if isinstance(receipt_row, dict) else receipt_row[0]
-    return {"event_id": event_id, "raw_artifact_uuid": raw_uuid, "work_order_uuid": work_order_uuid, "work_receipt_uuid": receipt_uuid}
+    if attempt_lookup:
+        work_order_attempt_uuid = attempt_lookup["attempt_uuid"] if isinstance(attempt_lookup, dict) else attempt_lookup[0]
+    else:
+        attempt_row = cur.execute(
+            """
+            INSERT INTO lucidota_control.work_order_attempt
+              (work_order_uuid, worker_id, started_at, completed_at, status, proof_status, receipt_uuid)
+            VALUES (%s::uuid, 'luci_attempt_engine', now(), now(), 'succeeded', 'PROVEN', %s::uuid)
+            RETURNING attempt_uuid::text
+            """,
+            (work_order_uuid, receipt_uuid),
+        ).fetchone()
+        work_order_attempt_uuid = attempt_row["attempt_uuid"] if isinstance(attempt_row, dict) else attempt_row[0]
+    audit_lookup = cur.execute(
+        """
+        SELECT workload_audit_uuid::text
+        FROM lucidota_audit.workload_audit_ledger
+        WHERE receipt_uuid=%s::uuid
+        LIMIT 1
+        """,
+        (receipt_uuid,),
+    ).fetchone()
+    if audit_lookup:
+        workload_audit_uuid = audit_lookup["workload_audit_uuid"] if isinstance(audit_lookup, dict) else audit_lookup[0]
+    else:
+        audit_row = cur.execute(
+            """
+            INSERT INTO lucidota_audit.workload_audit_ledger
+              (actor_id, actor_class, caller, provider, model_id, action_summary, tokens_in, tokens_out,
+               token_source, receipt_uuid, evidence_refs, proof_status, functionality_explanation, ontology_index,
+               work_order_uuid, work_order_attempt_uuid, worker_id)
+            VALUES
+              ('luci_attempt_engine', 'unknown', 'operator', 'local', '', %s, %s, 0,
+               'local_counter', %s::uuid, %s::jsonb, 'PROVEN', %s, %s::jsonb,
+               %s::uuid, %s::uuid, 'luci_attempt_engine')
+            RETURNING workload_audit_uuid::text
+            """,
+            (
+                f"LUCI bounded runtime closure worker executed {attempt['attempt_kind']} for job {job['job_uuid']}",
+                len(stable_json(job).split()),
+                receipt_uuid,
+                json.dumps([receipt_path, raw_ref]),
+                "Receipt-backed LUCI operate worker execution; no canonical graph writes.",
+                json.dumps(
+                    {
+                        "primitive_refs": ["state", "receipt", "worker_claim"],
+                        "claim_type": "luci_runtime_closure",
+                        "proof_status": "PROVEN",
+                        "canonical_graph_writes_performed": False,
+                    }
+                ),
+                work_order_uuid,
+                work_order_attempt_uuid,
+            ),
+        ).fetchone()
+        workload_audit_uuid = audit_row["workload_audit_uuid"] if isinstance(audit_row, dict) else audit_row[0]
+    cur.execute(
+        """
+        UPDATE lucidota_control.worker
+        SET active_mode='idle', updated_at=now()
+        WHERE worker_id='luci_attempt_engine'
+        """
+    )
+    return {
+        "event_id": event_id,
+        "raw_artifact_uuid": raw_uuid,
+        "work_order_uuid": work_order_uuid,
+        "work_receipt_uuid": receipt_uuid,
+        "work_order_attempt_uuid": work_order_attempt_uuid,
+        "workload_audit_uuid": workload_audit_uuid,
+        "worker_id": "luci_attempt_engine",
+    }
 
 
 def claim_job(cur: Any, queue_name: str) -> dict[str, Any] | None:
@@ -276,13 +418,79 @@ def run_once(conn: psycopg.Connection, *, queue_name: str, synthetic: bool = Fal
     with conn.cursor(row_factory=dict_row) as cur:
         ensure_schema_objects(cur)
         if synthetic and text is not None:
-            job = maybe_seed_synthetic_job(cur, queue_name=queue_name, run_id=run_id, text=text)
+            seed = maybe_seed_synthetic_job(cur, queue_name=queue_name, run_id=run_id, text=text)
+            job, inserted = seed_queue_job(cur, seed)
         else:
             job = claim_job(cur, queue_name)
+            inserted = False
             if job is None and synthetic:
-                job = maybe_seed_synthetic_job(cur, queue_name=queue_name, run_id=run_id, text=text)
+                seed = maybe_seed_synthetic_job(cur, queue_name=queue_name, run_id=run_id, text=text)
+                job, inserted = seed_queue_job(cur, seed)
         if job is None:
             return {"status": "no_work", "queue_name": queue_name}
+        existing_result = dict(job.get("result") or {})
+        if str(job.get("status")) in {"succeeded", "failed", "dead_lettered", "cancelled"} and existing_result.get("work_order_uuid"):
+            repaired_legacy_result = False
+            if not {"work_order_attempt_uuid", "workload_audit_uuid", "worker_id"}.issubset(existing_result):
+                attempt = classify_job(job)
+                observation = execute_probe(conn, attempt)
+                score = score_attempt(attempt, observation)
+                ids = record_attempt(
+                    cur,
+                    job,
+                    attempt,
+                    observation,
+                    score,
+                    receipt_path=str(existing_result.get("receipt_path") or ""),
+                )
+                existing_result.update(ids)
+                repaired_legacy_result = True
+                cur.execute(
+                    """
+                    UPDATE lucidota_control.absurd_queue_job
+                    SET result = result || %s::jsonb
+                    WHERE job_uuid=%s::uuid
+                    """,
+                    (json.dumps(existing_result), job["job_uuid"]),
+                )
+                conn.commit()
+            return {
+                "schema": "lucidota.luci_attempt_engine.receipt.v1",
+                "generated_at": now(),
+                "queue_name": queue_name,
+                "job_uuid": str(job["job_uuid"]),
+                "status": "PASS" if str(job.get("status")) == "succeeded" else "DEGRADED",
+                "next_state": str(job.get("status")),
+                "db_write": existing_result,
+                "real_work_loop": {
+                    "worker_executed": repaired_legacy_result,
+                    "idempotent_replay": True,
+                    "legacy_result_repaired": repaired_legacy_result,
+                    "queue_job_inserted": False,
+                    "queue_job_status": str(job.get("status")),
+                    "dead_letter_count": count_dead_letters(cur, str(job["job_uuid"])),
+                },
+                "passed": str(job.get("status")) == "succeeded",
+                "receipt_path": existing_result.get("receipt_path", ""),
+            }
+        cur.execute(
+            """
+            UPDATE lucidota_control.absurd_queue_job
+            SET status='running',
+                leased_by='luci_attempt_engine',
+                lease_expires_at=now()+interval '5 minutes',
+                attempt_count=attempt_count+1
+            WHERE job_uuid=%s::uuid
+            """,
+            (job["job_uuid"],),
+        )
+        cur.execute(
+            """
+            UPDATE lucidota_control.worker
+            SET active_mode='running', updated_at=now()
+            WHERE worker_id='luci_attempt_engine'
+            """
+        )
         attempt = classify_job(job)
         observation = execute_probe(conn, attempt)
         score = score_attempt(attempt, observation)
@@ -303,17 +511,19 @@ def run_once(conn: psycopg.Connection, *, queue_name: str, synthetic: bool = Fal
         receipt["receipt_path"] = rel(receipt_path)
         receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
         ids = record_attempt(cur, job, attempt, observation, score, receipt_path=receipt["receipt_path"])
-        if not synthetic:
-            cur.execute(
-                "UPDATE lucidota_control.absurd_queue_job SET status='running', leased_by='luci_attempt_engine', lease_expires_at=now()+interval '5 minutes', attempt_count=attempt_count+1 WHERE job_uuid=%s::uuid",
-                (job["job_uuid"],),
-            )
-            if next_state == "queued":
-                update_job(cur, job["job_uuid"], status="queued", result={"next_state": next_state, "reason": reason, **ids}, run_after=(datetime.now(timezone.utc) + timedelta(minutes=2)).isoformat())
-            else:
-                update_job(cur, job["job_uuid"], status=next_state, result={"next_state": next_state, "reason": reason, **ids}, last_error=reason)
+        if next_state == "queued":
+            update_job(cur, job["job_uuid"], status="queued", result={"next_state": next_state, "reason": reason, "receipt_path": receipt["receipt_path"], **ids}, run_after=(datetime.now(timezone.utc) + timedelta(minutes=2)).isoformat())
+        else:
+            update_job(cur, job["job_uuid"], status=next_state, result={"next_state": next_state, "reason": reason, "receipt_path": receipt["receipt_path"], **ids}, last_error=reason)
         conn.commit()
         receipt["db_write"] = {"job": job["job_uuid"], **ids, "event_kind": event_kind}
+        receipt["real_work_loop"] = {
+            "worker_executed": True,
+            "idempotent_replay": False,
+            "queue_job_inserted": inserted,
+            "queue_job_status": next_state,
+            "dead_letter_count": count_dead_letters(cur, str(job["job_uuid"])),
+        }
         return receipt
 
 

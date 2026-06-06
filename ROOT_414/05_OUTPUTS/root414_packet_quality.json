@@ -1,0 +1,329 @@
+{
+  "feedback_count": 25,
+  "mean_score": 96.09,
+  "ok": true,
+  "packet_count": 64,
+  "parser_name": "root414_machine_clean_parser_v0.50",
+  "scored": [
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::001_law_of_the_414",
+      "score": 100
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::002_language_as_control_surface",
+      "score": 90
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::003_palantir_primitive_translations",
+      "score": 100
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::004_enterprise_architecture_dynamic_valence",
+      "score": 90
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::005_system_boundary_state_primitives",
+      "score": 100
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::006_osint_investigation_primitives",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::007_osint_missing_primitives",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::008_ssss_case_clusters",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::009_stephanie_investigative_core_epistemic_audit",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::010_rtb_shadow_tenancy_osint_clusters",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::011_sovereign_vibe_linguistic_intersections",
+      "score": 90
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::012_sovereign_child_substrate_priming",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::013_sped_paradigm_reversal",
+      "score": 100
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::014_sped_mulder_unconventional_investigator",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::015_aggressive_learner_hardware_upgrade",
+      "score": 90
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::016_bootloading_the_matrix_baby_math",
+      "score": 100
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::017_sovereign_creation_imagination_expression",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::018_kinetic_elasticity_dynamic_topology",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::019_architecture_of_recovery_failure_fix",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::020_sovereign_resistance_antipatterns",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::021_trines_of_sovereign_beauty",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::022_relationship_trines_ternary_topology",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::023_high_frequency_forensic_map",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::024_inventory_learning_language_concepts",
+      "score": 90
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::025_final_sovereign_syllabus_joy_architecture",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::026_reason_to_live_100_vector_sovereign_audit",
+      "score": 100
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::027_topic4_transition_language_math",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::028_cognitive_control_language_blueprint",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::029_5490_ash_sovereign_evidence_pipeline",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::030_monkeys_paw_rulebook_gap",
+      "score": 90
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::031_compiler_conflict_gates_big_four_antipattern",
+      "score": 90
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::032_library_forgotten_things_text_application_test",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::033_detection_secure_parser_style_antipattern",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::034_full_414_primitives_and_language_rules",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::035_evidence_first_text_parser_v0_2_borges_tlon",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::036_borges_tlon_gpt55_groks_attempt_diff",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::037_door_paranoia_creepypasta_parser_diff",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::038_door_simulacrum_response_capacity_diff",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::039_rewritten_parser_spec_v0_3",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::040_queen_parser_spec_v0_4_applied_door_simulacrum",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::041_cia_writing_advice_parser_v3_vs_grok_diff",
+      "score": 100
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::042_root414_schema_decision",
+      "score": 90
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::043_cia_writing_advice_old_schema_strong_parse",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::044_parser_v0_50_machine_clean_spec",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::045_voynich_gemini_parser_v0_50_audit",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::046_language_stress_test_matrix_for_root414",
+      "score": 100
+    },
+    {
+      "feedback_count": 1,
+      "packet_id": "cry::047_voynich_parser_v0_50_executed_test_pass",
+      "score": 90
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::048_language_research_ingestion_build_report",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::049_symbol_llm_research_application",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::050_ner4opt_application_to_root414",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::051_neurosymbolic_ontology_reasoning_application",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::052_awesome_llm_reasoning_with_nesy_application",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::053_neural_symbolic_recursive_machine_application",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::054_program_of_thought_multilingual_reasoning_application",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::055_start_self_taught_reasoner_with_tools_application",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::056_root414_build_plan_neurosymbolic_compiler",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::057_quasar_quasi_symbolic_abstractions_application",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::058_oreolm_kg_reasoning_for_qa_application",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::059_reasoning_on_graphs_rog_application",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::060_reasoning_on_graphs_pdf_crosscheck",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::061_llm_reasoning_key_ideas_limitations_application",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::062_root414_iterative_gauntlet_benchmark_build",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::063_root414_gauntlet_game_mobi_build",
+      "score": 100
+    },
+    {
+      "feedback_count": 0,
+      "packet_id": "cry::README",
+      "score": 100
+    }
+  ]
+}

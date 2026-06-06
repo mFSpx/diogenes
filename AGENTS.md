@@ -47,3 +47,7 @@ Exact quote to remember and apply:
 > I’m going to encode this into the actual Slop Law docs, not just agree in chat.
 
 If the operator is having a literal meeting to make build decisions, that is work, not therapy. Extract the decision, encode durable changes where appropriate, verify, and receipt. Do not substitute generic emotional support, moralizing friction, or fake agreement for engineering follow-through.
+
+## RAC Truth Law
+
+Before claiming work in a RAC/build session, read `lucidota_control.active_operation_mode`, `lucidota_canon.manual_current`, `lucidota_canon.root_orchestrator_current`, `lucidota_canon.workload_audit_current`, and the current work orders. Use GOALS for intent and handoff only; use Postgres/PostgREST as live truth; every claim must have a receipt row or an UNKNOWN debt row.

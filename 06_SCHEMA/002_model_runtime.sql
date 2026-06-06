@@ -135,9 +135,9 @@ INSERT INTO lucidota_runtime.model_candidate (
         'unknown',
         1300000000,
         '4-bit target',
-        NULL,
+        909,
         'watch',
-        'Always-on stream listener target; exact model artifact not selected.'
+        'Always-on stream listener target; canonical 1x-VRAM listener lane for the strict stack. Exact model artifact is still watch-only until a runnable file is selected.'
     ),
     (
         'mamba-1.4b-listener',
@@ -152,7 +152,7 @@ INSERT INTO lucidota_runtime.model_candidate (
         'Legacy small Mamba fallback only; not the active strict-stack listener after the Falcon3-Mamba 7B Q2 lane was promoted.'
     ),
     (
-        'falcon3-mamba-7b-listener',
+        'falcon3-mamba-7b-listener-legacy',
         'listener',
         'https://huggingface.co/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF',
         '03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf',
@@ -161,7 +161,7 @@ INSERT INTO lucidota_runtime.model_candidate (
         'Q2_K GGUF',
         0,
         'accepted',
-        'Current strict-stack Mamba listener/planner lane served by llama.cpp on CPU/RAM port 8081; GPU partial copy is optional/preemptible.'
+        'Legacy reference only. Canonical strict-stack listener is mamba2-1.3b-listener on the 1x-VRAM loadout; GPU partial copy remains optional/preemptible.'
     ),
     (
         'deepseek-1.5b-indy_reads-reads',
@@ -230,11 +230,11 @@ INSERT INTO lucidota_runtime.resident_loadout_slot (
     (
         'gtx1650-special-forces-v0',
         'listener',
-        'falcon3-mamba-7b-listener',
+        'mamba2-1.3b-listener',
         1,
-        0,
+        909,
         10,
-        'Current strict-stack local Mamba listener/planner on llama.cpp :8081; spark aliases here, not optional GPU :8083.'
+        'Canonical 1x-VRAM local Mamba listener/planner on llama.cpp :8081; this is the strict-stack listener target. spark aliases here, not optional GPU :8083.'
     ),
     (
         'gtx1650-special-forces-v0',

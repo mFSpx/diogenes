@@ -19,11 +19,9 @@ OUT = ROOT / "05_OUTPUTS" / "model_invocations"
 
 LLAMA_LANES = {
     "deepseek": (8080, "DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf", "03_VAULT/models/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf"),
-    "mamba_cpu": (8081, "Falcon3-Mamba-7B-Instruct-Q2_K.gguf", "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf"),
     "bonsai": (8082, "Ternary-Bonsai-8B-Q2_0.gguf", "03_VAULT/models/prism-ml/Ternary-Bonsai-8B-gguf/Ternary-Bonsai-8B-Q2_0.gguf"),
     "bonsai_q1_0": (8082, "Bonsai-8B-Q1_0.gguf", "hf:prism-ml/Bonsai-8B-gguf:Q1_0"),
     "bonsai_q2_0": (8082, "Ternary-Bonsai-8B-Q2_0.gguf", "03_VAULT/models/prism-ml/Ternary-Bonsai-8B-gguf/Ternary-Bonsai-8B-Q2_0.gguf"),
-    "mamba_gpu": (8083, "Falcon3-Mamba-7B-Instruct-Q2_K.gguf", "03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/Falcon3-Mamba-7B-Instruct-Q2_K.gguf"),
 }
 NEEDLE_LANES = {f"needle_{i}": (8090 + i, "needle-26m", "03_VAULT/models/needle/needle.pkl") for i in range(6)}
 NEEDLE_LANES["spark"] = NEEDLE_LANES["needle_0"]

@@ -32,6 +32,11 @@ def render(rows: list[dict[str, Any]]) -> str:
     )
     if row.get("live_surface"):
         lines.append(f"  live_surface_keys={sorted((row.get('live_surface') or {}).keys())[:12]}")
+    if row.get("next_command_refs"):
+        lines.append(
+            "  next_command_refs="
+            + ", ".join(str(ref) for ref in (row.get("next_command_refs") or [])[:12])
+        )
     if row.get("next_commands"):
         lines.append(f"  next_commands={len(row.get('next_commands') or [])}")
     return "\n".join(lines) + "\n"

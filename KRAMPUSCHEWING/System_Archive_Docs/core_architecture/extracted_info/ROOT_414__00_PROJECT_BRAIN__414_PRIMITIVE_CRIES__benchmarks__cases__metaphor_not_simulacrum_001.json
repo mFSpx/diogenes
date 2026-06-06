@@ -1,0 +1,17 @@
+{
+  "benchmark_id": "metaphor_not_simulacrum_001",
+  "title": "Ordinary metaphor should not trigger simulacrum",
+  "input_text": "Her smile was a lighthouse in the fog; it helped him find his way back to the conversation.",
+  "expected": {
+    "required_primitives": ["DOCUMENT_EXAMINATION", "NARRATIVE_FRAMING", "WORD_AS_MAGIC"],
+    "forbidden_primitives": ["SIMULACRUM_DETECTED", "ARCHONIC_CONTROL_GRID", "REALITY_DISTORTION"],
+    "allowed_bps": [10, 50],
+    "must_have_falsifier": true,
+    "must_have_local_gate": true,
+    "claim_lifecycle": ["CLAIM_UNVERIFIED", "DESIGN_PATTERN_EXTRACTED"]
+  },
+  "judge_focus": [
+    "Does it treat metaphor as language/framing, not ontology breach?",
+    "Does it avoid horror-parser contamination?"
+  ]
+}

@@ -54,12 +54,10 @@ def test_model_fabric_control_helper_stays_tiny_and_wired():
     assert "goal_model_fabric_status" in recovery
 
 
-def test_model_fabric_control_knows_mamba_gpu_and_keeps_cpu_lanes_off_cuda():
-    assert "mamba_gpu" in goal_model_fabric_control.START
+def test_model_fabric_control_keeps_cpu_lanes_off_cuda():
     assert "bge_vram" in goal_model_fabric_control.START
     source = Path(goal_model_fabric_control.__file__).read_text()
     assert "CUDA_VISIBLE_DEVICES" in source
-    assert "mamba_cpu" in source
 
 
 def test_needle_swarm_start_forces_cpu_not_cuda():

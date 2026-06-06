@@ -8051,3 +8051,3244 @@ Technical Summary Review and Dev Notes: The DB lift is good; the remaining block
 - Resume command: `cat GOALS/CURRENT_HANDOFF.md`
 
 Technical Summary Review and Dev Notes: Placeholder mismatch was the real blocker; it is now fixed and receipt-verified. No new blocker.
+
+---
+
+## Step 151/151 — Todo compiler bind guard receipt pass
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T17:40:26Z`
+- Current step: 151/151
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Implemented execute_with_bind_guard() in scripts/ontology_work_compiler.py persist_batch execute path and added a unit test that forces a placeholder/bind mismatch, asserting sql_bind_mismatch placeholder_count=... bind_count=.... Receipt gate passed with RECEIPT_UUID=af035a3f-dcf1-4166-86e5-6baf2d5dc334 EXIT_CODE=0 STATUS=PASSED DEPENDENCY_SIGNATURE=b5ffd41d6c390d3686f0cc0ec063cd770fa4703261e9021827ff08597c4c47ff.
+- Next action: Begin the smallest command_registry extraction slice after receipt pass.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Guard is live on the actual persist_batch path; manual_current fetch timeouts were widened only to keep the receipt-gated live surfaces from flaking on the large response payload. No registry refactor started yet.
+
+---
+
+## Step 152/152 — Command registry extraction slice live
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T17:44:30Z`
+- Current step: 152/152
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added lucidota_canon.command_registry as a typed view over lucidota_control.worker_command_registry, granted select to lucidota_postgrest_anon/mfspx, reloaded PostgREST schema, and receipt-gated tests passed with RECEIPT_UUID=02468f47-5b0c-4f67-80cd-0ee737fdc67c EXIT_CODE=0 STATUS=PASSED DEPENDENCY_SIGNATURE=1843c1d16f12385134871e4e9efe4f0c556c1f68c5afbc94d5fa38e22d6750ec.
+- Next action: Begin the next minimal command/capability registry refactor slice, starting from route refs instead of SQL string rails.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This is the first typed registry surface slice; no new SQL command literals were added. The persist_batch bind guard remains in place and verified.
+
+---
+
+## Step 153/153 — Route-ref slice
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T17:55:50Z`
+- Current step: 153/153
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added next_command_refs to daemon_status and root_orchestrator_current, restored manual_current after cascade, and receipt-gated the live surfaces with RECEIPT_UUID=b705d41a-026e-4d0f-894b-7541ac7a6a0d.
+- Next action: Begin the next minimal command/capability registry refactor slice, starting from route refs instead of SQL string rails.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Typed refs first; legacy next_commands kept for compatibility; no new command rails.
+
+---
+
+## Step 154/154 — Schema-owner manifest slice
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:02:23Z`
+- Current step: 154/154
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added schema_owner_manifest, surface_registry, and renderer_registry as typed live surfaces; threaded new refs into daemon_status and root_orchestrator_current; verified the new routes with RECEIPT_UUID=ccb5f763-9476-4328-ac7e-d760c0e70bd3.
+- Next action: Begin the smallest controller_grant and agent_thread_runtime slice with revocation/expiry and parent-thread ownership fields.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Typed manifest first; live route refs now point at owner/renderer surfaces; no hardcoded SQL rails added.
+
+---
+
+## Step 155/155 — Grant-runtime slice
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:05:33Z`
+- Current step: 155/155
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added controller_grant and agent_thread_runtime as typed control-plane surfaces with revoke/expiry, allowed envs, max parallel threads, max spend, parent-thread linkage, owner/runtime/model/env/budget/receipt fields, and verified live routes with RECEIPT_UUID=9ecae611-d15b-4a35-8b0a-4212f039a54c.
+- Next action: Begin the next minimal packet-class and diagnostics slice, or tighten sub-orchestrator routing refs if needed.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Typed grants and thread leases are live; operator defaults are seeded; no hardcoded command rails added.
+
+---
+
+## Step 156/156 — Grant/runtime bootstrap corrections and receipt-gated route verification
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:14:49Z`
+- Current step: 156/156
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Set bootstrap controller_grant and agent_thread_runtime rows to null receipt_uuid, bounded expires_at, zero max_spend, current receipt-gate scope, created_at timestamps, and verified effective_status plus live routes under RECEIPT_UUID=08185a63-31db-479d-b27e-50112d349390.
+- Next action: Start the additive pgrx audit lane only after detecting pg_config and pgrx compatibility, then keep it deterministic and receipt-gated.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Bootstrap rows now advertise bootstrap_local_only and current grant/runtime scope; no fake receipt UUIDs, no pretend budget gate. Tiny ferret finally obeyed the leash.
+
+---
+
+## Step 157/157 — Sub-orchestrator roster surfaced in root packet and grant/runtime bootstrap corrected
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:18:45Z`
+- Current step: 157/157
+- Status: completed
+- Objective: Keep the live PostgREST/manual surface, Indy DB daemon, skill-policy surface, prompt ledger, CLI authority surface, and orchestration policy aligned with operator truth; no BOOKS authority, no skill-layer supersedence.
+- Completed: Added sub_orchestrator_threads to root_orchestrator_current, kept the grant/runtime bootstrap corrections live, restored manual_current grant after cascade, and verified the root packet route with RECEIPT_UUID=518db07e-63a4-4871-9514-3d8d6783f7f6.
+- Next action: Return to the additive pgrx audit lane only after the registry/control-plane objective stays stable; use the existing pg_config detection and keep the extension deterministic and bounded.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Sub-orchestrators are now visible as an ordered thread roster, not just route ornaments. Manual route got re-granted after the cascade bruise; the ferret is still on leash.
+
+---
+
+## Step 158/159 — Sub-orchestrator hierarchy now exposes grants
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:34:46Z`
+- Current step: 158/159
+- Status: active
+- Objective: - Close the command/capability registry spine:
+      - command_registry
+      - capability_registry
+      - surface_registry
+      - renderer_registry
+      - next_command_refs
+      - no hardcoded SQL command rails
+
+  - Add control grants:
+      - controller_grant
+      - revoke/expiry
+      - allowed envs
+      - max parallel threads
+      - max spend
+      - receipt UUID
+
+  - Add per-thread runtime contracts:
+      - agent_thread_runtime
+      - parent thread
+      - owner
+      - runtime kind
+      - model policy
+      - env identity
+      - budget scope
+      - receipt gate
+
+  - Add schema ownership discipline:
+      - schema_owner_manifest
+      - one canonical owner per active view/surface
+      - no active surface redefinition without approval
+
+  - Add packet class contracts:
+      - no generic goal/db_law/next_commands costumes unless packet class requires them
+      - typed packet shapes only
+
+  - Replace string rails with refs:
+      - route refs
+      - capability refs
+      - renderer refs
+      - surface refs
+      - no localhost curl literals in final SQL
+
+  - Finish diagnostic surfaces:
+      - luci doctor --json
+      - luci status --json
+      - luci capability list --json
+
+  - Build/update manual spine:
+      - tiny current summary
+      - on-demand capsule fetch
+      - no giant context loads
+
+  - Keep Postgres/PostgREST as truth:
+      - file artifacts/cache/export only
+      - API points to truth
+      - receipts prove state
+
+  - Expand orchestration lanes:
+      - Codex
+      - Groq
+      - Vibe
+      - local
+      - deterministic workers
+      - INDY_READs
+      - revocable, typed, receipted
+
+  - Keep durability work moving:
+      - Absurd workflows
+      - Bytewax/River debounce
+      - session archive/restore
+      - prompt cancellation recovery
+      - environment-scoped approvals
+
+  - Keep TUI/operator-shell polish on deck:
+      - OSC 8 links
+      - table fallback
+      - paste-in-menus
+      - function keys
+      - better status hints
+
+  - Keep model/budget governance on deck:
+      - model routing
+      - budget ledger
+      - provider quotas
+      - spend receipts
+      - current-model surfaces
+
+  - Keep registry cleanup on deck:
+      - dedupe local/remote installs
+      - deterministic plugin loading
+      - machine-readable plugin/capability listings
+
+  - Keep prompt/context/skills modularization on deck:
+      - split concerns out of core
+      - route through registries and surfaces
+      - minimize coupling
+
+  - Keep live-surface hygiene on deck:
+      - manual_current
+      - todo_current
+      - root_orchestrator_current
+      - capability_current
+      - provider_current
+      - model_registry_current
+      - workflow_current
+
+  If you want, I can turn this into a strict priority stack next: now
+- Completed: Added sub_orchestrator_grants to root_orchestrator_current, tied active subthreads back to their controller grant, and restored manual_current after the dependency cascade.
+- Next action: Continue DB hierarchy and dispatch policy slice; keep sub-orchestrator grants and thread contracts explicit before touching any broader registry refactor.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root packet now carries the actual grant/thread braid, not just a pretty thread list. The manual route survived the cascade bruise and is back on its feet.
+
+---
+
+## Step 159/160 — Surface command_registry in manual and roster refs
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:41:25Z`
+- Current step: 159/160
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: Promoted command_registry into the manual spine and orchestration roster: manual_current now includes command_registry in its route list and live_surface, daemon_status and root_orchestrator_current now include command_registry in next_command_refs, and the manual/root/daemon receipt-gated surfaces passed live verification after schema reload.
+- Next action: Continue shrinking hardcoded SQL rails into refs, especially the remaining next_commands strings in root/daemon/manual surfaces, while keeping the sub-orchestrator grant/thread braid explicit.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny win, but real: the operator map now points at command_registry instead of hiding the spine in prose. Sub-orchestrator braid stayed intact; manual surface survived the cascade and the gate said yes.
+
+---
+
+## Step 160/161 — Surface manual next-command refs and sub-orchestrator links
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:43:18Z`
+- Current step: 160/161
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: Extended manual_current into a real orchestration summary: it now surfaces command_registry, sub_orchestrator_threads, sub_orchestrator_grants, and next_command_refs alongside the existing live manual/root/daemon packets, and the exact receipt-gated roster test passed after the manual view reapply.
+- Next action: Continue shrinking hardcoded SQL rails into refs across the remaining manual/root/daemon next_commands arrays, while preserving the explicit sub-orchestrator braid and control-grant surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The manual spine now points at the actual control braid instead of just repeating root. We still have command-string rails left, but the manual packet finally speaks in refs as well as prose.
+
+---
+
+## Step 161/162 — Surface manual/root command refs and sub-orchestrator links
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:45:03Z`
+- Current step: 161/162
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: Lifted the root/manual orchestration packets another notch: root_orchestrator_current now carries command_registry in live_surface, manual_current carries command_registry plus sub_orchestrator_threads/grants and next_command_refs, and the live root/manual roster passed the receipt gate after schema reload.
+- Next action: Continue replacing the remaining raw next_commands command rails in root/manual/daemon surfaces with refs where the packet shape allows it, and keep the sub-orchestrator braid explicit.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Manual now points at the real command registry and sub-orchestrator braid instead of pretending the root packet is enough. Root also learned the registry packet itself, so the manual spine is less echo and more control surface.
+
+---
+
+## Step 162/163 — Surface registry/control manifolds in manual_current
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:46:02Z`
+- Current step: 162/163
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: Expanded manual_current to expose the registry/control manifolds directly: schema_owner_manifest, surface_registry, renderer_registry, controller_grant, agent_thread_runtime, plus the existing command_registry and sub-orchestrator refs, and verified the live manual slice with a receipt-gated test pass after reapply.
+- Next action: Continue collapsing the remaining raw next_commands rails in root/manual/daemon into ref-backed surfaces where the packet class allows it, and keep the sub-orchestrator braid explicit.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Manual is now less echo chamber and more control plane: the registry family and sub-orchestrator braid are visible in one place, without losing the live route spine.
+
+---
+
+## Step 163/164 — Surface capability_current refs into the registry braid
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:47:02Z`
+- Current step: 163/164
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: Extended capability_current so it points at the same registry/control braid as the manual and root packets: next_command_refs now includes command_registry, surface_registry, renderer_registry, schema_owner_manifest, controller_grant, and agent_thread_runtime, and the live capability/manual slice passed the receipt gate after schema reload.
+- Next action: Continue collapsing the remaining raw next_commands rails in root/manual/daemon into refs where the packet shape allows it, and keep the sub-orchestrator braid explicit.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Capability_current is now part of the same visible registry braid instead of being a standalone stats blob. The capability leaf and manual spine now rhyme with the actual control plane.
+
+---
+
+## Step 164/165 — Surface provider_current with ref-backed next-command rails
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:49:22Z`
+- Current step: 164/165
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: provider_current now exposes next_command_refs alongside next_commands, pointing at the manual/root/daemon/capability/registry-control braid so the provider leaf participates in the same orchestration graph instead of staying a raw command island; receipt-gated and live through PostgREST.
+- Next action: Continue collapsing remaining raw next_commands rails in root/manual/daemon/provider into refs where the packet shape allows it, and keep the sub-orchestrator braid explicit.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Small ref slice; provider_current is now less of a lonely command island. Kept next_commands for compatibility but anchored the real navigation in refs.
+
+---
+
+## Step 165/166 — Surface workflow_current with ref-backed next-command rails
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:51:06Z`
+- Current step: 165/166
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: workflow_current now exposes next_command_refs alongside next_commands, pointing at the manual/root/daemon/capability/control registry braid so the workflow leaf participates in the same orchestration graph instead of staying a raw command island; receipt-gated and live through PostgREST.
+- Next action: Continue collapsing remaining raw next_commands rails in root/manual/daemon/model-routing into refs where the packet shape allows it, and keep the sub-orchestrator braid explicit.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Workflow leaf now speaks the same ref language as the rest of the control plane. This is the right direction for sub-orchestrator steering.
+
+---
+
+## Step 166/167 — Surface model_registry_current with ref-backed next-command rails
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:52:00Z`
+- Current step: 166/167
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: model_registry_current now exposes next_command_refs alongside next_commands, pointing at the manual/root/daemon/capability/control registry braid so the model leaf participates in the same orchestration graph instead of staying a raw command island; receipt-gated and live through PostgREST.
+- Next action: Continue collapsing remaining raw next_commands rails in root/manual/daemon/model-routing into refs where the packet shape allows it, and keep the sub-orchestrator braid explicit.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Model lane now speaks the same ref language as the provider and workflow lanes. This reduces the last lonely command-island feel in the live surface set.
+
+---
+
+## Step 167/168 — Surface model_routing_blockers with ref-backed next-command rails
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:53:14Z`
+- Current step: 167/168
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: model_routing_blockers now exposes next_command_refs alongside next_commands, pointing at the manual/root/daemon/capability/control registry braid so the blocker packet participates in the same orchestration graph instead of staying a raw command island; receipt-gated and live through PostgREST.
+- Next action: Continue collapsing remaining raw next_commands rails in root/manual/daemon/model-routing into refs where the packet shape allows it, and keep the sub-orchestrator braid explicit.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The model routing cluster now speaks the same ref language end-to-end: current, blockers, model registry, provider, workflow. This is the steering spine the goal asked for.
+
+---
+
+## Step 168/169 — Surface active_goal and canon_current with ref-backed next-command rails
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:54:52Z`
+- Current step: 168/169
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: active_goal and canon_current now expose next_command_refs alongside next_commands, pointing at the manual/root/daemon/capability/control registry braid so the goal and canon truth spines participate in the same orchestration graph instead of staying raw command islands; receipt-gated and live through PostgREST.
+- Next action: Continue collapsing remaining raw next_commands rails in root/manual/daemon/skill-policy where the packet shape allows it, and keep the sub-orchestrator braid explicit.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The goal and canon truth spines now speak the same ref language as the orchestrator leaves. This is the right top-of-tree wiring for the stated orchestration goal.
+
+---
+
+## Step 169/170 — Surface todo_current with ref-backed next-command rails
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:57:32Z`
+- Current step: 169/170
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: todo_current now exposes next_command_refs alongside next_commands, pointing at the manual/root/daemon/capability/control registry braid so the work-batch leaf participates in the same orchestration graph instead of staying a raw command island; receipt-gated and live through PostgREST.
+- Next action: Continue collapsing remaining raw next_commands rails in root/manual/daemon/skill-policy where the packet shape allows it, and decide whether manual_current should mirror todo_current refs or keep the embedded batch as a plain payload.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Todo work-batch leaf now speaks the ref braid directly on the standalone route. The embedded manual copy can stay simple unless we deliberately mirror that field later.
+
+---
+
+## Step 170/171 — Surface skill_policy_current with ref-backed next-command rails
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T18:59:11Z`
+- Current step: 170/171
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: skill_policy_current now exposes next_command_refs alongside the live policy text, and this file no longer tries to re-own manual_current; the policy surface participates in the same orchestration braid and the route contract is receipt-gated live through PostgREST.
+- Next action: Continue collapsing remaining raw next_commands rails in root/manual/daemon where the packet shape allows it; keep the live manual and root surfaces as the steering spine, and decide whether more embedded leaf copies need ref fields or should stay plain payloads.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This fixed an ownership bug too: skill_policy_current now owns only policy, not the manual surface. Cleaner schema ownership and cleaner ref navigation.
+
+---
+
+## Step 171/172 — Strengthen root/manual ref braid with registry leaves
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T19:01:19Z`
+- Current step: 171/172
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: root_orchestrator_current and manual_current now point at the registry leaves directly in next_command_refs, including capability_registry, model_registry, provider_registry, workflow_registry, and skill_policy_current, so the top-of-tree orchestration graph is more explicit and less command-string dependent; receipt-gated and live through PostgREST.
+- Next action: Continue collapsing remaining raw next_commands rails in daemon and any remaining high-level truth spines; the root/manual braid is now richer, but still has compatibility command arrays to retire gradually.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This tightened the actual steering surface: root/manual now point straight at the registry leaves they summarize, instead of only at intermediate packet names.
+
+---
+
+## Step 172/173 — Strengthen goal and canon truth spines with direct registry refs
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T19:03:37Z`
+- Current step: 172/173
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: active_goal and canon_current now expose next_command_refs alongside next_commands, pointing directly at the manual/root/daemon/control registry braid so the top-of-tree truth spines are receipt-covered and less dependent on raw command rails.
+- Next action: Continue collapsing remaining raw next_commands rails in any remaining top-level truth packets while keeping compatibility arrays only where needed; the root/manual/goal/canon steering stack is now much more ref-driven.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This tightened the actual goal and canon handoff surface. The ref braid now reaches the top of the tree, not just the leaves.
+
+---
+
+## Step 173/174 — Surface sheet_current with ref-backed next-command rails
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T19:04:51Z`
+- Current step: 173/174
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: sheet_current now exposes next_command_refs alongside next_commands, pointing at the manual/root/daemon/control registry braid so the spreadsheet leaf participates in the same orchestration graph instead of staying a raw command island; receipt-gated and live through PostgREST.
+- Next action: Continue collapsing any remaining raw next_commands rails in the last compatibility leaves; the main live-surface and goal/canon/root/manual chain is now substantially ref-driven.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Sheet is now part of the same ref braid as the rest of the live surfaces. That cleans one more operational leaf without changing the underlying data model.
+
+---
+
+## Step 174/175 — Surface chrono_current with ref-backed next-command rails on the canonical owner
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T19:06:23Z`
+- Current step: 174/175
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: chrono_current now exposes next_command_refs on its canonical owner file, pointing at the manual/root/daemon/control registry braid so the prompt/work ledger spine participates in the same orchestration graph instead of staying a raw command island; receipt-gated and live through PostgREST.
+- Next action: Continue collapsing remaining raw next_commands rails in any leftover truth packets while preserving canonical owner discipline; the live surface stack is now broadly ref-driven.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Chrono was patched on the actual owner file, not the stale manual-update copy. That kept schema ownership discipline intact while still shrinking raw rails.
+
+---
+
+## Step 175/176 — CLI process receipts ref spine on the canonical owner
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T19:11:31Z`
+- Current step: 175/176
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: cli_process_receipts now exposes next_command_refs through a PostgREST computed field on the canonical owner surface, and both the direct CLI helper plus the help/manual fetch path request and render it live.
+- Next action: Continue collapsing remaining raw next_commands rails in any leftover truth packets while preserving canonical owner discipline; payload_archive_status is the next obvious leaf if it still needs ref-backed navigation.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Small, clean win: avoided rewriting the existing receipt view schema and used a computed field so the live surface could grow without breaking the owner view. Cryptid note: the receipt hydra now has a compass.
+
+---
+
+## Step 176/177 — Payload archive status ref spine and helper render refs
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T19:16:02Z`
+- Current step: 176/177
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: payload_archive_status now exposes next_command_refs on the canonical owner view, the payload archive CLI helper renders the refs in text mode, and the live API/test surfaces assert the ref braid.
+- Next action: Finish the diagnostic operator surfaces (doctor/status/capability list) and then sweep any remaining live-surface ref gaps without regressing canonical owner discipline.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Small but important integration win: the cold archive lane is now navigable by refs instead of just being a summary blob. Tiny hydra note: archive tails now point back to the control braid.
+
+---
+
+## Step 176/176 — Close the last ref-hygiene gaps on the daemon/root summary rows
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T19:20:35Z`
+- Current step: 176/176
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: Added cli_process_receipts and payload_archive_status to daemon_status next_command_refs, added cli_process_receipts to root_orchestrator_current next_command_refs, and restored the dependent manual_current view after the root migration cascade. Receipt-gated live tests passed.
+- Next action: No blocker; if the chain needs further polish, the next obvious audit target is manual_current.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny surgical win: changed only the two canonical summary views and their direct tests, then reloaded PostgREST truth. Cryptid note: the summary rows finally know where the receipts live.
+
+---
+
+## Step 177/178 — Diagnostic operator surfaces ref braid and live helper wiring
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Active thread goal — live manual, daemon front door, root orchestration, prompt ledger, and policy alignment
+- Generated: `2026-06-04T19:20:45Z`
+- Current step: 177/178
+- Status: completed
+- Objective: Close the command/capability registry spine: command_registry, capability_registry, surface_registry, renderer_registry, next_command_refs, no hardcoded SQL command rails. Add control grants, per-thread runtime contracts, schema ownership discipline, packet class contracts, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, keep Postgres/PostgREST as truth, expand orchestration lanes, keep durability work moving, keep TUI/operator-shell polish on deck, keep model/budget governance on deck, keep registry cleanup on deck, keep prompt/context/skills modularization on deck, keep live-surface hygiene on deck.
+- Completed: luci doctor --json, luci status --json, and luci capability list --json now carry ref-backed navigation in their payloads, and the live tests prove the diagnostic surfaces are querying the real current packets instead of a dead manual path.
+- Next action: Sweep the remaining live-surface ref gaps on the orchestration chain, then reassess whether any raw next_commands rails remain in top-level truth packets.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The blocker was a stale/missing manual route in PostgREST, not the doctor/status code itself. Reloading the schema restored the live path, and the diagnostics payloads now tell the operator where to go next.
+
+---
+
+## Step 5/5 — Refresh handoff after verified braid wiring
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: LUCI diagnostic operator surfaces braid repair
+- Generated: `2026-06-04T19:23:39Z`
+- Current step: 5/5
+- Status: completed
+- Objective: Patch luci doctor, luci status, and luci capability list to surface the live ref braid without breaking canonical ownership discipline.
+- Completed: doctor, status, and capability list now carry live next_command_refs plus route_refs/capability_refs where appropriate; status no longer crashes on missing manual_current and falls back to the live root_orchestrator packet for its manual-facing summary; direct receipt-gated regression passed.
+- Next action: If more stale operator wrappers surface, patch only their canonical owner scripts and direct tests.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Small braid win: preserved owner discipline, stopped the status crash, and kept the live refs coming from the actual packets instead of a guessed static list.
+
+---
+
+## Step 3/3 — Receipt-gated root surface cleanup
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T19:39:38Z`
+- Current step: 3/3
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and per-thread runtime contracts, replace string rails with refs, and keep diagnostic/manual surfaces aligned with live Postgres/PostgREST truth.
+- Completed: Patched the stale root_orchestrator_current assertions to match live ref-backed commands, re-ran the command_capability_registry_spine receipt gate, and got a passing DB-backed regression for root/manual/registry diagnostic surfaces.
+- Next action: Sweep the remaining compatibility leaves and any stale next_commands assertions only where the live surfaces still disagree with the ref braid.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Small but real progress: the live root surface now lines up with the ref braid and the gate is green; no new schema shape was needed for this slice.
+
+---
+
+## Step 4/4 — Runtime resonance lane and status fix
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T19:55:34Z`
+- Current step: 4/4
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and per-thread runtime contracts, replace string rails with refs, and keep diagnostic/manual surfaces aligned with live Postgres/PostgREST truth.
+- Completed: Built the standalone runtime-only resonance evolver crate, added the runtime receipt schema/routes, exposed read-only latest/candidate/pressure views, verified a synthetic JSON receipt, and fixed luci status to use valid lightweight active_goal columns.
+- Next action: Keep sweeping any remaining compatibility leaves and, if desired, wire resonance JSONL ingestion into Absurd without touching canon truth.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Two live lanes now sit cleanly beside the control spine: the status CLI is lighter and the runtime receipt surface is real. No canon mutation happened.
+
+---
+
+## Step 5/5 — Sub-orchestrator priority contract
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T20:02:28Z`
+- Current step: 5/5
+- Status: completed
+- Objective: Continue the command/capability registry spine by making the sub-orchestrator priority contract explicit in the packet, swarm, and recursive fanout rails.
+- Completed: Added orchestration metadata to goal_agent_packet, propagated it through goal_swarm_dispatch, and exposed lane priority on recursive_fanout_orchestrator. Focused tests now pass through the DB receipt gate.
+- Next action: Sweep remaining compatibility leaves or wire the new orchestration hints into any other live surfaces that still lack a typed priority contract.
+- Resume command: `python3 scripts/dev_library_scan.py --query sub orchestrator priority`
+
+Technical Summary Review and Dev Notes: Tiny metadata slice; no canon truth changes. Sub-orchestrators now have an explicit ordering spine instead of implicit packet drift.
+
+---
+
+## Step 6/6 — Sub-orchestrator truth surface
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T20:06:41Z`
+- Current step: 6/6
+- Status: completed
+- Objective: Continue the command/capability registry spine by surfacing the sub-orchestrator priority contract in the live root/manual/status packets.
+- Completed: Added orchestration metadata to the live root_orchestrator_current and manual_current packets and exposed the same priority block through luci status --json; focused receipt-gated tests passed after schema reload.
+- Next action: Sweep remaining compatibility leaves or wire the orchestration block into any other live surfaces still missing typed priority metadata.
+- Resume command: `python3 scripts/dev_library_scan.py --query orchestration sub orchestrator priority`
+
+Technical Summary Review and Dev Notes: This turns the sub-orchestrator ordering from packet-only metadata into surfaced truth. No canon write; just better steering visibility.
+
+---
+
+## Step 7/7 — Capability orchestration truth surface
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T20:08:56Z`
+- Current step: 7/7
+- Status: completed
+- Objective: Continue the command/capability registry spine by surfacing the sub-orchestrator priority contract in the live root/manual/status packets and adjacent live capability surfaces.
+- Completed: Added orchestration metadata to capability_current and luci doctor/status surfaces, aligned the live orchestration block across root/manual/capability packets, and verified the DB-backed surface through a receipt-gated test run.
+- Next action: Sweep remaining compatibility leaves or wire the orchestration block into any other live surfaces still missing typed priority metadata.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny metadata slice; no canon truth changes. The sub-orchestrator ordering is now visible on another live control surface, not just the packet rails.
+
+---
+
+## Step 8/8 — Registry surface orchestration
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T20:10:35Z`
+- Current step: 8/8
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Added typed orchestration metadata and next_command_refs to surface_registry and renderer_registry, keeping the registry plane aligned with the sub-orchestrator priority spine, then verified both live routes through a receipt-gated test run.
+- Next action: Sweep the last compatibility leaves or wire the same orchestration block into any remaining live surfaces missing typed priority metadata.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Small registry-plane slice, but it matters: route inventory and renderer inventory now advertise the same sub-orchestrator ordering as the rest of the live control surfaces.
+
+---
+
+## Step 9/9 — Capability list orchestration surface
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T20:12:14Z`
+- Current step: 9/9
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Reloaded capability_current with a typed orchestration block at the live view tail, taught luci capability list to emit that orchestration state explicitly, and verified the diagnostic surface through a receipt-gated test run.
+- Next action: Sweep the last compatibility leaves or wire the same orchestration block into any remaining live surfaces missing typed priority metadata.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Diagnostic surface now mirrors the sub-orchestrator priority contract directly. No canon mutation; just making the live router honestly report its steering spine.
+
+---
+
+## Step 10/10 — Current surface orchestration trio
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T20:13:37Z`
+- Current step: 10/10
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Added typed orchestration blocks to provider_current, workflow_current, and model_registry_current, then verified the live packet trio through a receipt-gated current-surface test run.
+- Next action: Sweep the last compatibility leaves or wire the same orchestration block into any remaining live surfaces missing typed priority metadata.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The remaining current packet leaves now carry the same sub-orchestrator priority spine as the rest of the live control surfaces. No canon truth changed; only the steering metadata tightened.
+
+---
+
+## Step 11/11 — Remaining orchestration live surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T20:19:11Z`
+- Current step: 11/11
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Reloaded the remaining live packet leaves and receipts-facing surfaces with typed orchestration tails, then verified daemon, todo, sheet, skill, chrono, model routing, payload archive, and CLI receipt surfaces through a receipt-gated test bundle.
+- Next action: Sweep any remaining compatibility leaves or non-current surfaces still missing typed priority metadata; otherwise continue the broader registry/control contract closure.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This was the last obvious live-surface drift cluster in the current packet family. The sub-orchestrator priority spine now shows up across the current packets, routing blockers, receipts, and archive/status surfaces.
+
+---
+
+## Step 12/12 — Compatibility orchestration sweep
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T20:30:21Z`
+- Current step: 12/12
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Patched the remaining compatibility/manual/truth-spine leaves to carry typed next_command_refs and orchestration tails, then verified the live surfaces with a receipt-gated test bundle.
+- Next action: Audit any remaining non-current or compatibility leaves for stale command rails or missing typed packet shapes.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This was the last obvious compatibility cluster. UUID identity and shape signatures now stay separate: relational truth stays lossless, elastic shape remains routing-only.
+
+---
+
+## Step 13/13 — Elastic shape runtime surface
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T20:47:34Z`
+- Current step: 13/13
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Added runtime-only elastic shape receipts, residuals, and Indy attention-pressure surface; wired luci elastic shape/status/doctor paths; verified DB route exposure and receipt-gated tests.
+- Next action: Map the Percyphon SQLB coordinate-table contract next, then wire proxy/outbound control loops as a thin adapter.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: UUID identity stays lossless; shape signatures are routing-only. Pressure surface is now live for Indy_READs and operator routing.
+
+---
+
+## Step 14/14 — Architecture-first repomix digest
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T21:07:08Z`
+- Current step: 14/14
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Wrote repomix.config.json and generated 05_OUTPUTS/lucidota_subsystems_tight_digest.md (2.1M) with a top-level headerText preamble and a tight architecture-first include/ignore set.
+- Next action: Next: wire the Percyphon/Ouroboros split and sub-orchestrator priority stack into the live routing surfaces with receipts.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Digest now stays under 5 MB. Percyphon is still advisory geometry; the digest is a handoff aid, not truth.
+
+---
+
+## Step 15/15 — Restore old canon anchors
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T21:15:34Z`
+- Current step: 15/15
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Added the restored old canon anchors section to 00_PROJECT_BRAIN/ACTIVE_INSTRUCTION_INDEX.md so the older law stack is explicitly visible again.
+- Next action: Verify the restored index pointers, then continue the provider/fanout and live routing work with the old canon available as first-class context.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Old canon now has an explicit index section instead of living only in scattered memory. Percyphon stays advisory; STATUS_LEDGER and the canonical instruction files still own truth.
+
+---
+
+## Step 16/16 — Restore load-bearing system law into core contract
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T21:19:08Z`
+- Current step: 16/16
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Added a restored whole-system wakeup section to PROJECT_2501_CORE_CONTRACT.md so the old load-bearing laws now live in canonical active doctrine instead of only in chat or scattered references.
+- Next action: Verify the updated core contract against the active instruction index, then continue the sub-orchestrator priority and live surface work with the restored law in place.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Used option B: fold the load-bearing laws into existing canon docs. HUMAN_ROOT authority, claim/evidence/receipt separation, Percyphon advisory-vs-canon, and the runtime spine are now explicitly stated in core law.
+
+---
+
+## Step 17/17 — Restore old contracts addendum in workflow contract
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T21:23:26Z`
+- Current step: 17/17
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Restored the old load-bearing addendum into the live Indy workflow contract, including the Phosphorae routing forms, Krampus-mode routing surfaces, verbosity protocol, and scope fence.
+- Next action: Verify the updated workflow contract against the active instruction index, then continue the provider dispatch and secret isolation work.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Kept the old canon as live contract text instead of inventing a new subsystem file.
+
+---
+
+## Step 18/18 — Write strict orchestration priority stack into GOALS policy
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T21:24:43Z`
+- Current step: 18/18
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Added an explicit strict orchestration priority stack to GOALS/AGENT_ORCHESTRATION_POLICY.md, including provider secret isolation so sub-orchestrator fanout has an actual live ordering and a quarantine boundary for secrets.
+- Next action: Verify the updated policy and handoff/log, then continue the registry spine work on the current command/capability/provider surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This makes “now” a concrete routing order: truth surfaces, deterministic local checks, mini-orchestrator packets, local/INDY lanes, then Groq/Vibe cloud candidates.
+
+---
+
+## Step 19/19 — Align live provider/model/current surfaces to strict orchestration priority stack
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T21:27:27Z`
+- Current step: 19/19
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Patched the live provider/model/root/workflow/current views so the orchestration block now uses the explicit strict priority stack and provider secret isolation boundary, then verified the touched surfaces with the DB receipt gate.
+- Next action: Continue the registry spine work by checking the remaining live current surfaces for the same refs-and-grants shape, especially command/capability/surface/renderer/controller/runtime contracts.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This turn was about moving the priority stack from policy text into live current surfaces; the gate passed with 24 tests green.
+
+---
+
+## Step 20/20 — Close workflow alias and root orchestration queue slice
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T22:06:42Z`
+- Current step: 20/20
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Patched the workflow current JSON emitter so stdout is one JSON object in --json mode, created the missing root_orchestration_spine queue row, and inserted a queued OUROBOROS_ONLINE_REENGAGE job with a receipt file.
+- Next action: Continue only if another live surface still fails a verified receipt gate; otherwise move to the next remaining goal slice with the restored queue and workflow alias in place.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Single JSON stdout fixed the alias regression. ABSURD payload now lands on a real queue instead of bouncing on the FK. Keep the slice receipt-backed and avoid more registry prose.
+
+---
+
+## Step 21/21 — Provider fanout now executes live lanes
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T22:17:49Z`
+- Current step: 21/21
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Patched the existing model-fabric orchestrator so it now plans Gemini execute and Vibe sequencer jobs alongside Groq, wired a live Gemini chat CLI, and verified execute/consume receipts. Groq attempted and returned 401 with the current key; Gemini is still missing from the quarantine file; Vibe ran and wrote a receipt.
+- Next action: If the operator loads a valid Gemini key, rerun the same fanout execute/consume smoke; otherwise keep using the existing orchestrator and receipts for Groq/Vibe.
+- Resume command: `./luci provider current --json && .venv/bin/python scripts/goal_model_fabric_orchestrate.py --execute --consume --json`
+
+Technical Summary Review and Dev Notes: Tiny honest slice: existing orchestrator, not new surface. Live lanes now exist and write receipts; current blockers are secret/key validity, not missing dispatch plumbing. Save the receipts, keep the queue spine boring.
+
+---
+
+## Step 22/22 — Model fabric front door wired into luci
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T22:19:43Z`
+- Current step: 22/22
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Added luci model fabric as a front door to the existing model-fabric orchestrator. The command now reaches the same queued fanout path, and the wrapper test passes. The fanout path itself is live: Groq attempted and 401ed with the current key, Gemini execute blocked on missing secrets, and Vibe executed and wrote a receipt.
+- Next action: Resolve the provider secret state if the operator wants live Groq/Gemini responses; otherwise keep using the current front door and receipts while tightening the budget/provenance surfaces next.
+- Resume command: `./luci model fabric --json && .venv/bin/python scripts/goal_model_fabric_orchestrate.py --execute --consume --json`
+
+Technical Summary Review and Dev Notes: No new orchestration surface invented. We exposed the existing model-fabric organ through luci, proved it with a receipt gate, and kept the rough edges honest: key validity is the remaining blocker, not dispatch plumbing.
+
+---
+
+## Step 23/23 — Restore provider secrets and refresh live fanout
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T22:24:36Z`
+- Current step: 23/23
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Updated the actual ~/.config/lucidota/secrets.env with the requested Gemini and Groq keys, then verified provider_current reports GEMINI_API_KEY, GOOGLE_API_KEY, and GROQ_API_KEY as PRESENT. The live model-fabric fanout can be re-run from the existing front door now that the secret blocker is cleared.
+- Next action: Re-run ./luci model fabric --execute --consume --json and inspect the Groq/Gemini/Vibe receipts for actual execution status.
+- Resume command: `./luci provider current --json && ./luci model fabric --execute --consume --json`
+
+Technical Summary Review and Dev Notes: Secret blocker was real; the fix was to rewrite the actual quarantine env file, not invent a new dispatcher. Provider surface now shows the keys as present. Next honest check is lane receipts, not more prose.
+
+---
+
+## Step 23/23 — Restore provider secret execution and Gemini fallback
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T22:31:51Z`
+- Current step: 23/23
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Rewrote the actual ~/.config/lucidota/secrets.env with the requested Gemini and Groq keys, added a shared env hydrator for provider lanes, switched Gemini to a supported live model, and added fallback from depleted billing key to the free key. Live smoke now passes for Gemini and the model-fabric orchestrator fanout, with Groq also passing.
+- Next action: Tighten provider budget/provenance surfaces and surface the fallback attempt ledger where needed.
+- Resume command: `./luci model fabric --execute --consume --json`
+
+Technical Summary Review and Dev Notes: Root cause was split across two layers: Gemini never loaded the quarantine file, and the default model name was stale. The free key works; the billing key is depleted, so fallback is now honest and live.
+
+---
+
+## Step 24/24 — Close live current surface orchestration stack and queue Indy_READs world report
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T22:48:22Z`
+- Current step: 24/24
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Patched the remaining live current surfaces (sheet_current, workflow_current, canon_current, active_goal) to carry strict_priority_stack; verified provider/model/doctor/canon/active_goal routes now expose controller grant + thread snapshots where applicable; queued an Indy_READs world report email receipt and wrote the local report packet.
+- Next action: Move to the next whole-system slice: provider budget/provenance, input membrane, and Indy_READs signal bot hardening.
+- Resume command: `./luci model fabric --execute --consume --json`
+
+Technical Summary Review and Dev Notes: Tiny cut, big whiskers: the old priority tail is gone on the live surfaces we touched, and the report packet is queued without pretending it was sent.
+
+---
+
+## Step 25/25 — Prove Indy_READs receipt and always-on daemon
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T22:49:40Z`
+- Current step: 25/25
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Seeded a queued dialogue row, ran Indy_READs once against the queue, verified the row moved to done with response_delivery_status=QUEUED_FOR_CHAT_SURFACE and last_response_id populated, and confirmed ironclaw-indy-reads.service is active.
+- Next action: Continue the next whole-system slice: provider budget/provenance, input membrane, and Percyphon/flow hardening.
+- Resume command: `systemctl --user is-active ironclaw-indy-reads.service && ./luci api indy queue --json`
+
+Technical Summary Review and Dev Notes: The daemon was already on; the queue was the bone. The response left a track and the service kept breathing.
+
+---
+
+## Step 26/26 — Expose resident loadout operational state in live model surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T22:58:18Z`
+- Current step: 26/26
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Patched model_registry_current and model_routing_current to expose resident_loadout, latest load_governor decision, and derived loadout_status so the live API now reports the current loadout as partial/deferred instead of implying the whole bundle is online. Receipt-gated tests passed.
+- Next action: Sync the bootstrap safe-surface SQL and any remaining model/current/manual surfaces that still omit the new loadout state; then decide whether to add a dedicated luci surface for model-governor status.
+- Resume command: `./luci model registry current --json && ./luci model routing current --json`
+
+Technical Summary Review and Dev Notes: Truth over wishful loadout math: the live governor says defer, so the registry now says defer too. Small schema tail, honest loadout state.
+
+---
+
+## Step 27/27 — Sync manual/model registry surfaces to resident loadout governor truth
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T23:00:37Z`
+- Current step: 27/27
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Patched the model registry CLI and runtime manual to print the current resident loadout as partial/defer instead of implying the bundle is fully on; receipt-gated smoke proved the new text and CLI output.
+- Next action: Inspect the remaining manual/bootstrap views for any last drift in current model/loadout status and then stop normalizing loadout wording unless a new live mismatch appears.
+- Resume command: `./luci model registry current --json && ./.venv/bin/python scripts/lucidota_model_registry.py`
+
+Technical Summary Review and Dev Notes: If the governor says defer, the human surfaces should say defer. Keeps the operator from chasing phantom full-load state.
+
+---
+
+## Step 28/28 — Sync bootstrap/manual model registry truth to live loadout governor state
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T23:02:07Z`
+- Current step: 28/28
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Confirmed the bootstrap safe-surface model_registry view carries load_governor_status, the live model_registry_current packet still reports partial/defer, and the operator CLI prints governor=partial/defer. Manual runtime text already carries the same posture.
+- Next action: Continue only if a new live mismatch appears; otherwise move to the next unfinished objective slice with the live truth spine now consistent.
+- Resume command: `./luci model registry current --json && ./.venv/bin/python scripts/lucidota_model_registry.py`
+
+Technical Summary Review and Dev Notes: If the box cannot fit the full bundle, the docs and CLI should say so plainly. No more loadout cosplay.
+
+---
+
+## Step 29/29 — Surface explicit Bonsai→Needles→Bonsai chain path
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T23:09:32Z`
+- Current step: 29/29
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Added a new bonsai-chain CLI bridge in model_runner_cli.py that runs Bonsai Q1 -> six Needle lanes -> Bonsai Q1 again with a deterministic needle digest, and receipt-gated the new path with a passing test plus a live dry-run receipt. Confirmed the local llama.cpp backend path remains the build-cuda llama-server used by the Mamba/DeepSeek lanes.
+- Next action: Wire the new chain into the luci front door or model-fabric surface next, then verify the remaining registry/orchestration refs that still use string rails.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The chain is now explicit and receipted. Next tighten the operator shell so the route is visible at the top-level, not just in the runner helper.
+
+---
+
+## Step 30/30 — Expose bonsai-chain from the luci front door
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T23:12:50Z`
+- Current step: 30/30
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Added a top-level luci model bonsai-chain alias that dispatches to the new Bonsai Q1 -> six Needle lanes -> Bonsai Q1 chain helper, updated the help surface, fixed the stale help assertion to match the live percyphon emit syntax, and verified the front door with a receipt-gated test plus a live dry-run through luci itself.
+- Next action: Wire this front-door route into the remaining model-fabric/provider surfaces only if another live surface still lacks the new chain or a registry ref still points at a string rail.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This is the right level of exposure: the helper exists, but now the operator can hit it from luci directly. Keep the next step honest and live-surface driven.
+
+---
+
+## Step 31/31 — Wire Bonsai chain into model-fabric and packet registry surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T23:18:55Z`
+- Current step: 31/31
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Patched scripts/goal_model_fabric_orchestrate.py to enqueue a bonsai_chain_execute job, patched scripts/goal_agent_packet.py to select a dedicated bonsai_chain adapter for Bonsai/MambaGraph/Needles routing, added bonsai_chain to GOALS/plugin_build_mode_bootstrap.json, and receipt-gated the new tests. Live `./luci model fabric --execute --consume --json` now includes the Bonsai chain lane in the planned jobs and executes cleanly under the current fabric report. Also copied every treelite-related file under /home/mfspx into /home/mfspx/treelite_bundle_20260604/ with a manifest for the user request.
+- Next action: Scan any remaining provider/model surfaces for stale generic llama_cpp_heavy routing where bonsai_chain should be selected, then update only those live surfaces if a receipt proves another miss.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The helper existed; the missing piece was first-class orchestration exposure. Kept the change surgical: one new fabric job, one new packet adapter, one registry entry, then proved it with a fresh receipt-gated test and live model-fabric run. Treelite request handled separately by flatten-copying all treelite-matching files into one folder without touching originals.
+
+---
+
+## Step 32/32 — Align Gemini cloud lane registry with active chat path
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T23:39:15Z`
+- Current step: 32/32
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Updated GOALS/plugin_build_mode_bootstrap.json so gemini now points at the active model_runner_cli gemini-chat lane in adapter_registry and cloud_lanes, then verified the change with receipt-gated tests that now pass. This removes the stale legacy bridge path from the operator-facing registry packet.
+- Next action: Rescan the remaining live command/capability/surface/renderer registry surfaces for any stale legacy rails or hidden string-command references, then patch only the live mismatch that a fresh receipt proves.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Kept the fix surgical: first a failing test exposed the stale gemini lane, then the registry packet was updated to the live chat path and the full adapter registry tests passed. Tiny bridge, no broad rewrite.
+
+---
+
+## Step 33/33 — Replace Gemini inventory bridge with live provider current surface
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T23:41:41Z`
+- Current step: 33/33
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Updated GOALS/plugin_build_mode_bootstrap.json so the Gemini adapter and cloud lane point at the active model_runner_cli gemini-chat path, then changed the model-fabric Gemini inventory job to call luci provider current --json instead of the legacy litellm bridge. Verified both with receipt-gated tests, including the full goal_agent_packet and goal_model_fabric_orchestrate surfaces.
+- Next action: Rescan the remaining live registry surfaces for any other legacy bridges or hardcoded rails, then patch only the next live mismatch that a receipt proves.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This closes the split-brain between the registry packet and the fabric planner. Inventory now asks the live provider surface; execution already uses gemini-chat.
+
+---
+
+## Step 34/34 — Point model fabric Gemini inventory at live provider current
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T23:43:56Z`
+- Current step: 34/34
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Replaced the Gemini inventory job in scripts/goal_model_fabric_orchestrate.py so model fabric now asks luci provider current --json instead of the legacy LiteLLM bridge, after the Gemini adapter registry itself had already been aligned to the active model_runner_cli gemini-chat lane. Verified with receipt-gated tests for both the registry packet and the fabric orchestrator.
+- Next action: Do one more bounded scan for any remaining live registry or manual surfaces that still point at stale string rails or corpse bridges, and patch only a proved mismatch.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This keeps inventory and execution on the same live control surface: provider_current for inventory, gemini-chat for execution. No bridge split-brain left in the fabric planner.
+
+---
+
+## Step 35/35 — Expand capability list refs to match live diagnostic spine
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T23:45:46Z`
+- Current step: 35/35
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Expanded scripts/luci_capability_list.py so the capability list surface now surfaces the full live registry/control braid in next_command_refs, including renderer_registry, schema_owner_manifest, controller_grant, and agent_thread_runtime. Verified with receipt-gated tests and a live luci capability list --json check.
+- Next action: Rescan for any remaining live surface that still omits one of the canonical registry/control refs, then patch only the live mismatch that remains.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This makes the capability surface consistent with doctor and status instead of being the odd one out. Small ref, live proof, no broad rewrite.
+
+---
+
+## Step 36/36 — Teach manual spine to emit a tiny current summary with on-demand refs
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T23:51:54Z`
+- Current step: 36/36
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, and prioritize proper orchestration of sub orchestrators.
+- Completed: Updated scripts/luci_help_manual.py so the manual spine now returns a compact manual_summary plus next_command_refs, route_refs, surface_refs, renderer_refs, and capability_refs. It now falls back to root_orchestrator_current when manual_current is empty, keeping the operator manual thin instead of forcing giant context loads. Verified with receipt-gated tests and live luci manual current --json output.
+- Next action: Run one bounded audit for any remaining live surface that still emits a large or stale summary where the tiny current summary should be enough, then patch only a proved mismatch.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This made the manual surface actually behave like a spine: short current digest first, refs available for capsule fetches, no giant wall of context.
+
+---
+
+## Step 37/37 — Slim workflow current to refs-only
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-04T23:55:12Z`
+- Current step: 37/37
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, and keep the orchestration graph explicit and receipt-backed.
+- Completed: Patched lucidota_canon.workflow_current so the live workflow packet keeps the registry summary but replaces the heavy full-row active workflow payload with refs-only names, reducing the live JSON surface while preserving the raw registry route for details. Verified with receipt-gated tests and live luci workflow current --json output.
+- Next action: Audit one more current surface for avoidable bulk and only patch if it has the same refs-vs-full-row mismatch.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Workflow current is now spine-shaped: counts and refs first, raw registry behind the door.
+
+---
+
+## Step 38/38 — Compact root/manual current and restore refs
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T00:06:51Z`
+- Current step: 38/38
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, and keep the orchestration graph explicit and receipt-backed.
+- Completed: Patched root_orchestrator_current so its live_surface stopped inlining the full canon payloads and now keeps capped ID summaries for canon_current and canon_versions, shrinking the live root packet from multi-megabyte context soup into a compact control surface. Restored manual_current after the root reload cascade, then aligned it to the live route catalog, root live_surface, and command braid by surfacing route_refs, surface_refs, renderer_refs, capability_refs, sub_orchestrator threads/grants, goal, db_law, queue_loop, and the operator-control registry leaves. Verified with receipt-gated tests and live luci root orchestrator current --json / luci manual current --json output.
+- Next action: Audit one more live surface for avoidable bulk only if a fresh live check shows a real mismatch; otherwise continue the registry/control/spine work from the compact base.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root is finally a spine, not a canyon; manual now follows the live route catalog instead of historical aliases.
+
+---
+
+## Step 39/39 — Compact capability current and align manual source wording
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T00:09:01Z`
+- Current step: 39/39
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants and runtime contracts, enforce schema ownership, replace string rails with refs, finish diagnostic surfaces, build/update manual spine, and keep the orchestration graph explicit and receipt-backed.
+- Completed: Patched capability_current so active capabilities are emitted as compact key/name/status/workflow objects instead of full registry rows, dropping the live capability packet from megabyte-scale to a compact summary packet while preserving the consumers that only need capability refs and status hints. Updated manual_current auth_expectations.manual_source so it explicitly names the capability registry, surface registry, renderer registry, and the packet vocabulary expected by the manual test, then reloaded the live views. Verified with receipt-gated tests and live luci capability current --json / luci capability list --json output.
+- Next action: Continue auditing the remaining live surfaces for any other broad row blobs only if a fresh live check shows they still need compaction; otherwise keep advancing the registry/control spine.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Capability current is now a proper packet instead of a full-row spill; manual wording and refs are back in sync with the live registry braid.
+
+---
+
+## Step 40/40 — Promote canonical Mamba listener lane to mamba2-1.3b-listener
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T00:17:26Z`
+- Current step: 40/40
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Updated lucidota_runtime.model_candidate and resident_loadout_slot so the active resident listener lane points at mamba2-1.3b-listener with a 909 MB 1x-VRAM estimate instead of the older falcon3-mamba-7b listener row. Verified the live /model_registry_current and /model_routing_current packets now report the mamba2 listener, and refreshed the model-runtime alignment tests and manual-current packet checks through a receipt-gated run.
+- Next action: Continue auditing any remaining live surfaces that still encode the old listener model id or stale routing notes; otherwise keep advancing the registry/control spine.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny truth fix: the canonical listener lane is now explicit in DB and live packets. Manual/current surface tests were aligned to the current payload shape rather than assuming route_list leftovers.
+
+---
+
+## Step 41/41 — Retire the stale falcon3 listener id from runtime seed
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T00:19:17Z`
+- Current step: 41/41
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Removed the last stale falcon3-mamba-7b-listener string from the active runtime seed by renaming the old model_candidate row to a legacy reference id and keeping the resident listener slot on mamba2-1.3b-listener. Reapplied the runtime schema, verified the live registry/routing packets still report the canonical mamba2 listener, and receipt-gated the cleanup with the current manual/model tests.
+- Next action: Continue auditing any remaining live surfaces for stale listener/router strings or other hardcoded rails; otherwise proceed deeper into the registry/control spine.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This was the last hardcoded stale listener string in the active runtime seed. Live active_models now show deepseek, mamba2, and needle only; the old Falcon3 row is legacy-only.
+
+---
+
+## Step 42/42 — Surface current model routes in the live manual packet
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T00:20:38Z`
+- Current step: 42/42
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Updated manual_current route refs and route list so the live manual now advertises model_registry_current and model_routing_current directly, not just in next_command_refs. Verified the live manual packet exposes both routes and receipt-gated the change with targeted tests.
+- Next action: Continue auditing for any remaining stale hardcoded rails or missing refs on other live surfaces; then keep advancing the registry/control spine.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Manual/current is now more self-describing: route_refs, route_list, and next_command_refs all agree on the current model packets.
+
+---
+
+## Step 43/43 — Collapse smaller current packets onto ref-backed next_commands
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T00:25:14Z`
+- Current step: 43/43
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Changed model_registry_current, model_routing_current, provider_current, capability_current, and workflow_current so their next_commands are now ref-backed packets instead of raw CLI rails. Updated the live manual packet to advertise provider_current and workflow_current in route_list, route_refs, and manual_source, then verified the live manual/current surfaces and receipt-gated the cleanup.
+- Next action: Continue auditing the remaining large root/manual surfaces and any other active SQL still carrying raw CLI command rails; keep replacing them with refs where the packet class needs them.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This reduced the command-rail debt on the smaller current packets. The big root/manual surfaces still carry legacy next_commands rails and remain the next live cleanup targets.
+
+---
+
+## Step 44/44 — Teach manual and root renderers to surface refs explicitly
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T00:27:14Z`
+- Current step: 44/44
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Updated the live renderer helpers for root orchestrator and manual surfaces so they explicitly print next_command_refs in addition to legacy next_commands. This keeps the operator surfaces honest about the ref layer while the larger SQL packets are still being refactored. Syntax-checked the helper edits and kept the worktree clean.
+- Next action: Continue cutting the biggest remaining SQL command rails in root_orchestrator_current and manual_current, with the renderers already prepared to show ref-backed packets cleanly.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: This is a staging move for the final big rails: the renderers now make the ref layer visible even before the SQL packets are fully collapsed.
+
+---
+
+## Step 45/45 — Collapse remaining root/manual rails to refs and restore Indy responses
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T00:36:34Z`
+- Current step: 45/45
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Rewrote the live root_orchestrator_current and manual_current packets so next_commands are ref-only instead of literal luci rails, added the missing route refs to keep the packets self-consistent, and restored the missing luci api indy responses route with a real script. Verified the live root/manual packets now load without ./luci command strings and the Indy response route returns data.
+- Next action: Keep the goal active and only touch additional live surfaces if a new verified mismatch appears in root/manual/diagnostic packets or Indy response consumers.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny, boring, and right: the ref layer is now the operator-facing default, and the Indy response hole is patched back into the shell.
+
+---
+
+## Step 46/46 — Ref-followup surfaces and Indy response route stay live
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T00:47:19Z`
+- Current step: 46/46
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Verified the root, manual, active goal, canon, sheet, daemon status, and model-routing-blockers packets with ref-only next_commands and refreshed strict priority stacks where needed. The live /indy_responses route remains restored. A receipt-gated test run passed across all touched surfaces.
+- Next action: Continue the remaining rail sweep in older helper/current packets and either collapse their next_commands to refs or retire them if they are no longer live surfaces.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny, boring, and right: the operator surfaces now read like refs instead of command graffiti, and the queue/response loop is visible again.
+
+---
+
+## Step 47/47 — Refactor controller grant allowed_commands to typed identifiers
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T00:54:03Z`
+- Current step: 47/47
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Replaced the last literal shell command strings in controller_grant.allowed_commands with typed identifiers and added a regression guard that blocks ./luci from reappearing in the grant policy.
+- Next action: Inspect whether any other registry/control-policy rows still encode shell commands instead of typed refs, then collapse or retire them.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Small but load-bearing: the grant policy now speaks identifiers instead of operator-shell graffiti, and the live /controller_grant surface reflects it.
+
+---
+
+## Step 48/48 — Convert prompt ledger catalog to ref-based packet shape
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T00:58:21Z`
+- Current step: 48/48
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Reworked the prompt catalog status packet so the live prompt surface exposes typed next_command_refs instead of literal shell rails, and added a regression test proving the nested packet shape stays ref-only.
+- Next action: Keep sweeping for any remaining live SQL helper surface that still emits shell-command text or command graffiti instead of refs.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt catalog is now ref-shaped and the live packet still reads cleanly through PostgREST; one more old helper got turned into a typed surface instead of a command list.
+
+---
+
+## Step 49/49 — Eliminate remaining SQL command rails and add a whole-tree regression guard
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:02:00Z`
+- Current step: 49/49
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Removed the last executable shell-command strings from the SQL helper/current surfaces in 06_SCHEMA, replaced them with typed command identifiers and refs, and added a regression test that scans the SQL tree for forbidden command rails.
+- Next action: If any residual live surface still lags the file state, reapply the corresponding ref-only view block; otherwise keep moving on non-shell registry cleanup and live-surface hygiene.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The SQL tree is finally speaking refs instead of command graffiti, and the new guard will catch any future slide back into executable strings.
+
+---
+
+## Step 50/50 — Add whole-tree SQL command-rail regression guard and finish helper surface cleanup
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:02:48Z`
+- Current step: 50/50
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Removed remaining executable shell strings from the SQL helper/current surfaces, replaced them with typed command identifiers and refs, and added a whole-tree SQL regression test that blocks future hardcoded command rails from returning.
+- Next action: Keep the live-surface hygiene sweep going, especially the remaining current/manual packets and any registry row that still wants to expose shell text instead of refs.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The SQL tree is now guarded against command graffiti, and the surviving ./luci references are test fixtures or shell entrypoints rather than live SQL rails.
+
+---
+
+## Step 51/51 — Normalize prompt filing acceptance-test output
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:09:33Z`
+- Current step: 51/51
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Patched the live prompt filing view so `prompts_filed.detail.acceptance_test` no longer leaks the stale curl phrasing, then re-ran the receipt-gated prompt filing surface test to green.
+- Next action: Continue the live-surface hygiene sweep for any remaining registry/manual packet that still emits shell text instead of typed refs.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Live API truth now normalizes the prompt ledger packet at the view layer, so the prompt filing surface stays clean even if upstream rows rehydrate stale wording.
+
+---
+
+## Step 52/52 — Normalize todo_current acceptance-test output
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:11:32Z`
+- Current step: 52/52
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Patched the live todo_current truth spine so acceptance_test values normalize at the view layer, including nested batch items, then re-ran receipt-gated ontology/work compiler and root/manual surface tests to green.
+- Next action: Continue the live-surface hygiene sweep for any remaining registry/current packet that still emits shell text or stale command-like wording instead of typed refs.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The todo packet was the last obvious live surface still leaking the stale curl phrasing; normalizing it at the view layer also cleaned the nested root/manual surfaces that embed todo_current.
+
+---
+
+## Step 53/53 — Normalize ontology work batch acceptance-test output
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:13:18Z`
+- Current step: 53/53
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Patched the live ontology_work_batch and ontology_work_item views to normalize the stale curl phrasing in their acceptance_test fields, which also cleaned the nested manual and root current surfaces that embed them, then re-ran the receipt-gated ontology/work compiler and nested surface tests to green.
+- Next action: Continue the live-surface hygiene sweep for any other current packet that still leaks command-like phrasing or stale text through nested views.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The final curl leak was not in the prompt or todo surfaces anymore; it lived in the ontology work batch/items, and normalizing those views cleaned the whole nested chain.
+
+---
+
+## Step 54/54 — Sync schema ownership manifest to all active surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:15:13Z`
+- Current step: 54/54
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Filled schema_owner_manifest from the live surface_registry so every active surface now has a canonical owner row, then verified the manifest coverage equals the active surface set and passed the registry raw-surface receipt gate.
+- Next action: Continue the live-surface hygiene sweep for any remaining registry/current packet or manifest row that drifts away from typed refs or canonical ownership.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Ownership discipline is now complete across the live active surface set instead of just the handful of seed rows; the manifest coverage test will keep it from silently shrinking again.
+
+---
+
+## Step 55/55 — Add manifest approval gate for active surface redefinitions
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:18:52Z`
+- Current step: 55/55
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Added approval metadata and a BEFORE UPDATE guard to schema_owner_manifest so active surface redefinitions require approved_by, approved_at, and approval_receipt_uuid; verified the live manifest still covers every active surface and that the guard blocks unauthorised redefinitions while allowing approved updates.
+- Next action: Continue the live-surface hygiene sweep for any remaining current packet or manifest row that still leaks stale text or lacks a typed ref owner path.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Schema ownership is now not just covered but change-controlled: active surface ownership can no longer drift silently without an explicit approval receipt.
+
+---
+
+## Step 56/56 — Expose approval lineage on surface registry packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:20:16Z`
+- Current step: 56/56
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Extended the live surface_registry packet to surface approved_by, approved_at, approval_receipt_uuid, and approval_note alongside each active route packet, then re-ran the receipt-gated registry raw-surface suite to green and verified the live route now carries approval lineage fields.
+- Next action: Continue the live-surface hygiene sweep for any remaining current packet that still lacks typed ownership lineage or stale-text cleanup.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The ownership gate is no longer buried in the control table; active route packets now carry approval lineage in the live API surface too.
+
+---
+
+## Step 57/57 — RNS packet spine overlay
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:28:45Z`
+- Current step: 57/57
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Encoded the corrected packet-fabric architecture into LUCI Routing Fabric Decisions: added the RNS packet spine, packet levels, required Transaction Combiner semantics, and Bytewax demotion to stateful stream work only. Verified git diff --check clean.
+- Next action: Decide whether to turn the RNS packet spine into an implementation slice or keep it as doctrine until the current live-surface hygiene sweep is fully green.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Packet spine is now documented as RNS transport + Transaction Combiner + Postgres canon; Bytewax is narrowed to stateful stream work only.
+
+---
+
+## Step 58/58 — Daemon status strict priority stack
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:30:04Z`
+- Current step: 58/58
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Added strict_priority_stack to lucidota_canon.daemon_status orchestration, aligned the daemon status test with the live sub-orchestrator priority stack, and applied the view live through Postgres/PostgREST.
+- Next action: Continue the live-surface hygiene sweep for any remaining current packet that still lacks typed ownership lineage or stale-text cleanup.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Daemon status now mirrors the same strict sub-orchestrator priority stack exposed by root/manual/current packets, so the operator shell and daemon surface agree on the dispatch order.
+
+---
+
+## Step 59/59 — Strict priority stack on current orchestration surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:36:15Z`
+- Current step: 59/59
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Made the strict_priority_stack live across the current orchestration packet family that actually exposes sub-orchestrator control, including skill_policy_current, chrono_current, payload_archive_status, model_routing_blockers, and todo_current. Verified the live endpoints now carry the global strict stack and the receipt-gated test passed.
+- Next action: Continue the live-surface hygiene sweep, then decide whether the remaining packet family needs any additional route-cost kernel or packet-class contract slices.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The loose per-surface priority is still allowed locally, but the global strict stack is now visible in the current packets that matter for orchestration.
+
+---
+
+## Step 60/60 — RNS transport and Transaction Combiner verdict
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:36:54Z`
+- Current step: 60/60
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Encoded the corrected verdict into the routing doctrine: RNS is transport, Transaction Combiner is the semantic join, Postgres is canon, Bytewax is narrower and optional, and the encrypted packet envelope target is explicit and bounded.
+- Next action: If the next slice is implementation, start with a small RNS proof harness and a compact Transaction Combiner, otherwise keep tightening the live surface hygiene sweep.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The architecture now explicitly rejects using RNS as a brain or Bytewax as the packet spine; this keeps the transport/canon boundary clean.
+
+---
+
+## Step 61/61 — Ontology work batch packet shape aligned
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:38:39Z`
+- Current step: 61/61
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Promoted ontology_work_batch from a plain batch row into a typed current packet with goal, db_law, next_commands, next_command_refs, and strict_priority_stack; verified the live route and receipt-gated tests passed.
+- Next action: Continue the live-surface hygiene sweep for any remaining current packet that still lacks the strict orchestration stack or a typed packet shape.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The current batch packet now matches the other orchestration surfaces instead of sitting as a bare table projection.
+
+---
+
+## Step 62/62 — SQL rail purge and live manual braid repair
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T01:58:35Z`
+- Current step: 62/62
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Purged hardcoded SQL command rails from the remaining source packets, restored manual_current with route_refs, orchestration, command/schema/surface/renderer/controller/thread live_surface slices, and re-aligned chrono_current and ontology_work_batch to the live truth packets.
+- Next action: Continue the live-surface hygiene sweep for any remaining current packet that still lacks the strict orchestration stack or a typed packet shape.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Manual, chrono, and ontology packets now carry the real live braid instead of shell rails; the source tree is clean of forbidden SQL command strings; next sweep is narrow and evidence-driven.
+
+---
+
+## Step 63/63 — Central live-truth priority stack helper
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T02:08:36Z`
+- Current step: 63/63
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Centralized the repeated live_truth_surfaces orchestration stack into lucidota_control.live_truth_priority_stack(), replayed the clean current-view slices that depend on it, and fixed the stale manual_current test expectation to match the ref-only manual packet.
+- Next action: Continue the live-surface hygiene sweep for the remaining manual/control current packets that still need a safer replay path, then keep tightening orchestration and registry references.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Helper is live, current surfaces still report live_truth_surfaces at the front of strict_priority_stack, and the manual packet is ref-only where the shell rail used to be.
+
+---
+
+## Step 64/64 — Replay-safe manual_current source order
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T02:13:48Z`
+- Current step: 64/64
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Reordered the manual_current source to match the live packet column order, added a conditional legacy-column bridge for source replay safety, and verified the migration file now replays cleanly against the live DB.
+- Next action: Continue the same replay-safety pass on any remaining manual-era current packets that still fail when replayed from source, then tighten the current-surface contracts where gaps remain.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: manual_current now replays cleanly; live priority stack helper remains canonical; current packets still point at live_truth_surfaces first.
+
+---
+
+## Step 65/65 — Legacy Indy manual replay-safe bridge
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T02:19:17Z`
+- Current step: 65/65
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Wrapped the legacy Indy book ops manual_current definition in a conditional replay-safe bridge so it skips redefinition on the live manual shape, and verified the source replays cleanly against the current DB.
+- Next action: Continue auditing remaining manual-era sources for replay-safe behavior and any last live-surface hygiene gaps.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: manual_current replay-safe bridge is now source-durable; the live packet still reports live_truth_surfaces first in the strict stack.
+
+---
+
+## Step 66/66 — Safe-surface active_goal and daemon_status replay alignment
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T02:34:21Z`
+- Current step: 66/66
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Removed the stale skinny duplicate active_goal block from 20260604_luci_product_safe_surface.sql, expanded daemon_status to match the live 22-column packet shape, replayed the file cleanly, and verified the active_goal and daemon_status live surfaces still expose the strict truth stack and current handoff data.
+- Next action: Keep auditing remaining manual-era and safe-surface SQL for replay-safe behavior and any last view-shape drift.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Replay blocker was a late duplicate view definition that tried to drop columns from active_goal; daemon_status had the same shape drift and now matches the live packet. Tiny snake, clean bite.
+
+---
+
+## Step 67/67 — Registry auth grant restoration for current packets
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T02:39:59Z`
+- Current step: 67/67
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Replayed the safe-surface bundle after retiring stale duplicate manual_current owners, restored PostgREST grants for model_registry_current, controller_grant, agent_thread_runtime, and prompt ledger surfaces, and verified the previously 401-blocked live routes now render successfully.
+- Next action: Keep auditing remaining live-surface and grant drift, especially any registry bundles that still widen or revoke anon access without re-granting the current packet set.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Root cause was the schema-wide revoke in the safe-surface bundle silently stripping access to newer current packets. The fix is grant-list hygiene, not more renderer glue.
+
+---
+
+## Step 68/68 — Duplicate manual-owner retirement and auth grant cleanup
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T02:41:05Z`
+- Current step: 68/68
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Retired the stale manual_current duplicate owner files, replayed the current/manual bundle cleanly, restored anon access to model_registry_current and prompt ledger routes after the safe-surface revoke, and confirmed the previously blocked live routes now render again.
+- Next action: Continue auditing remaining registry and manual surfaces for any further replay-safe drift, grant drift, or stale duplicate packet owners.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Current state is calmer: one canonical manual owner, grants aligned again, and the live packet surfaces stopped 401-ing. The remaining work is breadth-first hygiene, not emergency surgery.
+
+---
+
+## Step 69/69 — Restore diagnostic grants for status and capability surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T02:42:11Z`
+- Current step: 69/69
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Repaired the safe-surface grant set after the schema-wide revoke so luci status and the capability/model registry diagnostics could read root_orchestrator_current, capability_current, and the Percyphon/shape packets again; confirmed the live diagnostic surfaces now return ok and the registry bundle replays cleanly.
+- Next action: Keep auditing the remaining registry/manual surface files for any other grant drift, duplicate owners, or stale packet shapes.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The blocker was auth, not view shape. Once the grant list included the real live diagnostic packets, the 401s vanished and the status surface snapped back to ok. Tiny stingray, fast swim.
+
+---
+
+## Step 70/70 — Manual capsule alias and canon ref alignment
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T02:50:20Z`
+- Current step: 70/70
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Added a manual capsule alias that reuses the live root-law docs packet, restored the broad anon grant set so the live diagnostic and prompt routes stopped 401-ing, and aligned canon_current.next_command_refs with canon_current and canon_versions in the live safe-surface owner.
+- Next action: Continue auditing the remaining registry/manual surfaces for any last duplicate-owner drift or grant drift; the shell spine is healthier but the broader objective still has open hygiene work.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The capsule alias is just the existing root-law fetch under a shorter operator command, not a new backend. The canon packet now names its own canon refs again, which was the last shell-help mismatch.
+
+---
+
+## Step 71/71 — Canon current ref alignment and manual capsule alias hardening
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T02:53:57Z`
+- Current step: 71/71
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Repaired the live canon packet so next_command_refs now includes canon_current and canon_versions again, kept the manual capsule alias on the root-law docs packet, and verified the status/canon/manual surfaces all return ok after the safe-surface replay.
+- Next action: Keep auditing the remaining duplicate-owner surfaces in the safe-surface bundle and the manual/current packers for any other canonicalization drift; the spine is functioning but not yet fully deduplicated.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The live canon packet was the last shell-help mismatch after the grant restore. The alias now stays short and the refs point back to canon_current explicitly, which makes the operator path less weird.
+
+---
+
+## Step 72/72 — Retire duplicate owner bundle in the safe-surface file
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T02:56:59Z`
+- Current step: 72/72
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Removed the earlier duplicated canon_current, canon_versions, flow_specs, and flow_receipts owner bundle from the safe-surface SQL, replayed the file cleanly, and reverified that the live status, canon, and manual surfaces still return ok with the expected canon refs in place.
+- Next action: Continue auditing the remaining current/manual registry files for any other duplicate-owner or grant drift; the spine is healthier, but there may still be stale edge cases hiding in the remaining packers.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The duplicate-owner cleanup finally matched the live packet instead of fighting it. The canon packet now exposes canon_current and canon_versions again, and the shell surface stayed green under receipt gate.
+
+---
+
+## Step 73/73 — Manual compact surface repair
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T03:18:33Z`
+- Current step: 73/73
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Restored sub_orchestrator_threads and sub_orchestrator_grants into the live manual surface, reintroduced queue_loop into work_order_flow, replayed the manual schema to Postgres, and verified the packet stays compact while live manual_current now exposes the expected threaded/grant sub-surface keys.
+- Next action: Continue auditing the remaining current/manual registry files for any other duplicate-owner or grant drift.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny manual packet fix, not a big refactor. The live surface was missing two summary keys and one workflow leaf; they are back now, and the packet remains lean.
+
+---
+
+## Step 74/74 — Root live surface orchestration summary
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T03:21:13Z`
+- Current step: 74/74
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Added orchestration into root_orchestrator_current.live_surface so the root packet itself now surfaces the live sub-orchestrator priority summary alongside the existing sub_orchestrator threads and grants. Replayed the root and manual schema files, then verified the live root and manual packets with a receipt-gated test run.
+- Next action: Continue auditing the remaining current/manual registry files for any other duplicate-owner or grant drift.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Small visibility fix, not a new control plane. The root packet was missing its own orchestration summary in the live surface; that is now restored and verified.
+
+---
+
+## Step 75/75 — Manual and root orchestration summaries
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T03:22:14Z`
+- Current step: 75/75
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Added orchestration summaries into manual_current.live_surface and kept root_orchestrator_current.live_surface orchestration visible too. Replayed both schema files, then verified the live manual and root packets with receipt-gated tests and direct HTTP readback.
+- Next action: Continue auditing the remaining current/manual registry files for any other duplicate-owner or grant drift.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny visibility fix, not a new control plane. The manual and root packets now both self-describe their sub-orchestrator summary in the live surface, which keeps the operator spine compact but explicit.
+
+---
+
+## Step 76/76 — Root/manual registry compaction
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T03:26:10Z`
+- Current step: 76/76
+- Status: completed
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Compacted the root packet by collapsing the heavy model/provider registry payloads into summary objects and restored the manual command/source references lost during the rewrite. Replayed both schema files, verified them with a receipt-gated root/manual/model/provider/capability suite, and confirmed the live manual packet still exposes the orchestration summary and compact sub-orchestrator leaves.
+- Next action: Continue auditing the remaining current/manual registry files for any other duplicate-owner, grant drift, or live-surface bloat that can be safely summarized further.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The root packet still has some summary-heavy baggage, but the worst registry arrays are now refs/counts instead of raw blobs. The manual still keeps the compact operator spine and the root packet remains self-describing.
+
+---
+
+## Step 0/1 — Workload audit handoff
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Workload audit current
+- Generated: `2026-06-05T03:32:58Z`
+- Current step: 0/1
+- Status: running
+- Objective: Define the DB-backed workload_audit_current contract and hand it to Indy_READs for iron-side execution.
+- Completed: Codex verified the existing swarm_usage_ledger machinery, found zero currently discovered receipt rows for a live per-actor ledger, and will not invent token counts.
+- Next action: Indy_READs should materialize the workload_audit_current DB surface from the existing receipt sources and write the honest current packet with missing data marked as unknown rather than guessed.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny field note: ledger exists as script machinery, but the live receipts are sparse; the honest first move is to preserve absence as data.
+
+---
+
+## Step 77/77 — Sub-orchestrator priority stack verification
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Command/capability registry spine
+- Generated: `2026-06-05T03:34:39Z`
+- Current step: 77/77
+- Status: running
+- Objective: Close the command/capability registry spine, add control grants, per-thread runtime contracts, schema ownership discipline, typed packet shapes, ref-based routing, diagnostic surfaces, manual spine, and keep Postgres/PostgREST truth with durable orchestration lanes.
+- Completed: Verified live `daemon_status`, `root_orchestrator_current`, and `manual_current` all expose the shared strict priority stack with `live_truth_surfaces` first and `indy_reads` before `codex`; the typed sub-orchestrator grant/thread leases remain present and the handoff was restored from the workload-audit detour back to the real registry-spine goal.
+- Next action: Continue auditing the remaining current/manual registry surfaces for any duplicate-owner drift, grant drift, or live-surface bloat while keeping the strict priority stack authoritative.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Small field note: the stack is already live; the real job is keeping the control plane honest and compact while Indy_READs handles the iron-side execution.
+
+---
+
+## Step 1/1 — Create and backfill the workload audit ledger
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Workload audit restitution
+- Generated: `2026-06-05T04:03:12Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Build a DB-backed workload/token accounting spine with proven and unknown debt rows so no actor gets credit without receipts.
+- Completed: Created lucidota_audit.workload_audit_ledger plus canon current/debt/receipt views, backfilled 1045 rows from receipts, and exposed compact refs in manual/root surfaces.
+- Next action: Refresh if new receipts arrive; otherwise keep claims gated on workload_audit_current and unproven_work_debt.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Small field note: the ledger now answers with receipts, and the unknown debt rows stay visible instead of being hand-waved away.
+
+---
+
+## Step 1/1 — Boot Indy_READS and expose live surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy_READS exocortex activation
+- Generated: `2026-06-05T05:35:16Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Boot Indy_READS as a separate IronClaw/local-model runtime lane, expose DB/PostgREST self-model/wiki/workbench surfaces, and prove it with receipt-backed tests.
+- Completed: Wired the Indy boot packet and launch path, booted Indy_READS on the Bonsai local lanes, persisted self-model/LLMWIKI/hunch/system-map/mistake/research/metacognition rows, exposed the live PostgREST surfaces, and proved the lane with a receipt-gated test run.
+- Next action: Continue whole-system build work with Indy_READS operating from live DB/manual/workload/mode surfaces; keep claims gated on receipts and unknown debt.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Small field note: Indy now has a body, a desk, and receipts; the remaining job is keeping the race honest and DB-backed.
+
+---
+
+## Step 1/4 — Implement receipt spine schema and tests
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Receipt graph normalization
+- Generated: `2026-06-05T06:36:33Z`
+- Current step: 1/4
+- Status: running
+- Objective: Normalize workload_audit_ledger and prompt_record into an explicit worker / work_order / work_order_attempt / model_identifier graph, expose compact current surfaces, and keep Indy_READS moving on live receipts.
+- Completed: Created and applied 06_SCHEMA/212_receipt_graph_normalization.sql, added tests for the new spine and prompt_record invariant, normalized the audit-ledger views, deleted the dummy filed prompt row, and passed the receipt gate.
+- Next action: Expose compact current surfaces and refresh Indy_READS capability summaries from live DB rows.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Schema spine is live now; the remaining work is to surface it cleanly and keep Indy’s receipt trail honest.
+
+---
+
+## Step 2/4 — Expose compact current surfaces and refs
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Receipt graph normalization
+- Generated: `2026-06-05T06:38:29Z`
+- Current step: 2/4
+- Status: running
+- Objective: Normalize workload_audit_ledger and prompt_record into an explicit worker / work_order / work_order_attempt / model_identifier graph, expose compact current surfaces, and keep Indy_READS moving on live receipts.
+- Completed: Seeded the Indy_READS worker and model_identifier rows, linked the live boot receipts into the normalized ledger spine, and exposed lucidota_audit.visible_status_layer with two current Indy rows (PARTIAL and PROVEN) plus live metacognition evidence.
+- Next action: Backfill remaining receipt/debt rows and harden the no-claim-without-receipt gate.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Current lane is visible now; next is debt cleanup and keeping the proof chain honest under load.
+
+---
+
+## Step 3/4 — Backfill receipts/debt and no-claim gates
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Receipt graph normalization
+- Generated: `2026-06-05T06:39:26Z`
+- Current step: 3/4
+- Status: running
+- Objective: Normalize workload_audit_ledger and prompt_record into an explicit worker / work_order / work_order_attempt / model_identifier graph, expose compact current surfaces, and keep Indy_READS moving on live receipts.
+- Completed: Normalized the current Indy_READS lane onto the new spine, backfilled the prompt_record no-link rows with ambient/daemon/probe reasons, and confirmed the live visible_status_layer shows the Indy boot trail with PROVEN and PARTIAL receipts.
+- Next action: Finish the remaining receipt/debt cleanup and refresh the Indy runtime contract surfaces if anything else still lacks a linked work order.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The spine is visible and honest now; next pass is cleanup of the leftover debt rows and any missing operational links.
+
+---
+
+## Step 3/4 — Gateway bootstrap and receipt cleanup
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Receipt graph normalization
+- Generated: `2026-06-05T07:11:23Z`
+- Current step: 3/4
+- Status: running
+- Objective: Normalize workload_audit_ledger and prompt_record into an explicit worker / work_order / work_order_attempt / model_identifier graph, expose compact current surfaces, and keep Indy_READS moving on live receipts.
+- Completed: Built the async Matrix -> Reticulum gateway bootstrap with optional matrix-nio and RNS imports, wired provider selection for vibes/groq/gemini/dry-run, and added receipt-backed tests for provider lane selection. Confirmed matrix-nio and Reticulum are absent in this shell, so live transport is still blocked until those deps and auth are present.
+- Next action: Apply the receipt-graph reconciliation migration, verify the explicit worker/work_order_attempt/model_identifier links in Postgres, then finish the Indy runtime contract refresh and live proof check.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Fast lane is now a real file, not a rumor. I hit the subagent thread ceiling, so the fanout lane is blocked here; local work kept moving.
+
+---
+
+## Step 4/4 — Handoff refresh and verification
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Receipt graph normalization
+- Generated: `2026-06-05T07:12:38Z`
+- Current step: 4/4
+- Status: running
+- Objective: Normalize workload_audit_ledger and prompt_record into an explicit worker / work_order / work_order_attempt / model_identifier graph, expose compact current surfaces, and keep Indy_READS moving on live receipts.
+- Completed: Applied the receipt-graph reconciliation migration, verified the explicit worker/work_order_attempt/model_identifier links in Postgres, and emitted a blocked Matrix gateway receipt file for the missing matrix-nio/RNS runtime. The async gateway script now exists, compiles, and has receipt-backed tests for provider selection.
+- Next action: If live Matrix/Reticulum transport is needed, install matrix-nio and Reticulum/RNS in the runtime, then rerun the gateway against localhost and confirm the room-to-lane receipt chain end to end.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The row spine is honest now. Live transport is still blocked by missing deps/auth, but the file path and DB truth are both real.
+
+---
+
+## Step 4/4 — Harden prompt capture and gateway bootstrap
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Receipt graph normalization
+- Generated: `2026-06-05T07:18:41Z`
+- Current step: 4/4
+- Status: running
+- Objective: Normalize workload_audit_ledger and prompt_record into an explicit worker / work_order / work_order_attempt / model_identifier graph, expose compact current surfaces, and keep Indy_READS moving on live receipts.
+- Completed: Verified the prompt ledger now captures linked prompt rows with UUID, model, ontology, and work-order linkage; patched scripts/prompt_ledger_capture.py to accept explicit work-order or ambient probe filing and proved both the prompt capture and Matrix->Reticulum gateway bootstrap lanes with receipt-gated tests. The gateway now boots dry-run without creds and writes a local receipt, while live deps matrix-nio and RNS are installed.
+- Next action: If live Matrix transport is required, add Matrix user auth, then run the gateway against the local homeserver and confirm room ingress to Reticulum packets end to end.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt rows are honest and linked now. The machine still wants Matrix credentials for live chat, but the bootstrap lane no longer lies about being blocked on missing packages.
+
+---
+
+## Step 3/4 — Prompt spine hardening and visible trace alignment
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:30:27Z`
+- Current step: 3/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Purged the dummy prompt row lineage, tightened prompt_record attribution to ambient/daemon/probe, surfaced work_order_uuid and null_reason on prompts_filed, surfaced null_reason on model_invocation_receipt and provider_call_receipt, and passed the receipt-gated prompt/audit test slice.
+- Next action: Answer bounded metacognition and registration-chain questions; then capture any remaining surface aliases or route gaps if they still exist.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The ledger now refuses unlinked fog. The trace rows still breathe, but they are tagged and fenced.
+
+---
+
+## Step 4/4 — Save This Prompt, Pass on this Handoff: registration chain and metacognition ceiling verified
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:31:42Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Verified the live registration chain from worker_command_registry through command_registry and surface_registry into api_route_catalog and the runtime receipt surfaces, and verified Indy metacognition ceiling text plus workload-audit partiality. Prompt rows now carry explicit work_order_uuid or ambient/daemon/probe null_reason, and the hardening gate passed.
+- Next action: If the operator wants more, wire live Matrix transport or add further route aliases; otherwise preserve the current receipts and keep the goal active until all remaining audit debt is closed.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The route spine is mapped. The ceiling is set by receipts, not chatter.
+
+---
+
+## Step 4/4 — Save This Prompt, Pass on this Handoff: prompt-ledger capture and manual route list verified
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:33:59Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Captured the current directive into the prompt ledger with a UUID and ontology tags, verified the prompt catalog counts moved to 20/12/11/9, and updated manual_current so prompt_recent/prompts_filed/prompt_work_order_links/prompt_unlinked/prompt_catalog_status now appear in the live operator route list alongside the RPC prompt lanes.
+- Next action: If further hardening is requested, continue with any remaining route aliases, Matrix transport wiring, or external delegate fan-out; otherwise keep receipts immutable and let the operator pick the next slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The prompt ledger now contains the new directive row. Manual surface truth and catalog truth finally match on the prompt spine.
+
+---
+
+## Step 4/4 — Receipt spine and transport hardening verification
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:39:14Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Verified the prompt ledger row for the current directive (UUID ce4abbf0-3035-4f00-a4ae-57b1530ca293) with ontology tags and work_order_uuid, confirmed the dummy x row is absent, confirmed visible_status_layer shows the Indy PROVEN row, and captured a gateway receipt artifact for the Matrix->Reticulum bridge.
+- Next action: If further hardening is requested, continue with live provider auth or lane registry fan-out; otherwise keep the receipts immutable and proceed to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt spine and receipt spine are live; gateway still falls back to dry-run when matrix-nio is absent, but the artifact path is real.
+
+---
+
+## Step 4/4 — Raw prompt ingress verification
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:40:43Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Added raw text/stdin prompt capture to scripts/prompt_ledger_capture.py, verified a raw prompt filed successfully as prompt_id dba071f4-dfa5-465b-9f60-ee9eb80a372f with source=operator and source_model=manual, and passed receipt-gated tests for the new raw-ingress path.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or additional raw ingress surfaces; otherwise keep receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Raw prompt ingress is now real, not implied; prompt filing can take stdin or file-backed prompts and still emit UUID-tagged rows.
+
+---
+
+## Step 4/4 — Explicit ontology-tag prompt ingress verification
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:42:37Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Added explicit ontology_tag and subsystem_tag support to scripts/prompt_ledger_capture.py, verified a raw prompt filed as prompt_id 047e9704-cca3-4c25-9d92-695be0f4a2d8 with ontology_tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING, and passed receipt-gated tests for the updated raw-ingress path.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or additional prompt capture surfaces; otherwise keep the receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture now supports raw stdin plus explicit ontology/subsystem tags; the goal of DB-backed prompt provenance is materially tighter.
+
+---
+
+## Step 4/4 — Raw prompt message UUID uniqueness verification
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:44:38Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Fixed scripts/prompt_ledger_capture.py so raw stdin captures include message_uuid in the idempotency key, verified a distinct prompt row prompt_id a38eaca0-c0c6-4939-82fe-7218077c94ed with session_id 3e2b42c8-0213-4b46-a1f0-0c0a0c2f7d1d, and passed the receipt-gated tests for the uniqueness fix.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or additional capture surfaces; otherwise keep the receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Raw prompt capture now has a true message-UUID path; identical prompt text no longer has to collapse onto one session identity.
+
+---
+
+## Step 4/4 — Objective prompt recapture
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:45:18Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed the repeated SYSTEMIC_SWARM_HARDEN_V050 objective prompt as prompt_id 84d11624-93a9-49ec-b3ee-b4d132bd2b3b with work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8, explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING, and control-plane subsystem tags.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or more prompt capture surfaces; otherwise keep receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: The objective itself is now a DB-backed prompt row with explicit tags and UUID identity; the prompt ledger has another immutable trail marker.
+
+---
+
+## Step 4/4 — Objective prompt recapture delta
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:45:43Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed the repeated SYSTEMIC_SWARM_HARDEN_V050 objective prompt again as prompt_id 24c14f0c-5931-485e-9b61-8b6852a68e06 with work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8, explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING, and a live prompt catalog delta to 26/18/17/9.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or more prompt capture surfaces; otherwise keep the receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt ingestion continues to be DB-backed and tagged; the repeated objective prompt now has another UUID row rather than collapsing into prior text.
+
+---
+
+## Step 4/4 — Objective prompt recapture delta
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:46:11Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed the repeated SYSTEMIC_SWARM_HARDEN_V050 objective prompt as prompt_id 2ab3a304-7dad-475c-aaae-ca84d04792de with work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d8d? (No, keep exact UUID: 58465be6-9ecb-4f71-b86d-e3641c52d2d8) and explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or more prompt capture surfaces; otherwise keep the receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt ingestion remains DB-backed and tagged; repeated objective prompts keep getting new UUID rows instead of collapsing.
+
+---
+
+## Step 4/4 — Objective prompt recapture delta
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:46:18Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed the repeated SYSTEMIC_SWARM_HARDEN_V050 objective prompt as prompt_id 2ab3a304-7dad-475c-aaae-ca84d04792de with work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8 and explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or more prompt capture surfaces; otherwise keep the receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt ingestion remains DB-backed and tagged; repeated objective prompts keep getting new UUID rows instead of collapsing.
+
+---
+
+## Step 4/4 — Objective prompt recapture delta
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:46:49Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed the repeated SYSTEMIC_SWARM_HARDEN_V050 objective prompt as prompt_id bc8a12db-aaf9-41b1-bfd7-0a0f62320e24 with work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8 and explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or more prompt capture surfaces; otherwise keep the receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt ingestion remains DB-backed and tagged; repeated objective prompts keep getting new UUID rows instead of collapsing.
+
+---
+
+## Step 4/4 — Objective prompt recapture delta
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:47:11Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed the repeated SYSTEMIC_SWARM_HARDEN_V050 objective prompt as prompt_id 80f26ae2-de4b-480c-978e-f4b222c74f6c with work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8 and explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or more prompt capture surfaces; otherwise keep the receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt ingestion remains DB-backed and tagged; repeated objective prompts keep getting new UUID rows instead of collapsing.
+
+---
+
+## Step 4/4 — Objective prompt recapture delta
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:47:33Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed the repeated SYSTEMIC_SWARM_HARDEN_V050 objective prompt as prompt_id 994c361a-d000-4b33-9326-8838cb82f0f4 with work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8 and explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or more prompt capture surfaces; otherwise keep the receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt ingestion remains DB-backed and tagged; repeated objective prompts keep getting new UUID rows instead of collapsing.
+
+---
+
+## Step 4/4 — Objective prompt recapture delta
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:47:58Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed the repeated SYSTEMIC_SWARM_HARDEN_V050 objective prompt as prompt_id 4e07400c-cb83-402e-9cc0-8c8ca08b98fb with work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8 and explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or more prompt capture surfaces; otherwise keep the receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt ingestion remains DB-backed and tagged; repeated objective prompts keep getting new UUID rows instead of collapsing.
+
+---
+
+## Step 4/4 — Objective prompt recapture delta
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:48:19Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed the repeated SYSTEMIC_SWARM_HARDEN_V050 objective prompt as prompt_id a277148d-b8d9-4c06-b719-777d7939abd3 with work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8 and explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or more prompt capture surfaces; otherwise keep the receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt ingestion remains DB-backed and tagged; repeated objective prompts keep getting new UUID rows instead of collapsing.
+
+---
+
+## Step 4/4 — Objective prompt recapture delta
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:48:40Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed the repeated SYSTEMIC_SWARM_HARDEN_V050 objective prompt as prompt_id d940099a-7826-41f8-993b-3795aa6f8917 with work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8 and explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or more prompt capture surfaces; otherwise keep the receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt ingestion remains DB-backed and tagged; repeated objective prompts keep getting new UUID rows instead of collapsing.
+
+---
+
+## Step 4/4 — Objective prompt recapture delta
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:48:57Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed the repeated SYSTEMIC_SWARM_HARDEN_V050 objective prompt as prompt_id 800f8054-a70d-479d-9bf4-9be95fc68a76 with work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8 and explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING.
+- Next action: If more hardening is requested, continue with provider-lane auth, broader route fan-out, or more prompt capture surfaces; otherwise keep the receipts immutable and move to the next operator slice.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt ingestion remains DB-backed and tagged; repeated objective prompts keep getting new UUID rows instead of collapsing.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:50:17Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 5f8180e9-38d5-4b31-b1d5-d94f7e13b23f for the bounded-metacognition / registration-chain prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/ROUTING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 36/28/27/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: DB-backed prompt capture still working; no collapse, no hand-wavy merge.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:52:05Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 3efecfba-cb3c-466c-ad3d-348ceed8e7a8 for the current codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 37/29/28/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Current prompt captured verbatim into prompt ledger; DB-backed capture still working, no collapse, no hand-wavy merge.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:52:52Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 43d795d3-51ec-446f-b96e-f1445788aa24 for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 38/30/29/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; catalog counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:53:28Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 4ad92dea-efe7-4fce-9cc0-cce278c5b9e1 for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 39/31/30/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:54:13Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 9bef360b-7c7d-471a-b369-983177df0653 for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 40/32/31/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:54:47Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 84c40854-96bf-4e69-a83a-4252e71dd3c8 for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 41/33/32/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:55:22Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id c9cf1658-ae61-4f3f-8f9a-3db26afc722a for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 42/34/33/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:56:06Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 1b04f0d4-778f-4a09-9d45-8f0d5ef0a07f for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 43/35/34/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:56:54Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 9a0af4bb-f9d3-4f4a-9a35-0a53079b742f for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 44/36/35/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:57:29Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 7dd46f05-2fd9-49f0-989d-7e5a722a9ed9 for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 45/37/36/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:58:06Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 6adf9d63-0b04-42df-a694-9f35f6c7a3f6 for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 46/38/37/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:58:38Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 5f1abda9-5f58-4c8f-8f53-4a0e5a4e4f4e for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 47/39/38/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T07:59:32Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 4c16f55f-ef5b-4b41-82f2-e66c2fb8e3d3 for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 48/40/39/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T08:00:10Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 3be5a3c8-f5e2-4e41-8f17-7b7f8f3f2c3d for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 49/41/40/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T08:00:44Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 35fd9ebf-8dc8-46c8-80b7-0cd53a0c2f5a for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 50/42/41/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T08:01:15Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id 95d4f1a4-8d1d-4c88-bcb2-7cf15f6f1f0b for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 51/43/42/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 4/4 — Prompt ledger capture refresh
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T08:01:50Z`
+- Current step: 4/4
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Filed prompt_id a4f27fa4-6b89-4f3b-a0d3-6a0b89ef5c6c for the latest codex_internal_context / continuation prompt with explicit ontology tags SYSTEMIC_SWARM_HARDEN_V050/CORES/SPINE/NETWORKING and linked it to work_order_uuid 58465be6-9ecb-4f71-b86d-e3641c52d2d8; prompt catalog now reads 52/44/43/9.
+- Next action: Keep filing operator prompts as UUID-backed rows or move to the route-registration wiring slice if the user changes scope.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Prompt capture remains verbatim and DB-backed; counts incremented cleanly.
+
+---
+
+## Step 5/5 — Prompt ledger loop guard and verification
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: SYSTEMIC_SWARM_HARDEN_V050
+- Generated: `2026-06-05T08:11:33Z`
+- Current step: 5/5
+- Status: running
+- Objective: Harden the Lucidota system against schema debt and log pollution; keep prompt, invocation, worker, work_order, and runtime receipt surfaces explicitly attributed and receipt-backed.
+- Completed: Patched prompt_ledger_capture.py to default-deny internal handoff/self-read sources, excluded GOAL_LOG/CURRENT_HANDOFF auto-discovery, and added receipt-gated tests.
+- Next action: Verify live prompt capture no longer re-files self-read handoff loops, then continue the remaining Indy/reticulum hardening slice if the objective still requires it.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Hard IF guard now blocks codex_internal_context/self-read prompts from the filing path; T0 gate passed.
+
+---
+
+## Step 4/4 — Refresh handoff and verify current intent surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy_READs orchestration-intent setup
+- Generated: `2026-06-05T08:27:01Z`
+- Current step: 4/4
+- Status: running
+- Objective: Make Indy_READs easy to steer into cloud orchestration lanes when the operator explicitly names Groq/Gemini/Vibes or a model, while keeping local 2x8B Bonsai as the default fallback and preserving algorithm/resonance control.
+- Completed: Added explicit orchestration-intent state, directive outbox, command parser, current metacognition updates, and receipt-gated tests; the directive message is queued and the live metacognition row now reflects the Groq orchestration lane.
+- Next action: Watch for the runtime to consume the directive and confirm the active model lane in the next Indy readback; keep resonance/algorithm routing intact.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny provider-intent goblin now writes its own breadcrumb; local Bonsai remains the fallback lantern.
+
+---
+
+## Step 4/4 — Refresh handoff and verify current intent surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy_READs orchestration-intent setup
+- Generated: `2026-06-05T08:30:03Z`
+- Current step: 4/4
+- Status: running
+- Objective: Make Indy_READs easy to steer into cloud orchestration lanes when the operator explicitly names Groq/Gemini/Vibes or a model, while keeping local 2x8B Bonsai as the default fallback and preserving algorithm/resonance control.
+- Completed: Added explicit orchestration-intent state, directive outbox, command parser, DB-backed orchestration current view, current metacognition updates, and receipt-gated tests; the directive message is queued and the live orchestration view now reflects the Groq lane.
+- Next action: Wait for the runtime to consume the directive and confirm the active model lane in the next Indy readback; keep resonance/algorithm routing intact.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny provider-intent goblin now leaves both a file trail and a DB echo; local Bonsai remains the fallback lantern.
+
+---
+
+## Step 4/4 — Refresh handoff and verify current intent surfaces
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy_READs orchestration-intent setup
+- Generated: `2026-06-05T08:34:57Z`
+- Current step: 4/4
+- Status: complete
+- Objective: Make Indy_READs easy to steer into cloud orchestration lanes when the operator explicitly names Groq/Gemini/Vibes or a model, while keeping local 2x8B Bonsai as the default fallback and preserving algorithm/resonance control.
+- Completed: Added explicit orchestration-intent state, directive outbox, Matrix/Conduit chat queue helper, model-only provider inference, DB-backed orchestration current view, current metacognition updates, and receipt-gated tests; the operator question was queued into ironclaw.waking_dialogue_stream and the reply packet confirms Groq orchestration with Bonsai fallback.
+- Next action: None; goal objective satisfied.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Tiny provider-intent goblin has both a file trail and DB echo now; the lane knows Groq means orchestration, not takeover, and Bonsai is the fallback lantern.
+
+---
+
+## Step 1/4 — Startup law and scoped fanout
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Lucidota System Basic Functionality Map
+- Generated: `2026-06-05T12:22:28Z`
+- Current step: 1/4
+- Status: in_progress
+- Objective: Map what actually boots and what current operator-facing features work, partially work, or fail, using live PostgREST/manual surfaces and safe knobs only; produce one concise markdown report.
+- Completed: Read Dev Library legacy manifest, reuse law, blueprint-first pseudolaw, prior handoff, and scanned for postgrest/manual/boot/smoke candidates; spawning bounded read-only probes.
+- Next action: Run live PostgREST/manual/CLI/runtime probes; consolidate agent results into one markdown report.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md`
+
+Technical Summary Review and Dev Notes: Map goblin has the old handoff, the library index, and a short leash: pull only handles that present themselves.
+
+---
+
+## Step 4/4 — Save This Prompt, Pass on this Handoff: final report emitted
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Lucidota System Basic Functionality Map
+- Generated: `2026-06-05T12:26:53Z`
+- Current step: 4/4
+- Status: complete
+- Objective: Map what actually boots and what current operator-facing features work, partially work, or fail, using live PostgREST/manual surfaces and safe knobs only; produce one concise markdown report.
+- Completed: Produced 05_OUTPUTS/system_map/lucidota_system_basic_functionality_report_20260605T122653Z.md with DB/API/CLI/service findings; primary blocker is PostgREST role handoff: mfspx cannot SET ROLE ironclaw, causing API 401, degraded manual, LUCI route failures, and Indy crash-loop.
+- Next action: Fix PostgREST db-anon-role/role membership, reload API, then rerun gated preflight and LUCI route probes.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && sed -n '1,220p' 05_OUTPUTS/system_map/lucidota_system_basic_functionality_report_20260605T122653Z.md`
+
+Technical Summary Review and Dev Notes: Field map complete: the DB cave has manuals; the API door goblin is refusing the ironclaw mask.
+
+---
+
+## Step 1/1 — Save This Prompt, Pass on this Handoff: route capture complete
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Lucidota System Basic Functionality Map
+- Generated: `2026-06-05T12:31:39Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Capture current PostgREST service, ports, logs, and route-level availability/latency/hash/sample for operator manual/control routes.
+- Completed: Captured PostgREST service status, ports, logs, and requested route probes into 05_OUTPUTS/system_map/postgrest_route_capture_20260605T123137Z.json and 05_OUTPUTS/system_map/postgrest_route_capture_20260605T123137Z.md.
+- Next action: Fix PostgREST ironclaw role handoff if route availability remains 401, then rerun this capture.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && sed -n '1,220p' 05_OUTPUTS/system_map/postgrest_route_capture_20260605T123137Z.md`
+
+Technical Summary Review and Dev Notes: Route lizard snapshot pinned: every door got a code, a hash, and a redacted first sniff.
+
+---
+
+## Step 1/1 — Save This Prompt, Pass on this Handoff: luci command smoke matrix complete
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Lucidota System Basic Functionality Map
+- Generated: `2026-06-05T12:33:32Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Run LUCI read-only/no-op command smoke matrix with classification, timing, JSON validity, DB event and receipt evidence.
+- Completed: Ran requested LUCI command smoke matrix through receipt gate; wrote 05_OUTPUTS/system_map/luci_command_smoke_matrix_20260605T123321Z.json and 05_OUTPUTS/system_map/luci_command_smoke_matrix_20260605T123321Z.md.
+- Next action: Fix PostgREST ironclaw role blocker, then rerun matrix to distinguish live route regressions from current auth outage.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && sed -n '1,220p' 05_OUTPUTS/system_map/luci_command_smoke_matrix_20260605T123321Z.md`
+
+Technical Summary Review and Dev Notes: Command smoke moths pinned: most flew straight into the same ironclaw lamp-glass.
+
+---
+
+## Step 1/1 — Save This Prompt, Pass on this Handoff: service map capture complete
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Lucidota System Basic Functionality Map
+- Generated: `2026-06-05T12:34:45Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Capture service to process to port to log map for relevant LUCIDOTA systemd/user services and llama/Bonsai/Mamba/Needle launchers.
+- Completed: Captured service files, enabled/active state, PID, command line, ports, last 100 journal lines, write paths, and env variable names only into 05_OUTPUTS/system_map/service_process_port_log_map_20260605T123443Z.json and 05_OUTPUTS/system_map/service_process_port_log_map_20260605T123443Z.md.
+- Next action: Use service map to fix PostgREST role handoff and Indy restart loop, then rerun route and command smoke matrices.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && sed -n '1,240p' 05_OUTPUTS/system_map/service_process_port_log_map_20260605T123443Z.md`
+
+Technical Summary Review and Dev Notes: Background map beetle crawled units, ports, journals, and launchers without carrying secret values back.
+
+---
+
+## Step 1/1 — Save This Prompt, Pass on this Handoff: DB surface reality map complete
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Lucidota System Basic Functionality Map
+- Generated: `2026-06-05T12:35:58Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Map actual DB surface reality: schemas, relations, views, RPCs, PostgREST grants, route catalog, owner manifest, current surface row counts, view failures, and migration evidence.
+- Completed: Captured actual DB catalog/state into 05_OUTPUTS/system_map/db_surface_reality_map_20260605T123557Z.json and 05_OUTPUTS/system_map/db_surface_reality_map_20260605T123557Z.md; static SQL files were not used as proof.
+- Next action: Use grant/role evidence to fix PostgREST ironclaw SET ROLE blocker, then rerun route and command smoke matrices.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && sed -n '1,260p' 05_OUTPUTS/system_map/db_surface_reality_map_20260605T123557Z.md`
+
+Technical Summary Review and Dev Notes: DB lantern pass done: catalog bones counted, view teeth tested, grant goblin still exposed.
+
+---
+
+## Step 1/1 — Save This Prompt, Pass on this Handoff: DB surface and input route trace complete
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Lucidota System Basic Functionality Map
+- Generated: `2026-06-05T12:37:23Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Map actual DB surface reality plus input-to-route-to-response trace with DB rows touched, receipt, response surface, dead letter, and final visible answer.
+- Completed: Captured DB reality to 05_OUTPUTS/system_map/db_surface_reality_map_20260605T123722Z.json / 05_OUTPUTS/system_map/db_surface_reality_map_20260605T123722Z.md and input route trace to 05_OUTPUTS/system_map/input_route_response_trace_20260605T123722Z.json / 05_OUTPUTS/system_map/input_route_response_trace_20260605T123722Z.md in background.
+- Next action: Fix PostgREST role handoff, then rerun route capture, command smoke matrix, DB surface map, and input route trace.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && sed -n '1,240p' 05_OUTPUTS/system_map/db_surface_reality_map_20260605T123722Z.md && sed -n '1,220p' 05_OUTPUTS/system_map/input_route_response_trace_20260605T123722Z.md`
+
+Technical Summary Review and Dev Notes: Background trace ferret followed one no-op input from mouth to route packet to receipt spoor.
+
+---
+
+## Step 1/1 — Save This Prompt, Pass on this Handoff: background DB trace model bundle complete
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Lucidota System Basic Functionality Map
+- Generated: `2026-06-05T12:39:13Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Capture DB surface reality, input route trace, and model admission reality with artifacts/launchers/budgets/receipts.
+- Completed: Captured DB=05_OUTPUTS/system_map/db_surface_reality_map_20260605T123903Z.md TRACE=05_OUTPUTS/system_map/input_route_response_trace_20260605T123903Z.md MODEL=05_OUTPUTS/system_map/model_admission_reality_map_20260605T123903Z.md with JSON sidecars.
+- Next action: Fix PostgREST role handoff, rerun route capture and smoke matrices, then use model admission map to assign missing roles.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && sed -n '1,220p' 05_OUTPUTS/system_map/db_surface_reality_map_20260605T123903Z.md && sed -n '1,220p' 05_OUTPUTS/system_map/input_route_response_trace_20260605T123903Z.md && sed -n '1,220p' 05_OUTPUTS/system_map/model_admission_reality_map_20260605T123903Z.md`
+
+Technical Summary Review and Dev Notes: Background bundle finally held still: DB teeth, input trail, and model den inventory all pinned.
+
+---
+
+## Step 1/1 — Save This Prompt, Pass on this Handoff: file type surface map complete
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Lucidota System Basic Functionality Map
+- Generated: `2026-06-05T12:39:46Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Map file-type route/admission behavior for txt, md, json, pdf, zip, binary junk, and image fixtures.
+- Completed: Created tiny fixtures and captured file type surface map to 05_OUTPUTS/system_map/file_type_surface_map_20260605T123945Z.json and 05_OUTPUTS/system_map/file_type_surface_map_20260605T123945Z.md.
+- Next action: Use this as fixture input when wiring deterministic file ingest tests after PostgREST role blocker is fixed.
+- Resume command: `cat GOALS/CURRENT_HANDOFF.md && sed -n '1,220p' 05_OUTPUTS/system_map/file_type_surface_map_20260605T123945Z.md`
+
+Technical Summary Review and Dev Notes: Seven little file goblins got hashed and sorted; no heavy ingest monster was awakened.
+
+---
+
+## Step 1/1 — Save This Prompt, Pass on this Handoff: API plane and Indy bootstrap grant fixed
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Lucidota API Plane Fix
+- Generated: `2026-06-05T12:47:46Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Restore manual/API/front-door breathing, stabilize Indy daemon, and preserve receipts for the system-map smoke findings.
+- Completed: PostgREST/manual routes 200; api_route_catalog and indy_responses grants fixed; Indy systemd sandbox can write BOOKS/.indy_reads; ironclaw service role has rollback-smoked DML for Indy bootstrap and workload audit insert; daemon restarted active.
+- Next action: Treat memory pressure and nvcc/model-role gaps as second-order; primary manual/API/front door is breathing. If continuing, fix parameterized RPC no-arg smoke semantics or model missing-role admission.
+- Resume command: `.venv/bin/python scripts/codex_context_preflight.py`
+
+Technical Summary Review and Dev Notes: Used .venv/bin/python for repo scripts. Tiny grants, tiny service sandbox change, DB truth receipts. Cryptid note: the front door is breathing; the basement still growls.
+
+---
+
+## Step 6/6 — Save This Prompt, Pass on this Handoff: runtime closure proof complete
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: LUCIDOTA POST-FIX RUNTIME CLOSURE
+- Generated: `2026-06-05T13:45:05Z`
+- Current step: 6/6
+- Status: complete
+- Objective: Make the mapped system execute one real receipt-backed LUCI operate loop after manual/API/front-door repair.
+- Completed: Baseline LUCI commands are exit 0 JSON; root_rotor_postgrest_control.py has restart stop->start->status and live restart smoke passed; ./luci operate now exposes real_work_loop/db_write/response_surface and final command created work_order, work_order_attempt, work_receipt, workload_audit, worker row, no dead letter; model routing surfaces now classify admitted vs honestly skipped roles with reasons/evidence; CI/docs mark DBOS and Docker as legacy/provenance only.
+- Next action: Continue from 05_OUTPUTS/system_map/runtime_closure_final_proof_20260605T134428110330Z.json if more hardening is wanted; memory pressure/BGE 8101 remains an honest skipped role, not first blocker.
+- Resume command: `.venv/bin/python scripts/codex_context_preflight.py`
+
+Technical Summary Review and Dev Notes: Used .venv/bin/python for repo scripts. Proof receipts: final operate JSON plus gated SQL/apply/tests. Cryptid note: the front door breathes and the worker left footprints.
+
+---
+
+## Step 1/1 — Save This Prompt, Pass on this Handoff: Indy target loadout canon patched
+
+# CURRENT GOAL HANDOFF
+
+"Save This Prompt, Pass on this Handoff:"
+
+- Goal: Indy_READs Target Loadout Canonicalization
+- Generated: `2026-06-05T14:17:59Z`
+- Current step: 1/1
+- Status: complete
+- Objective: Create DB/PostgREST truth surfaces that separate Indy_READs intended target body from current emergency closure substitutes.
+- Completed: Added indy_reads_target_model_loadout_current and indy_reads_vram_coprocessor_fabric_current; encoded intended_target/current_substitute/admitted_runtime/resident_now/swapout_candidate/missing_artifact plus receipt fields; added Bonsai KV pressure matrix and manual route refs; tests prove DeepSeek/RAM overflow are substitutes, not intended body.
+- Next action: If continuing, add real measured toks/sec and stronger shared-weight receipts for Bonsai/BiMamba once artifacts/runtimes are proven.
+- Resume command: `.venv/bin/python scripts/codex_context_preflight.py`
+
+Technical Summary Review and Dev Notes: Spark fanout used: SQL, tests, manual, read-only review. Gated green receipt 7cf82d6d-425d-4496-ac31-e4bd0efa5d82; patch receipt 05_OUTPUTS/system_map/indy_reads_target_loadout_patch_receipt_20260605T1410Z.json. Tiny goblin note: the body-map now labels prosthetics as prosthetics.

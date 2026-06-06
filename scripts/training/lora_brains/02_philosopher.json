@@ -1,0 +1,19 @@
+{
+  "schema": "lucidota.lora_brain_config.v1",
+  "brain_id": "philosopher",
+  "model": "Ternary-Bonsai-8B-Q2_0.gguf",
+  "model_path": "03_VAULT/models/prism-ml/Ternary-Bonsai-8B-gguf/",
+  "base_model": "prism-ml/Ternary-Bonsai-8B",
+  "purpose": "Deep dialectical reasoning — argument structure extraction, claim→evidence→conclusion tracking",
+  "personality": "The cortex. Dense philosophical reasoning. Reads Plato and argues back.",
+  "r": 8,
+  "alpha": 16,
+  "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+  "batch_size": 1,
+  "learning_rate": 0.0001,
+  "max_steps": 2000,
+  "loss": "cross_entropy",
+  "training_data": ["The Republic", "On Liberty", "The Social Contract", "Discourse on Method"],
+  "training_labels": "Structured argument maps with claims, evidence, conclusions, counterarguments",
+  "output_format": "JSON object {claims: [...], evidence: [...], conclusions: [...], counterarguments: [...]}"
+}

@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
-"""Materialize a graph edge through the governed promotion path."""
+"""Materialize a graph edge through the governed promotion path.
+
+MUTATION CLASS: materializer
+AUTHORIZED: This is the governed edge materialization helper. It follows
+the full promotion pipeline:
+  promotion_packet -> promotion_decision -> SET LOCAL graph_promotion_path='on'
+  -> graph_edge -> graph_journal -> graph_promotion_materialization
+  -> materialization_helper_receipt
+The INSERT at line 80 into lucidota_go.graph_edge is protected by
+SET LOCAL lucidota.graph_promotion_path='on' (line 78) which is gated by
+the 093_graph_edge_materialization_guard.sql schema.
+"""
 from __future__ import annotations
 import argparse,json,os,uuid
 from datetime import datetime, timezone

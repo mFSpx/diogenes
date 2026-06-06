@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """LUCIDOTA ABSURD-compatible durable queue spine.
 
+Usage:
+  python3 scripts/absurd_queue_spine.py --action <action> [--execute|--dry-run] [--json]
+  python3 scripts/absurd_queue_spine.py  # (no args) starts wake-plane listener loop
+
+Exit codes: 0=success, 1=operational failure (blockers), 2=config/args error.
+
 Dry-run is default for actions that can write. Execute mode writes only queue-spine
 state (jobs/events/dead-letter/workflow_event), never canonical graph tables.
 """
@@ -30,6 +36,7 @@ WAKE_SCHEMA = ROOT / "06_SCHEMA" / "030_absurd_wake_plane.sql"
 RUNTIME_SPINE_SCHEMA = ROOT / "06_SCHEMA" / "20260603_runtime_spine.sql"
 OUT_DIR = ROOT / "05_OUTPUTS" / "absurd"
 PY = Path(sys.executable)
+PY_RESOLVED = str(Path(sys.executable).resolve())
 QUEUE_TABLES = [
     "lucidota_control.absurd_queue",
     "lucidota_control.absurd_queue_job",
@@ -66,6 +73,9 @@ ALLOWED_EXTERNAL_COMMANDS = {
     "scripts/indy_reads.py",
     "scripts/krampuschewing_master_index.py",
     "scripts/krampuschewing_quarantine_triage.py",
+    "scripts/vibe_sequencer.py",
+    "scripts/odysseus_riverml_extract.py",
+    "scripts/odysseus_friday_snapshot.py",
 }
 MAX_PAYLOAD_JSON_BYTES = 65536
 DB_URL = os.getenv("ABSURD_SYSTEM_DATABASE_URL") or os.getenv("DATABASE_URL") or "postgresql:///lucidota_state"
@@ -320,7 +330,8 @@ def run_job(job_kind: str, payload: dict[str, Any]) -> tuple[bool, dict[str, Any
         if not hygiene_ok:
             result["hygiene"] = hygiene
             return False, result, hygiene.get("error", "job_result_hygiene_failed")
-        return ok, result, "" if ok else proc.stderr[-1000:]
+        error_snippet = (proc.stderr[-1000:] if proc.stderr.strip() else proc.stdout[-1000:]).strip()
+        return ok, result, "" if ok else (error_snippet or "subprocess_failed_with_no_output")
     if job_kind == "external_command":
         command = payload.get("command")
         if not isinstance(command, list) or len(command) < 2:
@@ -330,7 +341,10 @@ def run_job(job_kind: str, payload: dict[str, Any]) -> tuple[bool, dict[str, Any
                 result["hygiene"] = hygiene
                 return False, result, "external_command_requires_command_list"
             return False, result, "external_command_requires_command_list"
-        if str(command[0]) not in {"python3", "/usr/bin/python3", str(PY)} or str(command[1]) not in ALLOWED_EXTERNAL_COMMANDS:
+        # resolves .venv/bin/python -> /usr/bin/python3 so string comparison works for venv paths too
+        cmd0_resolved = str(Path(command[0]).resolve())
+        allowed_interpreters = {"python3", "/usr/bin/python3", str(PY), PY_RESOLVED, str(ROOT / ".venv" / "bin" / "python"), str(ROOT / ".venv" / "bin" / "python3")}
+        if cmd0_resolved not in allowed_interpreters or str(command[1]) not in ALLOWED_EXTERNAL_COMMANDS:
             result = {"error": "external_command_not_allowlisted", "command": command[:2], "outcome": "failed"}
             ok, hygiene = gate_worker_payload_hygiene(result, queue_name="absurd_queue_spine", job_kind=job_kind, worker_key="absurd_queue_spine")
             if not ok:
@@ -356,7 +370,8 @@ def run_job(job_kind: str, payload: dict[str, Any]) -> tuple[bool, dict[str, Any
         if not hygiene_ok:
             result["hygiene"] = hygiene
             return False, result, hygiene.get("error", "job_result_hygiene_failed")
-        return ok, result, "" if ok else proc.stderr[-1000:]
+        error_snippet = (proc.stderr[-1000:] if proc.stderr.strip() else proc.stdout[-1000:]).strip()
+        return ok, result, "" if ok else (error_snippet or "subprocess_failed_with_no_output")
     result = {"error": "unsupported_job_kind", "job_kind": job_kind, "outcome": "failed"}
     _, hygiene = gate_worker_payload_hygiene(result, queue_name="absurd_queue_spine", job_kind=job_kind, worker_key="absurd_queue_spine")
     result["hygiene"] = hygiene
@@ -608,20 +623,69 @@ async def attempt_durable_claim(queue: str = "control", worker_id: str | None = 
 
 
 async def wake_plane_loop(queue: str = "control", worker_id: str | None = None, database_url: str | None = None) -> None:
-    """0% CPU Idle Listener."""
+    """0% CPU Idle Listener with automatic reconnect on DB failures.
+
+    The outer loop survives transient DB errors (disconnect, server restart,
+    permission changes) by reconnecting with exponential backoff and logging
+    every event so the operator can diagnose without digging through report JSON.
+    """
+    import logging as _logging
+    _logger = _logging.getLogger("absurd.wake_plane")
+    _logger.setLevel(_logging.INFO)
+    if not _logger.handlers:
+        _handler = _logging.StreamHandler(sys.stdout)
+        _handler.setFormatter(_logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+        _logger.addHandler(_handler)
+
     url = database_url or DB_URL
-    async with await psycopg.AsyncConnection.connect(url, autocommit=True) as listen_conn:
-        await listen_conn.execute(f"LISTEN {LISTEN_CHANNEL};")
+    wid = worker_id or f"{socket.gethostname()}:{os.getpid()}"
+    base_delay = 1.0
+    max_delay = 30.0
+    retry = 0
 
-        # 1. Drain queue on boot (catch missed events while offline)
-        while await attempt_durable_claim(queue=queue, worker_id=worker_id, database_url=url):
-            pass
+    while True:
+        try:
+            _logger.info("wake_plane starting  queue=%s  worker_id=%s  db=%s", queue, wid, redacted(url))
+            async with await psycopg.AsyncConnection.connect(url, autocommit=True) as listen_conn:
+                await listen_conn.execute(f"LISTEN {LISTEN_CHANNEL};")
+                _logger.info("LISTEN %s  OK  --  draining backlog", LISTEN_CHANNEL)
 
-        # 2. Enter 0-CPU event loop wait
-        async for _notify in listen_conn.notifies():
-            # 3. Drain queue on ping until empty
-            while await attempt_durable_claim(queue=queue, worker_id=worker_id, database_url=url):
-                pass
+                # 1. Drain queue on boot (catch missed events while offline)
+                drained = 0
+                while await attempt_durable_claim(queue=queue, worker_id=wid, database_url=url):
+                    drained += 1
+                if drained:
+                    _logger.info("drained %d backlog job(s) on connect", drained)
+                else:
+                    _logger.info("no backlog jobs  --  entering NOTIFY wait")
+
+                # 2. Enter 0-CPU event loop wait
+                async for _notify in listen_conn.notifies():
+                    _logger.info("NOTIFY received  channel=%s  pid=%d  payload=%s",
+                                 _notify.channel, _notify.pid, _notify.payload or "(none)")
+                    # 3. Drain queue on ping until empty
+                    processed = 0
+                    while await attempt_durable_claim(queue=queue, worker_id=wid, database_url=url):
+                        processed += 1
+                    _logger.info("processed %d job(s) after NOTIFY", processed)
+
+                # If the async for loop ends (connection closed cleanly), reconnect
+                _logger.warning("notifies() generator ended  --  reconnecting")
+        except asyncio.CancelledError:
+            _logger.info("wake_plane cancelled  --  exiting")
+            return
+        except Exception as exc:
+            retry += 1
+            delay = min(base_delay * (2 ** (retry - 1)), max_delay)
+            _logger.error("wake_plane error (attempt %d): %s  --  reconnecting in %.1fs", retry, exc, delay)
+            import traceback
+            _logger.error("traceback:\n%s", traceback.format_exc())
+            await asyncio.sleep(delay)
+            continue
+
+        # Reset retry counter on successful reconnect
+        retry = 0
+        await asyncio.sleep(0.5)
 
 
 def main() -> int:
@@ -639,6 +703,7 @@ def main() -> int:
     ap.add_argument("--priority", type=int, default=100)
     ap.add_argument("--max-attempts", type=int, default=3)
     ap.add_argument("--worker-id")
+    ap.add_argument("--json", action="store_true", help="Emit structured JSON summary to stdout.")
     args = ap.parse_args()
     execute = bool(args.execute)
     blockers: list[str] = []
@@ -672,6 +737,8 @@ def main() -> int:
         "blockers": blockers,
     }
     write_report(args.action, report)
+    if args.json:
+        print(json.dumps({"action": args.action, "mode": "execute" if execute else "dry_run", "status": "PASS" if not blockers else "FAIL", "blockers": blockers, "report_path": report.get("report_path", "")}, sort_keys=True))
     return 0 if not blockers else 1
 
 

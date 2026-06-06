@@ -41,6 +41,231 @@ DEFAULT_LABELS = [
     "Command Envelope Protocol",
 ]
 
+# ---------------------------------------------------------------------------
+# Code-specific entity labels for GLiNER code extraction
+# ---------------------------------------------------------------------------
+CODE_ENTITY_LABELS = [
+    # Structure
+    "CLASS_DEFINITION",
+    "FUNCTION_DEFINITION",
+    "IMPORT_STATEMENT",
+    "DECORATOR",
+    # Data layer
+    "DB_TABLE_NAME",
+    "DB_SCHEMA_NAME",
+    "API_ENDPOINT_DEFINITION",
+    "SQL_QUERY",
+    # Config & env
+    "CONFIG_KEY",
+    "ENVIRONMENT_VARIABLE",
+    # Domain
+    "ONTOLOGY_TERM",
+    "ERROR_EXCEPTION_TYPE",
+    "PROTOCOL_OR_INTERFACE",
+    "ALGORITHM_NAME",
+    "SYSTEM_COMPONENT_NAME",
+    "QUEUE_OR_WORKFLOW_NAME",
+    "SCHEMA_OR_CONTRACT",
+]
+
+# Regex patterns for literal code-entity fallback detection.
+# Each entry maps a label to a list of compiled patterns.
+_CODE_ENTITY_PATTERNS: dict[str, list[re.Pattern]] = {}
+
+def _compile_code_patterns() -> dict[str, list[re.Pattern]]:
+    """Lazy-compile code entity regex patterns on first use."""
+    if _CODE_ENTITY_PATTERNS:
+        return _CODE_ENTITY_PATTERNS
+    patterns: dict[str, list[re.Pattern]] = {
+        "CLASS_DEFINITION": [
+            re.compile(r"(?<!\w)class\s+([A-Za-z_]\w*)\s*(?:\(|:)", re.MULTILINE),
+        ],
+        "FUNCTION_DEFINITION": [
+            re.compile(r"(?<!\w)(?:async\s+)?def\s+([A-Za-z_]\w*)\s*\(", re.MULTILINE),
+        ],
+        "IMPORT_STATEMENT": [
+            re.compile(r"^(?:from\s+([A-Za-z_.][\w.]*)\s+)?import\s+(.+)$", re.MULTILINE),
+        ],
+        "DECORATOR": [
+            re.compile(r"^@([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)", re.MULTILINE),
+        ],
+        "DB_TABLE_NAME": [
+            re.compile(r"CREATE\s+(?:TEMPORARY\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:lucidota_\w+\.)?(\w+)", re.IGNORECASE | re.MULTILINE),
+            re.compile(r'(?:FROM|INTO|TABLE|FROM\s+ONLY)\s+(?:lucidota_\w+\.)?(\w+)', re.IGNORECASE),
+        ],
+        "DB_SCHEMA_NAME": [
+            re.compile(r"CREATE\s+SCHEMA\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)", re.IGNORECASE | re.MULTILINE),
+            re.compile(r'SET\s+search_path\s+TO\s+(\w+)', re.IGNORECASE),
+        ],
+        "API_ENDPOINT_DEFINITION": [
+            re.compile(r"@\w+\.(?:get|post|put|patch|delete|options|head|route)\s*\(\s*['\"]([^'\"]+)['\"]", re.IGNORECASE | re.MULTILINE),
+            re.compile(r"(?:\.add_route|\.add_api_route)\s*\(\s*['\"]([^'\"]+)['\"]", re.IGNORECASE),
+        ],
+        "ENVIRONMENT_VARIABLE": [
+            re.compile(r"(?:os\.environ|os\.getenv|environ)\s*(?:\.\w+|[(\[])\s*['\"]?([A-Z_][A-Z0-9_]*)['\"]?"),
+            re.compile(r'(?:os\.environ|os\.getenv|environ)\s*(?:\.\w+|[(\[])\s*["\']?([A-Z_][A-Z0-9_]*)["\']?'),
+        ],
+        "ONTOLOGY_TERM": [
+            re.compile(r"\b(ENTITY|ATTRIBUTE|RELATIONSHIP|FRICTION|LEVERAGE|VISIBILITY|ACTION|EVENT|TIME|PATTERN|HYPOTHESIS|CLAIM|EVIDENCE|ATOMIC_ID|SIGNAL|GLOW|TERM|TOOL|ALGORITHM|NAUGHTY|NICE|GROUP|OPERATOR|MODE|COMMENT)\b"),
+        ],
+        "ERROR_EXCEPTION_TYPE": [
+            re.compile(r"class\s+(\w+Error|Error\w+|Exception\w*|Fault\w*)\s*\(", re.MULTILINE),
+            re.compile(r"class\s+(\w+)\s*\(.*(?:Exception|Error|BaseException)"),
+        ],
+        "PROTOCOL_OR_INTERFACE": [
+            re.compile(r"class\s+(\w+)\s*\(.*Protocol\)"),
+            re.compile(r"class\s+(\w+)\s*\(.*ABC\)"),
+            re.compile(r"class\s+(\w+)\s*\(.*Interface\)"),
+        ],
+        "ALGORITHM_NAME": [
+            re.compile(r'\b(?:class|def|async\s+def)\s+(\w+)(?:Bandit|Router|Ranker|Gate|Filter|Tree|Solver|Optimizer|Update|Delta|Coefficient|Entropy|Kernel|Hash|Dedupe|Partition|Motif|Attribution|Surrogate|Scheduler|Cipher|Schoolfield|Righting|Ambush|Leader|Election|Pruning|Avoidance|Sink|Rete|Estimate|Fold|Pheromone|HDC|NLP|LMS|SSIM|Minhash|Voronoi|RBF|KAN|LTC|VFE)\b', re.MULTILINE),
+            re.compile(r"\b(?:Bandit|Rete|Hoeffding|GA|Tropical|Sheaf|Koopman|Caputo|Path\s*Signature|Diffusion\s*Forcing|Ternary|Pheromone|Infotaxis|Physarum|Capybara|Serpentina|Chelydrid|Poikilotherm|Doomsday|Fisher|Thanatosis|Possum|Honeybee|Dendritic|Rectified\s*Flow|Mistletoe|JEPA|Percyphon|Omni|Chaotic|Sprint|Liquid\s*Time|State\s*Space|Duality|Variational|Free\s*Energy|Entropic|Bayes|Damper|Tropical\s*Map|Belief|Rotor)\b"),
+        ],
+        "SYSTEM_COMPONENT_NAME": [
+            re.compile(r"\b(?:KRAMPUSCHEWING|KORPUS|DIOGENES|FairyFuse|Rainmaker|Chrono[_-]?Ledger|Indy[_-]?[Rr]eads|Treelite|Marrow|Rive[rrs]|Absurd|Chrono|Catch[ _-]?Me|Master[ _-]?Eye|Cruelty[ _-]?Protocols|Darwinian[ _-]?[Ss]urfaces|Body[ _-]?Capture|Claw|IronClaw|Bonsai|Obelisk|Manticore|Hydra|Cerberus|Sphinx|Gryphon|Phoenix|Basilisk|Chimera|Pegasus|Centaur|Minotaur|Cyclops|Golem|LUCIDOTA|LLXPRT|ALPHASLOP|Project[ _-]?2501)\b"),
+        ],
+        "QUEUE_OR_WORKFLOW_NAME": [
+            re.compile(r'QUEUE_NAME\s*=\s*["\']([^"\']+)["\']'),
+            re.compile(r'WORKFLOW_NAME\s*=\s*["\']([^"\']+)["\']'),
+            re.compile(r'JOB_KIND\s*=\s*["\']([^"\']+)["\']'),
+            re.compile(r'WORKER_KEY\s*=\s*["\']([^"\']+)["\']'),
+        ],
+        "SCHEMA_OR_CONTRACT": [
+            re.compile(r'"schema"\s*:\s*["\']([^"\']+)["\']'),
+            re.compile(r'__all__\s*=\s*\[([^\]]+)\]'),
+        ],
+        "CONFIG_KEY": [
+            re.compile(r'config\.([A-Za-z_]\w*)', re.IGNORECASE),
+            re.compile(r'settings\.([A-Za-z_]\w*)', re.IGNORECASE),
+            re.compile(r'cfg\[["\']([^"\']+)["\']\]'),
+            re.compile(r'(?:get_config|get_setting)\s*\(\s*["\']([^"\']+)["\']'),
+        ],
+        "SQL_QUERY": [
+            re.compile(r'(?:SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|TRUNCATE)\s+[\s\S]*?(?:;|$)', re.IGNORECASE),
+        ],
+    }
+    _CODE_ENTITY_PATTERNS.update(patterns)
+    return _CODE_ENTITY_PATTERNS
+
+
+def code_entity_fallback(text: str) -> list[Span]:
+    """Regex-based code entity extraction for when GLiNER is unavailable.
+
+    Uses compiled patterns to detect code constructs in source text and
+    returns Span objects labeled by entity type.
+    """
+    patterns = _compile_code_patterns()
+    spans: list[Span] = []
+    seen: set[tuple[int, int, str]] = set()
+    for label, pattern_list in patterns.items():
+        for pattern in pattern_list:
+            for match in pattern.finditer(text):
+                # Determine the entity text:
+                #   Try the first participating capture group; fall back to full match.
+                #   (A group that didn't match returns None or has start=-1.)
+                entity_text = None
+                if match.lastindex and match.lastindex >= 1:
+                    for gi in range(1, match.lastindex + 1):
+                        g = match.group(gi)
+                        if g is not None:
+                            entity_text = g
+                            break
+                if entity_text is None or not entity_text.strip():
+                    candidate = match.group(0)
+                    if candidate and candidate.strip():
+                        entity_text = candidate.strip()
+                    else:
+                        continue
+                # For IMPORT_STATEMENT, reconstruct the full import line
+                if label == "IMPORT_STATEMENT":
+                    from_part = None
+                    import_part = None
+                    for gi in range(1, match.lastindex + 1):
+                        g = match.group(gi)
+                        if g is not None:
+                            if from_part is None:
+                                from_part = g
+                            else:
+                                import_part = g
+                    if import_part:
+                        entity_text = f"from {from_part} import {import_part}" if from_part else f"import {import_part}"
+                start = match.start()
+                end = match.end()
+                # For patterns with a participating capture group, use its position
+                for gi in range(1, (match.lastindex or 0) + 1):
+                    if match.start(gi) >= 0:
+                        start = match.start(gi)
+                        end = match.end(gi)
+                        break
+                key = (start, end, label)
+                if key not in seen:
+                    seen.add(key)
+                    spans.append(Span(
+                        start=start,
+                        end=end,
+                        text=entity_text.strip(),
+                        label=label,
+                        score=1.0,
+                        backend="code_entity_regex_fallback",
+                    ))
+    return sorted(spans, key=lambda s: (s.start, s.end, s.label))
+
+
+def code_entity_extract(text: str, labels: list[str] | None = None, *,
+                        model: str | None = None,
+                        threshold: float = 0.35,
+                        allow_remote_model: bool = False,
+                        no_fallback: bool = False) -> dict[str, Any]:
+    """Extract code entities from source text.
+
+    Tries GLiNER first (if model path is given and GLiNER is available),
+    then falls back to regex-based code entity extraction.
+
+    Returns the same schema as extract() but labeled with code entity types.
+    """
+    if labels is None:
+        labels = list(CODE_ENTITY_LABELS)
+    text, text_truncated = cap_text(text, limit=MAX_TEXT_CHARS)
+    labels = [str(x) for x in labels if str(x).strip()][:MAX_LABELS]
+
+    available, availability = gliner_available()
+    backend: str
+    backend_detail: dict[str, Any]
+    spans: list[Span] = []
+
+    label_set = frozenset(labels)
+    if available and model:
+        spans, backend_detail = run_gliner(text, labels, model, threshold, allow_remote_model=allow_remote_model)
+        if spans or backend_detail.get("backend") == "gliner":
+            backend = backend_detail.get("backend", "gliner")
+        elif no_fallback:
+            backend = backend_detail.get("backend", "gliner_error")
+        else:
+            spans = [s for s in code_entity_fallback(text) if s.label in label_set]
+            backend = "code_entity_regex_after_gliner_unavailable"
+    elif no_fallback:
+        backend_detail = {"backend": "code_entity_gliner_missing_or_unspecified", "availability": availability, "install_command": INSTALL_COMMAND}
+        backend = backend_detail["backend"]
+    else:
+        backend_detail = {"backend": "code_entity_regex_fallback", "availability": availability, "install_command": INSTALL_COMMAND}
+        spans = [s for s in code_entity_fallback(text) if s.label in label_set]
+        backend = "code_entity_regex_fallback"
+
+    spans = spans[:MAX_SPANS]
+    return {
+        "schema": "lucidota.proof_hoard.gliner_code_entity_extractor.v1",
+        "generated_at": now_iso(),
+        "text_sha256": sha256_text(text),
+        "text_length": len(text),
+        "labels": labels[:MAX_LABELS],
+        "backend": backend,
+        "backend_detail": backend_detail,
+        "install_instruction": INSTALL_COMMAND if not available else "gliner package importable",
+        "text_truncated": text_truncated,
+        "spans": [asdict(s) for s in spans],
+        "span_count": len(spans),
+    }
+
 
 @dataclass(frozen=True)
 class Span:

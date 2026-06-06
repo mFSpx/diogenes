@@ -1,0 +1,20 @@
+{
+  "schema": "lucidota.lora_brain_config.v1",
+  "brain_id": "observer",
+  "model": "bitvla-bf16 (ternary quantized)",
+  "model_path": "03_VAULT/models/bitvla-ternary/",
+  "base_model": "lxsy/bitvla-bf16",
+  "purpose": "Visual-textual grounding — map descriptive text to SigLIP visual embedding space. The eye.",
+  "personality": "The observer. Reads descriptions and sees the scene. Connects language to vision.",
+  "r": 8,
+  "alpha": 16,
+  "target_modules": ["mm_projector.linear1", "mm_projector.linear2", "multi_modal_projector.linear1", "vision_tower.output_projection"],
+  "batch_size": 2,
+  "learning_rate": 5e-5,
+  "max_steps": 500,
+  "loss": "cosine_embedding (margin=0.3)",
+  "training_data": ["Out of Darkness", "Blood in the Machine", "The Small and the Mighty", "A Death in Malta"],
+  "training_labels": "Image-text pairs — descriptive paragraphs mapped to SigLIP visual embeddings",
+  "output_format": "SigLIP-compatible visual embedding vector (1152-dim)",
+  "notes": "Projector converges fast. Train this first, then freeze before training other brains."
+}

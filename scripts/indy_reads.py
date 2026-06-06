@@ -27,15 +27,11 @@ import sys
 import textwrap
 import time
 import zipfile
+import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-
-try:
-    import psycopg
-except Exception:  # pragma: no cover - psycopg should exist in the active venv
-    psycopg = None  # type: ignore[assignment]
 
 ROOT = Path(__file__).resolve().parents[1]
 BOOKS = ROOT / "BOOKS"
@@ -53,8 +49,12 @@ RIVER_MODEL_PATH = DATA / "indy_reads_attention_model.pkl"
 TRANSPORT_SOCKET = Path("/tmp/lucidota_ego.sock")
 INDY_CONDUIT_RECEIPT_DIR = ROOT / "05_OUTPUTS" / "indy_conduit"
 INDY_OPERATOR_RESPONSE_OUTBOX = ROOT / "05_OUTPUTS" / "indy_conduit" / "indy_operator_responses.jsonl"
+INDY_DIRECTIVE_OUTBOX = ROOT / "05_OUTPUTS" / "indy_conduit" / "indy_directives.jsonl"
 GOALS_HANDOFF_MD = ROOT / "GOALS" / "CURRENT_HANDOFF.md"
 GOALS_NEXT_GOAL_QUEUE = ROOT / "GOALS" / "NEXT_GOAL_QUEUE.json"
+INDY_BOOT_PACKET_PATH = ROOT / "04_RUNTIME" / "indy_reads_boot_packet.json"
+INDY_ORCHESTRATION_INTENT_PATH = ROOT / "04_RUNTIME" / "indy_reads_orchestration_intent.json"
+INDY_BOOT_RECEIPT_DIR = ROOT / "05_OUTPUTS" / "indy_reads_boot"
 DB_URL = os.environ.get("ABSURD_SYSTEM_DATABASE_URL") or os.environ.get("DATABASE_URL") or "postgresql:///lucidota_state"
 ATTENTION_TIMEOUT_SECONDS = 45.0
 AUTONOMOUS_TICK_SECONDS = 1.0
@@ -71,21 +71,131 @@ SUPPORTED = {".pdf", ".epub", ".mobi", ".azw", ".azw3", ".txt", ".md"}
 CANONICAL_BPS = [0, 2, 4, 6, 10, 50, 69, 150]
 
 
+def _repo_venv_site_packages() -> list[Path]:
+    candidates: list[Path] = []
+    py_version = f"python{sys.version_info.major}.{sys.version_info.minor}"
+    for lib_root in (ROOT / ".venv" / "lib", ROOT / ".venv" / "lib64"):
+        candidate = lib_root / py_version / "site-packages"
+        if candidate.exists():
+            candidates.append(candidate)
+    return candidates
+
+
+def _bootstrap_psycopg() -> Any | None:
+    try:
+        import psycopg as psycopg_module  # type: ignore[import-not-found]
+
+        globals()["_PSYCOPG_BOOTSTRAP_MODE"] = "system"
+        return psycopg_module
+    except Exception:
+        for site_packages in _repo_venv_site_packages():
+            site_packages_str = str(site_packages)
+            if site_packages_str not in sys.path:
+                sys.path.insert(0, site_packages_str)
+        try:
+            import psycopg as psycopg_module  # type: ignore[import-not-found]
+
+            globals()["_PSYCOPG_BOOTSTRAP_MODE"] = "repo_venv_site_packages"
+            return psycopg_module
+        except Exception:
+            globals()["_PSYCOPG_BOOTSTRAP_MODE"] = "unavailable"
+            return None
+
+
+psycopg = _bootstrap_psycopg()  # type: ignore[assignment]
+_PSYCOPG_BOOTSTRAP_MODE = globals().get("_PSYCOPG_BOOTSTRAP_MODE", "unavailable")
+_STARTUP_WARNING_EMITTED = False
+
+
+def emit_startup_warning_once(message: str) -> dict[str, Any]:
+    global _STARTUP_WARNING_EMITTED
+    if _STARTUP_WARNING_EMITTED:
+        return {"ok": True, "emitted": False}
+    _STARTUP_WARNING_EMITTED = True
+    warning = {
+        "schema": "lucidota.indy_reads.startup_warning.v1",
+        "queued_at": datetime.now(timezone.utc).isoformat(),
+        "severity": "warning",
+        "source": "indy_reads",
+        "message": message,
+        "bootstrap_mode": _PSYCOPG_BOOTSTRAP_MODE,
+    }
+    INDY_CONDUIT_RECEIPT_DIR.mkdir(parents=True, exist_ok=True)
+    warning_path = INDY_CONDUIT_RECEIPT_DIR / "indy_startup_warnings.jsonl"
+    with warning_path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(warning, sort_keys=True, ensure_ascii=False, default=str) + "\n")
+    print(f"[indy_reads warning] {message}", file=sys.stderr)
+    if psycopg is not None:
+        try:
+            with psycopg.connect(DB_URL) as conn:  # type: ignore[union-attr]
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        INSERT INTO ironclaw.waking_dialogue_stream
+                          (comms_channel, sender_id, room_id, event_id, raw_text, clean_text, extracted_entities, processed_status, receipt_id)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb, %s, %s)
+                        ON CONFLICT (comms_channel, event_id) DO UPDATE SET
+                          raw_text = EXCLUDED.raw_text,
+                          clean_text = EXCLUDED.clean_text,
+                          extracted_entities = EXCLUDED.extracted_entities,
+                          processed_status = EXCLUDED.processed_status,
+                          receipt_id = EXCLUDED.receipt_id,
+                          updated_at = now()
+                        """,
+                        (
+                            "matrix",
+                            "indy_reads_bootstrap",
+                            "!indy_command_deck:localhost",
+                            "indy-startup:" + sha_text(json.dumps(warning, sort_keys=True, ensure_ascii=False, default=str))[:24],
+                            f"[BOOTSTRAP WARNING] {message}",
+                            f"[BOOTSTRAP WARNING] {message}",
+                            json.dumps({"warning": ["psycopg_bootstrap"]}, sort_keys=True),
+                            "queued",
+                            "indy-startup-receipt:" + sha_text(message)[:16],
+                        ),
+                    )
+                conn.commit()
+        except Exception:
+            pass
+    return {"ok": True, "emitted": True, "warning_path": str(warning_path), "bootstrap_mode": _PSYCOPG_BOOTSTRAP_MODE}
+
 DEFAULT_PERSONA_CONFIG: dict[str, Any] = {
     "schema": "lucidota.indy_reads.persona_config.v1",
     "persona_id": PERSONA_ID,
     "display_name": PERSONA_DISPLAY,
     "pronouns": PERSONA_PRONOUNS,
     "main_ai_persona": MAIN_AI_PERSONA,
+    "boot_packet_path": "04_RUNTIME/indy_reads_boot_packet.json",
     "active_ontology": {
         "name": "GO",
         "expanded_name": "Global Ontology",
         "terms_path": "BOOKS/GO_ACTIVE_TERMS.json",
     },
     "mission": "Page-locked reading companion, margin-noter, and judgment collector for the GO reading game.",
+    "runtime_truth_refs": [
+        "lucidota_control.active_operation_mode",
+        "lucidota_canon.manual_current",
+        "lucidota_canon.root_orchestrator_current",
+        "lucidota_canon.workload_audit_current",
+        "lucidota_canon.workload_audit_telemetry_current",
+        "lucidota_canon.indy_reads_self_model",
+        "lucidota_canon.indy_reads_llmwiki_entry",
+        "lucidota_canon.indy_reads_metacognition_current",
+    ],
     "permissions": {
-        "read_paths": ["BOOKS", "BOOKS/.indy_reads", "04_RUNTIME/indy_reads_adapter_registry.json"],
-        "write_paths": ["BOOKS/.indy_reads", "04_RUNTIME/indy_reads_persona_config.json", "04_RUNTIME/indy_reads_adapter_registry.json"],
+        "read_paths": [
+            "BOOKS",
+            "BOOKS/.indy_reads",
+            "04_RUNTIME/indy_reads_adapter_registry.json",
+            "04_RUNTIME/indy_reads_boot_packet.json",
+            "04_RUNTIME/INDY_READS/indy_reads_service_manifest.json",
+        ],
+        "write_paths": [
+            "BOOKS/.indy_reads",
+            "04_RUNTIME/indy_reads_persona_config.json",
+            "04_RUNTIME/indy_reads_adapter_registry.json",
+            "04_RUNTIME/indy_reads_boot_packet.json",
+        ],
         "may_update_adapter_registry": True,
         "may_edit_active_go_terms": False,
         "may_touch_graph_core_sql": False,
@@ -105,9 +215,54 @@ DEFAULT_ADAPTER_REGISTRY: dict[str, Any] = {
     "registry_id": "indy_reads_lora_adapter_candidates",
     "owner_persona": PERSONA_ID,
     "active_ontology": "GO / Global Ontology",
-    "write_policy": "append_or_update_candidates_only; no graph-core SQL writes",
+    "write_policy": "append_or_update_candidates_only; no graph-core SQL writes; runtime bootstrap lanes are receipt-bound",
     "default_base_model": "deepseek-1.5b-indy_reads-reads",
+    "runtime_fabric": {
+        "primary_language_cortex": {
+            "model_lane": "bonsai_q1_0",
+            "shared_weight": True,
+            "logical_slots": ["slot_0", "slot_1"],
+            "slot_0_role": "synthesis",
+            "slot_1_role": "skeptic_verifier",
+            "default_context_tokens": 10_000,
+            "max_context_tokens_after_proof": 16_000,
+            "prefix_cache_required": True,
+            "quantized_kv_preferred": True,
+        },
+        "reflex_bank": {
+            "model_family": "needle-26m",
+            "logical_lanes": 6,
+            "shared_weight": True,
+        },
+        "state_watcher": {
+            "model_lane": "mamba_cpu",
+            "role": "state_flow_watcher",
+        },
+        "recursive_bank": {
+            "model_family": "trm",
+            "logical_workers": 20,
+        },
+        "rolling_language": {
+            "model_lane": "rwkv_world_400m",
+            "role": "journal_and_continuity",
+        },
+    },
     "candidates": [
+        {
+            "adapter_id": "indy_reads_bootstrap_bonsai_v0",
+            "kind": "prompt_or_lora",
+            "target_model_id": "bonsai_q1_0",
+            "status": "active",
+            "training_sources": [
+                "04_RUNTIME/indy_reads_boot_packet.json",
+                "04_RUNTIME/INDY_READS/indy_reads_service_manifest.json",
+                "GOALS/CURRENT_HANDOFF.md",
+                "GOALS/GOAL_LOG.md",
+            ],
+            "permission_scope": "runtime_bootstrap_only",
+            "memory_boundary": "two-slot synthesis + skeptic verifier; no giant context dump",
+            "notes": "Primary Indy_READs bootstrap lane on the GTX 1650: one shared Bonsai 8B weight, two logical slots, quantized KV preferred.",
+        },
         {
             "adapter_id": "indy_reads_go_margin_v0",
             "kind": "lora",
@@ -129,6 +284,138 @@ DEFAULT_ADAPTER_REGISTRY: dict[str, Any] = {
             "notes": "Lightweight candidate for GO term routing and adapter browsing.",
         },
     ],
+}
+
+DEFAULT_BOOT_PACKET: dict[str, Any] = {
+    "schema": "lucidota.indy_reads.boot_packet.v1",
+    "owner": "indy_reads_runtime",
+    "runtime": "ironclaw_local_models",
+    "model_lane": "bonsai_q1_0",
+    "cloud_models": {
+        "allowed_during_build": True,
+        "receipt_required": True,
+        "uses": [
+            "architecture_synthesis",
+            "contradiction_checks",
+            "integration_planning",
+            "document_review",
+            "ontology_mapping",
+            "slop_pruning",
+        ],
+    },
+    "model_fabric": {
+        "primary_cortex": {
+            "model_lane": "bonsai_q1_0",
+            "shared_weight": True,
+            "logical_slots": ["slot_0", "slot_1"],
+            "slot_0_role": "synthesis",
+            "slot_1_role": "skeptic_verifier",
+            "default_context_tokens": 10_000,
+            "max_context_tokens_after_proof": 16_000,
+            "prefix_cache_required": True,
+            "quantized_kv_preferred": True,
+            "usable_vram_budget_mb": 3_500,
+            "stable_usable_vram_mb": 3_300,
+        },
+        "reflex_bank": {
+            "model_family": "needle-26m",
+            "logical_lanes": 6,
+            "shared_weight": True,
+        },
+        "state_watcher": {
+            "model_family": "mamba",
+            "model_lane": "mamba_cpu",
+            "role": "state_flow_watcher",
+        },
+        "recursive_bank": {
+            "model_family": "trm",
+            "logical_workers": 20,
+            "role": "constraint_and_reconciliation",
+        },
+        "rolling_language": {
+            "model_family": "rwkv",
+            "model_lane": "rwkv_world_400m",
+            "role": "journal_and_continuity",
+        },
+    },
+    "boot_target": "indy_reads_self_boot",
+    "boot_objective": "Initialize Indy_READs as her own runtime lane, not as a Codex subagent, using live DB/manual/workload/mode surfaces plus receipt-bound local model output.",
+    "surface_refs": {
+        "active_operation_mode": "lucidota_control.active_operation_mode",
+        "manual_current": "lucidota_canon.manual_current",
+        "root_orchestrator_current": "lucidota_canon.root_orchestrator_current",
+        "workload_audit_current": "lucidota_canon.workload_audit_current",
+        "workload_audit_telemetry_current": "lucidota_canon.workload_audit_telemetry_current",
+        "command_registry": "lucidota_canon.command_registry",
+        "capability_current": "lucidota_canon.capability_current",
+        "capability_registry": "lucidota_canon.capability_registry",
+        "ontology_registry": "BOOKS/GO_ACTIVE_TERMS.json",
+    },
+    "work_orders": [
+        "Read the live DB/manual/root/workload/mode surfaces before claiming anything.",
+        "Write Indy_READs first entries herself: self_model, LLMWIKI, hunch_log, system_map, mistake_ledger, learning_queue.",
+        "Keep receipts for any model/provider call and any agent work.",
+        "Mark unknown debt explicitly when proof is missing.",
+        "Do not let Codex impersonate Indy_READs.",
+        "Use the Bonsai 8B shared weight with two logical slots: synthesis and skeptic/verifier.",
+        "Use 10k context by default and only expand to 16k after proof.",
+        "Prefer quantized KV and prefix cache if the lane supports it; keep the GTX 1650 budget under control.",
+        "Cloud models are allowed during build and verification, and every call needs a receipt.",
+        "Exchange ontology packets, not prose blobs, between models and agents.",
+    ],
+    "receipt_requirements": {
+        "agent_work_receipt_required": True,
+        "model_invocation_receipt_required": True,
+        "provider_call_receipt_required": False,
+        "workload_audit_row_required": True,
+    },
+    "llmwiki": {
+        "ownership_statement": "LLMWIKI belongs to Indy_READs as her metacognition notebook. It is not canon truth until promoted with DB + receipt proof.",
+        "promotion_rule": "Any operationally important wiki note must be promoted through DB/receipt/graph gates before becoming truth.",
+    },
+    "first_entries": {
+        "self_model": True,
+        "llmwiki_entry": True,
+        "hunch_log": True,
+        "system_map": True,
+        "mistake_ledger": True,
+        "learning_queue": True,
+        "metacognition_current": True,
+    },
+    "prompt_instructions": [
+        "Return compact JSON only.",
+        "Do not claim receipt-backed work without receipts.",
+        "Use proof_status PROVEN, PARTIAL, UNKNOWN, or CONTRADICTED exactly.",
+        "Include evidence_refs and db_refs arrays for every entry.",
+        "When uncertain, write UNKNOWN debt instead of guessing.",
+    ],
+    "evidence_refs": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "GOALS/CURRENT_HANDOFF.md",
+        "GOALS/GOAL_LOG.md",
+        "scripts/lucidota_start_indy_reads_watcher.sh",
+        "scripts/indy_daemon.py",
+        "scripts/indy_reads.py",
+    ],
+}
+
+DEFAULT_ORCHESTRATION_INTENT: dict[str, Any] = {
+    "schema": "lucidota.indy_reads.orchestration_intent.v1",
+    "actor_id": PERSONA_ID,
+    "provider_key": "local_model",
+    "provider_kind": "local_runtime",
+    "workload_type": "orchestration",
+    "model_id": "bonsai_q1_0",
+    "model_family": "bonsai",
+    "role": "big_brain_orchestration",
+    "takeover_mode": False,
+    "fallback_provider_key": "local_model",
+    "fallback_model_id": "bonsai_q1_0",
+    "fallback_reason": "default_to_local_bonsai_when_cloud_orchestration_is_unavailable",
+    "source": "indy_boot_default",
+    "updated_at": "",
+    "notes": "Local 2x8B Bonsai is the default; explicit cloud keys may override for orchestration only.",
 }
 
 
@@ -173,6 +460,8 @@ def ensure_dirs() -> None:
         p.mkdir(parents=True, exist_ok=True)
     write_json_if_missing(PERSONA_CONFIG_PATH, DEFAULT_PERSONA_CONFIG)
     write_json_if_missing(ADAPTER_REGISTRY_PATH, DEFAULT_ADAPTER_REGISTRY)
+    write_json_if_missing(INDY_BOOT_PACKET_PATH, DEFAULT_BOOT_PACKET)
+    write_json_if_missing(INDY_ORCHESTRATION_INTENT_PATH, DEFAULT_ORCHESTRATION_INTENT)
     if not CSV_PATH.exists():
         with CSV_PATH.open("w", newline="", encoding="utf-8") as fh:
             writer = csv.DictWriter(fh, fieldnames=CSV_FIELDS)
@@ -651,6 +940,7 @@ def term_browser() -> None:
 def adapter_browser() -> None:
     cfg = load_persona_config()
     reg = load_adapter_registry()
+    intent = load_orchestration_intent()
     banner("ADAPTER CANDIDATES — INDY_READs browse/update seed")
     print(f"Persona: {cfg.get('display_name', PERSONA_DISPLAY)} ({cfg.get('pronouns', PERSONA_PRONOUNS)})")
     print(f"Main AI persona: {cfg.get('main_ai_persona', MAIN_AI_PERSONA)}")
@@ -658,6 +948,8 @@ def adapter_browser() -> None:
     print(f"Ontology: {ontology.get('name', 'GO')} — {ontology.get('expanded_name', 'Global Ontology')}")
     print(f"Registry: {ADAPTER_REGISTRY_PATH}")
     print(f"Policy: {reg.get('write_policy', '')}\n")
+    print(f"Current orchestration intent: {current_orchestration_intent_summary(intent)}")
+    print(f"Intent path: {INDY_ORCHESTRATION_INTENT_PATH}\n")
     for c in reg.get("candidates", []):
         print(f"- {c.get('adapter_id')} [{c.get('kind')}/{c.get('status')}]")
         print(f"  target: {c.get('target_model_id', reg.get('default_base_model', ''))}")
@@ -669,7 +961,979 @@ def adapter_browser() -> None:
 
 
 def db_available() -> bool:
+    if _PSYCOPG_BOOTSTRAP_MODE == "repo_venv_site_packages" and not _STARTUP_WARNING_EMITTED:
+        emit_startup_warning_once("psycopg was missing from system python; bootstrapped from repo .venv site-packages")
     return psycopg is not None
+
+
+def import_indy_conduit_driver():
+    try:
+        import indy_conduit_driver  # type: ignore
+
+        return indy_conduit_driver
+    except Exception:
+        import scripts.indy_conduit_driver as indy_conduit_driver  # type: ignore
+
+        return indy_conduit_driver
+
+
+def fetch_one_json(sql: str, params: tuple[Any, ...] = ()) -> dict[str, Any]:
+    if not db_available():
+        return {}
+    try:
+        with psycopg.connect(DB_URL) as conn:  # type: ignore[union-attr]
+            with conn.cursor() as cur:
+                cur.execute(sql, params)
+                row = cur.fetchone()
+                if not row:
+                    return {}
+                value = row[0]
+                if isinstance(value, dict):
+                    return value
+                if isinstance(value, str):
+                    return json.loads(value)
+                return dict(value) if value is not None else {}
+    except Exception:
+        return {}
+
+
+def fetch_rows_json(sql: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
+    if not db_available():
+        return []
+    try:
+        with psycopg.connect(DB_URL) as conn:  # type: ignore[union-attr]
+            with conn.cursor() as cur:
+                cur.execute(sql, params)
+                rows = cur.fetchall()
+        out: list[dict[str, Any]] = []
+        for row in rows:
+            if not row:
+                continue
+            value = row[0]
+            if isinstance(value, dict):
+                out.append(value)
+            elif isinstance(value, str):
+                out.append(json.loads(value))
+        return out
+    except Exception:
+        return []
+
+
+def fetch_scalar(sql: str, params: tuple[Any, ...] = ()) -> Any:
+    if not db_available():
+        return None
+    try:
+        with psycopg.connect(DB_URL) as conn:  # type: ignore[union-attr]
+            with conn.cursor() as cur:
+                cur.execute(sql, params)
+                row = cur.fetchone()
+                if not row:
+                    return None
+                return row[0]
+    except Exception:
+        return None
+
+
+def execute_sql(sql: str, params: tuple[Any, ...] = ()) -> bool:
+    if not db_available():
+        return False
+    try:
+        with psycopg.connect(DB_URL) as conn:  # type: ignore[union-attr]
+            with conn.cursor() as cur:
+                cur.execute(sql, params)
+            conn.commit()
+        return True
+    except Exception:
+        return False
+
+
+def load_boot_packet() -> dict[str, Any]:
+    return load_json_or_default(INDY_BOOT_PACKET_PATH, DEFAULT_BOOT_PACKET)
+
+
+def load_orchestration_intent() -> dict[str, Any]:
+    intent = load_json_or_default(INDY_ORCHESTRATION_INTENT_PATH, DEFAULT_ORCHESTRATION_INTENT)
+    merged = dict(DEFAULT_ORCHESTRATION_INTENT)
+    merged.update(intent)
+    merged.setdefault("updated_at", "")
+    return merged
+
+
+def save_orchestration_intent(intent: dict[str, Any]) -> dict[str, Any]:
+    ensure_dirs()
+    payload = dict(DEFAULT_ORCHESTRATION_INTENT)
+    payload.update(intent)
+    payload["updated_at"] = now()
+    INDY_ORCHESTRATION_INTENT_PATH.write_text(
+        json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False, default=str) + "\n",
+        encoding="utf-8",
+    )
+    persist_orchestration_intent_db(payload)
+    return payload
+
+
+def persist_orchestration_intent_db(intent: dict[str, Any]) -> bool:
+    if not db_available():
+        return False
+    try:
+        return execute_sql(
+            """
+            INSERT INTO lucidota_indy.indy_reads_orchestration_intent_state (
+                state_key,
+                actor_id,
+                provider_key,
+                provider_kind,
+                workload_type,
+                model_id,
+                model_family,
+                role,
+                takeover_mode,
+                fallback_provider_key,
+                fallback_model_id,
+                source,
+                notes,
+                updated_at
+            ) VALUES (
+                'indy_reads_orchestration_intent',
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, now()
+            )
+            ON CONFLICT (state_key) DO UPDATE SET
+                actor_id = EXCLUDED.actor_id,
+                provider_key = EXCLUDED.provider_key,
+                provider_kind = EXCLUDED.provider_kind,
+                workload_type = EXCLUDED.workload_type,
+                model_id = EXCLUDED.model_id,
+                model_family = EXCLUDED.model_family,
+                role = EXCLUDED.role,
+                takeover_mode = EXCLUDED.takeover_mode,
+                fallback_provider_key = EXCLUDED.fallback_provider_key,
+                fallback_model_id = EXCLUDED.fallback_model_id,
+                source = EXCLUDED.source,
+                notes = EXCLUDED.notes,
+                updated_at = now()
+            """,
+            (
+                str(intent.get("actor_id") or PERSONA_ID),
+                str(intent.get("provider_key") or "local_model"),
+                str(intent.get("provider_kind") or "local_runtime"),
+                str(intent.get("workload_type") or "orchestration"),
+                str(intent.get("model_id") or "bonsai_q1_0"),
+                str(intent.get("model_family") or "bonsai"),
+                str(intent.get("role") or "big_brain_orchestration"),
+                bool(intent.get("takeover_mode")),
+                str(intent.get("fallback_provider_key") or "local_model"),
+                str(intent.get("fallback_model_id") or "bonsai_q1_0"),
+                str(intent.get("source") or "operator"),
+                str(intent.get("notes") or ""),
+            ),
+        )
+    except Exception:
+        return False
+
+
+def normalize_provider_key(provider_key: str | None) -> str:
+    key = (provider_key or "").strip().lower().replace(" ", "_").replace("-", "_")
+    alias_map = {
+        "google": "gemini",
+        "vertex": "gemini",
+        "gemini_paid": "gemini",
+        "gemini_api": "gemini",
+        "vibes": "vibe",
+        "mistral": "vibe",
+        "bonsai": "local_model",
+        "local": "local_model",
+        "local_bonsai": "local_model",
+    }
+    return alias_map.get(key, key or "local_model")
+
+
+def provider_default_model(provider_key: str) -> str:
+    provider_key = normalize_provider_key(provider_key)
+    return {
+        "groq": "llama-3.3-70b-versatile",
+        "gemini": "gemini-2.5-flash",
+        "vibe": "codestral",
+        "codex": "gpt-5.4-mini",
+        "local_model": "bonsai_q1_0",
+    }.get(provider_key, "bonsai_q1_0")
+
+
+def provider_for_model_name(model_name: str) -> str | None:
+    normalized = (model_name or "").strip().lower()
+    if not normalized:
+        return None
+    model_to_provider = {
+        provider_default_model("groq").lower(): "groq",
+        provider_default_model("gemini").lower(): "gemini",
+        provider_default_model("vibe").lower(): "vibe",
+        provider_default_model("codex").lower(): "codex",
+        provider_default_model("local_model").lower(): "local_model",
+        "gemini-2.5-pro": "gemini",
+        "gemini-2.5-flash": "gemini",
+        "codestral": "vibe",
+        "ministral": "vibe",
+        "gpt-5.4-mini": "codex",
+        "gpt-5.5": "codex",
+        "bonsai_q1_0": "local_model",
+        "bonsai-q1-0": "local_model",
+    }
+    if normalized in model_to_provider:
+        return model_to_provider[normalized]
+    if normalized.startswith("gemini"):
+        return "gemini"
+    if normalized.startswith("llama-3.3"):
+        return "groq"
+    if normalized.startswith("codestral") or normalized.startswith("ministral"):
+        return "vibe"
+    if normalized.startswith("gpt-5"):
+        return "codex"
+    if "bonsai" in normalized:
+        return "local_model"
+    return None
+
+
+def current_orchestration_intent_summary(intent: dict[str, Any] | None = None) -> str:
+    intent = intent or load_orchestration_intent()
+    provider_key = normalize_provider_key(str(intent.get("provider_key") or "local_model"))
+    model_id = str(intent.get("model_id") or provider_default_model(provider_key))
+    takeover_mode = bool(intent.get("takeover_mode"))
+    fallback_model = str(intent.get("fallback_model_id") or "bonsai_q1_0")
+    if provider_key == "local_model":
+        return f"local {model_id} (fallback {fallback_model})"
+    takeover = "takeover" if takeover_mode else "orchestration-only"
+    return f"{provider_key}::{model_id} ({takeover}; fallback {fallback_model})"
+
+
+def resolve_orchestration_intent(
+    provider_key: str | None = None,
+    model_id: str | None = None,
+    *,
+    takeover_mode: bool | None = None,
+    source: str = "operator",
+) -> dict[str, Any]:
+    provider_key = normalize_provider_key(provider_key or "local_model")
+    if provider_key in {"", "unknown"}:
+        provider_key = "local_model"
+    resolved_model = (model_id or "").strip() or provider_default_model(provider_key)
+    fallback_provider_key = "local_model"
+    fallback_model_id = provider_default_model(fallback_provider_key)
+    provider_kind = {
+        "groq": "cloud_provider",
+        "gemini": "cloud_provider",
+        "vibe": "cloud_orchestrator",
+        "codex": "cloud_orchestrator",
+        "local_model": "local_runtime",
+    }.get(provider_key, "local_runtime")
+    takeover = bool(takeover_mode) if takeover_mode is not None else False
+    return save_orchestration_intent(
+        {
+            "actor_id": PERSONA_ID,
+            "provider_key": provider_key,
+            "provider_kind": provider_kind,
+            "workload_type": "orchestration",
+            "model_id": resolved_model,
+            "model_family": resolved_model.split("_", 1)[0] if "_" in resolved_model else resolved_model.split("-", 1)[0],
+            "role": "big_brain_orchestration",
+            "takeover_mode": takeover,
+            "fallback_provider_key": fallback_provider_key,
+            "fallback_model_id": fallback_model_id,
+            "source": source,
+            "notes": "Explicit orchestration lane intent; resonance/pathing remains in control.",
+        }
+    )
+
+
+def parse_orchestration_intent_command(ans: str) -> tuple[dict[str, Any] | None, str]:
+    text = ans.strip()
+    if not text:
+        return None, "empty_command"
+    low = text.lower()
+    if not any(low.startswith(prefix) for prefix in ("use ", "route ", "model ", "orchestrate ", "set model ", "switch to ")):
+        return None, "not_orchestration_command"
+    tokens = text.split()
+    provider_token = ""
+    model_token = ""
+    takeover_mode = None
+    for tok in tokens[1:]:
+        norm = normalize_provider_key(tok)
+        if norm in {"groq", "gemini", "vibe", "codex", "local_model"} and not provider_token:
+            provider_token = norm
+            continue
+        if tok.lower() in {"takeover", "bigbrain", "big_brain", "orchestrate", "orchestration"}:
+            takeover_mode = tok.lower() != "orchestration"
+            continue
+        if not model_token and tok.lower() not in {"for", "as", "the", "a", "to", "with", "model", "lane"}:
+            model_token = tok
+    if not provider_token and "local" in low and "bonsai" in low:
+        provider_token = "local_model"
+    if not provider_token and model_token:
+        inferred = provider_for_model_name(model_token)
+        if inferred:
+            provider_token = inferred
+    if not provider_token:
+        inferred = provider_for_model_name(text)
+        if inferred:
+            provider_token = inferred
+    if not provider_token:
+        return None, "provider_not_found"
+    if not model_token:
+        model_token = provider_default_model(provider_token)
+    intent = resolve_orchestration_intent(provider_key=provider_token, model_id=model_token, takeover_mode=takeover_mode, source="operator_command")
+    return intent, ""
+
+
+def compose_indy_orchestration_check_message(intent: dict[str, Any]) -> str:
+    summary = current_orchestration_intent_summary(intent)
+    return (
+        "Hello, Indy_READs, it's Northern.Strike, how the fuck are you doing tonight? "
+        "Let me know the answer to that question. "
+        "Then tell me what model you are running your chat through and confirm that. "
+        f"Current orchestration intent: {summary}."
+    )
+
+
+def queue_indy_directive_message(
+    message: str,
+    *,
+    intent: dict[str, Any] | None = None,
+    outbox: Path | None = None,
+) -> dict[str, Any]:
+    outbox = outbox or INDY_DIRECTIVE_OUTBOX
+    payload = {
+        "schema": "lucidota.indy_reads.indy_directive.v1",
+        "queued_at": now(),
+        "target_path": "indy_runtime_control_surface",
+        "route": "indy_orchestration_directive",
+        "actor_id": PERSONA_ID,
+        "body": message,
+        "body_sha256": sha_text(message),
+        "intent": intent or load_orchestration_intent(),
+        "delivery_status": "QUEUED_FOR_INDY_RUNTIME",
+    }
+    outbox.parent.mkdir(parents=True, exist_ok=True)
+    with outbox.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(payload, sort_keys=True, ensure_ascii=False, default=str) + "\n")
+    return {
+        "ok": True,
+        "outbox": str(outbox),
+        "delivery_status": payload["delivery_status"],
+        "body_sha256": payload["body_sha256"],
+    }
+
+
+def queue_indy_chat_message(
+    message: str,
+    *,
+    sender_id: str = "Northern.Strike",
+    room_id: str = "!indy_command_deck:localhost",
+    output_dir: Path | None = None,
+) -> dict[str, Any]:
+    output_dir = output_dir or INDY_CONDUIT_RECEIPT_DIR
+    event_id = "indy-chat:" + sha_text(
+        json.dumps(
+            {
+                "sender_id": sender_id,
+                "room_id": room_id,
+                "body": message,
+            },
+            sort_keys=True,
+            ensure_ascii=False,
+            default=str,
+        )
+    )[:24]
+    raw_text = message
+    clean_text = " ".join(message.split())
+    extracted_entities = {"urls": [], "emails": [], "slash_commands": [], "hashtags": []}
+    if db_available():
+        try:
+            with psycopg.connect(DB_URL) as conn:  # type: ignore[union-attr]
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        INSERT INTO ironclaw.waking_dialogue_stream
+                          (comms_channel, sender_id, room_id, event_id, raw_text, clean_text, extracted_entities, processed_status, receipt_id)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb, %s, %s)
+                        ON CONFLICT (comms_channel, event_id) DO UPDATE SET
+                          raw_text = EXCLUDED.raw_text,
+                          clean_text = EXCLUDED.clean_text,
+                          extracted_entities = EXCLUDED.extracted_entities,
+                          processed_status = EXCLUDED.processed_status,
+                          receipt_id = EXCLUDED.receipt_id,
+                          updated_at = now()
+                        RETURNING id::text
+                        """,
+                        (
+                            "matrix",
+                            sender_id,
+                            room_id,
+                            event_id,
+                            raw_text,
+                            clean_text,
+                            json.dumps(extracted_entities, sort_keys=True),
+                            "queued",
+                            "matrix_conduit:" + sha_text(json.dumps({"event_id": event_id, "room_id": room_id, "sender_id": sender_id, "body": raw_text}, sort_keys=True, ensure_ascii=False, default=str))[:16],
+                        ),
+                    )
+                    dialogue_id = cur.fetchone()[0]
+                conn.commit()
+            receipt = {
+                "schema": "lucidota.indy_reads.operator_chat_message.v1",
+                "queued_at": now(),
+                "dialogue_id": dialogue_id,
+                "event_id": event_id,
+                "room_id": room_id,
+                "sender_id": sender_id,
+                "body": raw_text,
+                "body_sha256": sha_text(raw_text),
+                "delivery_status": "QUEUED_FOR_CHAT_SURFACE",
+            }
+            output_dir.mkdir(parents=True, exist_ok=True)
+            receipt_path = output_dir / f"indy_chat_message_{sha_text(event_id)[:16]}.json"
+            receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
+            return {
+                "ok": True,
+                "executed": True,
+                "receipt_path": str(receipt_path),
+                "event_id": event_id,
+                "dialogue_row": {
+                    "comms_channel": "matrix",
+                    "sender_id": sender_id,
+                    "room_id": room_id,
+                    "event_id": event_id,
+                    "raw_text": raw_text,
+                    "clean_text": clean_text,
+                    "extracted_entities": extracted_entities,
+                    "processed_status": "queued",
+                    "receipt_id": receipt["dialogue_id"] if isinstance(receipt.get("dialogue_id"), str) else "",
+                },
+                "absurd_jobs": 0,
+                "ui_action": None,
+                "error": "",
+            }
+        except Exception as exc:
+            return {
+                "ok": False,
+                "executed": False,
+                "receipt_path": "",
+                "event_id": event_id,
+                "dialogue_row": {
+                    "comms_channel": "matrix",
+                    "sender_id": sender_id,
+                    "room_id": room_id,
+                    "event_id": event_id,
+                    "raw_text": raw_text,
+                    "clean_text": clean_text,
+                    "extracted_entities": extracted_entities,
+                    "processed_status": "queued",
+                    "receipt_id": "",
+                },
+                "absurd_jobs": 0,
+                "ui_action": None,
+                "error": f"{type(exc).__name__}: {exc}",
+            }
+    return {
+        "ok": False,
+        "executed": False,
+        "receipt_path": "",
+        "event_id": event_id,
+        "dialogue_row": {
+            "comms_channel": "matrix",
+            "sender_id": sender_id,
+            "room_id": room_id,
+            "event_id": event_id,
+            "raw_text": raw_text,
+            "clean_text": clean_text,
+            "extracted_entities": extracted_entities,
+            "processed_status": "queued",
+            "receipt_id": "",
+        },
+        "absurd_jobs": 0,
+        "ui_action": None,
+        "error": "database_unavailable",
+    }
+
+
+def compact_surface_fields(payload: dict[str, Any], fields: list[str]) -> dict[str, Any]:
+    return {field: payload.get(field) for field in fields if field in payload}
+
+
+def compact_list(values: Any, limit: int = 8) -> Any:
+    if isinstance(values, list):
+        return values[:limit]
+    return values
+
+
+def indy_boot_context_snapshot() -> dict[str, Any]:
+    active_operation_mode = fetch_one_json(
+        "SELECT COALESCE((SELECT to_jsonb(aom) FROM lucidota_control.active_operation_mode aom LIMIT 1), '{}'::jsonb)"
+    )
+    manual_current = fetch_one_json(
+        "SELECT COALESCE((SELECT to_jsonb(mc) FROM lucidota_canon.manual_current mc LIMIT 1), '{}'::jsonb)"
+    )
+    root_orchestrator_current = fetch_one_json(
+        "SELECT COALESCE((SELECT to_jsonb(roc) FROM lucidota_canon.root_orchestrator_current roc LIMIT 1), '{}'::jsonb)"
+    )
+    workload_audit_current = fetch_one_json(
+        "SELECT COALESCE((SELECT to_jsonb(wac) FROM lucidota_canon.workload_audit_current wac LIMIT 1), '{}'::jsonb)"
+    )
+    workload_audit_telemetry_current = fetch_one_json(
+        "SELECT COALESCE((SELECT to_jsonb(wat) FROM lucidota_canon.workload_audit_telemetry_current wat LIMIT 1), '{}'::jsonb)"
+    )
+    model_registry_current = fetch_one_json(
+        "SELECT COALESCE((SELECT to_jsonb(mrc) FROM lucidota_canon.model_registry_current mrc LIMIT 1), '{}'::jsonb)"
+    )
+    provider_current = fetch_one_json(
+        "SELECT COALESCE((SELECT to_jsonb(pc) FROM lucidota_canon.provider_current pc LIMIT 1), '{}'::jsonb)"
+    )
+    orchestration_intent = load_orchestration_intent()
+    orchestration_current = fetch_one_json(
+        "SELECT COALESCE((SELECT to_jsonb(oc) FROM lucidota_canon.indy_reads_orchestration_current oc LIMIT 1), '{}'::jsonb)"
+    )
+    command_registry = fetch_one_json(
+        "SELECT COALESCE((SELECT to_jsonb(cr) FROM lucidota_canon.command_registry cr LIMIT 1), '{}'::jsonb)"
+    )
+    capability_current = fetch_one_json(
+        "SELECT COALESCE((SELECT to_jsonb(cc) FROM lucidota_canon.capability_current cc LIMIT 1), '{}'::jsonb)"
+    )
+    surface_registry = fetch_rows_json(
+        """
+        SELECT to_jsonb(sr)
+        FROM (
+            SELECT surface_id, canonical_owner, surface_kind, active, approval_required
+            FROM lucidota_control.surface_registry
+            ORDER BY surface_id
+            LIMIT 8
+        ) sr
+        """
+    )
+    schema_owner_manifest = fetch_rows_json(
+        """
+        SELECT to_jsonb(som)
+        FROM (
+            SELECT surface_id, canonical_owner, surface_kind, active, approval_required, approved_by, approval_receipt_uuid
+            FROM lucidota_control.schema_owner_manifest
+            ORDER BY surface_id
+            LIMIT 8
+        ) som
+        """
+    )
+
+    return {
+        "active_operation_mode": compact_surface_fields(
+            active_operation_mode,
+            [
+                "current_mode",
+                "cloud_policy",
+                "swarm_policy",
+                "indy_reads_policy",
+                "receipt_policy",
+                "runtime_default_policy",
+                "build_session_policy",
+                "operator_override",
+                "updated_at",
+            ],
+        ),
+        "manual_current": {
+            "route_refs": compact_list(manual_current.get("route_refs", []), 12),
+            "next_command_refs": compact_list(manual_current.get("next_command_refs", []), 16),
+            "orchestration": manual_current.get("orchestration", {}),
+            "db_law": manual_current.get("db_law", {}),
+            "work_order_flow": manual_current.get("work_order_flow", {}),
+        },
+        "root_orchestrator_current": {
+            "route_count": root_orchestrator_current.get("route_count"),
+            "next_command_refs": compact_list(root_orchestrator_current.get("next_command_refs", []), 16),
+            "orchestration": root_orchestrator_current.get("orchestration", {}),
+            "db_law": root_orchestrator_current.get("db_law", {}),
+            "live_surface_keys": sorted(root_orchestrator_current.get("live_surface", {}).keys())[:16],
+        },
+        "workload_audit_current": compact_surface_fields(
+            workload_audit_current,
+            [
+                "audit_status",
+                "has_unacknowledged_unknown_rows",
+                "unknown_row_count",
+                "proven_row_count",
+                "partial_row_count",
+                "contradicted_row_count",
+                "can_claim_duplex_race",
+                "ledger_row_count",
+            ],
+        ),
+        "workload_audit_telemetry_current": compact_surface_fields(
+            workload_audit_telemetry_current,
+            [
+                "ledger_row_count",
+                "receipt_row_count",
+                "proven_row_count",
+                "partial_row_count",
+                "unknown_row_count",
+                "contradicted_row_count",
+                "codex_row_count",
+                "indy_row_count",
+                "local_llm_row_count",
+                "groq_row_count",
+                "gemini_row_count",
+                "gemini_paid_row_count",
+                "vibe_row_count",
+                "tokens_in_total",
+                "tokens_out_total",
+            ],
+        ),
+        "model_registry_current": compact_surface_fields(
+            model_registry_current,
+            ["model_packet_id", "model_id", "role", "slot_name", "loadout_id", "expected_vram_mb", "notes"],
+        ),
+        "provider_current": compact_surface_fields(
+            provider_current,
+            ["provider_packet_id", "provider_id", "provider_key", "current_status", "notes"],
+        ),
+        "indy_reads_orchestration_current": compact_surface_fields(
+            orchestration_current,
+            ["state_key", "provider_key", "provider_kind", "model_id", "takeover_mode", "summary", "proof_status"],
+        ),
+        "orchestration_intent": orchestration_intent,
+        "command_registry": compact_surface_fields(command_registry, ["command_registry_id", "summary", "next_commands"]),
+        "capability_current": compact_surface_fields(
+            {
+                **capability_current,
+                "active_capabilities": compact_list(capability_current.get("active_capabilities", []), 4),
+                "next_command_refs": compact_list(capability_current.get("next_command_refs", []), 12),
+            },
+            ["capability_packet_id", "next_command_refs", "active_capabilities"],
+        ),
+        "surface_registry": compact_list(surface_registry, 4),
+        "schema_owner_manifest": compact_list(schema_owner_manifest, 4),
+    }
+
+
+def boot_prompt_payload(boot_packet: dict[str, Any], context: dict[str, Any], slot_role: str) -> str:
+    return json.dumps(
+        {
+            "boot_packet": boot_packet,
+            "live_context": context,
+            "slot_role": slot_role,
+            "instructions": [
+                "Return compact JSON only.",
+                "Do not claim any receipt-backed work without receipts.",
+                "You are Indy_READs, not Codex.",
+                "Use proof_status exactly as PROVEN, PARTIAL, UNKNOWN, or CONTRADICTED.",
+                "If you lack evidence, mark UNKNOWN debt instead of inventing facts.",
+            ],
+            "output_schema": {
+                "self_model": "object",
+                "llmwiki_entry": "object",
+                "hunch_log": "object",
+                "system_map": "object",
+                "mistake_ledger": "object",
+                "learning_queue": "object",
+                "metacognition_current": "object",
+            },
+        },
+        indent=2,
+        sort_keys=True,
+        default=str,
+    )
+
+
+def run_boot_slot(*, lane: str, slot_role: str, boot_packet: dict[str, Any], context: dict[str, Any], max_tokens: int = 512, timeout_sec: float = 180.0) -> dict[str, Any]:
+    prompt = boot_prompt_payload(boot_packet, context, slot_role)
+    system = (
+        "You are Indy_READs, the IronClaw local-model exocortex runtime. "
+        f"You are boot slot {slot_role}. "
+        "The database is truth; the boot packet and live DB surfaces are the only authority; "
+        "LLMWIKI is your notebook, not canon truth."
+    )
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "local_model_chat_cli.py"),
+            "--lane",
+            lane,
+            "--prompt",
+            prompt,
+            "--system",
+            system,
+            "--max-tokens",
+            str(max_tokens),
+            "--temperature",
+            "0.0",
+            "--timeout-sec",
+            str(timeout_sec),
+            "--execute",
+            "--json",
+            "--clear-history",
+        ],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+    )
+    try:
+        receipt = json.loads(proc.stdout.strip() or "{}")
+    except json.JSONDecodeError:
+        receipt = {
+            "schema": "lucidota.indy_reads.bootstrap_slot_receipt.v1",
+            "status": "BLOCKED",
+            "text": (proc.stdout or proc.stderr or "")[-4000:],
+        }
+    receipt["returncode"] = proc.returncode
+    receipt["stderr"] = (proc.stderr or "")[-4000:]
+    receipt["slot_role"] = slot_role
+    receipt["lane"] = lane
+    return receipt
+
+
+def parse_json_object(value: str) -> dict[str, Any]:
+    try:
+        parsed = json.loads(value)
+        return parsed if isinstance(parsed, dict) else {}
+    except Exception:
+        match = re.search(r"\{.*\}", value, re.S)
+        if not match:
+            return {}
+        try:
+            parsed = json.loads(match.group(0))
+            return parsed if isinstance(parsed, dict) else {}
+        except Exception:
+            return {}
+
+
+def default_indy_boot_content(*, slot0_text: str, slot1_text: str, boot_packet: dict[str, Any], context: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    live_mode = context.get("active_operation_mode", {})
+    manual_refs = context.get("manual_current", {}).get("route_refs", [])
+    root_refs = context.get("root_orchestrator_current", {}).get("next_command_refs", [])
+    workload_summary = context.get("workload_audit_current", {})
+    evidence_refs = [str(INDY_BOOT_PACKET_PATH), "04_RUNTIME/INDY_READS/indy_reads_service_manifest.json"]
+    db_refs = [
+        "lucidota_control.active_operation_mode",
+        "lucidota_canon.manual_current",
+        "lucidota_canon.root_orchestrator_current",
+        "lucidota_canon.workload_audit_current",
+        "lucidota_canon.workload_audit_telemetry_current",
+        "lucidota_canon.indy_reads_self_model",
+        "lucidota_canon.indy_reads_llmwiki_entry",
+        "lucidota_canon.indy_reads_hunch_log",
+        "lucidota_canon.indy_reads_learning_queue",
+        "lucidota_canon.indy_reads_system_map",
+        "lucidota_canon.indy_reads_mistake_ledger",
+        "lucidota_canon.indy_reads_research_source",
+        "lucidota_canon.indy_reads_metacognition_current",
+    ]
+    shared_summary = " ".join(part for part in [slot0_text.strip(), slot1_text.strip()] if part).strip()
+    if not shared_summary:
+        shared_summary = "Indy_READs booted through IronClaw local models and must learn from live DB truth before claiming anything."
+    orchestration_intent = load_orchestration_intent()
+    orchestration_summary = current_orchestration_intent_summary(orchestration_intent)
+    self_model = {
+        "actor_id": "indy_reads_runtime",
+        "author": "indy_reads",
+        "role": "indy_reads_runtime",
+        "boundaries": "DB truth first; receipts or UNKNOWN debt; LLMWIKI is notebook, not canon; do not impersonate Codex.",
+        "voice": "evidence-oriented, terse, skeptical, curious, operator-aware",
+        "relationship_to_operator": "reports compactly, challenges missing proof, follows operator intent through live DB truth",
+        "relationship_to_LUCIDOTA": "runtime exocortex lane with DB-backed memory and receipts",
+        "relationship_to_northern_strike": "not yet defined; track as UNKNOWN until evidence appears",
+        "relationship_to_Krampus": "evidence archive and custody lane; preserve bytes and receipts",
+        "relationship_to_Santa": "not yet defined; track as UNKNOWN until evidence appears",
+        "investigation_style": "receipt-bound, contradiction-seeking, live-surface first, cheap-before-expensive",
+        "learning_style": "local-first, slot split synthesis plus skeptic review, then promote by receipt",
+        "preferred_tools": "Postgres/PostgREST, local Bonsai 8B, Needles, Mamba watcher, TRM loops, River, Treelite, DB graphs",
+        "evidence_standard": "live DB rows, receipts, route refs, and model/provider invocation artifacts",
+        "receipt_standard": "proven or partial only when backed by row/receipt evidence; otherwise UNKNOWN debt",
+        "mistake_handling": "write the correction, preserve the proof trail, and downgrade the claim until receipts catch up",
+        "curiosity_targets": "system maps, receipts, workload accounting, model lanes, ontology packets, work orders",
+        "current_limitations": "first boot, limited proven history, must keep reading live surfaces before claiming state",
+        "next_upgrade": "stabilize the boot path, learn from live surfaces, and promote useful wiki notes through DB gates; explicit orchestration intent defaults to local Bonsai unless the operator says to use cloud",
+        "summary": shared_summary[:2000],
+        "goals_refs": ["GOALS/CURRENT_HANDOFF.md", "GOALS/GOAL_LOG.md"],
+        "confidence": 0.84,
+        "evidence_refs": evidence_refs,
+        "db_refs": db_refs,
+        "proof_status": "PARTIAL" if workload_summary.get("unknown_row_count", 1) else "PROVEN",
+        "functionality_explanation": "Indy_READs runtime self-model surface; DB truth first, wiki second, prose third.",
+        "ontology_index": {
+            "primitive_refs": ["state", "duplex", "allocation"],
+            "claim_type": "self_model_boot",
+            "evidence_type": "boot_packet_and_slot_receipts",
+            "actor_role": "indy_reads_runtime",
+            "subsystem_refs": ["self_model", "llmwiki", "hunch_log", "system_map", "mistake_ledger", "learning_queue", "research_source"],
+            "risk_tier": "T3",
+            "proof_status": "PARTIAL" if workload_summary.get("unknown_row_count", 1) else "PROVEN",
+            "receipt_refs": ["indy_reads_exocortex_activation_gate"],
+            "next_route": ["indy_reads_llmwiki_entry", "indy_reads_hunch_log", "indy_reads_learning_queue", "indy_reads_system_map", "indy_reads_mistake_ledger", "workload_audit_current"],
+        },
+    }
+    llmwiki_entry = {
+        "actor_id": "indy_reads_runtime",
+        "author": "indy_reads",
+        "topic": "What Indy_READs is and what LUCIDOTA is",
+        "summary": shared_summary[:1000],
+        "body": shared_summary,
+        "confidence": 0.79,
+        "evidence_refs": evidence_refs,
+        "db_refs": db_refs,
+        "next_questions": [
+            "What live rows prove the current model/workload split?",
+            "Which claims still need UNKNOWN debt rows?",
+            "Which model lanes are actually resident versus merely planned?",
+        ],
+        "mistake_risk": "high_if_claiming_unproven_boot_state",
+        "promotion_candidate": False,
+        "proof_status": "PARTIAL",
+        "functionality_explanation": "Indy_READs metacognition notebook entry surface; not canon truth until promoted with receipts.",
+        "ontology_index": {
+            "primitive_refs": ["state", "duplex", "allocation"],
+            "claim_type": "llmwiki_boot_note",
+            "evidence_type": "boot_packet_and_slot_receipts",
+            "actor_role": "indy_reads_runtime",
+            "subsystem_refs": ["self_model", "llmwiki", "hunch_log", "system_map", "mistake_ledger", "learning_queue"],
+            "risk_tier": "T3",
+            "proof_status": "PARTIAL",
+            "receipt_refs": ["indy_reads_exocortex_activation_gate"],
+            "next_route": ["indy_reads_metacognition_current", "workload_audit_current"],
+        },
+    }
+    hunch_log = {
+        "actor_id": "indy_reads_runtime",
+        "topic": "Boot lane and live truth surfaces",
+        "hunch": "The Bonsai 8B shared-weight dual-slot lane should be the primary exocortex bootstrap cortex, with Needles as reflexes and Mamba as watcher.",
+        "confidence": 0.72,
+        "evidence_refs": evidence_refs,
+        "db_refs": db_refs,
+        "next_questions": [
+            "Can the live workload ledger prove the Indy lane after boot?",
+            "Do manual and root packets expose the new Indy refs compactly?",
+        ],
+        "proof_status": "PARTIAL",
+        "functionality_explanation": "Indy_READs hunch log; useful for learning and contradiction tracking, not canon truth.",
+        "ontology_index": {
+            "primitive_refs": ["state", "duplex", "allocation"],
+            "claim_type": "hunch_boot",
+            "evidence_type": "boot_packet_and_slot_receipts",
+            "actor_role": "indy_reads_runtime",
+            "subsystem_refs": ["hunch_log", "workload_audit_current", "manual_current", "root_orchestrator_current"],
+            "risk_tier": "T3",
+            "proof_status": "PARTIAL",
+            "receipt_refs": ["indy_reads_exocortex_activation_gate"],
+            "next_route": ["indy_reads_learning_queue", "workload_audit_current"],
+        },
+    }
+    system_map = {
+        "actor_id": "indy_reads_runtime",
+        "topic": "LUCIDOTA runtime topology",
+        "summary": "IronClaw body; Postgres law; PostgREST sensory/manual API; Bonsai dual-slot cortex; Needles reflexes; Mamba watcher; TRM constraints; RWKV continuity; receipts or debt.",
+        "subsystem_refs": [
+            "lucidota_control.active_operation_mode",
+            "lucidota_canon.manual_current",
+            "lucidota_canon.root_orchestrator_current",
+            "lucidota_canon.workload_audit_current",
+            "lucidota_canon.indy_reads_self_model",
+            "lucidota_canon.indy_reads_llmwiki_entry",
+        ],
+        "evidence_refs": evidence_refs,
+        "db_refs": db_refs,
+        "proof_status": "PARTIAL",
+        "functionality_explanation": "Indy_READs system map; a compact topology note rather than canon truth.",
+        "ontology_index": {
+            "primitive_refs": ["state", "duplex", "allocation"],
+            "claim_type": "system_map_boot",
+            "evidence_type": "boot_packet_and_slot_receipts",
+            "actor_role": "indy_reads_runtime",
+            "subsystem_refs": ["manual_current", "root_orchestrator_current", "workload_audit_current", "active_operation_mode"],
+            "risk_tier": "T3",
+            "proof_status": "PARTIAL",
+            "receipt_refs": ["indy_reads_exocortex_activation_gate"],
+            "next_route": ["workload_audit_current", "active_operation_mode"],
+        },
+    }
+    mistake_ledger = {
+        "actor_id": "indy_reads_runtime",
+        "mistake_summary": "First boot still needs DB proof before any claim of being online.",
+        "mistake_risk": "high_if_claiming_boot_without_workload_rows",
+        "correction": "Treat the boot as partial until the workload ledger and the Indy rows are visible in PostgREST.",
+        "evidence_refs": evidence_refs,
+        "db_refs": db_refs,
+        "proof_status": "PARTIAL",
+        "functionality_explanation": "Indy_READs mistake ledger; records misses, corrections, and proof debt.",
+        "ontology_index": {
+            "primitive_refs": ["state", "duplex", "allocation"],
+            "claim_type": "mistake_boot",
+            "evidence_type": "boot_packet_and_slot_receipts",
+            "actor_role": "indy_reads_runtime",
+            "subsystem_refs": ["mistake_ledger", "workload_audit_current"],
+            "risk_tier": "T3",
+            "proof_status": "PARTIAL",
+            "receipt_refs": ["indy_reads_exocortex_activation_gate"],
+            "next_route": ["workload_audit_current", "unproven_work_debt"],
+        },
+    }
+    learning_queue = {
+        "actor_id": "indy_reads_runtime",
+        "topic": "Next learning targets for Indy_READs",
+        "summary": "Learn the live DB surfaces, prove the workload ledger, and then refine the self-model/wiki via receipt-backed updates.",
+        "status": "queued",
+        "priority": 10,
+        "next_route": "workload_audit_current",
+        "evidence_refs": evidence_refs,
+        "db_refs": db_refs,
+        "proof_status": "PARTIAL",
+        "functionality_explanation": "Indy_READs learning queue; tracks what she should learn next and how to route the next investigation.",
+        "ontology_index": {
+            "primitive_refs": ["state", "duplex", "allocation"],
+            "claim_type": "learning_queue_boot",
+            "evidence_type": "boot_packet_and_slot_receipts",
+            "actor_role": "indy_reads_runtime",
+            "subsystem_refs": ["learning_queue", "workload_audit_current", "active_operation_mode"],
+            "risk_tier": "T3",
+            "proof_status": "PARTIAL",
+            "receipt_refs": ["indy_reads_exocortex_activation_gate"],
+            "next_route": ["workload_audit_current", "manual_current", "root_orchestrator_current"],
+        },
+    }
+    metacognition_current = {
+        "state_key": "indy_reads_metacognition_current",
+        "actor_id": "indy_reads_runtime",
+        "owner_role": "indy_reads_runtime",
+        "what_i_am": "Indy_READs is the IronClaw local-model exocortex lane with DB-backed memory, metacognition, and receipts.",
+        "what_i_am_for": "Learn the system, challenge lies, write self-model/wiki/hunch/system-map notes, and keep proof before claims.",
+        "operator_model": f"The operator wants live truth over narrative, compact refs over bloat, and receipts or UNKNOWN debt. Current orchestration intent: {orchestration_summary}.",
+        "case_model": "Cases are chronology-plus-evidence problems; read the DB and receipts before speaking.",
+        "system_model": f"LUCIDOTA is Postgres/PostgREST truth plus local models, workflows, receipts, and compact operator surfaces. Default runtime lane: {orchestration_summary}.",
+        "learning_next": "Prove the workload ledger, then promote useful wiki notes through receipt gates; treat explicit provider/model switches as orchestration intent, not takeover.",
+        "refusal_standard": "Refuse any claim without a receipt row or explicit UNKNOWN debt.",
+        "self_model_ref": "",
+        "llmwiki_ref": "",
+        "hunch_log_ref": "",
+        "system_map_ref": "",
+        "mistake_ledger_ref": "",
+        "learning_queue_ref": "",
+        "research_source_ref": "",
+        "boot_packet_ref": str(INDY_BOOT_PACKET_PATH),
+        "evidence_refs": evidence_refs,
+        "db_refs": db_refs,
+        "proof_status": "PARTIAL",
+        "functionality_explanation": "Indy_READs metacognition current packet; the current self-understanding surface for the runtime lane.",
+        "ontology_index": {
+            "primitive_refs": ["state", "duplex", "allocation"],
+            "claim_type": "metacognition_boot",
+            "evidence_type": "boot_packet_and_slot_receipts",
+            "actor_role": "indy_reads_runtime",
+            "subsystem_refs": ["self_model", "llmwiki", "hunch_log", "system_map", "mistake_ledger", "learning_queue", "research_source"],
+            "risk_tier": "T3",
+            "proof_status": "PARTIAL",
+            "receipt_refs": ["indy_reads_exocortex_activation_gate"],
+            "next_route": ["indy_reads_self_model", "indy_reads_llmwiki_entry", "workload_audit_current"],
+        },
+    }
+    return {
+        "self_model": self_model,
+        "llmwiki_entry": llmwiki_entry,
+        "hunch_log": hunch_log,
+        "system_map": system_map,
+        "mistake_ledger": mistake_ledger,
+        "learning_queue": learning_queue,
+        "metacognition_current": metacognition_current,
+    }
 
 
 def hardware_telemetry() -> dict[str, Any]:
@@ -1059,11 +2323,33 @@ def load_queued_conduit_dialogue(limit: int = 5) -> list[dict[str, Any]]:
     if not db_available():
         return []
     try:
-        from indy_conduit_driver import read_queued_dialogue_rows
+        indy_conduit_driver = import_indy_conduit_driver()
+        read_queued_dialogue_rows = indy_conduit_driver.read_queued_dialogue_rows
         with psycopg.connect(DB_URL) as conn:  # type: ignore[union-attr]
             return read_queued_dialogue_rows(conn, limit=limit)
     except Exception:
         return []
+
+
+def load_queued_indy_directives(limit: int = 5) -> list[dict[str, Any]]:
+    if not INDY_DIRECTIVE_OUTBOX.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    try:
+        with INDY_DIRECTIVE_OUTBOX.open("r", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(row, dict):
+                    rows.append(row)
+    except OSError:
+        return []
+    return rows[-limit:]
 
 
 def format_conduit_dialogue_row(row: dict[str, Any], idx: int) -> str:
@@ -1073,6 +2359,15 @@ def format_conduit_dialogue_row(row: dict[str, Any], idx: int) -> str:
     sender = row.get("sender_id") or "matrix"
     event_id = row.get("event_id") or row.get("id") or ""
     return f"{idx}. {sender} {event_id}: {clean}"
+
+
+def format_indy_directive_row(row: dict[str, Any], idx: int) -> str:
+    body = str(row.get("body") or "").replace("\n", " ").strip()
+    if len(body) > 220:
+        body = body[:217] + "..."
+    intent = row.get("intent") if isinstance(row.get("intent"), dict) else {}
+    intent_summary = current_orchestration_intent_summary(intent) if intent else "local bonsai"
+    return f"{idx}. {row.get('route', 'indy_orchestration_directive')} [{intent_summary}]: {body}"
 
 
 def queued_dialogue_context(row: dict[str, Any]) -> tuple[Book, dict[str, Any], dict[str, Any]]:
@@ -1516,6 +2811,13 @@ def goals_chat_loop(st: dict[str, Any]) -> int:
         else:
             for i, row in enumerate(conduit_rows, 1):
                 print(format_conduit_dialogue_row(row, i))
+        indy_directives = load_queued_indy_directives(limit=5)
+        print("\nINDY DIRECTIVE QUEUE")
+        if not indy_directives:
+            print("(no queued orchestration directives visible to Indy_READs)")
+        else:
+            for i, row in enumerate(indy_directives, 1):
+                print(format_indy_directive_row(row, i))
         print("\nNEXT GOAL QUEUE")
         if not orders:
             print("(no GOALS/NEXT_GOAL_QUEUE.json found)")
@@ -1527,7 +2829,7 @@ def goals_chat_loop(st: dict[str, Any]) -> int:
                     print(f"   objective={order.get('objective')}")
                 elif order.get("summary"):
                     print(f"   summary={order.get('summary')}")
-        print("\nReplies: `respond 1 text...`, `approve 1`, `reject 2`, `note ...`, `enqueue 3`, `q` to quit")
+        print("\nReplies: `respond 1 text...`, `route groq llama-3.3-70b-versatile`, `approve 1`, `reject 2`, `note ...`, `enqueue 3`, `q` to quit")
         ans_raw = timed_input("reply> ", ATTENTION_TIMEOUT_SECONDS)
         if ans_raw is TIMEOUT_SENTINEL:
             run_autonomous_slow_lane_tick(st, book, page, parser)
@@ -1549,6 +2851,38 @@ def goals_chat_loop(st: dict[str, Any]) -> int:
                 continue
             response_result = record_conduit_dialogue_response(selected_dialogue, reply_text, st)
             print(f"Indy_READs terminal response saved: {response_result['decision']} {response_result['score']} | outbound_matrix_send=False")
+            continue
+        if lowered.startswith(("use ", "route ", "model ", "orchestrate ", "set model ", "switch to ")):
+            intent, error = parse_orchestration_intent_command(ans)
+            if intent is None:
+                print(f"No orchestration intent saved: {error}")
+                continue
+            directive = compose_indy_orchestration_check_message(intent)
+            directive_result = queue_indy_directive_message(directive, intent=intent)
+            record_indy_judgment(
+                book=book,
+                page=page,
+                parser=parser,
+                decision="route",
+                score=100,
+                score_label_value=score_label(100),
+                notes=f"{ans} | intent={current_orchestration_intent_summary(intent)} | directive={directive_result['delivery_status']}",
+                repair_instruction="",
+                term_correction="",
+                favorite_line="",
+                confusion="",
+                socket_active=transport_socket_active(),
+                terminal_active=True,
+                batch_size=int(st.get("slow_lane", {}).get("ingestion_batch_size", 0) or 0) or None,
+                extra={
+                    "intent": intent,
+                    "directive": directive,
+                    "directive_result": directive_result,
+                    "response_kind": "indy_orchestration_directive",
+                },
+            )
+            print(f"Indy orchestration intent saved: {current_orchestration_intent_summary(intent)}")
+            print(f"Directive queued: {directive_result['outbox']}")
             continue
         if lowered.startswith(("approve ", "enqueue ", "reject ")):
             parts = lowered.split()
@@ -1588,15 +2922,498 @@ def goals_chat_loop(st: dict[str, Any]) -> int:
         print(f"Judgment saved: {decision} {score} | enqueue={enqueue_result.get('ok', False)}")
 
 
+def write_indy_boot_report(payload: dict[str, Any]) -> str:
+    INDY_BOOT_RECEIPT_DIR.mkdir(parents=True, exist_ok=True)
+    stamp_value = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    digest = sha_text(json.dumps(payload, sort_keys=True, ensure_ascii=False, default=str))[:16]
+    path = INDY_BOOT_RECEIPT_DIR / f"indy_reads_bootstrap_{stamp_value}_{digest}.json"
+    payload["receipt_path"] = str(path)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+    return str(path.relative_to(ROOT))
+
+
+def persist_indy_bootstrap_rows(
+    *,
+    boot_packet: dict[str, Any],
+    context: dict[str, Any],
+    slot0: dict[str, Any],
+    slot1: dict[str, Any],
+) -> dict[str, Any]:
+    defaults = default_indy_boot_content(
+        slot0_text=str(slot0.get("text") or ""),
+        slot1_text=str(slot1.get("text") or ""),
+        boot_packet=boot_packet,
+        context=context,
+    )
+    slot0_text = str(slot0.get("text") or "")
+    slot1_text = str(slot1.get("text") or "")
+    slot0_tokens = slot0.get("token_accounting") if isinstance(slot0.get("token_accounting"), dict) else {}
+    slot1_tokens = slot1.get("token_accounting") if isinstance(slot1.get("token_accounting"), dict) else {}
+    tokens_in = int(slot0_tokens.get("prompt_tokens") or 0) + int(slot1_tokens.get("prompt_tokens") or 0)
+    tokens_out = int(slot0_tokens.get("completion_tokens") or 0) + int(slot1_tokens.get("completion_tokens") or 0)
+    receipt_paths = [
+        str(slot0.get("report_path") or ""),
+        str(slot1.get("report_path") or ""),
+    ]
+    evidence_refs = [
+        "04_RUNTIME/indy_reads_boot_packet.json",
+        "04_RUNTIME/INDY_READS/indy_reads_service_manifest.json",
+        *[p for p in receipt_paths if p],
+    ]
+    db_refs = [
+        "lucidota_control.active_operation_mode",
+        "lucidota_canon.manual_current",
+        "lucidota_canon.root_orchestrator_current",
+        "lucidota_canon.workload_audit_current",
+        "lucidota_canon.workload_audit_telemetry_current",
+        "lucidota_canon.indy_reads_self_model",
+        "lucidota_canon.indy_reads_llmwiki_entry",
+        "lucidota_canon.indy_reads_hunch_log",
+        "lucidota_canon.indy_reads_learning_queue",
+        "lucidota_canon.indy_reads_system_map",
+        "lucidota_canon.indy_reads_mistake_ledger",
+        "lucidota_canon.indy_reads_research_source",
+        "lucidota_canon.indy_reads_metacognition_current",
+    ]
+    local_receipt_uuid = uuid.uuid5(uuid.NAMESPACE_URL, "|".join(receipt_paths + [slot0_text[:256], slot1_text[:256]]))
+    boot_status = "PROVEN" if slot0.get("status") == "PASS" and slot1.get("status") == "PASS" else "PARTIAL"
+    boot_report: dict[str, Any] = {
+        "schema": "lucidota.indy_reads.bootstrap_report.v1",
+        "boot_packet_ref": str(INDY_BOOT_PACKET_PATH),
+        "slot_0": slot0,
+        "slot_1": slot1,
+        "tokens_in": tokens_in,
+        "tokens_out": tokens_out,
+        "proof_status": boot_status,
+        "receipt_uuid": str(local_receipt_uuid),
+        "evidence_refs": evidence_refs,
+        "db_refs": db_refs,
+    }
+
+    if not db_available():
+        return {
+            "ok": False,
+            "boot_status": "DB_BLOCKED",
+            "proof_status": "UNKNOWN",
+            "receipt_uuid": str(local_receipt_uuid),
+            "evidence_refs": evidence_refs,
+            "db_refs": db_refs,
+            "report_path": write_indy_boot_report({**boot_report, "db_blocked": True}),
+        }
+
+    self_model = defaults["self_model"]
+    llmwiki_entry = defaults["llmwiki_entry"]
+    hunch_log = defaults["hunch_log"]
+    system_map = defaults["system_map"]
+    mistake_ledger = defaults["mistake_ledger"]
+    learning_queue = defaults["learning_queue"]
+    metacognition_current = defaults["metacognition_current"]
+    research_source = {
+        "actor_id": "indy_reads_runtime",
+        "source_name": "live DB/manual/workload/mode surfaces",
+        "source_type": "db_surface",
+        "source_locator": "lucidota_control.active_operation_mode + lucidota_canon.manual_current + lucidota_canon.root_orchestrator_current + lucidota_canon.workload_audit_current",
+        "access_status": "readable",
+        "summary": "Current boot used live DB/PostgREST truth surfaces and the Bonsai local model lane.",
+        "evidence_refs": evidence_refs,
+        "db_refs": db_refs,
+        "proof_status": boot_status,
+        "functionality_explanation": "Indy_READs research source inventory; keep secrets out, keep evidence refs in.",
+        "ontology_index": {
+            "primitive_refs": ["state", "duplex", "allocation"],
+            "claim_type": "research_source_boot",
+            "evidence_type": "boot_packet_and_slot_receipts",
+            "actor_role": "indy_reads_runtime",
+            "subsystem_refs": ["active_operation_mode", "manual_current", "root_orchestrator_current", "workload_audit_current"],
+            "risk_tier": "T3",
+            "proof_status": boot_status,
+            "receipt_refs": ["indy_reads_exocortex_activation_gate"],
+            "next_route": ["workload_audit_current", "manual_current", "root_orchestrator_current"],
+        },
+    }
+
+    try:
+        with psycopg.connect(DB_URL) as conn:  # type: ignore[union-attr]
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO lucidota_indy.indy_reads_self_model
+                      (actor_id, author, role, boundaries, voice, relationship_to_operator, relationship_to_LUCIDOTA,
+                       relationship_to_northern_strike, relationship_to_Krampus, relationship_to_Santa,
+                       investigation_style, learning_style, preferred_tools, evidence_standard, receipt_standard,
+                       mistake_handling, curiosity_targets, current_limitations, next_upgrade, summary,
+                       goals_refs, confidence, evidence_refs, db_refs, proof_status, functionality_explanation,
+                       ontology_index)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,%s,%s::jsonb,%s::jsonb,%s,%s,%s::jsonb)
+                    RETURNING self_model_id::text
+                    """,
+                    (
+                        self_model["actor_id"],
+                        self_model["author"],
+                        self_model["role"],
+                        self_model["boundaries"],
+                        self_model["voice"],
+                        self_model["relationship_to_operator"],
+                        self_model["relationship_to_LUCIDOTA"],
+                        self_model["relationship_to_northern_strike"],
+                        self_model["relationship_to_Krampus"],
+                        self_model["relationship_to_Santa"],
+                        self_model["investigation_style"],
+                        self_model["learning_style"],
+                        self_model["preferred_tools"],
+                        self_model["evidence_standard"],
+                        self_model["receipt_standard"],
+                        self_model["mistake_handling"],
+                        self_model["curiosity_targets"],
+                        self_model["current_limitations"],
+                        self_model["next_upgrade"],
+                        self_model["summary"],
+                        json.dumps(self_model["goals_refs"], default=str),
+                        float(self_model["confidence"]),
+                        json.dumps(evidence_refs, default=str),
+                        json.dumps(db_refs, default=str),
+                        self_model["proof_status"],
+                        self_model["functionality_explanation"],
+                        json.dumps(self_model["ontology_index"], default=str),
+                    ),
+                )
+                self_model_id = cur.fetchone()[0]
+
+                cur.execute(
+                    """
+                    INSERT INTO lucidota_indy.indy_reads_llmwiki_entry
+                      (actor_id, author, topic, summary, body, confidence, evidence_refs, db_refs, next_questions,
+                       mistake_risk, promotion_candidate, proof_status, functionality_explanation, ontology_index)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb,%s::jsonb,%s,%s,%s,%s,%s::jsonb)
+                    RETURNING llmwiki_entry_id::text
+                    """,
+                    (
+                        llmwiki_entry["actor_id"],
+                        llmwiki_entry["author"],
+                        llmwiki_entry["topic"],
+                        llmwiki_entry["summary"],
+                        llmwiki_entry["body"],
+                        float(llmwiki_entry["confidence"]),
+                        json.dumps(evidence_refs, default=str),
+                        json.dumps(db_refs, default=str),
+                        json.dumps(llmwiki_entry["next_questions"], default=str),
+                        llmwiki_entry["mistake_risk"],
+                        bool(llmwiki_entry["promotion_candidate"]),
+                        llmwiki_entry["proof_status"],
+                        llmwiki_entry["functionality_explanation"],
+                        json.dumps(llmwiki_entry["ontology_index"], default=str),
+                    ),
+                )
+                llmwiki_entry_id = cur.fetchone()[0]
+
+                cur.execute(
+                    """
+                    INSERT INTO lucidota_indy.indy_reads_hunch_log
+                      (actor_id, topic, hunch, confidence, evidence_refs, db_refs, next_questions, proof_status,
+                       functionality_explanation, ontology_index)
+                    VALUES (%s,%s,%s,%s,%s::jsonb,%s::jsonb,%s::jsonb,%s,%s,%s::jsonb)
+                    RETURNING hunch_log_id::text
+                    """,
+                    (
+                        hunch_log["actor_id"],
+                        hunch_log["topic"],
+                        hunch_log["hunch"],
+                        float(hunch_log["confidence"]),
+                        json.dumps(evidence_refs, default=str),
+                        json.dumps(db_refs, default=str),
+                        json.dumps(hunch_log["next_questions"], default=str),
+                        hunch_log["proof_status"],
+                        hunch_log["functionality_explanation"],
+                        json.dumps(hunch_log["ontology_index"], default=str),
+                    ),
+                )
+                hunch_log_id = cur.fetchone()[0]
+
+                cur.execute(
+                    """
+                    INSERT INTO lucidota_indy.indy_reads_learning_queue
+                      (actor_id, topic, summary, status, priority, next_route, evidence_refs, db_refs, proof_status,
+                       functionality_explanation, ontology_index)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb,%s,%s,%s::jsonb)
+                    RETURNING learning_queue_id::text
+                    """,
+                    (
+                        learning_queue["actor_id"],
+                        learning_queue["topic"],
+                        learning_queue["summary"],
+                        learning_queue["status"],
+                        int(learning_queue["priority"]),
+                        learning_queue["next_route"],
+                        json.dumps(evidence_refs, default=str),
+                        json.dumps(db_refs, default=str),
+                        learning_queue["proof_status"],
+                        learning_queue["functionality_explanation"],
+                        json.dumps(learning_queue["ontology_index"], default=str),
+                    ),
+                )
+                learning_queue_id = cur.fetchone()[0]
+
+                cur.execute(
+                    """
+                    INSERT INTO lucidota_indy.indy_reads_system_map
+                      (actor_id, topic, summary, subsystem_refs, evidence_refs, db_refs, proof_status,
+                       functionality_explanation, ontology_index)
+                    VALUES (%s,%s,%s,%s::jsonb,%s::jsonb,%s::jsonb,%s,%s,%s::jsonb)
+                    RETURNING system_map_id::text
+                    """,
+                    (
+                        system_map["actor_id"],
+                        system_map["topic"],
+                        system_map["summary"],
+                        json.dumps(system_map["subsystem_refs"], default=str),
+                        json.dumps(evidence_refs, default=str),
+                        json.dumps(db_refs, default=str),
+                        system_map["proof_status"],
+                        system_map["functionality_explanation"],
+                        json.dumps(system_map["ontology_index"], default=str),
+                    ),
+                )
+                system_map_id = cur.fetchone()[0]
+
+                cur.execute(
+                    """
+                    INSERT INTO lucidota_indy.indy_reads_mistake_ledger
+                      (actor_id, mistake_summary, mistake_risk, correction, evidence_refs, db_refs, proof_status,
+                       functionality_explanation, ontology_index)
+                    VALUES (%s,%s,%s,%s,%s::jsonb,%s::jsonb,%s,%s,%s::jsonb)
+                    RETURNING mistake_ledger_id::text
+                    """,
+                    (
+                        mistake_ledger["actor_id"],
+                        mistake_ledger["mistake_summary"],
+                        mistake_ledger["mistake_risk"],
+                        mistake_ledger["correction"],
+                        json.dumps(evidence_refs, default=str),
+                        json.dumps(db_refs, default=str),
+                        mistake_ledger["proof_status"],
+                        mistake_ledger["functionality_explanation"],
+                        json.dumps(mistake_ledger["ontology_index"], default=str),
+                    ),
+                )
+                mistake_ledger_id = cur.fetchone()[0]
+
+                cur.execute(
+                    """
+                    INSERT INTO lucidota_indy.indy_reads_research_source
+                      (actor_id, source_name, source_type, source_locator, access_status, summary, evidence_refs, db_refs,
+                       proof_status, functionality_explanation, ontology_index)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb,%s,%s,%s::jsonb)
+                    RETURNING research_source_id::text
+                    """,
+                    (
+                        research_source["actor_id"],
+                        research_source["source_name"],
+                        research_source["source_type"],
+                        research_source["source_locator"],
+                        research_source["access_status"],
+                        research_source["summary"],
+                        json.dumps(evidence_refs, default=str),
+                        json.dumps(db_refs, default=str),
+                        research_source["proof_status"],
+                        research_source["functionality_explanation"],
+                        json.dumps(research_source["ontology_index"], default=str),
+                    ),
+                )
+                research_source_id = cur.fetchone()[0]
+
+                cur.execute(
+                    """
+                    INSERT INTO lucidota_indy.indy_reads_metacognition_current_state
+                      (state_key, actor_id, owner_role, what_i_am, what_i_am_for, operator_model, case_model, system_model,
+                       learning_next, refusal_standard, self_model_ref, llmwiki_ref, hunch_log_ref, system_map_ref,
+                       mistake_ledger_ref, learning_queue_ref, research_source_ref, boot_packet_ref, evidence_refs, db_refs,
+                       proof_status, functionality_explanation, ontology_index)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,%s::jsonb,%s,%s,%s::jsonb)
+                    ON CONFLICT (state_key) DO UPDATE SET
+                        actor_id = EXCLUDED.actor_id,
+                        owner_role = EXCLUDED.owner_role,
+                        what_i_am = EXCLUDED.what_i_am,
+                        what_i_am_for = EXCLUDED.what_i_am_for,
+                        operator_model = EXCLUDED.operator_model,
+                        case_model = EXCLUDED.case_model,
+                        system_model = EXCLUDED.system_model,
+                        learning_next = EXCLUDED.learning_next,
+                        refusal_standard = EXCLUDED.refusal_standard,
+                        self_model_ref = EXCLUDED.self_model_ref,
+                        llmwiki_ref = EXCLUDED.llmwiki_ref,
+                        hunch_log_ref = EXCLUDED.hunch_log_ref,
+                        system_map_ref = EXCLUDED.system_map_ref,
+                        mistake_ledger_ref = EXCLUDED.mistake_ledger_ref,
+                        learning_queue_ref = EXCLUDED.learning_queue_ref,
+                        research_source_ref = EXCLUDED.research_source_ref,
+                        boot_packet_ref = EXCLUDED.boot_packet_ref,
+                        evidence_refs = EXCLUDED.evidence_refs,
+                        db_refs = EXCLUDED.db_refs,
+                        proof_status = EXCLUDED.proof_status,
+                        functionality_explanation = EXCLUDED.functionality_explanation,
+                        ontology_index = EXCLUDED.ontology_index,
+                        refreshed_at = now()
+                    RETURNING state_key
+                    """,
+                    (
+                        metacognition_current["state_key"],
+                        metacognition_current["actor_id"],
+                        metacognition_current["owner_role"],
+                        metacognition_current["what_i_am"],
+                        metacognition_current["what_i_am_for"],
+                        metacognition_current["operator_model"],
+                        metacognition_current["case_model"],
+                        metacognition_current["system_model"],
+                        metacognition_current["learning_next"],
+                        metacognition_current["refusal_standard"],
+                        self_model_id,
+                        llmwiki_entry_id,
+                        hunch_log_id,
+                        system_map_id,
+                        mistake_ledger_id,
+                        learning_queue_id,
+                        research_source_id,
+                        metacognition_current["boot_packet_ref"],
+                        json.dumps(evidence_refs, default=str),
+                        json.dumps(db_refs, default=str),
+                        metacognition_current["proof_status"],
+                        metacognition_current["functionality_explanation"],
+                        json.dumps(metacognition_current["ontology_index"], default=str),
+                    ),
+                )
+                cur.fetchone()
+
+                workload_summary = context.get("workload_audit_current", {})
+                action_summary = "Indy_READs booted through IronClaw local model runtime with Bonsai slot_0 synthesis and slot_1 skeptic verification, then wrote self-model/wiki/hunch/system-map/mistake/learning/metacognition rows."
+                debt_reason = ""
+                proof_status = boot_status
+                if boot_status != "PROVEN":
+                    debt_reason = "first boot is still provisional until the workload/mode surfaces are fully reflected"
+                token_source = slot0_tokens.get("source") or slot1_tokens.get("source") or "local_counter"
+                if token_source not in {"provider_api", "local_counter", "receipt_file", "manual_operator_input", "unknown"}:
+                    token_source = "local_counter"
+                cur.execute(
+                    """
+                    INSERT INTO lucidota_audit.workload_audit_ledger
+                      (actor_id, actor_class, caller, provider, model_id, action_summary, tokens_in, tokens_out,
+                       token_source, receipt_uuid, evidence_refs, proof_status, debt_reason, functionality_explanation,
+                       ontology_index)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,%s,%s,%s,%s::jsonb)
+                    RETURNING workload_audit_uuid::text
+                    """,
+                    (
+                        "indy_reads_runtime",
+                        "indy_reads",
+                        "indy_reads",
+                        "local",
+                        "bonsai_q1_0",
+                        action_summary,
+                        tokens_in,
+                        tokens_out,
+                        token_source,
+                        str(local_receipt_uuid),
+                        json.dumps(evidence_refs, default=str),
+                        proof_status,
+                        debt_reason,
+                        "Tracks live token expenditures, execution workloads, and racing metrics between Codex Cloud and Indy Local models to prevent un-indexed handwaving.",
+                        json.dumps(
+                            {
+                                "primitive_refs": ["telemetry", "duplex", "allocation"],
+                                "claim_type": "indy_boot_workload",
+                                "evidence_type": "slot_receipts_and_db_rows",
+                                "actor_role": "indy_reads_runtime",
+                                "subsystem_refs": [
+                                    "active_operation_mode",
+                                    "manual_current",
+                                    "root_orchestrator_current",
+                                    "workload_audit_current",
+                                    "indy_reads_self_model",
+                                    "indy_reads_llmwiki_entry",
+                                    "indy_reads_metacognition_current",
+                                ],
+                                "risk_tier": "T3",
+                                "proof_status": proof_status,
+                                "receipt_refs": ["indy_reads_exocortex_activation_gate"],
+                                "next_route": ["workload_audit_current", "active_operation_mode", "manual_current", "root_orchestrator_current"],
+                            },
+                            default=str,
+                        ),
+                    ),
+                )
+                workload_audit_uuid = cur.fetchone()[0]
+            conn.commit()
+    except Exception as exc:
+        return {
+            "ok": False,
+            "boot_status": "DB_WRITE_FAILED",
+            "proof_status": "UNKNOWN",
+            "receipt_uuid": str(local_receipt_uuid),
+            "error": type(exc).__name__,
+            "message": str(exc),
+            "report_path": write_indy_boot_report({**boot_report, "db_write_failed": True, "error": type(exc).__name__, "message": str(exc)}),
+        }
+
+    report = {
+        **boot_report,
+        "ok": True,
+        "boot_status": "BOOTED",
+        "proof_status": "PROVEN" if proof_status == "PROVEN" else "PARTIAL",
+        "self_model_id": self_model_id,
+        "llmwiki_entry_id": llmwiki_entry_id,
+        "hunch_log_id": hunch_log_id,
+        "learning_queue_id": learning_queue_id,
+        "system_map_id": system_map_id,
+        "mistake_ledger_id": mistake_ledger_id,
+        "research_source_id": research_source_id,
+        "workload_audit_uuid": workload_audit_uuid,
+        "receipt_uuid": str(local_receipt_uuid),
+        "evidence_refs": evidence_refs,
+        "db_refs": db_refs,
+        "report_path": "",
+    }
+    report["report_path"] = write_indy_boot_report(report)
+    return report
+
+
+def run_indy_bootstrap(*, force: bool = False, timeout_sec: float = 180.0) -> dict[str, Any]:
+    boot_packet = load_boot_packet()
+    context = indy_boot_context_snapshot()
+    existing_self_model_count = int(fetch_scalar("SELECT count(*) FROM lucidota_indy.indy_reads_self_model") or 0)
+    if existing_self_model_count > 0 and not force:
+        report = {
+            "ok": True,
+            "boot_status": "ALREADY_BOOTED",
+            "proof_status": "PROVEN",
+            "receipt_uuid": str(uuid.uuid5(uuid.NAMESPACE_URL, "indy_reads_boot_already_booted")),
+            "existing_self_model_count": existing_self_model_count,
+            "evidence_refs": ["lucidota_canon.indy_reads_self_model", "lucidota_canon.indy_reads_metacognition_current"],
+            "db_refs": [
+                "lucidota_control.active_operation_mode",
+                "lucidota_canon.manual_current",
+                "lucidota_canon.root_orchestrator_current",
+                "lucidota_canon.workload_audit_current",
+                "lucidota_canon.indy_reads_self_model",
+                "lucidota_canon.indy_reads_metacognition_current",
+            ],
+        }
+        report["report_path"] = write_indy_boot_report(report)
+        return report
+
+    slot0 = run_boot_slot(lane="bonsai_q1_0", slot_role="slot_0_synthesis", boot_packet=boot_packet, context=context, max_tokens=512, timeout_sec=timeout_sec)
+    slot1 = run_boot_slot(lane="bonsai_q1_0", slot_role="slot_1_skeptic_verifier", boot_packet=boot_packet, context=context, max_tokens=384, timeout_sec=timeout_sec)
+    return persist_indy_bootstrap_rows(boot_packet=boot_packet, context=context, slot0=slot0, slot1=slot1)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", nargs="?", choices=["reader", "chat", "journal"])
-    ap.add_argument("--mode", dest="mode_flag", choices=["reader", "chat", "journal"])
+    ap.add_argument("mode", nargs="?", choices=["reader", "chat", "journal", "bootstrap"])
+    ap.add_argument("--mode", dest="mode_flag", choices=["reader", "chat", "journal", "bootstrap"])
     ap.add_argument("--respond-once", action="store_true", help="Process one queued Indy/Conduit chat row and exit.")
     ap.add_argument("--response-text", default=None, help="Optional explicit response body for --respond-once.")
     ap.add_argument("--journal-title", default=None)
     ap.add_argument("--journal-body", default=None)
     ap.add_argument("--journal-kind", default="note")
+    ap.add_argument("--force-bootstrap", action="store_true", help="Re-run Indy_READs bootstrap even if a self-model row already exists.")
     ap.add_argument("--receipt-dir", default=str(INDY_CONDUIT_RECEIPT_DIR))
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
@@ -1619,6 +3436,15 @@ def main() -> int:
             print(f"JOURNAL_PATH={journal['path']}")
             print(f"WIKI_PATH={wiki['path']}")
         return 0
+    if mode == "bootstrap":
+        result = run_indy_bootstrap(force=args.force_bootstrap)
+        if args.json:
+            print(json.dumps(result, sort_keys=True, default=str))
+        else:
+            print(f"INDY_BOOTSTRAP={result.get('boot_status', 'UNKNOWN')}")
+            print(f"RECEIPT_UUID={result.get('receipt_uuid', '')}")
+            print(f"REPORT_PATH={result.get('report_path', '')}")
+        return 0 if result.get("ok") else 1
     if mode == "chat":
         if args.respond_once:
             result = process_queued_conduit_once(st, response_text=args.response_text, receipt_dir=Path(args.receipt_dir))

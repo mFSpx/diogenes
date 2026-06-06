@@ -106,7 +106,37 @@ SELECT
     updated_at,
     workflow_count,
     workflows_preserved,
-    batch_kind
+    batch_kind,
+    jsonb_build_object(
+        'goal_id', batch_uuid::text,
+        'title', COALESCE(objective_summary, 'Ontology work batch'::text),
+        'status', status
+    ) AS goal,
+    jsonb_build_object(
+        'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; receipts prove the thing happened.'
+    ) AS db_law,
+    jsonb_build_array('ontology_work_batch', 'todo_current') AS next_commands,
+    jsonb_build_array(
+        'manual_current',
+        'root_orchestrator_current',
+        'daemon_status',
+        'todo_current',
+        'command_registry',
+        'capability_registry',
+        'surface_registry',
+        'renderer_registry',
+        'schema_owner_manifest',
+        'controller_grant',
+        'agent_thread_runtime'
+    ) AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'batch_uuid', batch_uuid,
+        'batch_key', batch_key,
+        'selected_lanes', selected_lanes
+    ) AS orchestration
 FROM lucidota_control.ontology_work_batch;
 
 CREATE OR REPLACE VIEW lucidota_canon.ontology_work_item AS
@@ -164,7 +194,41 @@ SELECT
     b.updated_at,
     b.workflow_count,
     b.workflows_preserved,
-    b.batch_kind
+    b.batch_kind,
+    jsonb_build_object(
+        'goal_id', b.batch_uuid::text,
+        'title', COALESCE(b.objective_summary, 'Todo batch'::text),
+        'status', b.status
+    ) AS goal,
+    jsonb_build_object(
+        'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; receipts prove the thing happened.'
+    ) AS db_law,
+    jsonb_build_array('todo_current', 'api_todo_current') AS next_commands,
+    jsonb_build_array(
+        'manual_current',
+        'root_orchestrator_current',
+        'daemon_status',
+        'capability_current',
+        'provider_current',
+        'workflow_current',
+        'model_registry_current',
+        'model_routing_current',
+        'model_routing_blockers',
+        'command_registry',
+        'surface_registry',
+        'renderer_registry',
+        'schema_owner_manifest',
+        'controller_grant',
+        'agent_thread_runtime'
+    ) AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'batch_uuid', b.batch_uuid,
+        'batch_key', b.batch_key,
+        'selected_lanes', b.selected_lanes
+    ) AS orchestration
 FROM lucidota_control.ontology_work_batch b
 LEFT JOIN lucidota_control.ontology_work_item i ON i.batch_uuid = b.batch_uuid
 GROUP BY
@@ -172,7 +236,8 @@ GROUP BY
     b.objective_summary, b.subsystem, b.ontology_tags, b.risk, b.parallel_policy,
     b.planner_groups, b.selected_lanes, b.missing_executor_roles, b.executor_recommendation,
     b.acceptance_test, b.receipt_requirement, b.functionality_contract, b.status,
-    b.detail, b.created_at, b.updated_at, b.workflow_count, b.workflows_preserved, b.batch_kind
+    b.detail, b.created_at, b.updated_at, b.workflow_count, b.workflows_preserved, b.batch_kind,
+    b.batch_uuid, b.objective_summary, b.status, b.selected_lanes
 ORDER BY b.created_at DESC;
 
 INSERT INTO lucidota_canon.api_route_catalog
@@ -193,114 +258,6 @@ ON CONFLICT (route_id) DO UPDATE SET
     sample_response = EXCLUDED.sample_response,
     status = EXCLUDED.status,
     updated_at = now();
-
-CREATE OR REPLACE VIEW lucidota_canon.manual_current AS
-WITH live_routes AS (
-    SELECT jsonb_agg(
-        jsonb_build_object(
-            'route_id', route_id,
-            'method', method,
-            'path_pattern', path_pattern,
-            'description', description,
-            'target', target,
-            'status', status
-        )
-        ORDER BY route_id
-    ) AS route_list,
-    count(*) AS route_count
-    FROM lucidota_canon.api_route_catalog
-    WHERE route_id IN (
-        'manual_current', 'canon_current', 'canon_versions', 'active_goal', 'api_workflow_registry',
-        'capability_registry', 'model_registry', 'provider_registry', 'workflow_registry',
-        'daemon_status', 'bytewax_compact_windows', 'indy_queue', 'indy_responses',
-        'cloud_packet', 'book_source', 'book_scan', 'book_read_queue', 'book_note',
-        'lora_candidate', 'lora_adapter', 'training_job', 'book_receipt',
-        'ontology_work_batch', 'ontology_work_item', 'todo_current'
-    )
-),
-goal_row AS (
-    SELECT to_jsonb(g) AS current_goal
-    FROM lucidota_canon.active_goal g
-    ORDER BY updated_at DESC
-    LIMIT 1
-),
-daemon_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(d) ORDER BY d.daemon_name), '[]'::jsonb) AS daemon_status
-    FROM lucidota_canon.daemon_status d
-),
-model_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(m) ORDER BY m.model_id), '[]'::jsonb) AS model_registry
-    FROM lucidota_canon.model_registry m
-),
-provider_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY p.provider_key), '[]'::jsonb) AS provider_registry
-    FROM lucidota_canon.provider_registry p
-),
-workflow_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(w) ORDER BY w.workflow_id), '[]'::jsonb) AS workflow_registry
-    FROM lucidota_canon.workflow_registry w
-),
-todo_rows AS (
-    SELECT COALESCE(
-        jsonb_agg(to_jsonb(t) ORDER BY t.created_at DESC),
-        '[]'::jsonb
-    ) AS todo_current
-    FROM (
-        SELECT *
-        FROM lucidota_canon.todo_current
-        WHERE status IN ('ready', 'queued', 'running')
-        ORDER BY created_at DESC
-        LIMIT 5
-    ) t
-)
-SELECT
-    'LUCIDOTA_OPERATOR_MANUAL'::text AS manual_id,
-    'LUCIDOTA Operator Manual'::text AS title,
-    live_routes.route_count AS node_count,
-    now() AS max_updated_at,
-    live_routes.route_list,
-    jsonb_build_object(
-        'read_surface', 'PostgREST safe views and RPCs only',
-        'write_surface', 'DB work orders and receipts only',
-        'legacy_book_watcher', 'retired as authority',
-        'skill_layers', 'execution aids only; live PostgREST/manual truth and GOALS handoffs win',
-        'manual_source', 'live route catalog + daemon status + current goal + current todo batches'
-    ) AS auth_expectations,
-    jsonb_build_object(
-        'book_ingest', 'book_source -> book_scan -> book_read_queue -> book_note -> lora_candidate -> lora_adapter -> training_job -> book_receipt',
-        'indy_loop', 'queued row -> /indy_queue -> indy_daemon once/loop -> /indy_responses or receipt row',
-        'mamba_role', 'DB queue/receipt/window watcher only; no BOOKS filesystem authority',
-        'ontology_loop', 'messy operator text -> ontology_work_batch -> ontology_work_item -> executable route plan'
-    ) AS work_order_flow,
-    jsonb_build_object(
-        'current_goal', goal_row.current_goal,
-        'daemon_status', daemon_rows.daemon_status,
-        'model_registry', model_rows.model_registry,
-        'provider_registry', provider_rows.provider_registry,
-        'workflow_registry', workflow_rows.workflow_registry,
-        'todo_current', todo_rows.todo_current
-    ) AS live_surface,
-    jsonb_build_array(
-        'curl -sS http://127.0.0.1:3000/manual_current?limit=1',
-        'curl -sS http://127.0.0.1:3000/todo_current?limit=5',
-        '.venv/bin/python scripts/ontology_work_compiler.py --json --text "<objective text>"',
-        '.venv/bin/python scripts/indy_daemon.py --once --json',
-        '.venv/bin/python scripts/indy_runtime_broker.py snapshot --json',
-        '.venv/bin/python scripts/luci_todo.py --json'
-    ) AS next_commands,
-    jsonb_build_array(
-        'BOOKS folder watcher authority',
-        'hand-written manual slop',
-        'raw corpus prompts',
-        'unbounded whole-table dumps'
-    ) AS retired_surfaces
-FROM live_routes
-CROSS JOIN daemon_rows
-CROSS JOIN model_rows
-CROSS JOIN provider_rows
-CROSS JOIN workflow_rows
-CROSS JOIN todo_rows
-LEFT JOIN goal_row ON true;
 
 GRANT SELECT, INSERT, UPDATE ON lucidota_control.ontology_work_batch, lucidota_control.ontology_work_item TO mfspx;
 GRANT SELECT ON lucidota_canon.ontology_work_batch, lucidota_canon.ontology_work_item, lucidota_canon.todo_current TO mfspx;

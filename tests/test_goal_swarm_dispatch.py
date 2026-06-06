@@ -33,6 +33,7 @@ def test_goal_swarm_dispatch_builds_queue_payloads_and_receipts(tmp_path, monkey
     assert payload["schema"] == "lucidota.goals.swarm_dispatch.v1"
     assert len(payload["jobs"]) == 2
     assert payload["goal_packet"]["adapter"] == "needle_swarm_6x"
+    assert payload["goal_packet"]["orchestration"]["mode"] == "sub_orchestrator"
     assert all(job["job_uuid"] == "job-1" for job in payload["jobs"])
     source = Path("scripts/goal_swarm_dispatch.py").read_text().splitlines()
     code_lines = [line for line in source if line.strip() and not line.lstrip().startswith("#")]
@@ -76,6 +77,7 @@ def test_goal_swarm_dispatch_detects_groq_command_with_python_prefix(monkeypatch
     payload = json.loads(sorted((Path(goal_swarm_dispatch.ROOT) / "05_OUTPUTS" / "goals").glob("goal_swarm_dispatch_*.json"))[-1].read_text())
     assert payload["goal_packet"]["adapter"] == "groq"
     assert payload["workflow"] == "goal_swarm"
+    assert payload["goal_packet"]["orchestration"]["sub_orchestrator_priority"][0] == "live_truth_surfaces"
     assert json.loads(calls[0][calls[0].index("--payload-json") + 1])["selected_adapter"] == "groq"
 
 

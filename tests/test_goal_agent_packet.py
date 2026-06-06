@@ -10,7 +10,7 @@ def test_goal_agent_packet_builds_coding_only_cheapest_capable_prompt(tmp_path):
     (tmp_path / "GOALS").mkdir()
     (tmp_path / "GOALS" / "CURRENT_HANDOFF.md").write_text("- Goal: G\n- Next action: edit scripts/x.py and run pytest\n")
     (tmp_path / "GOALS" / "AGENT_ORCHESTRATION_POLICY.md").write_text("Cheapest Capable Model\n")
-    (tmp_path / "GOALS" / "plugin_build_mode_bootstrap.json").write_text(json.dumps({"local_lanes":[{"name":"needle_swarm_6x"}],"cloud_lanes":[{"name":"groq"},{"name":"cohere"}]}))
+    (tmp_path / "GOALS" / "plugin_build_mode_bootstrap.json").write_text(json.dumps({"local_lanes":[{"name":"needle_swarm_6x"}],"cloud_lanes":[{"name":"groq"},{"name":"cohere"},{"name":"gemini"}]}))
     pkt = goal_agent_packet.build_packet(tmp_path, target="codex", task="edit scripts/x.py and run pytest", files=["scripts/x.py"], complexity="simple")
     assert pkt["schema"] == "lucidota.goals.agent_packet.v1"
     assert pkt["target"] == "codex"
@@ -22,7 +22,9 @@ def test_goal_agent_packet_builds_coding_only_cheapest_capable_prompt(tmp_path):
     assert pkt["coding_prompt"]["output_contract"]["required_output"] == ["status", "result", "next_action", "receipt_path", "evidence_refs", "decision_pairs"]
     assert pkt["coding_prompt"]["output_contract"]["envelope_style"] == "single_exact_top_level_json_object"
     assert pkt["model_policy"]["output_contract"]["decision_pairs_min"] == 2
-    assert pkt["adapters"]["cloud_lanes"] == ["groq", "cohere"]
+    assert pkt["orchestration"]["mode"] == "sub_orchestrator"
+    assert pkt["orchestration"]["sub_orchestrator_priority"] == ["live_truth_surfaces", "deterministic_local_checks", "thin_packets", "local", "indy_reads", "codex", "vibe", "groq", "broader_cloud"]
+    assert pkt["adapters"]["cloud_lanes"] == ["groq", "cohere", "gemini"]
     assert pkt["adapter"]["selected"] == "needle_swarm_6x"
     assert pkt["role"] == "CODE_PATCHER"
     assert pkt["model_calls_performed"] is False
@@ -43,10 +45,20 @@ def test_goal_agent_packet_prefers_other_local_lanes_over_cloud_when_needle_miss
     (tmp_path / "GOALS").mkdir()
     (tmp_path / "GOALS" / "CURRENT_HANDOFF.md").write_text("- Goal: G\n- Next action: edit scripts/x.py and run pytest\n")
     (tmp_path / "GOALS" / "AGENT_ORCHESTRATION_POLICY.md").write_text("Kernel Rule: local-first.\n")
-    (tmp_path / "GOALS" / "plugin_build_mode_bootstrap.json").write_text(json.dumps({"local_lanes":[{"name":"mamba7b_ram"},{"name":"bonsai4b_ram"}],"cloud_lanes":[{"name":"groq"}]}))
+    (tmp_path / "GOALS" / "plugin_build_mode_bootstrap.json").write_text(json.dumps({"local_lanes":[{"name":"bonsai4b_ram"}],"cloud_lanes":[{"name":"groq"},{"name":"gemini"}]}))
     pkt = goal_agent_packet.build_packet(tmp_path, task="edit scripts/x.py and run pytest", files=["scripts/x.py"], complexity="simple")
-    assert pkt["adapter"]["selected"] == "llama_cpp_heavy"
-    assert pkt["adapters"]["cloud_lanes"] == ["groq"]
+    assert pkt["adapter"]["selected"] == "bonsai4b_ram"
+    assert pkt["adapters"]["cloud_lanes"] == ["groq", "gemini"]
+
+
+def test_goal_agent_packet_selects_bonsai_chain_for_bonsai_needles_bonsai_work(tmp_path):
+    (tmp_path / "GOALS").mkdir()
+    (tmp_path / "GOALS" / "CURRENT_HANDOFF.md").write_text("- Goal: G\n- Next action: wire bonsai chain pathing\n")
+    (tmp_path / "GOALS" / "AGENT_ORCHESTRATION_POLICY.md").write_text("Kernel Rule: local-first.\n")
+    (tmp_path / "GOALS" / "plugin_build_mode_bootstrap.json").write_text(json.dumps({"local_lanes":[{"name":"needle_swarm_6x"},{"name":"bonsai4b_ram"}],"cloud_lanes":[{"name":"groq"},{"name":"gemini"}]}))
+    pkt = goal_agent_packet.build_packet(tmp_path, task="route Bonsai 1 -> algos -> MambaGraph Needles -> algos -> Bonsai 2 mutate -> response", files=["scripts/model_runner_cli.py"], complexity="integration")
+    assert pkt["adapter"]["selected"] == "bonsai_chain"
+    assert pkt["adapter"]["execute_cmd"] == "python3 scripts/model_runner_cli.py bonsai-chain --prompt @PROMPT --json --execute"
 
 
 def test_goal_agent_packet_cli_writes_receipt_and_stays_under_100_loc():
@@ -85,10 +97,17 @@ def test_goal_agent_packet_is_declared_in_goals_manifests():
 def test_plugin_bootstrap_has_machine_checkable_adapter_registry():
     data = json.loads(Path("GOALS/plugin_build_mode_bootstrap.json").read_text())
     required = {"provider_type", "env_key_names", "endpoint", "dry_run_cmd", "execute_cmd", "expected_receipt_glob", "stop_or_rollback_cmd", "safety_limits"}
-    for name in ["groq", "cohere", "needle_swarm_6x", "llama_cpp_heavy"]:
+    for name in ["groq", "cohere", "gemini", "bonsai_chain", "needle_swarm_6x", "llama_cpp_heavy"]:
         assert name in data["adapter_registry"]
         assert required <= set(data["adapter_registry"][name]), name
     assert "secret_values_forbidden" in data["adapter_registry"]["groq"]["safety_limits"]
+    assert data["adapter_registry"]["gemini"]["env_key_names"] == ["GEMINI_API_KEY"]
+    assert data["adapter_registry"]["gemini"]["execute_cmd"].endswith("model_runner_cli.py gemini-chat --prompt @PROMPT --max-tokens 256 --json --execute")
+    assert data["adapter_registry"]["gemini"]["dry_run_cmd"].endswith("model_runner_cli.py gemini-chat --prompt ping --max-tokens 8 --json")
+    assert "Active Gemini chat lane" in data["adapter_registry"]["gemini"]["selection_rule"]
+    assert any(lane.get("name") == "gemini" for lane in data["cloud_lanes"])
+    assert any(lane.get("name") == "gemini" and "model_runner_cli.py gemini-chat" in lane.get("adapter", "") for lane in data["cloud_lanes"])
+    assert data["adapter_registry"]["bonsai_chain"]["execute_cmd"].endswith("bonsai-chain --prompt @PROMPT --json --execute")
     assert "no_auto_heavy_daemon" in data["adapter_registry"]["llama_cpp_heavy"]["safety_limits"]
     assert "local-chat" in data["adapter_registry"]["llama_cpp_heavy"]["invoke_cmd"]
     assert "local-chat" in data["adapter_registry"]["needle_swarm_6x"]["invoke_cmd"]
@@ -101,6 +120,16 @@ def test_goal_agent_packet_uses_registry_as_adapter_source_for_heavy_local_tasks
     assert pkt["adapter"]["execute_cmd"] == json.loads(Path("GOALS/plugin_build_mode_bootstrap.json").read_text())["adapter_registry"]["llama_cpp_heavy"]["execute_cmd"]
     assert pkt["adapters"]["registry_source"] == "GOALS/plugin_build_mode_bootstrap.json"
     assert "frontier/high only for architecture" in pkt["model_policy"]["reasoning_split"]
+
+
+def test_goal_agent_packet_selects_gemini_for_architecture_cloud_tasks(tmp_path):
+    (tmp_path / "GOALS").mkdir()
+    (tmp_path / "GOALS" / "CURRENT_HANDOFF.md").write_text("- Goal: G\n- Next action: shape provider lanes\n")
+    (tmp_path / "GOALS" / "AGENT_ORCHESTRATION_POLICY.md").write_text("Kernel Rule: local-first.\n")
+    (tmp_path / "GOALS" / "plugin_build_mode_bootstrap.json").write_text(json.dumps({"local_lanes":[],"cloud_lanes":[{"name":"groq"},{"name":"gemini"}]}))
+    pkt = goal_agent_packet.build_packet(tmp_path, task="provider registry architecture and fanout", complexity="architecture")
+    assert pkt["adapter"]["selected"] == "gemini"
+    assert pkt["adapter"]["provider_type"] == "cloud"
 
 
 def test_goal_agent_packet_infers_archive_roles_for_quarantine_work():

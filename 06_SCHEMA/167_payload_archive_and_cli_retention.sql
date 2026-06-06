@@ -44,7 +44,27 @@ SELECT
     COALESCE(sum(payload_bytes), 0) AS archived_bytes,
     COALESCE(sum(payload_chars), 0) AS archived_chars,
     max(archived_at) AS latest_archived_at,
-    count(*) FILTER (WHERE restored_at IS NULL) AS active_archive_count
+    count(*) FILTER (WHERE restored_at IS NULL) AS active_archive_count,
+    ARRAY[
+        'manual_current',
+        'root_orchestrator_current',
+        'daemon_status',
+        'cli_process_receipts',
+        'command_registry',
+        'surface_registry',
+        'renderer_registry',
+        'schema_owner_manifest',
+        'controller_grant',
+        'agent_thread_runtime'
+    ]::text[] AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'source_table', source_table,
+        'payload_kind', payload_kind,
+        'archive_count', count(*)
+    ) AS orchestration
 FROM lucidota_control.payload_archive
 GROUP BY source_table, payload_kind
 ORDER BY source_table, payload_kind;

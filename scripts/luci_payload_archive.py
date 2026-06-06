@@ -30,6 +30,9 @@ def render(rows: list[dict[str, Any]]) -> str:
             f"- {row.get('source_table')}::{row.get('payload_kind')} count={row.get('archive_count')} "
             f"bytes={row.get('archived_bytes')} chars={row.get('archived_chars')} latest={row.get('latest_archived_at')}"
         )
+        refs = row.get("next_command_refs") or []
+        if refs:
+            lines.append(f"  next_command_refs={', '.join(str(ref) for ref in refs)}")
     return "\n".join(lines) + "\n"
 
 

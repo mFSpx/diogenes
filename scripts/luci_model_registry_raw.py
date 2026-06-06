@@ -11,6 +11,14 @@ import urllib.request
 DEFAULT_BASE_URL = "http://127.0.0.1:3000"
 
 
+def fetch_json(base_url: str, path: str, query: dict[str, str] | None = None) -> list[dict[str, object]]:
+    qs = urllib.parse.urlencode(query or {}, safe=",.()")
+    url = f"{base_url.rstrip('/')}/{path.lstrip('/')}" + (f"?{qs}" if qs else "")
+    with urllib.request.urlopen(url, timeout=5) as resp:
+        payload = json.loads(resp.read().decode("utf-8") or "[]")
+    return payload if isinstance(payload, list) else []
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Show the live model registry rows from PostgREST.")
     ap.add_argument("--base-url", default=DEFAULT_BASE_URL)
@@ -41,6 +49,13 @@ def main() -> int:
         raise SystemExit(2)
 
     result = {"ok": True, "status": "FOUND", "source_url": route_url, "rows": rows, "payload": rows}
+    if isinstance(rows, list) and rows:
+        current_rows = fetch_json(args.base_url, "model_registry_current", {"limit": "1"})
+        if current_rows and isinstance(current_rows[0], dict):
+            current_row = current_rows[0]
+            for key in ("resident_loadout_status", "resident_loadout", "controller_grant", "agent_thread_runtime"):
+                if key in current_row:
+                    rows[0][key] = current_row[key]
     if args.json:
         print(json.dumps(result, sort_keys=True, ensure_ascii=False))
     else:

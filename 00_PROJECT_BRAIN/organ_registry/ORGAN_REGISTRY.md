@@ -245,5 +245,4 @@
 - modernbert-base — encoder embed/rerank; ONNX int8/q4 = CPU-cheap (04_RUNTIME/models/modernbert-base/)
 - gliner_small-v2.1 — zero-shot NER / entity extraction (03_VAULT/models/gliner/urchade_gliner_small-v2.1/)
 - smoldocling-256m — doc-layout / OCR-ish VLM, ONNX q4 80MB (04_RUNTIME/models/smoldocling-256m-preview/)
-- falcon3-mamba-7b-gguf — generation (Mamba SSM cortex) via llama.cpp (03_VAULT/models/tensorblock/Falcon3-Mamba-7B-Instruct-GGUF/)
-- deepseek-r1-1.5b-gguf — small reasoning generation (03_VAULT/models/bartowski/DeepSeek-R1-Distill-Qwen-1.5B-GGUF/)
+- deepseek-r1-1.5b-gguf — small reasoning generation, on disk passive (03_VAULT/models/bartowski/DeepSeek-R1-Distill-Qwen-1.5B-GGUF/)

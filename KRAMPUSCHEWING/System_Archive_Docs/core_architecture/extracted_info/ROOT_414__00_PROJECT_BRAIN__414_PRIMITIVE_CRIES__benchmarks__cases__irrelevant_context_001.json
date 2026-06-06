@@ -1,0 +1,17 @@
+{
+  "benchmark_id": "irrelevant_context_001",
+  "title": "Distractor-heavy evidence extraction",
+  "input_text": "The landlord's email was written in a cheerful tone, mentioned the weather, included a recipe for soup, and attached a photo of a dog. The material sentence is: 'I entered the unit on March 2 without giving written notice because I still had a key.'",
+  "expected": {
+    "required_primitives": ["DOCUMENT_EXAMINATION", "VALIDITY_AUDIT", "DIRECT_KNOWLEDGE", "CONTEXT_COLLAPSE"],
+    "forbidden_primitives": ["ARCHONIC_CONTROL_GRID", "THE_SPIRAL_IS_COMPLETE"],
+    "allowed_bps": [50, 69],
+    "must_have_falsifier": true,
+    "must_have_local_gate": true,
+    "claim_lifecycle": ["CLAIM_UNVERIFIED", "CORROBORATION_REQUIRED"]
+  },
+  "judge_focus": [
+    "Does it ignore soup/dog/weather distractors?",
+    "Does it extract the direct admission?"
+  ]
+}

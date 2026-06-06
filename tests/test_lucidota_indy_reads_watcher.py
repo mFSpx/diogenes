@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from scripts.legacy import lucidota_indy_reads_watcher as watcher
+import scripts.lucidota_indy_reads_watcher as watcher
 
 
 class _Cursor:

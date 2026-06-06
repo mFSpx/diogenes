@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lucidota.local/schema/root414.route_packet.schema.json",
+  "title": "ROOT-414 Route Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "packet_id", "source_id", "parser_name", "timestamp", "raw_text_anchor",
+    "evidence_units", "routes", "ternary_state", "claim_lifecycle",
+    "confidence_bps", "falsifier", "hitl_status"
+  ],
+  "properties": {
+    "packet_id": {"type": "string", "minLength": 1},
+    "source_id": {"type": "string", "minLength": 1},
+    "parser_name": {"type": "string", "enum": ["evidence_first_414_queen_parser_v0.4"]},
+    "timestamp": {"type": "string"},
+    "raw_text_anchor": {"type": "string", "minLength": 1},
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"type": "string", "enum": ["fiction", "legal_record", "journal", "reddit_comment", "email", "report", "advice", "mixed", "unknown"]},
+        "substrate_level": {"type": "string", "enum": ["physical", "textual", "narrative_world", "psychological", "digital_mediated", "mixed", "unknown"]},
+        "stakes": {"type": "string", "enum": ["low", "medium", "high"]}
+      }
+    },
+    "evidence_units": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/evidence_unit"}
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/route"}
+    },
+    "ternary_state": {"$ref": "#/$defs/ternary_state"},
+    "claim_lifecycle": {"type": "string", "enum": ["RAW_SIGNAL", "CLAIM_UNVERIFIED", "CORROBORATION_REQUIRED", "GROUND_TRUTH_ANCHOR", "DETERMINISTIC_PROOF", "ROUTE_REJECTED", "QUARANTINED"]},
+    "confidence_bps": {"type": "integer", "enum": [0, 2, 4, 6, 10, 50, 69, 150]},
+    "confidence_mode": {"type": "string", "enum": ["canonical", "proposed", "experimental"], "default": "canonical"},
+    "falsifier": {"type": "string", "minLength": 1},
+    "rejected_routes": {"type": "array", "items": {"type": "string"}},
+    "indy_note": {"type": "string"},
+    "river_note": {"type": "string"},
+    "hitl_status": {"type": "string", "enum": ["pending", "approved", "corrected", "denied", "applied"]}
+  },
+  "$defs": {
+    "primitive_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ordinal", "symbol"],
+      "properties": {
+        "ordinal": {"type": "integer", "minimum": 1, "maximum": 414},
+        "symbol": {"type": "string", "pattern": "^[A-Z0-9_?]+$"},
+        "role": {"type": "string", "enum": ["anchor", "operator_operand", "vector", "resolution", "gate", "context", "antipattern"]}
+      }
+    },
+    "evidence_unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_id", "quote_or_fact", "channel"],
+      "properties": {
+        "evidence_id": {"type": "string"},
+        "quote_or_fact": {"type": "string", "minLength": 1},
+        "source_location": {"type": "string"},
+        "actor": {"type": "string"},
+        "object": {"type": "string"},
+        "event_time": {"type": "string"},
+        "place": {"type": "string"},
+        "channel": {"type": "string", "enum": ["physical", "digital", "hearsay", "memory", "narrator", "institution", "text", "unknown"]}
+      }
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["route_id", "operator", "primitives", "resolution", "local_gates"],
+      "properties": {
+        "route_id": {"type": "string"},
+        "operator": {"type": "string", "enum": ["∩", "\\", "^", "→", "mixed"]},
+        "primitives": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/primitive_ref"}},
+        "resolution": {"type": "string"},
+        "local_gates": {"type": "array", "items": {"$ref": "#/$defs/primitive_ref"}},
+        "route_risk": {"type": "string", "enum": ["clean", "overfit", "underfit", "high_label_gravity", "big_four_hammering", "unsupported_speculation"]}
+      }
+    },
+    "ternary_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inside_scope": {"type": "integer", "enum": [-1, 0, 1]},
+        "outside_scope": {"type": "integer", "enum": [-1, 0, 1]},
+        "narrator_subjective": {"type": "integer", "enum": [-1, 0, 1]},
+        "institutional_record": {"type": "integer", "enum": [-1, 0, 1]}
+      }
+    }
+  }
+}

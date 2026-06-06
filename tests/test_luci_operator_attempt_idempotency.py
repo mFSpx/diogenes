@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib
 import json
 import subprocess
+import uuid
 from pathlib import Path
 
 
@@ -98,3 +99,40 @@ def test_luci_operate_json_attempt_idempotency_depends_on_text_and_run_id():
     assert same_a.stdout.lstrip().startswith("{")
     assert same_a.stdout.rstrip().endswith("}")
     assert same_a.stderr == "" or "WARNING:" in same_a.stderr
+
+
+def test_luci_operate_runtime_closure_records_real_worker_loop():
+    root = Path(__file__).resolve().parents[1]
+    proc = subprocess.run(
+        [
+            str(root / "luci"),
+            "operate",
+            "--text",
+            "runtime closure smoke: read manual, check daemon, emit receipt",
+            "--run-id",
+            f"pytest-runtime-closure-real-loop-{uuid.uuid4()}",
+            "--json",
+        ],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    payload = json.loads(proc.stdout)
+    attempt = payload["attempt_engine"]
+    db_write = attempt["db_write"]
+
+    assert payload["verdict"] == "PASS"
+    assert payload["canonical_graph_writes_performed"] is False
+    assert payload["real_work_loop"]["worker_executed"] is True
+    assert payload["real_work_loop"]["dead_letter_count"] == 0
+    assert payload["db_write"]["work_order_uuid"] == db_write["work_order_uuid"]
+    assert payload["db_write"]["workload_audit_uuid"] == db_write["workload_audit_uuid"]
+    assert attempt["real_work_loop"]["worker_executed"] is True
+    assert attempt["real_work_loop"]["dead_letter_count"] == 0
+    assert db_write["work_order_uuid"]
+    assert db_write["work_order_attempt_uuid"]
+    assert db_write["work_receipt_uuid"]
+    assert db_write["workload_audit_uuid"]
+    assert db_write["worker_id"] == "luci_attempt_engine"
+    assert payload["visible_response"]["summary"].startswith("Indy_READs:")

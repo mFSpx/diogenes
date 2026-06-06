@@ -41,10 +41,77 @@ active_rows AS (
         LIMIT 25
     ) m
 ),
+active_loadout AS (
+    SELECT
+        rl.loadout_id,
+        rl.active,
+        rl.description,
+        rl.target_gpu,
+        rl.budget_vram_mb,
+        rl.created_at,
+        COALESCE(count(s.slot_name), 0) AS slot_count,
+        COALESCE(
+            jsonb_agg(
+                jsonb_build_object(
+                    'slot_name', s.slot_name,
+                    'model_id', s.model_id,
+                    'instance_count', s.instance_count,
+                    'priority', s.priority,
+                    'expected_vram_mb', s.expected_vram_mb,
+                    'notes', s.notes
+                )
+                ORDER BY s.priority, s.slot_name
+            ) FILTER (WHERE s.slot_name IS NOT NULL),
+            '[]'::jsonb
+        ) AS slots
+    FROM lucidota_runtime.resident_loadout rl
+    LEFT JOIN lucidota_runtime.resident_loadout_slot s
+        ON s.loadout_id = rl.loadout_id
+    WHERE rl.active = true
+    GROUP BY rl.loadout_id, rl.active, rl.description, rl.target_gpu, rl.budget_vram_mb, rl.created_at
+    ORDER BY rl.created_at DESC
+    LIMIT 1
+),
+load_governor_row AS (
+    SELECT
+        al.loadout_id,
+        to_jsonb(d) AS load_governor
+    FROM active_loadout al
+    LEFT JOIN LATERAL (
+        SELECT *
+        FROM lucidota_runtime.load_governor_decision d
+        WHERE d.loadout_id = al.loadout_id
+        ORDER BY d.created_at DESC
+        LIMIT 1
+    ) d ON true
+),
+controller_row AS (
+    SELECT to_jsonb(g) AS controller_grant
+    FROM lucidota_canon.controller_grant g
+    WHERE g.grant_key = 'default_local_operator'
+    ORDER BY g.updated_at DESC
+    LIMIT 1
+),
+thread_row AS (
+    SELECT to_jsonb(t) AS agent_thread_runtime
+    FROM lucidota_canon.agent_thread_runtime t
+    WHERE t.thread_key = 'root_operator_thread'
+    ORDER BY t.updated_at DESC
+    LIMIT 1
+),
 goal_row AS (
     SELECT to_jsonb(g) AS current_goal
     FROM lucidota_canon.active_goal g
     ORDER BY updated_at DESC
+    LIMIT 1
+),
+routing_current AS (
+    SELECT
+        role_admission_decisions,
+        admitted_roles,
+        honestly_skipped_roles,
+        missing_roles
+    FROM lucidota_canon.model_routing_current
     LIMIT 1
 )
 SELECT
@@ -58,7 +125,11 @@ SELECT
         'accepted_count', mr.accepted_count,
         'latest_model_updated_at', mr.latest_model_updated_at,
         'role_names', mr.role_names,
-        'loadout_names', mr.loadout_names
+        'loadout_names', mr.loadout_names,
+        'active_loadout_id', al.loadout_id,
+        'active_loadout_target_gpu', al.target_gpu,
+        'active_loadout_budget_vram_mb', al.budget_vram_mb,
+        'active_loadout_slot_count', al.slot_count
     ) AS model_summary,
     role_rows.role_breakdown,
     loadout_rows.loadout_breakdown,
@@ -67,25 +138,98 @@ SELECT
         'registry_truth', 'model_registry is the DB-visible model ledger; no script folklore authority',
         'routing_truth', 'active models are live choices; benchmark status and role are routing clues',
         'local_before_cloud', 'prefer local deterministic/needle/treelite/river lanes before cloud',
-        'missing_roles', 'missing model roles are DB-visible blockers, not guesses'
+        'missing_roles', 'missing model roles are DB-visible blockers, not guesses',
+        'honestly_skipped_roles', 'roles without a booted current runtime must carry precise skip reasons and fallback routes',
+        'resident_loadout_state', COALESCE(
+            CASE COALESCE(lgr.load_governor->>'decision', '')
+                WHEN 'allow' THEN 'operational'
+                WHEN 'defer' THEN 'partial'
+                WHEN 'reject' THEN 'blocked'
+                WHEN '' THEN 'unknown'
+                ELSE 'unknown'
+            END,
+            'unknown'
+        )
     ) AS routing_notes,
     goal_row.current_goal AS goal,
     jsonb_build_object(
         'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; receipts prove the thing happened.'
     ) AS db_law,
     jsonb_build_array(
-        'curl -sS http://127.0.0.1:3000/model_registry_current?limit=1',
-        'curl -sS http://127.0.0.1:3000/model_registry?limit=5',
-        'curl -sS http://127.0.0.1:3000/model_routing_current?limit=1',
-        './luci model registry current --json',
-        './luci model registry --json',
-        './luci model-routing-current --json'
-    ) AS next_commands
+        'model_registry_current',
+        'model_registry',
+        'model_routing_current',
+        'provider_current'
+    ) AS next_commands,
+    jsonb_build_array(
+        'manual_current',
+        'root_orchestrator_current',
+        'daemon_status',
+        'capability_current',
+        'provider_current',
+        'workflow_current',
+        'model_routing_current',
+        'model_routing_blockers',
+        'sheet_current',
+        'todo_current',
+        'command_registry',
+        'surface_registry',
+        'renderer_registry',
+        'schema_owner_manifest',
+        'controller_grant',
+        'agent_thread_runtime',
+        'model_registry'
+    ) AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'active_models', active_rows.active_models
+    ) AS orchestration,
+    controller_row.controller_grant,
+    thread_row.agent_thread_runtime,
+    jsonb_build_object(
+        'loadout_id', al.loadout_id,
+        'active', al.active,
+        'description', al.description,
+        'target_gpu', al.target_gpu,
+        'budget_vram_mb', al.budget_vram_mb,
+        'created_at', al.created_at,
+        'slot_count', al.slot_count,
+        'slots', al.slots
+    ) AS resident_loadout,
+    jsonb_build_object(
+        'loadout_id', lgr.loadout_id,
+        'decision', COALESCE(lgr.load_governor->>'decision', 'unknown'),
+        'observed_free_mb', NULLIF(lgr.load_governor->>'observed_free_mb', '')::integer,
+        'observed_used_mb', NULLIF(lgr.load_governor->>'observed_used_mb', '')::integer,
+        'headroom_mb', NULLIF(lgr.load_governor->>'headroom_mb', '')::integer,
+        'estimated_required_mb', NULLIF(lgr.load_governor->>'estimated_required_mb', '')::integer,
+        'rationale', COALESCE(lgr.load_governor->>'rationale', ''),
+        'created_at', lgr.load_governor->>'created_at',
+        'status', CASE COALESCE(lgr.load_governor->>'decision', '')
+            WHEN 'allow' THEN 'operational'
+            WHEN 'defer' THEN 'partial'
+            WHEN 'reject' THEN 'blocked'
+            WHEN '' THEN 'unknown'
+            ELSE 'unknown'
+        END
+    ) AS resident_loadout_status,
+    lgr.load_governor AS load_governor,
+    routing_current.role_admission_decisions,
+    routing_current.admitted_roles,
+    routing_current.honestly_skipped_roles,
+    routing_current.missing_roles
 FROM model_rows mr
 CROSS JOIN role_rows
 CROSS JOIN loadout_rows
 CROSS JOIN active_rows
-CROSS JOIN goal_row;
+CROSS JOIN active_loadout al
+CROSS JOIN load_governor_row lgr
+CROSS JOIN controller_row
+CROSS JOIN thread_row
+CROSS JOIN goal_row
+CROSS JOIN routing_current;
 
 INSERT INTO lucidota_canon.api_route_catalog (
     route_id, method, path_pattern, description, target, sample_request, sample_response, status

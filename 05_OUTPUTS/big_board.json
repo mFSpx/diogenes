@@ -72,7 +72,7 @@
     "dev_journey_decision_points": {
       "canonical_graph_writes_performed": false,
       "decision_point_count": 16,
-      "source_receipt": "05_OUTPUTS/dev_journey_decision_points/dev_journey_decision_points_receipt_20260602T071142002012Z.json",
+      "source_receipt": "05_OUTPUTS/dev_journey_decision_points/dev_journey_decision_points_receipt_20260606T091655914396Z.json",
       "tree_training_performed": true
     },
     "hunch_hypertimeline": {
@@ -114,9 +114,9 @@
     "model_invocation_audit": {
       "canonical_graph_writes_performed": false,
       "invocation_count": 0,
-      "markdown": "/tmp/claude-1000/pytest-of-mfspx/pytest-45/test_partial_tail_block_waits_0/model_invocation_audit_20260529T230242197590Z.md",
+      "markdown": "/tmp/pytest-of-mfspx/pytest-14/test_partial_tail_block_waits_0/model_invocation_audit_20260606T091840546511Z.md",
       "missing_dedicated_model_audit_blocks": 1,
-      "source_receipt": "/tmp/claude-1000/pytest-of-mfspx/pytest-45/test_partial_tail_block_waits_0/model_invocation_audit_20260529T230242197590Z.json",
+      "source_receipt": "/tmp/pytest-of-mfspx/pytest-14/test_partial_tail_block_waits_0/model_invocation_audit_20260606T091840546511Z.json",
       "status": "FAIL",
       "verdict": "FAIL"
     },
@@ -306,15 +306,15 @@
     "working_reality": {
       "canonical_graph_writes_performed": false,
       "execute_performed": false,
-      "generated_at": "2026-05-29T23:01:58.865946Z",
-      "receipt_path": "05_OUTPUTS/working_reality/working_reality_record_20260529T230158865894Z.json",
+      "generated_at": "2026-06-06T09:19:28.408729Z",
+      "receipt_path": "05_OUTPUTS/working_reality/working_reality_record_20260606T091928408708Z.json",
       "record": {
         "canonical_graph_writes_performed": false,
         "contradiction_refs": [],
         "evidence": [
           "receipt://05_OUTPUTS/example.json"
         ],
-        "generated_at": "2026-05-29T23:01:58.865853Z",
+        "generated_at": "2026-06-06T09:19:28.408693Z",
         "hypothesis": "Ontology is map, not territory.",
         "layers": {
           "evidence": {

@@ -38,9 +38,16 @@ group_rows AS (
     ) g
 ),
 active_rows AS (
-    SELECT COALESCE(jsonb_agg(to_jsonb(c) ORDER BY c.capability_group, c.capability_name), '[]'::jsonb) AS active_capabilities
+    SELECT COALESCE(jsonb_agg(jsonb_build_object(
+        'capability_key', c.capability_key,
+        'capability_name', c.capability_name,
+        'capability_group', c.capability_group,
+        'lifecycle_status', c.lifecycle_status,
+        'run_state', c.run_state,
+        'workflow_name', c.workflow_name
+    ) ORDER BY c.capability_group, c.capability_name), '[]'::jsonb) AS active_capabilities
     FROM (
-        SELECT *
+        SELECT capability_key, capability_name, capability_group, lifecycle_status, run_state, workflow_name
         FROM lucidota_canon.capability_registry
         WHERE lifecycle_status = 'active'
         ORDER BY capability_group, capability_name
@@ -84,13 +91,28 @@ SELECT
         'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; receipts prove the thing happened.'
     ) AS db_law,
     jsonb_build_array(
-        'curl -sS http://127.0.0.1:3000/capability_current?limit=1',
-        'curl -sS http://127.0.0.1:3000/capability_registry?limit=5',
-        'curl -sS http://127.0.0.1:3000/workflow_current?limit=1',
-        './luci capability current --json',
-        './luci capability registry --json',
-        './luci workflow current --json'
-    ) AS next_commands
+        'capability_current',
+        'capability_registry',
+        'workflow_current'
+    ) AS next_commands,
+    jsonb_build_array(
+        'manual_current',
+        'root_orchestrator_current',
+        'daemon_status',
+        'capability_registry',
+        'command_registry',
+        'surface_registry',
+        'renderer_registry',
+        'schema_owner_manifest',
+        'controller_grant',
+        'agent_thread_runtime'
+    ) AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'active_capabilities', active_rows.active_capabilities
+    ) AS orchestration
 FROM capability_rows cr
 CROSS JOIN status_rows
 CROSS JOIN group_rows

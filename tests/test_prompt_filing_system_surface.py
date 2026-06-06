@@ -53,9 +53,21 @@ def test_prompt_routes_are_readable_and_manual_mentions_prompt_ledger() -> None:
         "prompt_recent",
         "prompt_unlinked",
         "prompt_catalog_status",
+        "file_prompt",
+        "link_prompt_work_order",
+        "decompose_prompt_to_work_orders",
     }.issubset(route_ids)
-    assert "prompt filing law" in row["auth_expectations"]["skill_layers"]
-    assert "prompt_catalog_status" in row["live_surface"]
+
+    prompt_catalog_rows = get_json("prompt_catalog_status?limit=1")
+    assert isinstance(prompt_catalog_rows, list) and prompt_catalog_rows, prompt_catalog_rows
+    row = prompt_catalog_rows[0]
+    packet = row["packet"]
+    assert isinstance(packet.get("next_commands"), list) and packet["next_commands"]
+    assert isinstance(packet.get("next_command_refs"), list) and packet["next_command_refs"]
+    assert all(not str(cmd).startswith("./luci") for cmd in packet["next_commands"])
+    assert "prompt_catalog_status" in packet["next_commands"]
+    assert "prompt_catalog_status" in packet["next_command_refs"]
+    assert "api_prompt_catalog_status" in packet["next_command_refs"]
 
 
 def test_file_prompt_is_idempotent_and_raw_text_is_preserved() -> None:
@@ -142,3 +154,12 @@ def test_prompt_link_and_decompose_are_visible_through_routes() -> None:
     assert isinstance(catalog_rows, list) and catalog_rows
     assert catalog_rows[0]["prompt_count"] >= 2
     assert catalog_rows[0]["linked_count"] >= 1
+
+
+def test_prompt_records_do_not_keep_old_curl_acceptance_tests() -> None:
+    rows = get_json("prompts_filed?limit=25")
+    assert isinstance(rows, list) and rows
+    assert all(
+        "curl the live route" not in json.dumps(row).lower()
+        for row in rows
+    )

@@ -48,7 +48,7 @@ def test_registry_snapshot_reports_live_local_model_role_coverage(monkeypatch) -
         if path == "model_registry":
             return 200, [
                 {"model_id": "needle-26m", "role": "router", "slot_name": "router_swarm", "loadout_id": "gtx1650-special-forces-v0", "expected_vram_mb": 256, "benchmark_status": "accepted", "notes": "router"},
-                {"model_id": "falcon3-mamba-7b-listener", "role": "listener", "slot_name": "listener", "loadout_id": "gtx1650-special-forces-v0", "expected_vram_mb": 0, "benchmark_status": "accepted", "notes": "listener"},
+                {"model_id": "mamba2-1.3b-listener", "role": "listener", "slot_name": "listener", "loadout_id": "gtx1650-special-forces-v0", "expected_vram_mb": 909, "benchmark_status": "accepted", "notes": "listener"},
             ], ""
         if path == "provider_registry":
             return 200, [{"provider_key": "local_model", "active": True}], ""

@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
-"""System-wide runtime facts refresh from live DB/daemon evidence."""
+"""System-wide runtime facts refresh from live DB/daemon evidence.
+
+Usage:
+  python3 scripts/system_runtime_facts_refresh.py [--execute] [--json]
+
+Exit codes: 0=success, 1=operational failure (blockers), 2=config error.
+"""
 from __future__ import annotations
 
 import argparse
 import json
 import os
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -75,10 +82,11 @@ def write(payload: dict) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description="Refresh system runtime facts from live DB/daemon evidence.")
     ap.add_argument("--state-database-url")
     ap.add_argument("--storage-database-url")
     ap.add_argument("--execute", action="store_true")
+    ap.add_argument("--json", action="store_true", help="Emit structured JSON report to stdout.")
     a = ap.parse_args()
 
     facts: dict = {}
@@ -176,7 +184,7 @@ def main() -> int:
     }
 
     chrono_proc = subprocess.run(
-        ["scripts/check_chrono_ledger_service.sh"],
+        [str(ROOT / "scripts" / "check_chrono_ledger_service.sh")],
         cwd=ROOT,
         text=True,
         capture_output=True,
@@ -246,8 +254,11 @@ def main() -> int:
         "status": "PASS" if not blockers else "FAIL",
     }
     write(payload)
-    print("SYSTEM_RUNTIME_FACTS=" + payload["status"])
-    return 0 if not blockers else 4
+    if a.json:
+        print(json.dumps({"status": payload["status"], "blockers": blockers, "report_path": payload.get("report_path", "")}, sort_keys=True))
+    print("SYSTEM_RUNTIME_FACTS=" + payload["status"], file=sys.stderr if not a.json else sys.stdout)
+    # Exit: 0=success, 1=operational failure (blockers), 2=config error
+    return 0 if not blockers else 1
 
 
 if __name__ == "__main__":

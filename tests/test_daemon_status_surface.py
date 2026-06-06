@@ -23,8 +23,25 @@ def test_daemon_status_route_is_readable() -> None:
     assert "process_id" in row
     assert "goal" in row
     assert "db_law" in row
+    assert "next_command_refs" in row
+    assert isinstance(row["next_command_refs"], list) and row["next_command_refs"]
+    assert "manual_current" in row["next_command_refs"]
+    assert "command_registry" in row["next_command_refs"]
+    assert "capability_current" in row["next_command_refs"]
+    assert "model_registry" in row["next_command_refs"]
+    assert "provider_registry" in row["next_command_refs"]
+    assert "workflow_registry" in row["next_command_refs"]
+    assert "skill_policy_current" in row["next_command_refs"]
+    assert "payload_archive_status" in row["next_command_refs"]
+    assert "cli_process_receipts" in row["next_command_refs"]
+    assert isinstance(row.get("orchestration"), dict)
+    assert row["orchestration"]["mode"] == "sub_orchestrator"
+    assert row["orchestration"]["sub_orchestrator_priority"][0] == "live_truth_surfaces"
+    assert row["orchestration"]["strict_priority_stack"][0] == "live_truth_surfaces"
     assert "next_commands" in row
     assert isinstance(row["next_commands"], list) and row["next_commands"]
+    assert row["next_commands"] == ["daemon_status"]
+    assert "daemon_status" in row["next_command_refs"]
 
 
 def test_luci_daemon_status_text_renderer_shows_truth_spine() -> None:

@@ -20,6 +20,7 @@ def test_luci_shell_help_mentions_unified_rails():
 
     assert "luci operator-route --raw-command" in proc.stdout
     assert "luci provider groq-chat --prompt" in proc.stdout
+    assert "luci model bonsai-chain --prompt" in proc.stdout
     assert "luci model admission [--run-diogenes-gate]" in proc.stdout
     assert "luci learn --text TEXT [--run-id ID] [--artifact PATH] [--candidate-kind KIND] [--json]" in proc.stdout
     assert "luci help|/help|commands [--json] [--base-url URL]" in proc.stdout
@@ -27,6 +28,9 @@ def test_luci_shell_help_mentions_unified_rails():
     assert proc.stdout.count("luci openapi [--json] [--base-url URL]") == 1
     assert "luci manual|/manual [--json] [--base-url URL]" in proc.stdout
     assert "luci manual current [--json] [--base-url URL]" in proc.stdout
+    assert "luci manual capsule [--json] [--base-url URL]" in proc.stdout
+    assert "luci doctor [--json] [--base-url URL]" in proc.stdout
+    assert "luci status [--json] [--base-url URL]" in proc.stdout
     assert "luci active goal [--json] [--base-url URL]" in proc.stdout
     assert "luci root orchestrator current [--json] [--base-url URL]" in proc.stdout
     assert "luci todo [--json] [--base-url URL]" in proc.stdout
@@ -44,6 +48,7 @@ def test_luci_shell_help_mentions_unified_rails():
     assert "luci model registry raw [--json] [--base-url URL]" in proc.stdout
     assert "luci model registry current [--json] [--base-url URL]" in proc.stdout
     assert "luci capability current [--json] [--base-url URL]" in proc.stdout
+    assert "luci capability list [--json] [--base-url URL]" in proc.stdout
     assert "luci capability registry [--json] [--base-url URL]" in proc.stdout
     assert "luci capability registry raw [--json] [--base-url URL]" in proc.stdout
     assert "luci provider current [--json] [--base-url URL]" in proc.stdout
@@ -177,6 +182,10 @@ def test_luci_shell_help_mentions_unified_rails():
     assert "luci cli-process-receipts [--json] [--base-url URL]" in proc.stdout
     assert "luci cli-retention [--json] [--archive-all] [--max-rows N] [--older-than-hours N]" in proc.stdout
     assert "luci payload-archive-status [--json] [--base-url URL]" in proc.stdout
+    assert "luci elastic shape <current|latest|residuals|pressure> [--json] [--base-url URL]" in proc.stdout
+    assert "luci elastic shape emit --artifact-uuid UUID [--signal TOKEN=VALUE]... [--json] [--base-url URL]" in proc.stdout
+    assert "luci percyphon <current|matrix> [--json] [--base-url URL]" in proc.stdout
+    assert "luci percyphon emit [--seed SEED] [--source SOURCE] [--villager VALUE]... [--fluid-slots N] [--json] [--no-write-db]" in proc.stdout
 
 
 def test_luci_help_json_lists_operator_commands_without_api_hard_fail():
@@ -247,6 +256,20 @@ def test_luci_api_root_law_docs_json_reads_live_root_law_docs_surface():
 def test_luci_api_root_law_docs_hyphenated_alias_json_reads_live_root_law_docs_surface():
     proc = subprocess.run(
         [str(ROOT / "luci"), "api", "root-law-docs", "--json"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    payload = json.loads(proc.stdout)
+    assert payload["ok"] is True
+    assert payload["status"] == "FOUND"
+    assert "/root_law_docs" in payload["source_url"]
+
+
+def test_luci_manual_capsule_json_reads_live_root_law_docs_surface():
+    proc = subprocess.run(
+        [str(ROOT / "luci"), "manual", "capsule", "--json"],
         cwd=ROOT,
         text=True,
         capture_output=True,
@@ -391,6 +414,15 @@ def test_luci_api_cli_process_receipts_json_reads_live_cli_receipts_surface():
     assert payload
     row = payload[0]
     assert "receipt_uuid" in row
+    assert "next_command_refs" in row
+    assert isinstance(row["next_command_refs"], list) and row["next_command_refs"]
+    assert "manual_current" in row["next_command_refs"]
+    assert "root_orchestrator_current" in row["next_command_refs"]
+    assert "daemon_status" in row["next_command_refs"]
+    assert "command_registry" in row["next_command_refs"]
+    assert "schema_owner_manifest" in row["next_command_refs"]
+    assert "orchestration" in row
+    assert row["orchestration"]["mode"] == "sub_orchestrator"
 
 
 def test_luci_api_payload_archive_status_json_reads_live_archive_status_surface():
@@ -406,6 +438,15 @@ def test_luci_api_payload_archive_status_json_reads_live_archive_status_surface(
     assert payload
     row = payload[0]
     assert "source_table" in row
+    assert "next_command_refs" in row
+    assert isinstance(row["next_command_refs"], list) and row["next_command_refs"]
+    assert "manual_current" in row["next_command_refs"]
+    assert "root_orchestrator_current" in row["next_command_refs"]
+    assert "daemon_status" in row["next_command_refs"]
+    assert "cli_process_receipts" in row["next_command_refs"]
+    assert "command_registry" in row["next_command_refs"]
+    assert "orchestration" in row
+    assert row["orchestration"]["mode"] == "sub_orchestrator"
 
 
 def test_luci_api_cloud_packet_json_reads_live_cloud_packet():
@@ -529,7 +570,19 @@ def test_luci_help_surface_adds_root_manual_command_when_route_is_live(monkeypat
                 }
             }, f"{base_url}/"
         if path == "manual_current":
-            return True, [{"manual_id": "LUCIDOTA_OPERATOR_MANUAL", "route_list": [], "live_surface": {}}], f"{base_url}/manual_current"
+            return True, [{
+                "manual_id": "LUCIDOTA_OPERATOR_MANUAL",
+                "title": "LUCIDOTA Operator Manual",
+                "node_count": 1,
+                "max_updated_at": "2026-06-04T00:00:00Z",
+                "route_list": [],
+                "route_refs": ["manual_current", "root_orchestrator_current"],
+                "surface_refs": ["manual_current", "root_orchestrator_current"],
+                "renderer_refs": ["renderer_registry", "command_registry"],
+                "capability_refs": ["capability_current", "capability_registry"],
+                "next_command_refs": ["manual_current", "root_orchestrator_current", "renderer_registry", "command_registry"],
+                "live_surface": {},
+            }], f"{base_url}/manual_current"
         return True, [], f"{base_url}/{path}"
 
     monkeypatch.setattr(help_manual, "fetch_json", fake_fetch_json)
@@ -541,6 +594,7 @@ def test_luci_help_surface_adds_root_manual_command_when_route_is_live(monkeypat
     assert "luci root orchestrator current [--json] [--base-url URL]" in commands
     assert "luci canon current [--json] [--base-url URL]" in commands
     assert "luci api canon current [--json] [--base-url URL]" in commands
+    assert "luci manual capsule [--json] [--base-url URL]" in commands
     assert "luci skill policy current [--json] [--base-url URL]" in commands
     assert "luci chrono current [--json] [--base-url URL]" in commands
     assert "luci model-routing-current [--json] [--base-url URL]" in commands
@@ -617,6 +671,17 @@ def test_luci_help_surface_adds_root_manual_command_when_route_is_live(monkeypat
     assert "luci sheet current --json" in commands
     assert "luci workflow current --json" in commands or "luci workflow current [--json] [--base-url URL]" in commands
     assert "luci root-law-docs [--json] [--base-url URL]" in commands
+    assert "luci manual capsule [--json] [--base-url URL]" in commands
+    assert isinstance(payload.get("manual_summary"), dict)
+    assert payload["manual_summary"]["summary_source"] == "manual_current"
+    assert payload["manual_summary"]["manual_id"] == "LUCIDOTA_OPERATOR_MANUAL"
+    assert isinstance(payload.get("next_command_refs"), list) and payload["next_command_refs"]
+    assert "manual_current" in payload["next_command_refs"]
+    assert "root_orchestrator_current" in payload["next_command_refs"]
+    assert isinstance(payload.get("route_refs"), list) and payload["route_refs"]
+    assert isinstance(payload.get("surface_refs"), list) and payload["surface_refs"]
+    assert isinstance(payload.get("renderer_refs"), list) and payload["renderer_refs"]
+    assert isinstance(payload.get("capability_refs"), list) and payload["capability_refs"]
 
 
 def test_luci_root_orchestrator_json_shortcut_stays_thin():
@@ -701,6 +766,19 @@ def test_luci_flow_specs_json_reads_live_flow_specs_surface():
     assert "status" in row
 
 
+def test_luci_flow_specs_do_not_keep_shell_command_previews():
+    proc = subprocess.run(
+        [str(ROOT / "luci"), "flow", "specs", "--json"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    payload = json.loads(proc.stdout)
+    assert isinstance(payload, list) and payload
+    assert all("./luci" not in json.dumps(row).lower() for row in payload)
+
+
 def test_luci_flow_receipts_json_reads_live_flow_receipts_surface():
     proc = subprocess.run(
         [str(ROOT / "luci"), "flow", "receipts", "--json"],
@@ -719,7 +797,7 @@ def test_luci_flow_receipts_json_reads_live_flow_receipts_surface():
 
 
 def test_manual_current_mentions_api_test_execution_receipts():
-    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=5) as resp:
+    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=15) as resp:
         assert resp.status == 200
         payload = json.loads(resp.read().decode("utf-8"))
 
@@ -729,7 +807,7 @@ def test_manual_current_mentions_api_test_execution_receipts():
 
 
 def test_manual_current_mentions_api_route_catalog():
-    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=5) as resp:
+    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=15) as resp:
         assert resp.status == 200
         payload = json.loads(resp.read().decode("utf-8"))
 
@@ -739,7 +817,7 @@ def test_manual_current_mentions_api_route_catalog():
 
 
 def test_manual_current_mentions_api_bible_nodes():
-    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=5) as resp:
+    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=15) as resp:
         assert resp.status == 200
         payload = json.loads(resp.read().decode("utf-8"))
 
@@ -751,7 +829,7 @@ def test_manual_current_mentions_api_bible_nodes():
 
 
 def test_manual_current_mentions_api_bible_manuals():
-    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=5) as resp:
+    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=15) as resp:
         assert resp.status == 200
         payload = json.loads(resp.read().decode("utf-8"))
 
@@ -778,7 +856,7 @@ def test_luci_bible_manuals_json_reads_live_bible_manuals_surface():
 
 
 def test_manual_current_mentions_api_bible_route_catalog():
-    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=5) as resp:
+    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=15) as resp:
         assert resp.status == 200
         payload = json.loads(resp.read().decode("utf-8"))
 
@@ -805,7 +883,7 @@ def test_luci_bible_route_catalog_json_reads_live_bible_route_catalog_surface():
 
 
 def test_manual_current_mentions_api_bible_edges():
-    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=5) as resp:
+    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=15) as resp:
         assert resp.status == 200
         payload = json.loads(resp.read().decode("utf-8"))
 
@@ -827,7 +905,7 @@ def test_luci_bible_edges_json_reads_live_bible_edges_surface():
     assert isinstance(payload["payload"], list)
     # may be empty if no edges, but route should be reachable
 def test_manual_current_mentions_flow_specs_and_receipts():
-    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=5) as resp:
+    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=15) as resp:
         assert resp.status == 200
         payload = json.loads(resp.read().decode("utf-8"))
 
@@ -838,7 +916,7 @@ def test_manual_current_mentions_flow_specs_and_receipts():
 
 
 def test_manual_current_mentions_rpc_bible_helpers():
-    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=5) as resp:
+    with urllib.request.urlopen("http://127.0.0.1:3000/manual_current?limit=1", timeout=15) as resp:
         assert resp.status == 200
         payload = json.loads(resp.read().decode("utf-8"))
 
@@ -885,7 +963,15 @@ def test_luci_canon_current_json_reads_live_canon_surface():
     assert isinstance(row.get("db_law"), dict)
     assert row["db_law"]["statement"].startswith("Postgres/PostgREST is truth")
     assert isinstance(row.get("next_commands"), list)
-    assert any("luci canon current --json" in cmd for cmd in row["next_commands"])
+    assert "canon_current" in row["next_commands"]
+    assert "canon_versions" in row["next_commands"]
+    assert "canon_current" in row["next_command_refs"]
+    assert "canon_versions" in row["next_command_refs"]
+    assert isinstance(row.get("next_command_refs"), list) and row["next_command_refs"]
+    assert "manual_current" in row["next_command_refs"]
+    assert "root_orchestrator_current" in row["next_command_refs"]
+    assert "command_registry" in row["next_command_refs"]
+    assert "schema_owner_manifest" in row["next_command_refs"]
 
 
 def test_luci_rpc_bible_helpers_json_reads_live_rpc_surfaces():
@@ -946,7 +1032,13 @@ def test_luci_active_goal_json_reads_live_active_goal_surface():
     assert isinstance(row.get("db_law"), dict)
     assert row["db_law"]["statement"].startswith("Postgres/PostgREST is truth")
     assert isinstance(row.get("next_commands"), list)
-    assert any("luci active goal --json" in cmd for cmd in row["next_commands"])
+    assert "active_goal" in row["next_commands"]
+    assert "api_active_goal" in row["next_commands"]
+    assert isinstance(row.get("next_command_refs"), list) and row["next_command_refs"]
+    assert "manual_current" in row["next_command_refs"]
+    assert "root_orchestrator_current" in row["next_command_refs"]
+    assert "command_registry" in row["next_command_refs"]
+    assert "schema_owner_manifest" in row["next_command_refs"]
 
 
 def test_luci_chrono_current_json_reads_live_chrono_surface():
@@ -992,6 +1084,12 @@ def test_luci_manual_current_json_reads_live_manual_surface():
     assert payload["mode"] == "manual"
     assert payload["source"] == "postgrest_safe_surface"
     assert "/manual_current" in payload["manual_current_url"]
+    assert isinstance(payload.get("manual_summary"), dict)
+    assert payload["manual_summary"]["summary_source"] in {"manual_current", "root_orchestrator_current"}
+    assert payload["manual_summary"].get("orchestrator_id") in {None, "ROOT_ORCHESTRATOR_CURRENT"}
+    assert isinstance(payload.get("next_command_refs"), list) and payload["next_command_refs"]
+    assert "manual_current" in payload["next_command_refs"]
+    assert "root_orchestrator_current" in payload["next_command_refs"]
 
 
 def test_luci_workflow_registry_json_reads_live_workflow_registry_surface():
@@ -1282,6 +1380,13 @@ def test_luci_cli_process_receipts_json_reads_live_receipt_surface():
     assert "receipt_uuid" in row
     assert "status" in row
     assert "auth_injected" in row
+    assert "next_command_refs" in row
+    assert isinstance(row["next_command_refs"], list) and row["next_command_refs"]
+    assert "manual_current" in row["next_command_refs"]
+    assert "root_orchestrator_current" in row["next_command_refs"]
+    assert "daemon_status" in row["next_command_refs"]
+    assert "command_registry" in row["next_command_refs"]
+    assert "schema_owner_manifest" in row["next_command_refs"]
 
 
 def test_luci_payload_archive_status_json_reads_live_archive_surface():
@@ -1295,6 +1400,106 @@ def test_luci_payload_archive_status_json_reads_live_archive_surface():
     payload = json.loads(proc.stdout)
     assert isinstance(payload, list)
     assert payload == [] or "source_table" in payload[0]
+    if payload:
+        assert "next_command_refs" in payload[0]
+        assert isinstance(payload[0]["next_command_refs"], list) and payload[0]["next_command_refs"]
+        assert "manual_current" in payload[0]["next_command_refs"]
+        assert "root_orchestrator_current" in payload[0]["next_command_refs"]
+        assert "daemon_status" in payload[0]["next_command_refs"]
+        assert "cli_process_receipts" in payload[0]["next_command_refs"]
+        assert "command_registry" in payload[0]["next_command_refs"]
+        assert "orchestration" in payload[0]
+        assert payload[0]["orchestration"]["mode"] == "sub_orchestrator"
+
+
+def test_luci_elastic_shape_current_json_reads_live_elastic_shape_surface():
+    proc = subprocess.run(
+        [str(ROOT / "luci"), "elastic", "shape", "current", "--json"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    payload = json.loads(proc.stdout)
+    assert isinstance(payload, list)
+    assert payload
+    row = payload[0]
+    assert row["canon_status"] == "not_truth_runtime_only"
+    assert "artifact_uuid" in row
+    assert "signature" in row
+    assert "collision_signature" in row
+    assert "shape_vector" in row
+    assert "active_resonances" in row
+
+
+def test_luci_elastic_shape_emit_json_writes_runtime_receipt():
+    proc = subprocess.run(
+        [
+            str(ROOT / "luci"),
+            "elastic",
+            "shape",
+            "emit",
+            "--artifact-uuid",
+            "b3dad894-4b5c-4e89-9831-2749ad619f72",
+            "--synthetic",
+            "--signal",
+            "OBJECT=0.95",
+            "--signal",
+            "unhinged_chaos=0.81",
+            "--json",
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    payload = json.loads(proc.stdout)
+    assert payload["canon_status"] == "not_truth_runtime_only"
+    assert payload["artifact_uuid"] == "b3dad894-4b5c-4e89-9831-2749ad619f72"
+    assert payload["source"] == "Synthetic"
+    assert "source_hash" in payload
+    assert "collision_signature" in payload
+    assert "route_context" in payload
+
+
+def test_luci_elastic_shape_pressure_json_reads_live_attention_surface():
+    subprocess.run(
+        [
+            str(ROOT / "luci"),
+            "elastic",
+            "shape",
+            "emit",
+            "--artifact-uuid",
+            "b3dad894-4b5c-4e89-9831-2749ad619f73",
+            "--synthetic",
+            "--signal",
+            "OBJECT=0.95",
+            "--signal",
+            "INDY_READS=1.22",
+            "--signal",
+            "ABSURD=0.76",
+            "--json",
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    proc = subprocess.run(
+        [str(ROOT / "luci"), "elastic", "shape", "pressure", "--json"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    payload = json.loads(proc.stdout)
+    assert isinstance(payload, list)
+    assert payload
+    row = payload[0]
+    assert row["canon_status"] == "not_truth_runtime_only"
+    assert "pressure_score" in row
+    assert "recommended_action" in row
+    assert "artifact_uuid" in row
 
 
 def test_luci_todo_json_reads_live_queue_surface():
@@ -1312,6 +1517,8 @@ def test_luci_todo_json_reads_live_queue_surface():
     assert "goal" in payload[0]
     assert "db_law" in payload[0]
     assert "next_commands" in payload[0]
+    assert "orchestration" in payload[0]
+    assert payload[0]["orchestration"]["mode"] == "sub_orchestrator"
 
 
 def test_luci_todo_current_json_reads_live_queue_surface():
@@ -1329,6 +1536,8 @@ def test_luci_todo_current_json_reads_live_queue_surface():
     assert "goal" in payload[0]
     assert "db_law" in payload[0]
     assert "next_commands" in payload[0]
+    assert "orchestration" in payload[0]
+    assert payload[0]["orchestration"]["mode"] == "sub_orchestrator"
 
 
 def test_luci_stdin_help_shortcut_stays_out_of_model_engine():

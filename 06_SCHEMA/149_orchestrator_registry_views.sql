@@ -32,7 +32,29 @@ WITH rows AS (
         m.benchmark_status,
         m.notes,
         m.created_at,
-        m.updated_at
+        m.updated_at,
+        (
+            SELECT jsonb_build_object(
+                'decision', d.decision,
+                'status',
+                CASE d.decision
+                    WHEN 'allow' THEN 'operational'
+                    WHEN 'defer' THEN 'partial'
+                    WHEN 'reject' THEN 'blocked'
+                    ELSE 'unknown'
+                END,
+                'observed_free_mb', d.observed_free_mb,
+                'observed_used_mb', d.observed_used_mb,
+                'estimated_required_mb', d.estimated_required_mb,
+                'headroom_mb', d.headroom_mb,
+                'rationale', d.rationale,
+                'created_at', d.created_at
+            )
+            FROM lucidota_runtime.load_governor_decision d
+            WHERE d.loadout_id = l.loadout_id
+            ORDER BY d.created_at DESC
+            LIMIT 1
+        ) AS load_governor_status
     FROM lucidota_runtime.resident_loadout l
     JOIN lucidota_runtime.resident_loadout_slot s ON s.loadout_id = l.loadout_id
     JOIN lucidota_runtime.model_candidate m ON m.model_id = s.model_id
@@ -116,11 +138,43 @@ SELECT
         'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; receipts prove the thing happened.'
     ) AS db_law,
     jsonb_build_array(
-        'curl -sS http://127.0.0.1:3000/daemon_status?limit=1',
-        'curl -sS http://127.0.0.1:3000/active_goal?limit=1',
-        './luci daemon status --json',
-        './luci api daemon status --json'
-    ) AS next_commands
+        'daemon_status'
+    ) AS next_commands,
+    jsonb_build_array(
+        'manual_current',
+        'active_goal',
+        'daemon_status',
+        'api_daemon_status',
+        'root_orchestrator_current',
+        'payload_archive_status',
+        'cli_process_receipts',
+        'capability_current',
+        'capability_registry',
+        'model_registry',
+        'model_registry_current',
+        'provider_registry',
+        'provider_current',
+        'workflow_registry',
+        'workflow_current',
+        'model_routing_current',
+        'model_routing_blockers',
+        'sheet_current',
+        'skill_policy_current',
+        'todo_current',
+        'schema_owner_manifest',
+        'surface_registry',
+        'renderer_registry',
+        'command_registry',
+        'controller_grant',
+        'agent_thread_runtime'
+    ) AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'daemon_name', hb.daemon_name,
+        'heartbeat_kind', hb.heartbeat_kind
+    ) AS orchestration
 FROM latest_heartbeats hb
 LEFT JOIN latest_facts lf
     ON lf.subsystem = hb.daemon_name

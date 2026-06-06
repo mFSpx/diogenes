@@ -32,6 +32,20 @@ active_rows AS (
         LIMIT 25
     ) p
 ),
+controller_row AS (
+    SELECT to_jsonb(g) AS controller_grant
+    FROM lucidota_canon.controller_grant g
+    WHERE g.grant_key = 'default_local_operator'
+    ORDER BY g.updated_at DESC
+    LIMIT 1
+),
+thread_row AS (
+    SELECT to_jsonb(t) AS agent_thread_runtime
+    FROM lucidota_canon.agent_thread_runtime t
+    WHERE t.thread_key = 'root_operator_thread'
+    ORDER BY t.updated_at DESC
+    LIMIT 1
+),
 goal_row AS (
     SELECT to_jsonb(g) AS current_goal
     FROM lucidota_canon.active_goal g
@@ -56,25 +70,45 @@ SELECT
         'registry_truth', 'provider_registry is the DB-visible provider ledger; no script folklore authority',
         'routing_truth', 'provider_kind and default_model define legal lanes; active rows are live choices',
         'local_before_cloud', 'prefer local, deterministic, and stream runtimes before cloud providers',
-        'missing_roles', 'missing provider or model roles are DB-visible blockers, not guesses'
+        'missing_roles', 'missing provider or model roles are DB-visible blockers, not guesses',
+        'provider_secret_boundary', 'provider secrets must cross a quarantine boundary from env/vault into runtime, never from chat or hardcoded SQL'
     ) AS routing_notes,
     goal_row.current_goal AS goal,
     jsonb_build_object(
         'statement', 'Postgres/PostgREST is truth; files are cache/export/artifact unless API points to them; DB-worthy state goes to DB; receipts prove the thing happened.'
     ) AS db_law,
     jsonb_build_array(
-        'curl -sS http://127.0.0.1:3000/provider_current?limit=1',
-        'curl -sS http://127.0.0.1:3000/provider_registry?limit=5',
-        'curl -sS http://127.0.0.1:3000/model_registry_current?limit=1',
-        'curl -sS http://127.0.0.1:3000/model_routing_current?limit=1',
-        './luci provider current --json',
-        './luci provider registry --json',
-        './luci model registry current --json',
-        './luci model-routing-current --json'
-    ) AS next_commands
+        'provider_current',
+        'provider_registry',
+        'model_registry_current',
+        'model_routing_current'
+    ) AS next_commands,
+    jsonb_build_array(
+        'manual_current',
+        'root_orchestrator_current',
+        'daemon_status',
+        'capability_current',
+        'command_registry',
+        'surface_registry',
+        'renderer_registry',
+        'schema_owner_manifest',
+        'controller_grant',
+        'agent_thread_runtime'
+    ) AS next_command_refs,
+    jsonb_build_object(
+        'mode', 'sub_orchestrator',
+        'sub_orchestrator_priority', lucidota_control.live_truth_priority_stack(),
+        'strict_priority_stack', lucidota_control.live_truth_priority_stack(),
+        'provider_secret_isolation', 'load through an explicit quarantine file or env loader owned by the operator; no raw keys in chat, docs, SQL, or receipts',
+        'active_providers', active_rows.active_providers
+    ) AS orchestration,
+    controller_row.controller_grant,
+    thread_row.agent_thread_runtime
 FROM provider_rows pr
 CROSS JOIN kind_rows
 CROSS JOIN active_rows
+CROSS JOIN controller_row
+CROSS JOIN thread_row
 CROSS JOIN goal_row;
 
 INSERT INTO lucidota_canon.api_route_catalog (
