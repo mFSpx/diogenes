@@ -1,0 +1,194 @@
+{
+  "schema": "lucidota.go_graph_edge_types.v1",
+  "locked_at": "2026-06-06T10:30:00Z",
+  "locked_by": "operator_mfspx_earn_run",
+  "note": "Every edge_type MUST belong to exactly one relationship_family. No bare RELATIONSHIP edges permitted post-hardening. New edge types require operator approval.",
+  "edge_types": {
+    "evidence_chain": {
+      "description": "Evidence provenance and support chains. How evidence relates to claims, hypotheses, and other evidence.",
+      "members": {
+        "EVIDENCE_FOR": {
+          "description": "Evidence item supports a claim or hypothesis",
+          "domain": ["EVIDENCE", "SOURCE", "WITNESS", "RESIDUE", "SCAR", "DOCUMENT", "FILE_INGEST"],
+          "range": ["CLAIM", "HYPOTHESIS", "LEAD", "HUNCH"],
+          "ternary": "evidence_support (+1 corroborates, 0 neutral, -1 contradicts)"
+        },
+        "CONTRADICTS": {
+          "description": "Evidence contradicts a claim or hypothesis",
+          "domain": ["EVIDENCE", "SOURCE", "WITNESS", "GHOST", "VOID"],
+          "range": ["CLAIM", "HYPOTHESIS", "STORY", "LORE"],
+          "ternary": "contradiction_strength (+1 definitive, 0 partial, -1 apparent_only)"
+        },
+        "CORROBORATES": {
+          "description": "Multiple independent sources agree",
+          "domain": ["EVIDENCE", "SOURCE", "WITNESS", "RESIDUE"],
+          "range": ["EVIDENCE", "SOURCE", "CLAIM"],
+          "ternary": "corroboration_confidence (+1 independent, 0 same_source, -1 circular)"
+        },
+        "DERIVED_FROM": {
+          "description": "One artifact was derived/extracted from another",
+          "domain": ["CLAIM", "HYPOTHESIS", "PATTERN", "ENTITY"],
+          "range": ["EVIDENCE", "SOURCE", "FILE_INGEST", "DOCUMENT"],
+          "ternary": "derivation_certainty (+1 direct_lineage, 0 inferred, -1 speculative)"
+        }
+      }
+    },
+    "case_structure": {
+      "description": "Organizational structure. What belongs to what case, what contains what.",
+      "members": {
+        "BELONGS_TO": {
+          "description": "Item belongs to a case, group, or collection",
+          "domain": ["FILE_INGEST", "EVIDENCE", "DOCUMENT", "CLAIM", "HUNCH", "LEAD"],
+          "range": ["CASE", "GROUP", "COLLECTION", "INVESTIGATION"],
+          "ternary": "membership_certainty (+1 confirmed, 0 suspected, -1 ruled_out)"
+        },
+        "CONTAINS": {
+          "description": "Container holds item — case contains evidence, file contains chunk, directory contains file",
+          "domain": ["CASE", "COLLECTION", "DIRECTORY", "FILE_INGEST"],
+          "range": ["FILE_INGEST", "EVIDENCE", "CHUNK", "ENTITY"],
+          "ternary": "containment_type (+1 primary, 0 reference, -1 stale)"
+        },
+        "PART_OF": {
+          "description": "Compositional — item is part of a larger whole",
+          "domain": ["CHUNK", "ENTITY", "ATTRIBUTE", "EVENT"],
+          "range": ["FILE_INGEST", "ENTITY", "PATTERN", "STORY"],
+          "ternary": "composition_role (+1 essential, 0 accessory, -1 incidental)"
+        }
+      }
+    },
+    "provenance": {
+      "description": "Chain of custody. Who created, touched, observed, or modified what.",
+      "members": {
+        "AUTHORED_BY": {
+          "description": "Who created or wrote this artifact",
+          "domain": ["FILE_INGEST", "DOCUMENT", "CLAIM", "EVIDENCE", "STORY"],
+          "range": ["ENTITY", "OPERATOR", "WITNESS"],
+          "ternary": "authorship_certainty (+1 confirmed, 0 attributed, -1 disputed)"
+        },
+        "LOCATED_AT": {
+          "description": "Spatial or logical location of artifact at time of observation",
+          "domain": ["EVIDENCE", "ENTITY", "EVENT", "WITNESS"],
+          "range": ["LOCATION", "DEN"],
+          "ternary": "location_certainty (+1 confirmed, 0 approximate, -1 contested)"
+        },
+        "OBSERVED_BY": {
+          "description": "Who observed, witnessed, or recorded this",
+          "domain": ["EVENT", "EVIDENCE", "CLAIM", "SIGNAL"],
+          "range": ["WITNESS", "OPERATOR", "ENTITY"],
+          "ternary": "observation_quality (+1 direct, 0 hearsay, -1 fabricated)"
+        },
+        "CUSTODY_OF": {
+          "description": "Who holds or held custody of evidence",
+          "domain": ["ENTITY", "OPERATOR", "SYSTEM"],
+          "range": ["EVIDENCE", "FILE_INGEST", "DOCUMENT"],
+          "ternary": "custody_status (+1 current, 0 transferred, -1 broken)"
+        }
+      }
+    },
+    "temporal": {
+      "description": "Time ordering. What happened before, after, or during what.",
+      "members": {
+        "PRECEDES": {
+          "description": "A happened before B in time",
+          "domain": ["EVENT", "ACTION", "THRESHOLD", "DECAY"],
+          "range": ["EVENT", "ACTION", "THRESHOLD", "STATE"],
+          "ternary": "temporal_certainty (+1 timestamped, 0 estimated, -1 disputed)"
+        },
+        "FOLLOWS": {
+          "description": "A happened after B (inverse of PRECEDES)",
+          "domain": ["EVENT", "ACTION", "RESPONSE"],
+          "range": ["EVENT", "ACTION", "TRIGGER"],
+          "ternary": "temporal_certainty (+1 timestamped, 0 estimated, -1 disputed)"
+        },
+        "DURING": {
+          "description": "A happened within the duration of B",
+          "domain": ["EVENT", "ACTION", "OBSERVATION"],
+          "range": ["EVENT", "STATE", "PHASE", "MODE"],
+          "ternary": "containment_certainty (+1 confirmed, 0 likely, -1 speculative)"
+        }
+      }
+    },
+    "investigative": {
+      "description": "Investigation logic. Leads, hunches, trails — the operator's working chain.",
+      "members": {
+        "LEADS_TO": {
+          "description": "One finding, hunch, or lead points to another",
+          "domain": ["LEAD", "HUNCH", "CLUE", "TRAIL", "ANOMALY"],
+          "range": ["LEAD", "EVIDENCE", "ENTITY", "HUNCH", "QUARRY"],
+          "ternary": "lead_strength (+1 confirmed_productive, 0 unexplored, -1 dead_end)"
+        },
+        "REFERENCES": {
+          "description": "Cross-reference between artifacts",
+          "domain": ["CLAIM", "HYPOTHESIS", "DOCUMENT", "STORY"],
+          "range": ["EVIDENCE", "SOURCE", "CLAIM", "DOCUMENT", "FILE_INGEST"],
+          "ternary": "reference_type (+1 primary_source, 0 secondary, -1 hearsay)"
+        },
+        "REVEALS": {
+          "description": "Investigation of A revealed or uncovered B",
+          "domain": ["ACTION", "INVESTIGATION", "GLOW", "SIGNAL"],
+          "range": ["EVIDENCE", "ENTITY", "PATTERN", "DEN", "MASK", "TELL", "CRYPTID"],
+          "ternary": "revelation_significance (+1 breakthrough, 0 incremental, -1 noise)"
+        }
+      }
+    },
+    "causal": {
+      "description": "Cause and effect. What caused what, what enables or prevents what.",
+      "members": {
+        "CAUSED_BY": {
+          "description": "Effect was caused by this cause",
+          "domain": ["EVENT", "STATE", "FRICTION", "DECAY", "SCAR"],
+          "range": ["ACTION", "EVENT", "FORCE", "TRIGGER", "THRESHOLD"],
+          "ternary": "causal_certainty (+1 proven, 0 suspected, -1 disproven)"
+        },
+        "ENABLES": {
+          "description": "A makes B possible or easier",
+          "domain": ["LEVERAGE", "TOOL", "PERMISSION", "CAPACITY", "GRIP"],
+          "range": ["ACTION", "EVENT", "STATE", "MODE"],
+          "ternary": "enablement_strength (+1 necessary, 0 facilitative, -1 incidental)"
+        },
+        "PREVENTS": {
+          "description": "A blocks or prevents B",
+          "domain": ["CONSTRAINT", "FRICTION", "THREAT", "BOUNDARY", "SNARE"],
+          "range": ["ACTION", "EVENT", "STATE", "RESOLUTION"],
+          "ternary": "prevention_certainty (+1 definitive, 0 partial, -1 speculative)"
+        }
+      }
+    },
+    "identity": {
+      "description": "Identity and masking. What is what, what hides what, what exposes what.",
+      "members": {
+        "IS_A": {
+          "description": "Type/subtype or identity assertion",
+          "domain": ["ENTITY", "TERM", "PATTERN", "GLYPH"],
+          "range": ["TERM", "ENTITY", "PATTERN"],
+          "ternary": "identity_certainty (+1 confirmed, 0 alleged, -1 false)"
+        },
+        "MASKS": {
+          "description": "A conceals or disguises B",
+          "domain": ["MASK", "LIE", "ECHO", "SNARE", "CHURN", "STORY"],
+          "range": ["ENTITY", "TRUTH", "EVIDENCE", "SIGNAL", "TELL"],
+          "ternary": "mask_intent (+1 deliberate, 0 structural, -1 incidental)"
+        },
+        "EXPOSES": {
+          "description": "A reveals or unmasks B",
+          "domain": ["TELL", "GLOW", "SIGNAL", "RESIDUE", "GHOST", "VOID", "SCAR"],
+          "range": ["MASK", "LIE", "ENTITY", "TRUTH", "DEN"],
+          "ternary": "exposure_strength (+1 definitive, 0 suggestive, -1 misleading)"
+        }
+      }
+    }
+  },
+  "relationship_families": [
+    "evidence_chain",
+    "case_structure",
+    "provenance",
+    "temporal",
+    "investigative",
+    "causal",
+    "identity"
+  ],
+  "default_edge_type": "RELATED_TO",
+  "default_relationship_family": null,
+  "migration_rule": "Existing 13 edges with type RELATED_TO and null relationship_family are legacy. Reclassify or leave as UNKNOWN_DEBT. New edges MUST use typed edge_type + relationship_family.",
+  "workflow_integration": "Edge types are consumed by CASE_FILE_WORKFLOW.json for automated edge creation during evidence processing. Manual edges require operator approval."
+}

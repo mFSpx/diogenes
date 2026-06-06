@@ -1,0 +1,181 @@
+{
+  "schema": "lucidota.case_file_workflow.v1",
+  "locked_at": "2026-06-06T10:30:00Z",
+  "locked_by": "operator_mfspx_earn_run",
+  "doctrine": "Files are evidence, not blobs. A case is the atomic unit of organization. Every file belongs to exactly one case. Workflows define every step — follow the workflow, never fail the task.",
+
+  "case_definition": {
+    "case_id_format": "CASE-{YYYY}-{NNNNN}",
+    "case_required_fields": ["case_id", "title", "status", "opened_at", "custodian_uuid", "description"],
+    "case_statuses": ["open", "active_investigation", "pending_evidence", "under_review", "closed_founded", "closed_unfounded", "closed_inconclusive", "archived"],
+    "case_layers": ["digital_world", "physical_world", "influence", "power", "financial", "social", "relationship", "pressure", "visibility", "glow", "map"],
+    "case_terms": "Cases use GO-25 terms. A case is an ENTITY with ATTRIBUTEs. Evidence items within a case have RELATIONSHIP edges. The case itself is the CONTAINS root for its evidence tree."
+  },
+
+  "evidence_model": {
+    "description": "Every file ingested into the graph is EVIDENCE. Its path is its location_at_on_graph. Its hash is its identity. Its case membership is its meaning.",
+    "evidence_classes": {
+      "primary_source": "Original document, witness statement, direct observation — created at the time of events",
+      "secondary_source": "Analysis, report, summary — created after events from primary sources",
+      "derived_artifact": "Extraction, chunk, entity list — machine-generated from sources",
+      "administrative": "Receipt, log, manifest, workflow state — system-generated evidence of process",
+      "reference": "External document, law, standard — provides context but not case-specific",
+      "unknown": "Not yet classified — UNKNOWN_DEBT"
+    },
+    "evidence_chain": {
+      "description": "Custody chain for every piece of evidence. No evidence moves without a receipt.",
+      "states": ["collected", "registered", "hashed", "ingested", "linked_to_case", "reviewed", "promoted", "challenged", "superseded", "archived"],
+      "transitions": {
+        "collected": ["registered"],
+        "registered": ["hashed", "rejected"],
+        "hashed": ["ingested", "rejected"],
+        "ingested": ["linked_to_case", "rejected"],
+        "linked_to_case": ["reviewed", "returned_to_ingest"],
+        "reviewed": ["promoted", "challenged", "returned_to_ingest"],
+        "promoted": ["challenged", "superseded", "archived"],
+        "challenged": ["reviewed", "superseded"],
+        "superseded": ["archived"],
+        "archived": []
+      }
+    }
+  },
+
+  "case_file_structure": {
+    "description": "How evidence files are organized within a case. Physical layout mirrors logical structure.",
+    "template": {
+      "CASE-{YYYY}-{NNNNN}/": {
+        "CASE_BRIEF.md": "Human-readable case summary, status, key findings",
+        "case_manifest.json": "Machine-readable case metadata — all evidence UUIDs, counts, status",
+        "EVIDENCE/": {
+          "primary/": "Primary source evidence files",
+          "secondary/": "Secondary/analysis files",
+          "derived/": "Machine-extracted chunks, entities, regex hits",
+          "administrative/": "Receipts, logs, workflow state files"
+        },
+        "LEADS/": "Active leads, hunches, trails — items with LEADS_TO edges",
+        "CLAIMS/": "Claims and hypotheses with EVIDENCE_FOR edges",
+        "ENTITIES/": "Extracted entities — people, orgs, locations, accounts",
+        "TIMELINE/": "Temporal ordering — events with PRECEDES/FOLLOWS/DURING edges",
+        "RECEIPTS/": "All receipts for this case — one per operation",
+        "GRAPH/": "Case-specific graph export — nodes and edges for this case only"
+      }
+    }
+  },
+
+  "workflow_steps": {
+    "step_1_collect": {
+      "name": "Evidence Collection",
+      "description": "New evidence arrives — file, screenshot, document, message, log, or witness statement.",
+      "input": "Raw file or data stream",
+      "output": "Evidence registered with UUID, SHA256, timestamp, collector ID",
+      "edge_types_created": [],
+      "status_transition": "null → collected",
+      "receipt_required": "collection_receipt"
+    },
+    "step_2_register": {
+      "name": "Evidence Registration",
+      "description": "Register evidence in the system. Assign UUID, compute SHA256, record metadata.",
+      "input": "Collected evidence",
+      "output": "Registered evidence with immutable hash and timestamp",
+      "edge_types_created": ["AUTHORED_BY → collector", "LOCATED_AT → collection_location"],
+      "status_transition": "collected → registered",
+      "receipt_required": "registration_receipt"
+    },
+    "step_3_hash": {
+      "name": "Cryptographic Hashing",
+      "description": "SHA256 hash computed and recorded. This is the evidence's immutable identity.",
+      "input": "Registered evidence",
+      "output": "Hashed evidence — identity is now immutable",
+      "edge_types_created": [],
+      "status_transition": "registered → hashed",
+      "receipt_required": "hash_receipt"
+    },
+    "step_4_ingest": {
+      "name": "Graph Ingestion",
+      "description": "Evidence inserted into lucidota_go.graph_item as FILE_INGEST with staged status.",
+      "input": "Hashed evidence",
+      "output": "graph_item row with UUID, term=FILE_INGEST, status=staged, payload with hash+metadata",
+      "edge_types_created": [],
+      "status_transition": "hashed → ingested",
+      "receipt_required": "ingest_receipt",
+      "db_operation": "INSERT INTO lucidota_go.graph_item (uuid, term, label, status, location_at_on_graph, payload, created_at) VALUES (...)",
+      "mutation_class": "candidate_writer"
+    },
+    "step_5_link_to_case": {
+      "name": "Case Linking",
+      "description": "Link evidence to its parent case. Every evidence item belongs to a case.",
+      "input": "Ingested graph_item",
+      "output": "BELONGS_TO edge: evidence → case. CONTAINS edge: case → evidence.",
+      "edge_types_created": ["BELONGS_TO", "CONTAINS"],
+      "status_transition": "ingested → linked_to_case",
+      "receipt_required": "case_link_receipt",
+      "db_operation": "INSERT INTO lucidota_go.graph_edge (source_uuid, target_uuid, edge_type, relationship_family, status, evidence_uuid) VALUES (evidence_uuid, case_uuid, 'BELONGS_TO', 'case_structure', 'current', null)",
+      "mutation_class": "candidate_writer"
+    },
+    "step_6_extract": {
+      "name": "Entity & Signal Extraction",
+      "description": "Extract entities, regex hits, temporal markers, and signals from evidence.",
+      "input": "Linked evidence (text files only)",
+      "output": "Entity nodes, chunk nodes, edge connections back to source evidence",
+      "edge_types_created": ["DERIVED_FROM (entity → evidence)", "PART_OF (chunk → file)"],
+      "status_transition": "linked_to_case → under_review (partial — extraction complete)",
+      "receipt_required": "extraction_receipt"
+    },
+    "step_7_review": {
+      "name": "Evidence Review",
+      "description": "Human or AI review of evidence. Classify, assess relevance, flag for promotion.",
+      "input": "Linked evidence with extractions",
+      "output": "Reviewed evidence with classification, relevance score, promotion flag",
+      "edge_types_created": ["EVIDENCE_FOR", "CONTRADICTS", "CORROBORATES", "LEADS_TO"],
+      "status_transition": "linked_to_case → reviewed",
+      "receipt_required": "review_receipt"
+    },
+    "step_8_promote": {
+      "name": "Graph Promotion",
+      "description": "Evidence is promoted through the graph promotion gate to canonical status.",
+      "input": "Reviewed evidence meeting promotion criteria",
+      "output": "Promoted graph_item with status=approved, canonical_uuid set, operator_uuid set",
+      "edge_types_created": [],
+      "status_transition": "reviewed → promoted",
+      "receipt_required": "promotion_receipt",
+      "mutation_class": "materializer (requires promotion gate)"
+    },
+    "step_9_challenge": {
+      "name": "Evidence Challenge",
+      "description": "Evidence is challenged — contrary evidence found, chain of custody questioned, or new information contradicts.",
+      "input": "New contradictory evidence or custody concern",
+      "output": "CONTRADICTS edge from new evidence to challenged evidence",
+      "edge_types_created": ["CONTRADICTS"],
+      "status_transition": "reviewed → challenged",
+      "receipt_required": "challenge_receipt"
+    },
+    "step_10_supersede": {
+      "name": "Evidence Supersession",
+      "description": "Evidence is superseded by newer/better evidence. Old evidence is preserved, not deleted.",
+      "input": "New superior evidence",
+      "output": "PRECEDES edge: old → new. Old evidence status → superseded.",
+      "edge_types_created": ["PRECEDES"],
+      "status_transition": "promoted → superseded",
+      "receipt_required": "supersession_receipt"
+    }
+  },
+
+  "workflow_invariants": {
+    "no_orphan_evidence": "Every evidence item (FILE_INGEST graph_item) MUST have a BELONGS_TO edge to a case within 1 hour of ingestion.",
+    "no_unhashed_evidence": "Every evidence item MUST have a SHA256 hash recorded before ingestion.",
+    "no_unreceipted_mutation": "Every state transition MUST produce a receipt in the case's RECEIPTS/ directory.",
+    "no_direct_canonical_write": "Evidence ingestion writes via candidate_writer. Promotion writes via materializer through the promotion gate.",
+    "no_deletes_ever": "Superseded evidence stays in the graph with status=superseded. Challenged evidence stays with status=challenged. Nothing is deleted.",
+    "case_closure_requires_completion": "A case cannot be closed unless: (1) all evidence is linked, (2) all leads are resolved or marked dead_end, (3) all claims have EVIDENCE_FOR or CONTRADICTS edges, (4) the case manifest is up to date."
+  },
+
+  "postgrest_big_board": {
+    "description": "Big Board surfaces case and evidence status via PostgREST API on lucidota_storage.",
+    "views_needed": {
+      "case_summary": "SELECT case_id, title, status, evidence_count, open_leads, last_activity FROM lucidota_go.case_summary_view",
+      "evidence_status": "SELECT status, count(*) FROM lucidota_go.graph_item WHERE term='FILE_INGEST' GROUP BY status",
+      "orphan_evidence": "SELECT gi.* FROM lucidota_go.graph_item gi LEFT JOIN lucidota_go.graph_edge ge ON gi.uuid = ge.source_uuid AND ge.edge_type = 'BELONGS_TO' WHERE gi.term = 'FILE_INGEST' AND ge.edge_uuid IS NULL",
+      "promotion_queue": "SELECT gi.* FROM lucidota_go.graph_item gi WHERE gi.term = 'FILE_INGEST' AND gi.status = 'reviewed' ORDER BY gi.created_at"
+    }
+  }
+}

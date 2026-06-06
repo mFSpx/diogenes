@@ -121,6 +121,13 @@
     "status": "archived_reference_storage_externalized",
     "rule": "Do not reactivate unless explicit operator order."
   },
+  "case_file_workflow": "BOOKS/CASE_FILE_WORKFLOW.json",
+  "edge_type_vocabulary": "BOOKS/GO_GRAPH_EDGE_TYPES.json",
+  "evidence_provenance_chain": "BOOKS/EVIDENCE_PROVENANCE_CHAIN.json",
+  "edge_type_count": 28,
+  "relationship_families": ["evidence_chain","case_structure","provenance","temporal","investigative","causal","identity"],
+  "case_file_views_migration": "06_SCHEMA/020_case_file_workflow_views.sql",
+  "postgrest_big_board_views": ["case_summary_view","evidence_status_view","orphan_evidence_view","promotion_queue_view","edge_type_usage_view","staging_backlog_view","custody_chain_view"],
   "approval_policy": "operator approves single items or batches",
   "staging_policy": "all parser outputs stage until operator removes HITL requirement",
   "documentation_policy": "one README for human doctrine; active references are JSON/SQL/code only",
